@@ -10,6 +10,10 @@ and AGENTS.md. Existing mockups are visual seeds, not behavioral specifications.
   operation keys, revisions, and owned relationships.
 - Local Docker Compose; Keycloak OIDC; secure opaque application sessions.
 - Private mounted media, NetVips/libheif; authorized image delivery.
+- Backend image acceptance and deployment use Linux system libvips/libheif with
+  HEVC support; NetVips.Native's prebuilt runtime omits that codec. The acceptance
+  container pins .NET SDK 10.0.400/Ubuntu 24.04; local builds use the installed
+  .NET 10 SDK. Test commands and exact native packages are in backend/.
 - OpenAI GPT-5.4 mini for critique, metadata, summaries; Ollama bge-m3 for local
   embeddings. Explicit deterministic Demo and configured Live modes.
 - Independent static design-system site; authoritative --lp- visual tokens.

@@ -1,0 +1,17 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0.400-noble@sha256:4beef5b8919dcaa2dc924233bd069257e883cc7a061e09088a97d152d6a48510
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libvips42t64=8.15.1-1.1build4 libheif-plugin-libde265=1.17.6-1ubuntu4.8 libheif-plugin-x265=1.17.6-1ubuntu4.8 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+COPY NuGet.Config ./
+COPY backend/Directory.Build.props backend/Loupe.slnx backend/
+COPY backend/src/Loupe.Domain/*.csproj backend/src/Loupe.Domain/packages.lock.json backend/src/Loupe.Domain/
+COPY backend/src/Loupe.Application/*.csproj backend/src/Loupe.Application/packages.lock.json backend/src/Loupe.Application/
+COPY backend/src/Loupe.Infrastructure/*.csproj backend/src/Loupe.Infrastructure/packages.lock.json backend/src/Loupe.Infrastructure/
+COPY backend/src/Loupe.Api/*.csproj backend/src/Loupe.Api/packages.lock.json backend/src/Loupe.Api/
+COPY backend/tests/Loupe.Api.Tests/*.csproj backend/tests/Loupe.Api.Tests/packages.lock.json backend/tests/Loupe.Api.Tests/
+RUN dotnet restore backend/Loupe.slnx --locked-mode
+COPY backend/ backend/
+CMD ["dotnet", "test", "backend/Loupe.slnx", "--no-restore"]

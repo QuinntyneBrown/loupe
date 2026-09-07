@@ -120,3 +120,11 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: seven invalid inputs produced 201 or 500 instead of their specified errors; a separate real 100,010,000-pixel PNG was also incorrectly accepted.
 - Green: all 33 API integration checks passed. Every rejected upload leaves zero photograph rows and no retained media files. Format verification passed.
 - The server compares content signatures with declared MIME types before decoding, bounds streamed bytes independently of reported length, checks decoded dimensions before rendering, and maps failures to 413/415/422 without decoder internals. Inclusive-boundary, animation and remaining supported-format evidence follows next.
+
+## API-09: all supported formats and inclusive boundaries on the deployment runtime
+
+- Seven Windows checks passed for JPEG/PNG/WebP and inclusive byte/edge/pixel limits. HEIC fixture creation failed before the API call because NetVips.Native omits HEVC; this was a dependency/setup failure, not a recorded behavioral red.
+- Replaced the incomplete native runtime with the planned Linux system libvips/libheif codec combination. No acceptance assertion was removed or changed. The complete 41-test suite passed in the Linux acceptance container, including actual HEVC encoding/decoding of a synthetic HEIC file and exact 100-megapixel and 25-MB inputs.
+- Added `backend/Test.ps1`; its pinned-package rebuild and all eight format/boundary checks passed under 4 CPUs/8 GiB. Format verification passed. Subsequent backend acceptance uses this command from Windows.
+- SDK 10.0.303-noble was not published; the container uses published SDK 10.0.400, pinned by digest. Native packages are libvips 8.15.1-1.1build4 and libheif HEVC plugins 1.17.6-1ubuntu4.8 from Ubuntu's repositories. Local compilation remains on .NET 10. MediatR remains 12.5.0.
+- Sources: [prebuilt codec exclusions](https://github.com/libvips/build-win64-mxe), [official SDK images](https://github.com/dotnet/dotnet-docker/blob/main/README.sdk.md), [Ubuntu HEVC decoder](https://packages.ubuntu.com/noble/libheif-plugin-libde265).

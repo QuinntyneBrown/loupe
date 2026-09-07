@@ -1,0 +1,6 @@
+**
+!NuGet.Config
+!backend/
+!backend/**
+backend/**/bin/
+backend/**/obj/
