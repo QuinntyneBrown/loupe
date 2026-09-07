@@ -13,6 +13,8 @@ namespace Loupe.Api.Controllers;
 public sealed class PhotographsController(ISender sender) : ControllerBase
 {
     [HttpPost]
+    [RequestSizeLimit(UploadLimits.RequestBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = UploadLimits.RequestBytes)]
     public async Task<ActionResult<PhotographResult>> Upload([FromForm] UploadPhotographRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new UploadPhotographCommand(new ImageUpload(request.Image.OpenReadStream,

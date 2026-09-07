@@ -114,3 +114,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Owner keys derive from validated issuer and subject. Storage keys are generated identifiers, and media reads authorize the owning photograph before opening files. Persisted full-frame PNG and JPEG preview omit metadata; allowed EXIF extraction remains a separate slice.
 - This establishes the PNG save/revisit path. Format/byte/pixel/frame bounds, field normalization, cleanup failure recovery and remaining formats are required next increments before this feature can be released.
 - References: [NetVips 3.2.0](https://www.nuget.org/packages/NetVips/3.2.0), [Image API](https://kleisauke.github.io/net-vips/api/NetVips.Image.html). Native libvips is pinned to 8.18.6.
+
+## API-08: upload type, byte and decoded-dimension limits
+
+- Red: seven invalid inputs produced 201 or 500 instead of their specified errors; a separate real 100,010,000-pixel PNG was also incorrectly accepted.
+- Green: all 33 API integration checks passed. Every rejected upload leaves zero photograph rows and no retained media files. Format verification passed.
+- The server compares content signatures with declared MIME types before decoding, bounds streamed bytes independently of reported length, checks decoded dimensions before rendering, and maps failures to 413/415/422 without decoder internals. Inclusive-boundary, animation and remaining supported-format evidence follows next.

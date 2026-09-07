@@ -9,6 +9,8 @@ using Microsoft.IdentityModel.Protocols;
 using Loupe.Api.Tests.Security;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Diagnostics;
+using Loupe.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace Loupe.Api.Tests;
 
@@ -17,6 +19,23 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
     public ControlledIdentityProvider Identity { get; } = new();
     public TestClock Clock { get; } = new();
     public CapturedApiFailure Failure { get; } = new();
+
+    public async Task<HttpClient> CreateAuthenticatedClientAsync(string subject = "owner-a")
+    {
+        await using (var scope = Services.CreateAsyncScope())
+            await scope.ServiceProvider.GetRequiredService<LibraryDbContext>().Database.MigrateAsync();
+        var client = CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, BaseAddress = new Uri("https://localhost") });
+        try
+        {
+            using var callback = await OidcFlow.CompleteAsync(this, client, subject);
+            using var session = await client.GetAsync("/api/session");
+            session.EnsureSuccessStatusCode();
+            client.DefaultRequestHeaders.Add("X-CSRF-Token", session.Headers.GetValues("X-CSRF-Token").Single());
+            client.DefaultRequestHeaders.Add("Origin", "https://localhost");
+            return client;
+        }
+        catch { client.Dispose(); throw; }
+    }
 
     public override async ValueTask DisposeAsync()
     {
