@@ -36,7 +36,7 @@
   }
   @if (reviewed() && photograph(); as latest) {
     <section aria-labelledby="delete-latest">
-      <h3 id="delete-latest">Latest saved details</h3>
+      <h3 #latestHeading id="delete-latest" tabindex="-1">Latest saved details</h3>
       <dl>
         <dt>Intent</dt>
         <dd>{{ latest.brief.intent || 'Not provided' }}</dd>

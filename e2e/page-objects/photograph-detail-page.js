@@ -43,6 +43,47 @@ export class PhotographDetailPage {
     await expect(this.deleteDialog().getByRole('alert')).toHaveText('This photograph is no longer available. Close this dialog to return to your library or keep your unsaved text.');
     await expect(this.deleteDialog().getByRole('button', { name: /Delete photograph|Retry deletion|Review latest photograph/ })).toHaveCount(0);
   }
+  async expectDeletionKeyboard() {
+    await this.expectDeleteConfirmation();
+    await this.page.keyboard.press('Tab');
+    await expect(this.deleteDialog().getByRole('button', { name: 'Delete photograph', exact: true })).toBeFocused();
+    await this.page.keyboard.press('Tab');
+    await expect(this.deleteDialog().getByRole('button', { name: 'Cancel', exact: true })).toBeFocused();
+    await this.page.keyboard.press('Shift+Tab');
+    await expect(this.deleteDialog().getByRole('button', { name: 'Delete photograph', exact: true })).toBeFocused();
+  }
+  async escapeDeletion() { await this.page.keyboard.press('Escape'); }
+  async expectPendingDeletionKeyboard() {
+    await this.page.keyboard.press('Tab');
+    await expect(this.deleteDialog()).toBeFocused();
+    await this.page.keyboard.press('Escape');
+    await this.expectDeleting();
+  }
+  async expectDeletionReviewFocus() { await expect(this.deleteDialog().getByRole('heading', { name: 'Latest saved details', exact: true })).toBeFocused(); }
+  async expectReviewActionsReachable() {
+    await this.page.keyboard.press('Tab');
+    const cancel = this.deleteDialog().getByRole('button', { name: 'Cancel', exact: true });
+    await expect(cancel).toBeFocused();
+    await expect(cancel).toBeInViewport({ ratio: 1 });
+    await this.page.keyboard.press('Shift+Tab');
+    const confirm = this.deleteDialog().getByRole('button', { name: 'Delete photograph', exact: true });
+    await expect(confirm).toBeFocused();
+    await expect(confirm).toBeInViewport({ ratio: 1 });
+  }
+  async expectAccessibleDeletion() {
+    const box = await this.deleteDialog().boundingBox();
+    const viewport = this.page.viewportSize();
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+    expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+    for (const button of await this.deleteDialog().getByRole('button').all()) {
+      const target = await button.boundingBox();
+      expect(target.width).toBeGreaterThanOrEqual(24);
+      expect(target.height).toBeGreaterThanOrEqual(24);
+    }
+    await this.expectAccessibleBrief();
+  }
   async expectImage(title) {
     await expect(this.page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();
     await expect(this.page.getByRole('img', { name: title, exact: true })).toBeVisible();

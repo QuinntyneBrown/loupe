@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 export class DeletionPage {
   constructor(page) { this.page = page; }
@@ -16,4 +17,12 @@ export class DeletionPage {
   async checkStatus() { await this.page.getByRole('button', { name: 'Check cleanup status', exact: true }).click(); }
   async expectUnavailable() { await expect(this.page.getByRole('heading', { name: 'Deletion record unavailable', exact: true })).toBeVisible(); }
   async expectPendingMessage() { await expect(this.page.getByRole('status')).toHaveText('This item is no longer in your library. Its files are queued for removal.'); }
+  async expectAccessibleStatus() {
+    expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const button = await this.page.getByRole('button', { name: 'Check cleanup status', exact: true }).boundingBox();
+    expect(button.width).toBeGreaterThanOrEqual(24);
+    expect(button.height).toBeGreaterThanOrEqual(24);
+    const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(audit.violations).toEqual([]);
+  }
 }

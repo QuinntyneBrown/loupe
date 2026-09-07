@@ -1,8 +1,10 @@
 import {
+  afterNextRender,
   Component,
   DestroyRef,
   ElementRef,
   inject,
+  Injector,
   output,
   signal,
   viewChild,
@@ -34,6 +36,8 @@ export class DeletePhotograph {
   private readonly service = inject(DELETION_SERVICE);
   private readonly photographs = inject(PHOTOGRAPH_SERVICE);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
+  private readonly latestHeading = viewChild<ElementRef<HTMLHeadingElement>>('latestHeading');
   open(photograph: PhotographResult): void {
     this.photograph.set(photograph);
     this.failed.set(false);
@@ -85,6 +89,9 @@ export class DeletePhotograph {
       this.photograph.set(latest);
       this.conflicted.set(false);
       this.reviewed.set(true);
+      afterNextRender(() => this.latestHeading()?.nativeElement.focus(), {
+        injector: this.injector,
+      });
     } catch (error) {
       if (!this.destroyRef.destroyed) {
         if (error instanceof ServiceError && error.code === 'item_unavailable')

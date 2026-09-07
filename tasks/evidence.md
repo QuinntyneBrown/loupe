@@ -405,3 +405,11 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 48 deletion/status checks passed across Chromium, Firefox and WebKit; production build and diff checks passed.
 - Initial transient server failures now retry on the same five-second cadence as transport failures. Failed refreshes retain the last known Pending result. Completed/unavailable outcomes stop automatic polling, repeated manual checks share the outstanding request, and departure ignores late results and clears polling.
 - Polling-stop checks advance the browser clock after observing the terminal state, following [Playwright's clock API](https://playwright.dev/docs/clock). They observe service calls and rendered behavior without inspecting implementation timers.
+
+## UI-25: deletion recovery across the viewport matrix
+
+- Fixture correction: the first target-size check assumed 44 pixels. L2-045.6 requires 24 pixels and the authoritative standard control token is 40 pixels. Corrected that new assertion to the approved criterion without changing production dimensions.
+- Red: latest saved details appeared after conflict review without receiving keyboard focus.
+- Green: all 42 added viewport checks passed, then the full 543-test Chromium/Firefox/WebKit suite passed in 18.3 minutes. Production build passed (386.15 kB raw, 98.54 kB estimated transfer); diff checks passed.
+- Review now focuses its heading after rendering. The matrix covers Escape/cancellation, focus wrapping, pending disabled controls, failed deletion, long saved text, keyboard scrolling to fully visible confirmation/cancel actions, status errors/completion, target sizes, overflow and axe checks.
+- Inspected 375- and 1440-pixel confirmation/review/status screenshots. Long phone review content scrolls inside the bounded dialog. These automated checks do not replace the remaining native-device and assistive-technology release review.
