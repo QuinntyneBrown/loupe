@@ -28,6 +28,7 @@ public sealed class OperationReceiptStore(LibraryDbContext database, TimeProvide
         var scopeHash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { ownerId, operationType, key }));
         var lockKey = BinaryPrimitives.ReadInt64BigEndian(scopeHash);
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
+        await MediaTransactionLock.ProtectUploadAsync(database, cancellationToken);
         await database.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({lockKey})", cancellationToken);
         var receipt = await database.OperationReceipts.SingleOrDefaultAsync(item => item.OwnerId == ownerId
             && item.OperationType == operationType && item.Key == key, cancellationToken);

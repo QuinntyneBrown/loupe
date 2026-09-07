@@ -355,3 +355,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: a worker repeatedly selected 100 blocked manifests and never completed the healthy deletion behind them before the acceptance deadline.
 - Green: all 137 container API checks passed; format and diff checks passed. The test creates the full backlog through the API, retains real filesystem obstructions, and verifies later completion while blocked cleanup remains Pending.
 - A persisted last-attempt timestamp rotates retry priority behind unattempted and less recently attempted records. Selection remains bounded and row-locked across worker instances. The migration updates the cleanup index; the public deletion response is unchanged.
+
+## API-28: remove abandoned media without racing uploads
+
+- Red: old unreferenced final/partial files remained; the paused-upload control already passed before the scanner existed.
+- Green: both targeted checks and all 139 container API checks passed; format, build (zero warnings/errors), and diff checks passed. A controlled mutation removing the shared upload lock made the safety test fail because both in-flight files disappeared. The lock was restored before the full regression.
+- The scanner removes up to 100 eligible files per iteration, with a one-hour grace period (files at the cutoff are eligible). It preserves current references, recent files, unknown names and reparse points. Upload transactions take a shared media lock before their operation lock; the scanner takes its exclusive counterpart before the reference snapshot and file removal.
+- Independent gpt-5.6-sol review found no Critical or Required changes, without running additional tests. Explicit enumeration/permission fault and multi-cleaner stress checks remain unexecuted. Framework multipart temporary storage is separate deployment work.

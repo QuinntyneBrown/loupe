@@ -44,3 +44,10 @@ and must be positive and at most five minutes. Multiple worker instances can
 share the store. Failed media removal stays pending for subsequent iterations;
 completed manifests retain only the deletion identity and timestamps. Journal
 retention, orphan scanning and backup restore are subsequent increments.
+
+The worker also scans managed media for abandoned files. Final and `.partial`
+files at least one hour old are eligible when no saved photograph references
+them. It removes up to 100 per iteration, excludes unknown names and reparse
+points, and coordinates with active upload transactions before taking its
+reference snapshot. Framework multipart temporary storage is a separate private
+staging mount in the deployment work.

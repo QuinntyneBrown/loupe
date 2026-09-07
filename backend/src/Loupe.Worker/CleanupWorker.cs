@@ -18,6 +18,7 @@ public sealed class CleanupWorker(IServiceScopeFactory scopes, IOptions<CleanupO
             {
                 await using var scope = scopes.CreateAsyncScope();
                 await scope.ServiceProvider.GetRequiredService<ISender>().Send(new CleanDeletedContentCommand(), stoppingToken);
+                await scope.ServiceProvider.GetRequiredService<ISender>().Send(new CleanAbandonedMediaCommand(), stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
             catch (Exception) { logger.LogError("Cleanup iteration failed; durable work remains pending"); }
