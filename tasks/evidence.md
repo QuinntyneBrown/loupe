@@ -427,3 +427,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: restart replay and a response lost after commit returned 503 when analysis configuration was removed. New invalid-key controls initially expected the wrong error code; corrected them to the established invalid_request contract. Concurrent same-key and separate-owner controls already passed.
 - Green: all 158 container API checks passed, including eight new replay cases; format, build and diff checks passed.
 - Configuration is evaluated only inside the receipt's new-operation callback. A retained request resolves its original operation despite later brief edits or disabled new admissions. Deletion still makes the photograph unavailable. Concurrent requests across API instances resolve one identifier; changed payload conflicts; failures before/after commit remain safely retryable.
+
+## API-33: deduplicate active analysis and enforce admission limits
+
+- Red: different keys created six equivalent active jobs; changed briefs admitted competing work; seven concurrent requests exceeded the five-job cap.
+- Green: all 161 container API checks passed; format, build and diff checks passed. Cross-instance requests reuse one active operation, including explicit Regenerate and notes-only edits. Different active inputs return analysis_active/409. A sixth job returns analysis_limit/429 and Retry-After: 30 while content and equivalent jobs remain accessible; deletion releases a slot and another owner remains independent.
+- A per-owner transaction advisory lock serializes admission before locking the photograph. Independent read-only gpt-5.6-sol review found no Critical or Required findings. Admission must remain inside its receipt transaction; active jobs must retain valid non-null input snapshots. Completed-result reuse and worker concurrency remain subsequent slices.
