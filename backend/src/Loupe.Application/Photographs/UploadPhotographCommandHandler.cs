@@ -26,6 +26,7 @@ public sealed class UploadPhotographCommandHandler(ICurrentOwner owner, IPhotogr
                 Title = title,
                 CreatedAt = clock.GetUtcNow(),
                 ImageKey = imageKey,
+                Exif = processed.Exif,
                 PreviewKey = previewKey,
                 Width = processed.Width,
                 Height = processed.Height

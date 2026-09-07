@@ -33,7 +33,7 @@ public sealed class ImageIngestor : IImageIngestor
             var image = oriented.PngsaveBuffer(keep: Enums.ForeignKeep.None);
             using var thumbnail = oriented.ThumbnailImage(1600, height: 1600, size: Enums.Size.Down);
             cancellationToken.ThrowIfCancellationRequested();
-            return new ProcessedImage(image, thumbnail.JpegsaveBuffer(q: 85, keep: Enums.ForeignKeep.None), oriented.Width, oriented.Height);
+            return new ProcessedImage(image, thumbnail.JpegsaveBuffer(q: 85, keep: Enums.ForeignKeep.None), oriented.Width, oriented.Height, CaptureMetadataReader.Read(decoded));
         }
         catch (VipsException) { throw new ImageValidationException(ImageFailure.Invalid); }
     }

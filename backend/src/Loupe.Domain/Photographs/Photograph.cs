@@ -10,4 +10,5 @@ public sealed class Photograph
     public required string PreviewKey { get; init; }
     public required int Width { get; init; }
     public required int Height { get; init; }
+    public CaptureMetadata Exif { get; init; } = new();
 }

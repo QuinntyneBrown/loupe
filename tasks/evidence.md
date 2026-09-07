@@ -140,3 +140,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: a synthetic two-frame APNG returned 201 because the decoder exposed its static first frame.
 - Green: all 44 container API checks passed. A bounded PNG chunk walk rejects animation before decoding while accepting the existing still-image and exact-byte fixtures. Format verification passed.
 - Fixture includes valid frame-control sequence numbers, zlib image data and PNG CRCs, following the [APNG specification](https://wiki.mozilla.org/APNG_Specification).
+
+## API-12: preserve allowed capture settings and scrub private EXIF
+
+- Red: the saved response lacked capture metadata, after verifying that the JPEG fixture actually contained private owner/GPS fields.
+- Green: all 53 container API checks passed. Camera, lens, aperture, shutter speed, ISO, focal length and capture time persist in an explicit allowlisted value object; GPS, owner and serial fields are absent from returned metadata and both retained image variants. The second API instance retrieves the same settings.
+- Added regression evidence for all eight EXIF orientations: full image and preview preserve expected dimensions and the expected quadrant's pixel value. These checks passed without changing the existing orientation pipeline. Format verification passed.
+- Capture settings use EF 10 complex JSON mapping; no unfiltered EXIF dictionary or original EXIF blob is persisted. Source: [Npgsql JSON mapping](https://www.npgsql.org/efcore/mapping/json.html).

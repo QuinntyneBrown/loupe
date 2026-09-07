@@ -13,5 +13,6 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<ApplicationSession>().ToTable("sessions").HasKey(session => session.Id);
         modelBuilder.Entity<Photograph>().ToTable("photographs").HasKey(photograph => photograph.Id);
         modelBuilder.Entity<Photograph>().HasIndex(photograph => new { photograph.OwnerId, photograph.CreatedAt, photograph.Id });
+        modelBuilder.Entity<Photograph>().ComplexProperty(photograph => photograph.Exif).ToJson();
     }
 }
