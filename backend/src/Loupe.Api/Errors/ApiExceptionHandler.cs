@@ -16,6 +16,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             ResourceNotFoundException => 404,
             RevisionConflictException => 409,
             OperationConflictException => 409,
+            ServiceUnavailableException => 503,
             ImageValidationException { Failure: ImageFailure.TooLarge } => 413,
             ImageValidationException { Failure: ImageFailure.Unsupported } => 415,
             ImageValidationException => 422,
@@ -27,12 +28,14 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             ResourceNotFoundException => "item_unavailable",
             RevisionConflictException => "revision_conflict",
             OperationConflictException => "operation_conflict",
+            ServiceUnavailableException => "service_unavailable",
             ImageValidationException { Failure: ImageFailure.TooLarge } => "image_too_large",
             ImageValidationException { Failure: ImageFailure.Unsupported } => "unsupported_media",
             ImageValidationException => "invalid_image",
             _ => "unexpected_failure"
         };
         logger.LogWarning("Request {CorrelationId} failed with {Code}", context.TraceIdentifier, code);
+        if (exception is ServiceUnavailableException) context.Response.Headers.RetryAfter = "5";
         await Results.Problem(statusCode: status, title: status < 500 ? exception.Message : "The request could not be completed.",
             extensions: new Dictionary<string, object?>
             {

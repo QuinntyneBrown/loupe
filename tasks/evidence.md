@@ -248,3 +248,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - A PostgreSQL transaction-scoped advisory lock and owner/type/key primary key serialize receipt creation. Photograph and receipt commit together; known receipts resolve before decoding or writing media. The upload reader enforces the existing byte bound while computing a streamed digest. Existing acceptance uploads now supply a fresh key through their fixture helper; their behavior assertions are unchanged.
 - File cleanup on immediate media-write failure remains; files are retained once database persistence starts so an uncertain commit cannot remove a saved image. Controlled commit-failure coverage and managed orphan cleanup are subsequent work. The receipt port is called directly by the upload handler; a generic MediatR pipeline is unnecessary for this first keyed operation.
 - Sources: [PostgreSQL advisory locks](https://www.postgresql.org/docs/current/explicit-locking.html#ADVISORY-LOCKS), [EF Core transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions), [Npgsql transactions](https://www.npgsql.org/doc/basic-usage.html#transactions).
+
+## API-19: recover from uncertain upload commits
+
+- Red: controlled transient failures immediately before and after the real PostgreSQL commit returned generic 500 responses instead of retryable 503 responses.
+- Green: all 104 container API checks passed; format verification and diff checks passed. Retry from a second API instance creates one record after rollback, or resolves the existing identifier and its two media files after commit. The saved preview remains decodable and private diagnostic text is absent from the response.
+- Infrastructure translates transient Npgsql failures to the application failure contract. The API returns 503 with a five-second Retry-After. A test-only EF transaction interceptor supplies the controlled fault while persistence remains real PostgreSQL.

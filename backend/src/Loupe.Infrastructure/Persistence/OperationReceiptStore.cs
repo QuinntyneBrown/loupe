@@ -2,14 +2,27 @@ using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Loupe.Application.Operations;
+using Loupe.Application.Common;
 using Loupe.Domain.Operations;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Loupe.Infrastructure.Persistence;
 
 public sealed class OperationReceiptStore(LibraryDbContext database, TimeProvider clock) : IOperationReceiptStore
 {
     public async Task<Guid> ExecuteAsync(string ownerId, string operationType, string key, string payloadHash,
+        Func<CancellationToken, Task<Guid>> create, CancellationToken cancellationToken)
+    {
+        try { return await ExecuteCoreAsync(ownerId, operationType, key, payloadHash, create, cancellationToken); }
+        catch (Exception exception) when (exception is NpgsqlException { IsTransient: true }
+            or DbUpdateException { InnerException: NpgsqlException { IsTransient: true } })
+        {
+            throw new ServiceUnavailableException();
+        }
+    }
+
+    private async Task<Guid> ExecuteCoreAsync(string ownerId, string operationType, string key, string payloadHash,
         Func<CancellationToken, Task<Guid>> create, CancellationToken cancellationToken)
     {
         var scopeHash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { ownerId, operationType, key }));

@@ -6,10 +6,10 @@ namespace Loupe.Api.Tests.Photographs;
 
 public static class PhotographFixture
 {
-    public static async Task<HttpResponseMessage> SubmitAsync(HttpClient client, HttpContent upload)
+    public static async Task<HttpResponseMessage> SubmitAsync(HttpClient client, HttpContent upload, string? key = null)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/photographs") { Content = upload };
-        request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+        request.Headers.Add("Idempotency-Key", key ?? Guid.NewGuid().ToString());
         return await client.SendAsync(request);
     }
 
