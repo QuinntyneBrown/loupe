@@ -1,6 +1,7 @@
 using Loupe.Application.Sessions;
 using Loupe.Application.Photographs;
 using Loupe.Application.Images;
+using Loupe.Application.Operations;
 using Loupe.Infrastructure.Images;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +20,7 @@ public static class PersistenceSetup
             options.UseNpgsql(provider.GetRequiredService<IOptions<DatabaseOptions>>().Value.Library));
         services.AddScoped<ISessionStore, SessionStore>();
         services.AddScoped<IPhotographStore, PhotographStore>();
+        services.AddScoped<IOperationReceiptStore, OperationReceiptStore>();
         services.AddOptions<MediaOptions>().BindConfiguration("Media")
             .Validate(options => Path.IsPathFullyQualified(options.Root), "Media:Root must be an absolute private storage path.").ValidateOnStart();
         services.AddSingleton<IImageStore, FileImageStore>();

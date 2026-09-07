@@ -1,5 +1,6 @@
 using Loupe.Application.Common;
 using Loupe.Application.Images;
+using Loupe.Application.Operations;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace Loupe.Api.Errors;
@@ -14,6 +15,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             RequestValidationException => 400,
             ResourceNotFoundException => 404,
             RevisionConflictException => 409,
+            OperationConflictException => 409,
             ImageValidationException { Failure: ImageFailure.TooLarge } => 413,
             ImageValidationException { Failure: ImageFailure.Unsupported } => 415,
             ImageValidationException => 422,
@@ -24,6 +26,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             RequestValidationException => "invalid_request",
             ResourceNotFoundException => "item_unavailable",
             RevisionConflictException => "revision_conflict",
+            OperationConflictException => "operation_conflict",
             ImageValidationException { Failure: ImageFailure.TooLarge } => "image_too_large",
             ImageValidationException { Failure: ImageFailure.Unsupported } => "unsupported_media",
             ImageValidationException => "invalid_image",

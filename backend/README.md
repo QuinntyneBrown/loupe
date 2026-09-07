@@ -22,3 +22,11 @@ Runtime configuration requires `ConnectionStrings:Library`, absolute private
 `Browser:AllowedOrigins`. Browser/API/identity deployment and secret provisioning
 are delivered with the Compose increment. Current behavior and remaining work
 are recorded in `../tasks/evidence.md` and `../tasks/todo.md`.
+
+`POST /api/photographs` requires a client-generated `Idempotency-Key` header of
+1–128 visible ASCII characters, in addition to the authenticated session and
+antiforgery proof. Generate a new key for a new upload and retain it when retrying
+the same upload. Normalized title/brief fields, declared format and the byte
+digest identify its payload. A key is scoped to its owner and operation for 24
+hours; conflicting content returns 409. A retained receipt for an unavailable
+photograph returns 404 rather than recreating it.

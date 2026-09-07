@@ -39,7 +39,7 @@ public sealed class CaptureMetadataTests(PostgreSqlFixture database) : IClassFix
         var part = new ByteArrayContent(bytes);
         part.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         upload.Add(part, "image", "Study.jpg");
-        using var response = await client.PostAsync("/api/photographs", upload);
+        using var response = await PhotographFixture.SubmitAsync(client, upload);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var body = await response.Content.ReadAsStringAsync();
         Assert.DoesNotContain("CONFIDENTIAL", body);

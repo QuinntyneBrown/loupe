@@ -36,7 +36,7 @@ public sealed class SupportedImageTests(PostgreSqlFixture database) : IClassFixt
         var part = new ByteArrayContent(bytes);
         part.Headers.ContentType = new MediaTypeHeaderValue("image/" + format);
         upload.Add(part, "image", "Study." + format);
-        using var response = await client.PostAsync("/api/photographs", upload);
+        using var response = await PhotographFixture.SubmitAsync(client, upload);
         Assert.True(response.StatusCode == HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
         using var saved = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         using var full = await client.GetAsync(saved.RootElement.GetProperty("imageUrl").GetString());

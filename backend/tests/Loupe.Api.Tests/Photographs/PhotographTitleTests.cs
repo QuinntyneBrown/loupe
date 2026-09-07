@@ -36,7 +36,7 @@ public sealed class PhotographTitleTests(PostgreSqlFixture database) : IClassFix
         var db = scope.ServiceProvider.GetRequiredService<LibraryDbContext>();
         var before = await db.Photographs.CountAsync();
         var filesBefore = Directory.Exists(database.MediaRoot) ? Directory.GetFiles(database.MediaRoot).Length : 0;
-        using var response = await client.PostAsync("/api/photographs", upload);
+        using var response = await PhotographFixture.SubmitAsync(client, upload);
         if (scenario == "too-long")
         {
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

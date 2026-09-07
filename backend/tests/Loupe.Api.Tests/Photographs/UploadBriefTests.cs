@@ -30,7 +30,7 @@ public sealed class UploadBriefTests(PostgreSqlFixture database) : IClassFixture
         upload.Add(new StringContent(genre), "genre");
         upload.Add(new StringContent(feedback), "requestedFeedback");
         upload.Add(new StringContent(experience), "experience");
-        using var response = await client.PostAsync("/api/photographs", upload);
+        using var response = await PhotographFixture.SubmitAsync(client, upload);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         using var saved = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         var brief = saved.RootElement.GetProperty("brief");
@@ -55,7 +55,7 @@ public sealed class UploadBriefTests(PostgreSqlFixture database) : IClassFixture
         part.Headers.ContentType = new MediaTypeHeaderValue("image/png");
         upload.Add(part, "image", "Study.png");
         upload.Add(new StringContent(length == 0 ? "Expert" : new string('a', length)), field);
-        using var response = await client.PostAsync("/api/photographs", upload);
+        using var response = await PhotographFixture.SubmitAsync(client, upload);
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         using var problem = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         Assert.True(problem.RootElement.GetProperty("errors").TryGetProperty(field, out _));
@@ -77,7 +77,7 @@ public sealed class UploadBriefTests(PostgreSqlFixture database) : IClassFixture
         upload.Add(new StringContent(empty ? "" : "  Portrait  "), "genre");
         upload.Add(new StringContent(empty ? "" : "Beginner"), "experience");
         upload.Add(new StringContent(empty ? "\r\n" : "  Improve separation\rand framing  "), "requestedFeedback");
-        using var response = await client.PostAsync("/api/photographs", upload);
+        using var response = await PhotographFixture.SubmitAsync(client, upload);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         await using var second = new ApiFactory(database.ConnectionString, database.MediaRoot);
         using var later = await second.CreateAuthenticatedClientAsync();

@@ -5,21 +5,10 @@ namespace Loupe.Infrastructure.Images;
 
 public sealed class ImageIngestor : IImageIngestor
 {
-    public async Task<ProcessedImage> ProcessAsync(ImageUpload upload, CancellationToken cancellationToken)
+    public ProcessedImage Process(byte[] bytes, string declaredContentType, CancellationToken cancellationToken)
     {
-        if (upload.Length > UploadLimits.Bytes) throw new ImageValidationException(ImageFailure.TooLarge);
-        await using var source = upload.OpenRead();
-        using var buffer = new MemoryStream();
-        var chunk = new byte[81920];
-        int read;
-        while ((read = await source.ReadAsync(chunk, cancellationToken)) > 0)
-        {
-            if (buffer.Length + read > UploadLimits.Bytes) throw new ImageValidationException(ImageFailure.TooLarge);
-            buffer.Write(chunk, 0, read);
-        }
-        var bytes = buffer.ToArray();
         var contentType = ImageSignature.ContentType(bytes);
-        if (contentType is null || !string.Equals(contentType, upload.ContentType, StringComparison.OrdinalIgnoreCase))
+        if (contentType is null || !string.Equals(contentType, declaredContentType, StringComparison.OrdinalIgnoreCase))
             throw new ImageValidationException(ImageFailure.Unsupported);
         if (contentType == "image/png") PngContainerValidator.Validate(bytes);
         try

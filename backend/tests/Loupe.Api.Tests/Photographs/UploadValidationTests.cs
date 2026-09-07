@@ -31,7 +31,7 @@ public sealed class UploadValidationTests(PostgreSqlFixture database) : IClassFi
         var part = new ByteArrayContent(bytes);
         part.Headers.ContentType = new MediaTypeHeaderValue(declaredType);
         upload.Add(part, "image", "innocent.png");
-        using var response = await client.PostAsync("/api/photographs", upload);
+        using var response = await PhotographFixture.SubmitAsync(client, upload);
         Assert.Equal((HttpStatusCode)expectedStatus, response.StatusCode);
         await using var scope = factory.Services.CreateAsyncScope();
         Assert.Equal(0, await scope.ServiceProvider.GetRequiredService<LibraryDbContext>().Photographs.CountAsync());

@@ -34,7 +34,7 @@ public sealed class OrientationTests(PostgreSqlFixture database) : IClassFixture
         var part = new ByteArrayContent(oriented.JpegsaveBuffer(q: 100));
         part.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         upload.Add(part, "image", "Orientation.jpg");
-        using var response = await client.PostAsync("/api/photographs", upload);
+        using var response = await PhotographFixture.SubmitAsync(client, upload);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         using var saved = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         foreach (var variant in new[] { "imageUrl", "previewUrl" })

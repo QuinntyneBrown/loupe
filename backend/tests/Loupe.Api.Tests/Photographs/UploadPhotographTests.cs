@@ -31,7 +31,7 @@ public sealed class UploadPhotographTests(PostgreSqlFixture database) : IClassFi
         var imagePart = new ByteArrayContent(image.PngsaveBuffer());
         imagePart.Headers.ContentType = new MediaTypeHeaderValue("image/png");
         upload.Add(imagePart, "image", "Window light.png");
-        using var response = await client.PostAsync("/api/photographs", upload);
+        using var response = await PhotographFixture.SubmitAsync(client, upload);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         using var saved = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         Assert.Equal("Window light", saved.RootElement.GetProperty("title").GetString());
