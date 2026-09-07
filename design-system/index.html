@@ -15,7 +15,7 @@
       <p class="eyebrow">01 / FOUNDATIONS</p>
       <h1>A clear frame for photography.</h1>
       <p class="intro">Quiet surfaces, precise controls, and room for the image. The shared visual language for learning to see.</p>
-      <nav aria-label="Reference"><a href="#buttons-heading">Buttons</a><a href="#forms">Forms &amp; dialogs</a><a href="#tokens">Tokens</a></nav>
+      <nav aria-label="Reference"><a href="#buttons-heading">Buttons</a><a href="#forms">Forms &amp; dialogs</a><a href="#gallery">States &amp; layouts</a><a href="#tokens">Tokens</a></nav>
       <section aria-labelledby="buttons-heading">
         <div class="section-heading"><h2 id="buttons-heading">Buttons</h2><p>One clear action. A visible response.</p></div>
         <div class="specimen">
@@ -38,6 +38,20 @@
             <div class="actions"><button type="submit">Save example</button><button id="cancel-editor" class="secondary" type="button">Cancel</button></div>
           </form>
         </dialog>
+      </section>
+      <section id="gallery" aria-labelledby="gallery-heading">
+        <h2 id="gallery-heading">States &amp; layouts</h2>
+        <h3>Cards and selection</h3><p>Images lead; titles and state stay readable. These abstract studies are synthetic.</p>
+        <div class="actions"><button class="tag" id="tag-example" aria-pressed="false">Window light</button><span class="pill">Saved</span><span class="pill ai">AI suggested</span></div>
+        <ul class="image-grid" aria-label="Image grid example" id="image-grid"></ul>
+        <h3>Progress and feedback</h3><div class="specimen">
+          <div class="actions"><button disabled aria-busy="true">Saving example</button><span class="pill">Queued</span><span class="pill ai">Running</span><span class="pill success">Succeeded</span><span class="pill danger">Failed</span><span class="pill">Canceled</span></div>
+          <label for="upload-progress">Upload example · 60 of 100 bytes</label><progress id="upload-progress" aria-label="Upload example" value="60" max="100">60%</progress>
+          <label for="processing-progress">Processing example · total unknown</label><progress id="processing-progress" aria-label="Processing example">Processing</progress>
+          <p class="notice ai">Demo output · This is a simulated analysis example.</p>
+        </div>
+        <h3>Empty and error states</h3><div class="specimen"><h4>No photographs yet</h4><p>Add a photograph when you are ready to start a study.</p><a href="#forms">Try the upload-form controls</a></div>
+        <div class="notice danger"><h4>Example could not be loaded</h4><p>Keep your draft and try again. A failed request is different from an empty collection.</p><button type="button" id="retry-example" class="secondary">Try recovery example</button><p role="status" aria-label="Recovery feedback">Example request failed.</p></div>
       </section>
       <section id="tokens" aria-labelledby="tokens-heading"><h2 id="tokens-heading">Tokens</h2><p>Names describe roles. Every specimen reads the same CSS values used by Loupe.</p><div id="token-catalog"></div></section>
     </main>

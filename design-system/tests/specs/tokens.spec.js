@@ -6,7 +6,7 @@ import { ReferencePage } from '../page-objects/reference-page.js';
 
 test('L2-051.2/.5: browse every token category without external requests or runtime errors', async ({ page }) => {
   const external = [], errors = [];
-  page.on('request', request => { if (new URL(request.url()).origin !== 'http://127.0.0.1:4173') external.push(request.url()); });
+  page.on('request', request => { if (new URL(request.url()).origin !== 'http://127.0.0.1:4187') external.push(request.url()); });
   page.on('pageerror', error => errors.push(error.message));
   const reference = new ReferencePage(page);
   await reference.open();

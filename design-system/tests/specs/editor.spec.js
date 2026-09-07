@@ -4,6 +4,10 @@
 import { test } from '@playwright/test';
 import { ReferencePage } from '../page-objects/reference-page.js';
 
+// Includes a full axe scan and two dialog visits; interaction assertions retain
+// their 5-second deadlines. Product latency has separate L2-047 release budgets.
+test.describe.configure({ timeout: 60_000 });
+
 for (const [width, height] of [[375, 667], [768, 900], [1440, 900], [844, 390]]) {
   test(`L2-051.3/.4 and L2-045.2/.3: edit a synthetic example at ${width}x${height}`, async ({ page }) => {
     await page.setViewportSize({ width, height });

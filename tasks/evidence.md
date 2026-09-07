@@ -3,6 +3,10 @@
 Record the command, observed red failure, green result, and review for each slice.
 No application behavior was implemented before this log was created.
 
+Reference sources: [Playwright web servers](https://playwright.dev/docs/test-webserver),
+[Angular compatibility](https://angular.dev/reference/versions),
+[ASP.NET OIDC](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-oidc-web-authentication?view=aspnetcore-10.0).
+
 ## DS-01: independent keyboard-operable button
 
 - Red: `cd design-system; npm test -- --project=chromium` served the built blank
@@ -21,3 +25,10 @@ No application behavior was implemented before this log was created.
 - Red: focused Chromium test failed because the editor trigger was absent.
 - First implementation exposed focus escape in Chromium/WebKit; retained assertions and added explicit Tab wrapping.
 - Green: npm test passed 60 browser checks, including modal keyboard containment, error accessibility scans, save/cancel focus recovery and the full token viewport regression. Build passed within the test command.
+
+## DS-04: component states and image-grid specimens
+
+- Red: gallery acceptance failed on missing States & layouts navigation.
+- Green: 13 focused Chromium gallery checks passed. Full two-worker regression: 98 passed, one WebKit dialog exceeded aggregate 30s after successful scan/save/cancel actions. Four affected WebKit dialog checks then passed with a 60s total harness allowance; every 5s interaction assertion and all L2 product budgets remain unchanged. No assertions or accessibility rules removed.
+- Reduced runner parallelism from four to two after traces identified scanner contention. Port 4173 was occupied by an unrelated Python server; moved this project's preview/tests to 4187.
+- Reviewed desktop rendering, generated breakpoint behavior, inert synthetic examples, and JS syntax. Full named manual accessibility/visual approval remains a release gate.

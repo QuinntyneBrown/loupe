@@ -54,4 +54,21 @@ export class ReferencePage {
       expect(await this.page.getByRole('dialog').evaluate(dialog => dialog.contains(document.activeElement))).toBe(true);
     }
   }
+  async browseGallery() {
+    await this.page.getByRole('link', { name: 'States & layouts', exact: true }).click();
+    for (const name of ['Cards and selection', 'Progress and feedback', 'Empty and error states']) {
+      await expect(this.page.getByRole('heading', { name, exact: true })).toBeVisible();
+    }
+    await this.page.getByRole('button', { name: 'Window light', exact: true }).click();
+    await expect(this.page.getByRole('button', { name: 'Window light', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await expect(this.page.getByRole('progressbar', { name: 'Upload example' })).toHaveAttribute('value', '60');
+    await expect(this.page.getByRole('progressbar', { name: 'Processing example' })).not.toHaveAttribute('value');
+    await expect(this.page.getByRole('button', { name: 'Saving example' })).toBeDisabled();
+  }
+  async expectGridColumns(width) {
+    const expected = width < 576 ? 1 : width < 768 ? 2 : width < 992 ? 3 : width < 1200 ? 4 : 5;
+    const grid = this.page.getByRole('list', { name: 'Image grid example' });
+    await expect(grid.getByRole('listitem')).toHaveCount(10);
+    expect(await grid.evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(expected);
+  }
 }

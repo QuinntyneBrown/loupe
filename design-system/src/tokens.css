@@ -9,6 +9,10 @@
   --lp-token-min: 15rem;
   --lp-example-height: 3rem;
   --lp-dialog-height: 90dvh;
+  --lp-study-ratio: 4 / 3;
+  --lp-study-circle: 40%;
+  --lp-study-offset: 28%;
+  --lp-no-duration: 0s;
   /* Colour: a neutral gallery wall. No warm cast, so photographs read true. */
   --lp-color-bg: #ffffff;
   --lp-color-surface: #ffffff;
