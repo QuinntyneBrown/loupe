@@ -21,6 +21,7 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
     public TestClock Clock { get; } = new();
     public CapturedApiFailure Failure { get; } = new();
     public DbTransactionInterceptor? TransactionInterceptor { get; init; }
+    public IReadOnlyDictionary<string, string?> Settings { get; init; } = new Dictionary<string, string?>();
 
     public async Task<HttpClient> CreateAuthenticatedClientAsync(string subject = "owner-a")
     {
@@ -56,6 +57,7 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
             ["Media:Root"] = mediaRoot ?? Path.Combine(Path.GetTempPath(), "loupe-unused-media"),
             ["ConnectionStrings:Library"] = connectionString ?? "Host=localhost;Database=unused;Username=unused"
         }));
+        builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(Settings));
         builder.ConfigureTestServices(services => services.PostConfigure<OpenIdConnectOptions>("oidc", options =>
         {
             options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(Identity.Configuration);

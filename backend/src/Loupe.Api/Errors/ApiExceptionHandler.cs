@@ -17,6 +17,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             RevisionConflictException => 409,
             OperationConflictException => 409,
             ServiceUnavailableException => 503,
+            IntegrationNotConfiguredException => 503,
             ImageValidationException { Failure: ImageFailure.TooLarge } => 413,
             ImageValidationException { Failure: ImageFailure.Unsupported } => 415,
             ImageValidationException => 422,
@@ -29,13 +30,14 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             RevisionConflictException => "revision_conflict",
             OperationConflictException => "operation_conflict",
             ServiceUnavailableException => "service_unavailable",
+            IntegrationNotConfiguredException => "integration_not_configured",
             ImageValidationException { Failure: ImageFailure.TooLarge } => "image_too_large",
             ImageValidationException { Failure: ImageFailure.Unsupported } => "unsupported_media",
             ImageValidationException => "invalid_image",
             _ => "unexpected_failure"
         };
         logger.LogWarning("Request {CorrelationId} failed with {Code}", context.TraceIdentifier, code);
-        if (exception is ServiceUnavailableException) context.Response.Headers.RetryAfter = "5";
+        if (exception is ServiceUnavailableException or IntegrationNotConfiguredException) context.Response.Headers.RetryAfter = "5";
         await Results.Problem(statusCode: status, title: status < 500 ? exception.Message : "The request could not be completed.",
             extensions: new Dictionary<string, object?>
             {

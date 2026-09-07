@@ -12,6 +12,7 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
     public DbSet<Photograph> Photographs => Set<Photograph>();
     public DbSet<OperationReceipt> OperationReceipts => Set<OperationReceipt>();
     public DbSet<DeletionOperation> Deletions => Set<DeletionOperation>();
+    public DbSet<BackgroundOperation> BackgroundOperations => Set<BackgroundOperation>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ApplicationSession>().ToTable("sessions").HasKey(session => session.Id);
@@ -30,5 +31,13 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<DeletionOperation>().Property(deletion => deletion.ResourceType).HasMaxLength(64);
         modelBuilder.Entity<DeletionOperation>().HasIndex(deletion => new { deletion.OwnerId, deletion.ResourceType, deletion.ResourceId }).IsUnique();
         modelBuilder.Entity<DeletionOperation>().HasIndex(deletion => new { deletion.CompletedAt, deletion.LastAttemptAt, deletion.DeletedAt });
+        modelBuilder.Entity<BackgroundOperation>().ToTable("background_operations").HasKey(operation => operation.Id);
+        modelBuilder.Entity<BackgroundOperation>().Property(operation => operation.OwnerId).HasMaxLength(64);
+        modelBuilder.Entity<BackgroundOperation>().Property(operation => operation.Type).HasConversion<string>().HasMaxLength(64);
+        modelBuilder.Entity<BackgroundOperation>().Property(operation => operation.Mode).HasConversion<string>().HasMaxLength(16);
+        modelBuilder.Entity<BackgroundOperation>().Property(operation => operation.Status).HasConversion<string>().HasMaxLength(16);
+        modelBuilder.Entity<BackgroundOperation>().Property(operation => operation.InputJson).HasColumnType("jsonb");
+        modelBuilder.Entity<BackgroundOperation>().HasIndex(operation => new { operation.OwnerId, operation.Type, operation.ResourceId });
+        modelBuilder.Entity<BackgroundOperation>().HasIndex(operation => new { operation.Status, operation.CreatedAt });
     }
 }

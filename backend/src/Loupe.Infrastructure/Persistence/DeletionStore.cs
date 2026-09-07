@@ -4,6 +4,7 @@ using System.Text.Json;
 using Loupe.Application.Common;
 using Loupe.Application.Deletions;
 using Loupe.Domain.Deletions;
+using Loupe.Domain.Operations;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -32,7 +33,7 @@ public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock)
         var previous = await database.Deletions.AsNoTracking().SingleOrDefaultAsync(item => item.OwnerId == ownerId
             && item.ResourceType == "photograph" && item.ResourceId == id, cancellationToken);
         if (previous is not null) return previous;
-        var photograph = await database.Photographs.SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken)
+        var photograph = await database.Photographs.FromSqlInterpolated($"SELECT * FROM photographs WHERE \"Id\" = {id} AND \"OwnerId\" = {ownerId} FOR UPDATE").SingleOrDefaultAsync(cancellationToken)
             ?? throw new ResourceNotFoundException();
         if (photograph.Revision != revision) throw new RevisionConflictException();
         var operation = new DeletionOperation
@@ -44,6 +45,11 @@ public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock)
             MediaKeys = [photograph.ImageKey, photograph.PreviewKey]
         };
         database.Deletions.Add(operation);
+        await database.BackgroundOperations.Where(item => item.OwnerId == ownerId && item.Type == OperationType.Critique && item.ResourceId == id
+            && (item.Status == OperationStatus.Queued || item.Status == OperationStatus.Running))
+            .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.Status, OperationStatus.Canceled)
+                .SetProperty(item => item.InputJson, (string?)null).SetProperty(item => item.CompletedAt, operation.DeletedAt)
+                .SetProperty(item => item.UpdatedAt, operation.DeletedAt).SetProperty(item => item.Message, "The photograph was deleted."), cancellationToken);
         database.Photographs.Remove(photograph);
         try { await database.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateConcurrencyException) { throw new RevisionConflictException(); }

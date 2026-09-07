@@ -4,6 +4,8 @@ using Loupe.Application.Images;
 using Loupe.Application.Operations;
 using Loupe.Application.Deletions;
 using Loupe.Application.Maintenance;
+using Loupe.Application.Critiques;
+using Loupe.Infrastructure.Ai;
 using Loupe.Infrastructure.Images;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +25,11 @@ public static class PersistenceSetup
         services.AddScoped<ISessionStore, SessionStore>();
         services.AddScoped<IPhotographStore, PhotographStore>();
         services.AddScoped<IOperationReceiptStore, OperationReceiptStore>();
+        services.AddScoped<IBackgroundOperationStore, BackgroundOperationStore>();
+        services.AddSingleton<ICritiqueConfiguration, CritiqueConfiguration>();
+        services.AddOptions<AiOptions>().BindConfiguration("Ai")
+            .Validate(options => options.Mode is null or "Demo" or "Live", "Ai:Mode must be Demo or Live when configured.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Model), "Ai:Model must name a model.").ValidateOnStart();
         services.AddScoped<IDeletionStore, DeletionStore>();
         services.AddScoped<IDeletedContentCleaner, DeletedContentCleaner>();
         services.AddScoped<IAbandonedMediaCleaner, AbandonedMediaCleaner>();

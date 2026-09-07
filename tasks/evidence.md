@@ -413,3 +413,11 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 42 added viewport checks passed, then the full 543-test Chromium/Firefox/WebKit suite passed in 18.3 minutes. Production build passed (386.15 kB raw, 98.54 kB estimated transfer); diff checks passed.
 - Review now focuses its heading after rendering. The matrix covers Escape/cancellation, focus wrapping, pending disabled controls, failed deletion, long saved text, keyboard scrolling to fully visible confirmation/cancel actions, status errors/completion, target sizes, overflow and axe checks.
 - Inspected 375- and 1440-pixel confirmation/review/status screenshots. Long phone review content scrolls inside the bounded dialog. These automated checks do not replace the remaining native-device and assistive-technology release review.
+
+## API-31: durable private critique admission
+
+- Red: all six new integration checks failed at the missing admission/status endpoints.
+- Green: all six targeted checks and the full 150-test container API suite passed. Format, container build and diff checks passed. The initial API build exposed an action name colliding with ControllerBase.Request; renamed it without suppressing the compiler warning.
+- Admission atomically saves an immutable image/brief/EXIF snapshot and operation receipt. Notes are excluded. Owner-scoped status survives an API restart; explicit Demo/Live configuration is required for new work. Deletion locks the photograph, cancels queued work and clears its snapshot in the same transaction.
+- Independent read-only gpt-5.6-sol review found no Critical or Required findings. Forced simultaneous admission/deletion and direct persisted-snapshot inspection remain coverage limits. Provider execution, quotas, leases and result publication are later slices. Keyed replay after configuration removal is the next slice.
+- Verified the official OpenAI model and Responses structured-output/image-input documentation. The configured Live model defaults to gpt-5.4-mini-2026-03-17; no provider calls or credentials were used.
