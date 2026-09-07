@@ -1,0 +1,13 @@
+**/node_modules/
+**/dist/
+**/bin/
+**/obj/
+**/test-results/
+**/playwright-report/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.local/
+artifacts/
