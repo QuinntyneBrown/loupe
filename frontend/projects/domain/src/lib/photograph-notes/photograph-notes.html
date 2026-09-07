@@ -1,11 +1,11 @@
-<form (ngSubmit)="save()" [attr.aria-busy]="saving()">
+<form (ngSubmit)="save()" [attr.aria-busy]="saving() || reloading()">
   <label for="photograph-notes">Notes</label>
   <textarea
     id="photograph-notes"
     name="notes"
     [ngModel]="draft()"
     (ngModelChange)="edit($event)"
-    [disabled]="saving()"
+    [disabled]="saving() || reloading()"
     [attr.aria-invalid]="overLimit()"
     [attr.aria-describedby]="overLimit() ? 'notes-count notes-error' : 'notes-count'"
   ></textarea>
@@ -16,12 +16,44 @@
   @if (failed()) {
     <p role="alert">Notes could not be saved. Your text is still here.</p>
   }
+  @if (conflicted()) {
+    <p role="alert">
+      {{
+        reloadFailed()
+          ? 'Latest notes could not be loaded. Your text is still here.'
+          : 'This photograph changed. Your notes have been kept.'
+      }}
+    </p>
+    <button type="button" [disabled]="reloading()" (click)="reloadLatest()">
+      Reload latest notes
+    </button>
+  }
+  @if (latestNotes() !== null) {
+    <section aria-labelledby="latest-notes-heading">
+      <h3 id="latest-notes-heading">Latest saved notes</h3>
+      <p class="latest">{{ latestNotes() || 'No notes saved.' }}</p>
+      <p>Review your draft before saving again.</p>
+    </section>
+  }
   <div class="actions">
-    <button type="submit" [disabled]="saving() || !dirty() || overLimit()">
+    <button
+      type="submit"
+      [disabled]="saving() || reloading() || conflicted() || !dirty() || overLimit()"
+    >
       {{ failed() ? 'Retry save' : 'Save notes' }}
     </button>
     <p role="status">
-      {{ saving() ? 'Saving…' : failed() ? 'Not saved' : dirty() ? 'Unsaved changes' : 'Saved' }}
+      {{
+        saving()
+          ? 'Saving…'
+          : reloading()
+            ? 'Loading latest…'
+            : failed() || conflicted()
+              ? 'Not saved'
+              : dirty()
+                ? 'Unsaved changes'
+                : 'Saved'
+      }}
     </p>
   </div>
 </form>

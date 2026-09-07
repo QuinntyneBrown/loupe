@@ -30,5 +30,17 @@ for (const viewport of viewports) {
     await detail.editNotes('a'.repeat(10001));
     await detail.expectNotesLimit();
     await detail.expectAccessibleNotes();
+    await detail.editNotes('Keep my draft while reviewing the latest.');
+    work.library.photos[0].notes = 'A newer note from another editor.';
+    work.library.photos[0].revision++;
+    await detail.saveNotes();
+    await detail.expectNotesConflict();
+    await detail.expectAccessibleNotes();
+    await detail.reloadLatestNotes();
+    await detail.expectLatestNotes('A newer note from another editor.');
+    await detail.expectNotes('Keep my draft while reviewing the latest.');
+    await detail.expectAccessibleNotes();
+    await detail.saveNotes();
+    await detail.expectNotesState('Saved');
   });
 }

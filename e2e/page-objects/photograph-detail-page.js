@@ -55,4 +55,10 @@ export class PhotographDetailPage {
     const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
     expect(audit.violations).toEqual([]);
   }
+  async expectNotesConflict() {
+    await expect(this.page.getByRole('alert')).toHaveText('This photograph changed. Your notes have been kept.');
+  }
+  async reloadLatestNotes() { await this.page.getByRole('button', { name: 'Reload latest notes', exact: true }).click(); }
+  async expectLatestNotes(value) { await expect(this.page.getByRole('region', { name: 'Latest saved notes', exact: true })).toContainText(value); }
+  async expectNotesReloadFailure() { await expect(this.page.getByRole('alert')).toContainText('Latest notes could not be loaded. Your text is still here.'); }
 }

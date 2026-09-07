@@ -1,0 +1,57 @@
+import { test } from '@playwright/test';
+import { MyWorkPage } from '../page-objects/my-work-page.js';
+import { SignInPage } from '../page-objects/sign-in-page.js';
+import { PhotographDetailPage } from '../page-objects/photograph-detail-page.js';
+
+test('L2-030.3: two editors retain a stale draft and review the latest before intentionally saving', async ({ page, context }) => {
+  const work = new MyWorkPage(page);
+  await work.configureCollection(1);
+  const signIn = new SignInPage(page);
+  await signIn.openPrivateDestination();
+  await signIn.continue();
+  await work.openPhotograph('Study 01');
+  const second = await context.newPage();
+  await work.library.attach(second);
+  const secondSignIn = new SignInPage(second);
+  await secondSignIn.openPrivateDestination();
+  await secondSignIn.continue();
+  await new MyWorkPage(second).openPhotograph('Study 01');
+  const firstEditor = new PhotographDetailPage(page);
+  const secondEditor = new PhotographDetailPage(second);
+  await firstEditor.editNotes('First editor saved this');
+  await secondEditor.editNotes('Second editor draft');
+  await firstEditor.saveNotes();
+  await firstEditor.expectNotesState('Saved');
+  await secondEditor.saveNotes();
+  await secondEditor.expectNotesConflict();
+  await secondEditor.expectNotes('Second editor draft');
+  await secondEditor.reloadLatestNotes();
+  await secondEditor.expectLatestNotes('First editor saved this');
+  await secondEditor.expectNotes('Second editor draft');
+  work.library.expectSavedNotes('First editor saved this');
+  await secondEditor.saveNotes();
+  await secondEditor.expectNotesState('Saved');
+  work.library.expectSavedNotes('Second editor draft');
+});
+
+test('L2-030.3/L2-043: failure loading the latest notes preserves the attempted text', async ({ page }) => {
+  const work = new MyWorkPage(page);
+  await work.configureCollection(1);
+  const signIn = new SignInPage(page);
+  await signIn.openPrivateDestination();
+  await signIn.continue();
+  await work.openPhotograph('Study 01');
+  const detail = new PhotographDetailPage(page);
+  await detail.editNotes('My attempted edit');
+  work.library.photos[0].notes = 'Changed elsewhere';
+  work.library.photos[0].revision++;
+  await detail.saveNotes();
+  await detail.expectNotesConflict();
+  work.library.failures.get = 1;
+  await detail.reloadLatestNotes();
+  await detail.expectNotesReloadFailure();
+  await detail.expectNotes('My attempted edit');
+  await detail.reloadLatestNotes();
+  await detail.expectLatestNotes('Changed elsewhere');
+  await detail.expectNotes('My attempted edit');
+});

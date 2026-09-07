@@ -208,3 +208,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: 129 relevant browser checks passed across Chromium, Firefox and WebKit, including 14-size notes failure/validation layouts, detail regressions and sign-in. The production build and diff checks passed. Phone/desktop error screenshots were inspected.
 - Notes expose unsaved/saving/saved/error states, wait for acknowledgment, preserve failed drafts for retry, normalize saved text, survive reload through the controlled library, clear explicitly, and enforce the 10,000-scalar limit without splitting emoji. The HTTP adapter obtains its antiforgery proof through the session interface; domain holds editor state in signals.
 - The existing detail assertions now verify the same saved notes through the editor value. No content assertion was removed. Conflict recovery is the next slice. Reference: [Angular template-driven forms](https://angular.dev/guide/forms/template-driven-forms).
+
+## UI-10: recover from stale notes without losing the draft
+
+- Red: both conflict tests received a generic retry message instead of a conflict/reload workflow.
+- Green: all 72 relevant notes, conflict, detail and viewport checks passed. A six-check cross-browser follow-up verified wording that correctly refers to the photograph revision, which can change independently of notes. Production build and diff checks passed.
+- Two browser editors share one controlled library: the second retains its text, loads the latest saved notes separately, and only changes storage after an intentional Save. A failed reload preserves the draft and offers retry. The same conflict/review flow passes axe/reflow checks at all 14 viewport sizes.

@@ -52,4 +52,5 @@ export class PhotographLibrary {
   }
   release(operation) { this.gates[operation].release(); delete this.gates[operation]; }
   expectReadsOnly() { expect(this.calls.every(operation => ['list', 'get'].includes(operation))).toBe(true); }
+  expectSavedNotes(value) { expect(this.photos[0].notes).toBe(value); }
 }

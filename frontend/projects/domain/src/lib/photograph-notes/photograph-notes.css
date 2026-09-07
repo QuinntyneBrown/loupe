@@ -1,6 +1,23 @@
 :host {
   display: block;
 }
+.latest {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+button:disabled {
+  cursor: default;
+}
+section {
+  padding: var(--lp-space-4);
+  margin-top: var(--lp-space-4);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+}
+h3 {
+  margin-top: var(--lp-zero);
+  font-size: var(--lp-text-md);
+}
 label {
   display: block;
   margin-bottom: var(--lp-space-2);
