@@ -58,7 +58,7 @@
       </section>
       <section aria-labelledby="notes-heading">
         <h2 id="notes-heading">Personal notes</h2>
-        <p class="plain-text">{{ item.notes || 'No notes yet.' }}</p>
+        <lp-photograph-notes [photograph]="item" (saved)="photo.set($event)" />
       </section>
     </div>
   </div>

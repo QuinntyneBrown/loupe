@@ -1,0 +1,27 @@
+<form (ngSubmit)="save()" [attr.aria-busy]="saving()">
+  <label for="photograph-notes">Notes</label>
+  <textarea
+    id="photograph-notes"
+    name="notes"
+    [ngModel]="draft()"
+    (ngModelChange)="edit($event)"
+    [disabled]="saving()"
+    [attr.aria-invalid]="overLimit()"
+    [attr.aria-describedby]="overLimit() ? 'notes-count notes-error' : 'notes-count'"
+  ></textarea>
+  <p id="notes-count">{{ length() }}/10,000 characters</p>
+  @if (overLimit()) {
+    <p id="notes-error" role="alert">Use 10,000 characters or fewer.</p>
+  }
+  @if (failed()) {
+    <p role="alert">Notes could not be saved. Your text is still here.</p>
+  }
+  <div class="actions">
+    <button type="submit" [disabled]="saving() || !dirty() || overLimit()">
+      {{ failed() ? 'Retry save' : 'Save notes' }}
+    </button>
+    <p role="status">
+      {{ saving() ? 'Saving…' : failed() ? 'Not saved' : dirty() ? 'Unsaved changes' : 'Saved' }}
+    </p>
+  </div>
+</form>

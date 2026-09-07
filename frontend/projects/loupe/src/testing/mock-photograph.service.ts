@@ -3,6 +3,9 @@ import { IPhotographService, PhotographPage, PhotographResult, ServiceError } fr
 
 @Injectable()
 export class MockPhotographService implements IPhotographService {
+  updateNotes(id: string, revision: number, notes: string): Promise<PhotographResult> {
+    return this.request<PhotographResult>('updateNotes', { id, revision, notes });
+  }
   async list(cursor?: string): Promise<PhotographPage> {
     if (!this.callback) return { items: [], nextCursor: null };
     return this.request<PhotographPage>('list', { cursor });

@@ -6,6 +6,7 @@ export interface ISessionService {
   load(): Promise<SessionResult | null>;
   signIn(returnUrl: string): void;
   signOut(): Promise<void>;
+  getRequestToken(): Promise<string>;
 }
 
 export const SESSION_SERVICE = new InjectionToken<ISessionService>('SESSION_SERVICE');

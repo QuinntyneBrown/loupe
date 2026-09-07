@@ -4,6 +4,9 @@ import { ISessionService, SessionResult } from 'api';
 
 @Injectable()
 export class MockSessionService implements ISessionService {
+  async getRequestToken(): Promise<string> {
+    return 'fixture-only-request-token';
+  }
   private readonly router = inject(Router);
   readonly current = signal<SessionResult | null>(null);
   async load(): Promise<SessionResult | null> {

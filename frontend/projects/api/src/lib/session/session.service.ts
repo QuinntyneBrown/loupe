@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ISessionService } from './session.service.contract';
 import { SessionResult } from './session-result';
+import { ServiceError } from '../common/service-error';
 
 @Injectable()
 export class SessionService implements ISessionService {
@@ -10,6 +11,11 @@ export class SessionService implements ISessionService {
   private readonly session = signal<SessionResult | null>(null);
   readonly current = this.session.asReadonly();
   private csrf: string | null = null;
+  async getRequestToken(): Promise<string> {
+    if (!this.csrf) await this.load();
+    if (!this.csrf) throw new ServiceError('authentication_required');
+    return this.csrf;
+  }
 
   async load(): Promise<SessionResult | null> {
     try {

@@ -2,7 +2,8 @@ import { expect } from '@playwright/test';
 
 export class PhotographLibrary {
   constructor(count) {
-    this.failures = { list: 0, get: 0 };
+    this.failures = { list: 0, get: 0, updateNotes: 0 };
+    this.gates = {};
     this.calls = [];
     const imageUrl = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#e0e0e0"/><path d="M0 600 450 0h100L100 600" fill="#9a9a9a"/></svg>');
     this.photos = Array.from({ length: count }, (_, index) => ({
@@ -15,8 +16,9 @@ export class PhotographLibrary {
     }));
   }
   async attach(page) {
-    await page.exposeFunction('loupePhotographs', (operation, input) => {
+    await page.exposeFunction('loupePhotographs', async (operation, input) => {
       this.calls.push(operation);
+      await this.gates[operation]?.promise;
       if (this.failures[operation] > 0) {
         this.failures[operation]--;
         return { error: 'request_failed' };
@@ -30,8 +32,24 @@ export class PhotographLibrary {
         const photo = this.photos.find(photo => photo.id === input.id);
         return photo ? { data: photo } : { error: 'item_unavailable' };
       }
+      if (operation === 'updateNotes') {
+        const photo = this.photos.find(photo => photo.id === input.id);
+        if (!photo) return { error: 'item_unavailable' };
+        if (photo.revision !== input.revision) return { error: 'revision_conflict' };
+        const notes = input.notes.replace(/\r\n?/g, '\n').trim();
+        if ([...notes].length > 10000) return { error: 'invalid_request' };
+        photo.notes = notes || null;
+        photo.revision++;
+        return { data: photo };
+      }
       throw new Error(`Unknown photograph fixture operation: ${operation}`);
     });
   }
+  pause(operation) {
+    const gate = {};
+    gate.promise = new Promise(resolve => { gate.release = resolve; });
+    this.gates[operation] = gate;
+  }
+  release(operation) { this.gates[operation].release(); delete this.gates[operation]; }
   expectReadsOnly() { expect(this.calls.every(operation => ['list', 'get'].includes(operation))).toBe(true); }
 }

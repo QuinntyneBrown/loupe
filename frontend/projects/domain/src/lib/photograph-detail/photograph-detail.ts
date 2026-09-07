@@ -1,10 +1,11 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { PHOTOGRAPH_SERVICE, PhotographResult, ServiceError } from 'api';
+import { PhotographNotes } from '../photograph-notes/photograph-notes';
 
 @Component({
   selector: 'lp-photograph-detail',
-  imports: [DatePipe],
+  imports: [DatePipe, PhotographNotes],
   templateUrl: './photograph-detail.html',
   styleUrl: './photograph-detail.css',
 })
@@ -12,7 +13,9 @@ export class PhotographDetail {
   readonly id = input.required<string>();
   private readonly service = inject(PHOTOGRAPH_SERVICE);
   readonly photo = signal<PhotographResult | null>(null);
-  readonly hasCaptureSettings = computed(() => Object.values(this.photo()?.exif ?? {}).some(Boolean));
+  readonly hasCaptureSettings = computed(() =>
+    Object.values(this.photo()?.exif ?? {}).some(Boolean),
+  );
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   private readonly attempt = signal(0);

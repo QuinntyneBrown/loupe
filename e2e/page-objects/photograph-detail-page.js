@@ -9,7 +9,7 @@ export class PhotographDetailPage {
     await expect(this.page.getByRole('img', { name: title, exact: true })).toBeVisible();
     await expect(this.page.getByText('Explore quiet morning light', { exact: true })).toBeVisible();
     await expect(this.page.getByText('Fixture camera', { exact: true })).toBeVisible();
-    await expect(this.page.getByText('Keep the edges quiet. Try a lower viewpoint.', { exact: true })).toBeVisible();
+    await this.expectNotes('Keep the edges quiet.\nTry a lower viewpoint.');
   }
   async expectUnavailable() {
     await expect(this.page.getByRole('heading', { name: 'Photograph unavailable', exact: true })).toBeVisible();
@@ -21,7 +21,7 @@ export class PhotographDetailPage {
   async expectAbsentContext() {
     await expect(this.page.getByText('No brief added.', { exact: true })).toBeVisible();
     await expect(this.page.getByText('No capture settings available.', { exact: true })).toBeVisible();
-    await expect(this.page.getByText('No notes yet.', { exact: true })).toBeVisible();
+    await this.expectNotes('');
   }
   async expectAccessibleLayout(sideBySide) {
     const image = await this.page.getByRole('img', { name: 'Study 01', exact: true }).boundingBox();
@@ -35,4 +35,24 @@ export class PhotographDetailPage {
     expect(audit.violations).toEqual([]);
   }
   async capture(path) { await this.page.screenshot({ path }); }
+  async editNotes(value) { await this.page.getByRole('textbox', { name: 'Notes', exact: true }).fill(value); }
+  async expectNotes(value) { await expect(this.page.getByRole('textbox', { name: 'Notes', exact: true })).toHaveValue(value); }
+  async saveNotes() { await this.page.getByRole('button', { name: 'Save notes', exact: true }).click(); }
+  async expectNotesState(value) { await expect(this.page.getByRole('status')).toHaveText(value); }
+  async expectNotesFailure() {
+    await expect(this.page.getByRole('alert')).toHaveText('Notes could not be saved. Your text is still here.');
+    await expect(this.page.getByRole('button', { name: 'Retry save', exact: true })).toBeEnabled();
+  }
+  async retryNotes() { await this.page.getByRole('button', { name: 'Retry save', exact: true }).click(); }
+  async expectNotesLimit() {
+    await expect(this.page.getByText('Use 10,000 characters or fewer.', { exact: true })).toBeVisible();
+    await expect(this.page.getByRole('textbox', { name: 'Notes', exact: true })).toHaveAttribute('aria-invalid', 'true');
+  }
+  async expectAccessibleNotes() {
+    const editor = this.page.getByRole('textbox', { name: 'Notes', exact: true });
+    await editor.scrollIntoViewIfNeeded();
+    expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(audit.violations).toEqual([]);
+  }
 }
