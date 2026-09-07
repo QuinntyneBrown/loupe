@@ -266,3 +266,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: both duplicate image fields and an additional attachment field were silently accepted as a single successful upload.
 - Green: all 107 container API checks passed; format verification and diff checks passed. Extra files return an image field error before decoding, creating a photograph, writing media or reserving a receipt. The corrected single-file request can reuse its key.
 - The controller binds the multipart file count; the application validator enforces exactly one file.
+
+## API-22: enforce request size before multipart parsing
+
+- Red: oversized multipart requests, both with and without Content-Length, returned framework 400 errors instead of 413. The 25 MB streamed control already passed.
+- Green: all 110 container API checks passed; format verification and diff checks passed. Oversized bodies have the image-too-large contract without a photograph or managed media, and a boundary-valid streamed image succeeds.
+- A read-only body wrapper enforces the existing 26 MB whole-request allowance before antiforgery/form parsing. Declared oversize is rejected immediately, and streamed bytes are counted independently. The separate 25 MB image limit remains unchanged. Native server 413 read failures retain the same application error contract.
+- Reference: [ASP.NET Core upload buffering and request limits](https://learn.microsoft.com/en-us/aspnet/core/mvc/models/file-uploads?view=aspnetcore-10.0). Private placement and cleanup of framework temporary buffering remain part of deployment/cleanup work.

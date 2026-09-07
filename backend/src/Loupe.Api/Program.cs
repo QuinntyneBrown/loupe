@@ -4,6 +4,7 @@ using Loupe.Infrastructure.Security;
 using Loupe.Api.Authentication;
 using Loupe.Api.Errors;
 using Loupe.Infrastructure.Persistence;
+using Loupe.Api.Uploads;
 using System.Text.Json.Serialization;
 
 namespace Loupe.Api;
@@ -57,6 +58,7 @@ public class Program
         app.UseExceptionHandler();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseMiddleware<UploadBodyLimitMiddleware>();
         app.UseMiddleware<SessionCsrfMiddleware>();
         app.MapControllers();
         app.Run();
