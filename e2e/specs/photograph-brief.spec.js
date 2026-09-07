@@ -83,5 +83,7 @@ test('L2-002.2/L2-043: brief errors retain values and cancellation discards only
   await detail.fillBrief({ intent: '📷'.repeat(2001) });
   await detail.expectBriefLimit();
   await detail.cancelBrief();
+  await detail.expectDiscardChoice();
+  await detail.discardChanges();
   await detail.expectBriefValues(draft);
 });

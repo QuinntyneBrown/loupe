@@ -25,6 +25,7 @@ import { CritiqueBrief, PHOTOGRAPH_SERVICE, PhotographResult, ServiceError } fro
 export class PhotographBrief {
   readonly photograph = input.required<PhotographResult>();
   readonly saved = output<PhotographResult>();
+  readonly discardRequested = output<() => void>();
   private readonly service = inject(PHOTOGRAPH_SERVICE);
   private readonly destroy = inject(DestroyRef);
   private readonly injector = inject(Injector);
@@ -71,6 +72,11 @@ export class PhotographBrief {
     };
   });
   readonly invalid = computed(() => Object.values(this.errors()).some(Boolean));
+  readonly dirty = computed(
+    () =>
+      this.editing() &&
+      this.fields.some((field) => this.normalized()[field.key] !== this.savedBrief()?.[field.key]),
+  );
 
   constructor() {
     effect(() => {
@@ -99,6 +105,10 @@ export class PhotographBrief {
   close(): void {
     this.editing.set(false);
     afterNextRender(() => this.editButton()?.nativeElement.focus(), { injector: this.injector });
+  }
+  cancel(): void {
+    if (this.dirty()) this.discardRequested.emit(() => this.close());
+    else this.close();
   }
   setText(field: 'intent' | 'genre' | 'requestedFeedback', value: string): void {
     this.draft.update((draft) => ({ ...draft, [field]: value || null }));

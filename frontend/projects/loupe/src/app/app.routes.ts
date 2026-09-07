@@ -3,6 +3,7 @@ import { sessionGuard } from './session.guard';
 import { SignIn } from './pages/sign-in/sign-in';
 import { MyWork } from './pages/my-work/my-work';
 import { PhotographDetailPage } from './pages/photograph-detail/photograph-detail-page';
+import { photographUnsavedGuard } from './photograph-unsaved.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'my-work' },
@@ -12,6 +13,7 @@ export const routes: Routes = [
     path: 'my-work/:id',
     component: PhotographDetailPage,
     canActivate: [sessionGuard],
+    canDeactivate: [photographUnsavedGuard],
     title: 'Photograph · Loupe',
   },
 ];

@@ -90,4 +90,18 @@ export class PhotographDetailPage {
     for (const value of Object.values(values)) await expect(latest.getByText(value, { exact: true })).toBeVisible();
   }
   async expectBriefReloadFailure() { await expect(this.brief().getByRole('alert')).toHaveText('Latest brief could not be loaded. Your changes are still here.'); }
+  async returnToLibrary() { await this.page.getByRole('link', { name: 'My Work', exact: true }).click(); }
+  discardDialog() { return this.page.getByRole('dialog', { name: 'Discard unsaved changes?', exact: true }); }
+  async expectDiscardChoice() {
+    await expect(this.discardDialog()).toBeVisible();
+    await expect(this.discardDialog().getByRole('button', { name: 'Keep editing', exact: true })).toBeFocused();
+  }
+  async keepEditing() { await this.discardDialog().getByRole('button', { name: 'Keep editing', exact: true }).click(); }
+  async discardChanges() { await this.discardDialog().getByRole('button', { name: 'Discard', exact: true }).click(); }
+  async expectNoDiscardChoice() { await expect(this.discardDialog()).toHaveCount(0); }
+  async escapeDiscard() { await this.page.keyboard.press('Escape'); }
+  async expectUnloadProtection(expected) {
+    const prevented = await this.page.evaluate(() => !window.dispatchEvent(new Event('beforeunload', { cancelable: true })));
+    expect(prevented).toBe(expected);
+  }
 }

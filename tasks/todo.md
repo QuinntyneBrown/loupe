@@ -10,8 +10,8 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 - [ ] L2-001.5: Given uploaded bytes still transferring, when progress is available, then the UI displays transferred bytes and total bytes; when total size is unavailable, then it shows indeterminate progress without inventing a percentage.
 
 ## L2-002: Record and edit the critique brief
-- [ ] L2-002.1: Given a saved photograph, when the user saves any valid combination of brief fields, then the exact normalized values survive reload and are shown on its detail screen.
-- [ ] L2-002.2: Given a field at its shared maximum and then one character above, or an experience value outside the allowed set, when saved, then the boundary value succeeds and invalid input produces a field error while preserving the previous brief.
+- [x] L2-002.1: Given a saved photograph, when the user saves any valid combination of brief fields, then the exact normalized values survive reload and are shown on its detail screen.
+- [x] L2-002.2: Given a field at its shared maximum and then one character above, or an experience value outside the allowed set, when saved, then the boundary value succeeds and invalid input produces a field error while preserving the previous brief.
 - [ ] L2-002.3: Given a critique already queued, when the user edits the brief, then the job uses its original brief snapshot, and its displayed result identifies that snapshot rather than claiming it used the edited brief.
 - [ ] L2-002.4: Given a saved brief, when the user clears all optional fields, then they are stored as absent and later critiques do not reuse cleared instructions.
 
@@ -24,8 +24,8 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 ## L2-004: Keep personal notes on photographs
 - [ ] L2-004.1: Given a photograph with or without a critique, when valid notes are saved and the page reloads, then the notes appear unchanged after shared normalization and separately from AI text.
 - [ ] L2-004.2: Given existing notes, when a critique is requested, retried, or replaced, then the notes are preserved.
-- [ ] L2-004.3: Given a failed save, when the user retries, then the editor retains the attempted text and does not claim it was saved before acknowledgment.
-- [ ] L2-004.4: Given saved notes, when an empty value is saved, then the notes are cleared; when 10,001 characters are submitted, then the shared field error is returned and saved notes remain intact.
+- [x] L2-004.3: Given a failed save, when the user retries, then the editor retains the attempted text and does not claim it was saved before acknowledgment.
+- [x] L2-004.4: Given saved notes, when an empty value is saved, then the notes are cleared; when 10,001 characters are submitted, then the shared field error is returned and saved notes remain intact.
 
 ## L2-005: Compare two saved attempts
 - [ ] L2-005.1: Given two eligible photographs, when the user selects Compare and the second photograph, then both saved attempts and their current critiques appear with unambiguous labels and no new AI job is created.

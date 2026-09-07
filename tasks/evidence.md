@@ -226,3 +226,11 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: two conflict checks received a generic retry response; a third could not save an open brief after notes advanced the photograph revision.
 - Green: all 42 brief/notes/save/conflict checks passed across three browser engines, followed by the production build and diff check.
 - Failed and stale drafts remain editable. Reload presents all latest brief values separately and requires an explicit Save to replace them. Reload failure retains the draft. A notes-only save updates the open brief's revision when its saved brief values still match.
+
+## UI-13: protect unsaved photograph edits
+
+- Red: four checks demonstrated missing navigation/close confirmation and missing unload protection. The clean-editor control already passed.
+- Green: all 273 browser checks passed across Chromium, Firefox and WebKit (6.1 minutes), followed by the production build and diff check. Inspected brief-error and discard-dialog screenshots at 375x667 and 1440x900.
+- The application page owns the native modal and route guard. Keep editing and Escape retain the draft; Discard allows the requested departure. Closing a brief discards only that editor. A dirty page requests the browser's available unload protection and removes the listener after saving. This event-level check does not claim reliable unload prompts on mobile platforms.
+- Existing brief-cancel acceptance now explicitly chooses Discard, preserving its prior saved-content assertion. L2-002.1/.2 and L2-004.3/.4 are checked complete based on the API and browser evidence above; criteria involving unfinished capabilities remain open.
+- Sources: [Angular route guards](https://angular.dev/guide/routing/route-guards), [native dialog](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog), [beforeunload behavior and limitations](https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event).

@@ -15,7 +15,11 @@
     <div class="context">
       <section aria-labelledby="brief-heading">
         <h2 id="brief-heading">Critique brief</h2>
-        <lp-photograph-brief [photograph]="item" (saved)="photo.set($event)" />
+        <lp-photograph-brief
+          [photograph]="item"
+          (saved)="photo.set($event)"
+          (discardRequested)="discardRequested.emit($event)"
+        />
       </section>
       <section aria-labelledby="capture-heading">
         <h2 id="capture-heading">Capture settings</h2>

@@ -1,4 +1,13 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { PHOTOGRAPH_SERVICE, PhotographResult, ServiceError } from 'api';
 import { PhotographNotes } from '../photograph-notes/photograph-notes';
@@ -12,6 +21,10 @@ import { PhotographBrief } from '../photograph-brief/photograph-brief';
 })
 export class PhotographDetail {
   readonly id = input.required<string>();
+  readonly discardRequested = output<() => void>();
+  private readonly notesEditor = viewChild(PhotographNotes);
+  private readonly briefEditor = viewChild(PhotographBrief);
+  readonly dirty = computed(() => !!(this.notesEditor()?.dirty() || this.briefEditor()?.dirty()));
   private readonly service = inject(PHOTOGRAPH_SERVICE);
   readonly photo = signal<PhotographResult | null>(null);
   readonly hasCaptureSettings = computed(() =>

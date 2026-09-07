@@ -109,7 +109,7 @@
       <button type="submit" [disabled]="busy() || conflicted() || invalid()">
         {{ failed() ? 'Retry brief save' : 'Save brief' }}
       </button>
-      <button type="button" [disabled]="busy()" (click)="close()">Cancel brief edit</button>
+      <button type="button" [disabled]="busy()" (click)="cancel()">Cancel brief edit</button>
     </div>
     @if (saving()) {
       <p role="status">Saving brief…</p>
