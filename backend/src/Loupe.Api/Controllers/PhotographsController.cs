@@ -12,6 +12,10 @@ namespace Loupe.Api.Controllers;
 [Route("api/photographs")]
 public sealed class PhotographsController(ISender sender) : ControllerBase
 {
+    [HttpGet]
+    public Task<PhotographPage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null) =>
+        sender.Send(new ListPhotographsQuery(pageSize, cursor), cancellationToken);
+
     [HttpPost]
     [RequestSizeLimit(UploadLimits.RequestBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = UploadLimits.RequestBytes)]

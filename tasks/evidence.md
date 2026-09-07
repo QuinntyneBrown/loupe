@@ -170,3 +170,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: all six notes checks failed at the missing PUT endpoint; existing foreign detail/image/preview reads already produced safe 404 responses.
 - Green: all 83 container API checks passed after the notes implementation and consolidation of revision-checked persistence. Notes normalize line endings, accept exactly 10,000 Unicode scalars, survive another instance and clear to null. Oversized, stale and foreign edits preserve stored values. Formatter verification passed.
 - Notes remain a separate field from the brief. Their exclusion from external providers will be verified when those adapters are added.
+
+## API-17: page the private My Work collection
+
+- Red: all eight list checks returned 405 because the GET collection endpoint was absent.
+- Green: all 91 container API checks passed. Twenty-five uploaded photographs traverse default 24-item pages across API instances in descending creation time/ascending identifier order, including timestamp ties. Another owner's photograph is excluded. Empty pages succeed and invalid sizes/cursors have field errors. Format verification passed.
+- Query uses a bounded keyset cursor and selects only card fields, leaving notes and brief text out of collection payloads. Critique status and reference exclusion fixtures will be extended when those record types are introduced.
