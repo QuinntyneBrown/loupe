@@ -13,7 +13,7 @@ public sealed class CleanupProcess : IAsyncDisposable
     private Task<string>? stopping;
     public string[] Lines => lines.ToArray();
 
-    public CleanupProcess(string connectionString, string mediaRoot)
+    public CleanupProcess(string connectionString, string mediaRoot, IReadOnlyDictionary<string, string>? settings = null)
     {
         var start = new ProcessStartInfo("dotnet") { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false, CreateNoWindow = true };
         start.ArgumentList.Add(Path.Combine(AppContext.BaseDirectory, "Loupe.Worker.dll"));
@@ -21,6 +21,8 @@ public sealed class CleanupProcess : IAsyncDisposable
         start.Environment["Media__Root"] = mediaRoot;
         start.Environment["Cleanup__PollInterval"] = "00:00:00.100";
         start.Environment["Logging__LogLevel__Default"] = "Warning";
+        if (settings is not null)
+            foreach (var setting in settings) start.Environment[setting.Key] = setting.Value;
         process = Process.Start(start) ?? throw new InvalidOperationException("Could not start the cleanup worker.");
         output = ReadAsync(process.StandardOutput);
         error = ReadAsync(process.StandardError);

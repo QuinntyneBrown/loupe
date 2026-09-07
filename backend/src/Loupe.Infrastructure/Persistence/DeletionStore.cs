@@ -45,10 +45,11 @@ public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock)
             MediaKeys = [photograph.ImageKey, photograph.PreviewKey]
         };
         database.Deletions.Add(operation);
-        await database.BackgroundOperations.Where(item => item.OwnerId == ownerId && item.Type == OperationType.Critique && item.ResourceId == id
-            && (item.Status == OperationStatus.Queued || item.Status == OperationStatus.Running))
-            .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.Status, OperationStatus.Canceled)
-                .SetProperty(item => item.InputJson, (string?)null).SetProperty(item => item.CompletedAt, operation.DeletedAt)
+        await database.BackgroundOperations.Where(item => item.OwnerId == ownerId && item.Type == OperationType.Critique && item.ResourceId == id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.Status, item =>
+                    item.Status == OperationStatus.Queued || item.Status == OperationStatus.Running ? OperationStatus.Canceled : item.Status)
+                .SetProperty(item => item.InputJson, (string?)null).SetProperty(item => item.CompletedAt, item => item.CompletedAt ?? operation.DeletedAt)
+                .SetProperty(item => item.LeaseToken, (Guid?)null).SetProperty(item => item.LeaseExpiresAt, (DateTimeOffset?)null)
                 .SetProperty(item => item.UpdatedAt, operation.DeletedAt).SetProperty(item => item.Message, "The photograph was deleted."), cancellationToken);
         database.Photographs.Remove(photograph);
         try { await database.SaveChangesAsync(cancellationToken); }

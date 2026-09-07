@@ -27,6 +27,8 @@ public static class PersistenceSetup
         services.AddScoped<IOperationReceiptStore, OperationReceiptStore>();
         services.AddScoped<IBackgroundOperationStore, BackgroundOperationStore>();
         services.AddSingleton<ICritiqueConfiguration, CritiqueConfiguration>();
+        services.AddScoped<ICritiqueWorkStore, CritiqueWorkStore>();
+        services.AddSingleton<ICritiqueProvider, DemoCritiqueProvider>();
         services.AddOptions<AiOptions>().BindConfiguration("Ai")
             .Validate(options => options.Mode is null or "Demo" or "Live", "Ai:Mode must be Demo or Live when configured.")
             .Validate(options => !string.IsNullOrWhiteSpace(options.Model), "Ai:Model must name a model.").ValidateOnStart();

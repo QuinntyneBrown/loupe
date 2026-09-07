@@ -1,0 +1,10 @@
+using Loupe.Domain.Critiques;
+using Loupe.Domain.Operations;
+
+namespace Loupe.Application.Critiques;
+
+public interface ICritiqueWorkStore
+{
+    Task<BackgroundOperation?> ClaimAsync(ExecutionMode mode, CancellationToken cancellationToken);
+    Task PublishAsync(BackgroundOperation operation, CritiqueResult result, CancellationToken cancellationToken);
+}

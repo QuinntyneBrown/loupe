@@ -1,4 +1,5 @@
 using Loupe.Application.Maintenance;
+using Loupe.Application.Critiques;
 using Loupe.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,13 +21,14 @@ public static class Program
         builder.Services.AddLoupePersistence();
         builder.Services.AddMediatR(options =>
         {
-            options.TypeEvaluator = type => type.Namespace == typeof(CleanDeletedContentCommand).Namespace;
+            options.TypeEvaluator = type => type.Namespace == typeof(CleanDeletedContentCommand).Namespace || type == typeof(RunCritiqueCommandHandler);
             options.RegisterServicesFromAssemblyContaining<CleanDeletedContentCommand>();
         });
         builder.Services.AddOptions<CleanupOptions>().BindConfiguration("Cleanup")
             .Validate(options => options.PollInterval > TimeSpan.Zero && options.PollInterval <= TimeSpan.FromMinutes(5),
                 "Cleanup:PollInterval must be positive and at most five minutes.").ValidateOnStart();
         builder.Services.AddHostedService<CleanupWorker>();
+        builder.Services.AddHostedService<CritiqueWorker>();
         using var host = builder.Build();
         using var scope = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Loupe.Worker.Host")
             .BeginScope(new Dictionary<string, object> { ["EntryPoint"] = "worker_host", ["RunId"] = Guid.NewGuid().ToString("N") });

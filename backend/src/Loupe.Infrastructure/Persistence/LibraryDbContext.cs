@@ -20,6 +20,7 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Photograph>().HasIndex(photograph => new { photograph.OwnerId, photograph.CreatedAt, photograph.Id });
         modelBuilder.Entity<Photograph>().ComplexProperty(photograph => photograph.Exif).ToJson();
         modelBuilder.Entity<Photograph>().ComplexProperty(photograph => photograph.Brief).ToJson();
+        modelBuilder.Entity<Photograph>().Property(photograph => photograph.CritiqueJson).HasColumnType("jsonb");
         modelBuilder.Entity<Photograph>().Property(photograph => photograph.Revision).HasDefaultValue(1L).IsConcurrencyToken();
         modelBuilder.Entity<OperationReceipt>().ToTable("operation_receipts").HasKey(receipt => new { receipt.OwnerId, receipt.OperationType, receipt.Key });
         modelBuilder.Entity<OperationReceipt>().Property(receipt => receipt.OwnerId).HasMaxLength(64);

@@ -14,5 +14,7 @@ public sealed class BackgroundOperation
     public required DateTimeOffset CreatedAt { get; init; }
     public required DateTimeOffset UpdatedAt { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }
+    public Guid? LeaseToken { get; set; }
+    public DateTimeOffset? LeaseExpiresAt { get; set; }
     public string Message { get; set; } = "Waiting to start.";
 }
