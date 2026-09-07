@@ -1,5 +1,15 @@
 <main id="main" tabindex="-1">
-  <a routerLink="/my-work">My Work</a
-  ><lp-photograph-detail [id]="id()" (discardRequested)="requestDiscard($event)" />
+  <a routerLink="/my-work">My Work</a>
+  @if (deletion(); as removed) {
+    <h1>Photograph deleted</h1>
+    <a [routerLink]="['/deletions', removed.id]">View cleanup status</a>
+  } @else {
+    <lp-photograph-detail
+      [id]="id()"
+      (discardRequested)="requestDiscard($event)"
+      (deleteRequested)="deleteDialog.open($event)"
+    />
+  }
 </main>
 <lp-unsaved-changes [dirty]="dirty()" />
+<lp-delete-photograph #deleteDialog (deleted)="onDeleted($event)" />

@@ -376,3 +376,11 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 144 container API checks passed; format, build (zero warnings/errors), and diff checks passed. A real storage obstruction at 23 hours produces a structured warning; at 25 hours it also produces an Error alert with backlog count, oldest age, runbook path and a correlated worker run. Captured output excludes the private title, media key and connection string.
 - Worker console output is JSON with UTC timestamps and scopes naming the entry point and run. Event 3201 reports cleanup at or beyond 24 hours; event 3202 reports retryable media removal. The operational runbook defines the symptom and safe recovery actions.
 - This verifies the local alert signal. Monitoring-stack routing, metrics/tracing export and operational alert delivery remain release work; no external notification was sent. Source: [Microsoft JSON console logging](https://learn.microsoft.com/en-us/dotnet/core/extensions/logging/console-log-formatter).
+
+## UI-21: confirm photograph deletion and observe durable cleanup
+
+- Red: all five new Chromium workflows failed at the missing Delete control.
+- Green: all 72 deletion, detail, brief, notes and unsaved-navigation checks passed across Chromium, Firefox and WebKit. Production build passed (382.63 kB raw, 97.91 kB estimated transfer); diff checks passed.
+- Named native confirmation preserves drafts on cancellation/failure, prevents duplicate requests, and navigates only after acknowledgment. Explicit deletion bypasses a second unsaved-edits prompt. The owned status URL survives reload and polls Pending operations until Completed.
+- The first cross-browser run exposed WebKit returning focus to the notes editor on cancellation. Explicitly focusing the delete trigger before opening the dialog fixed this without changing assertions.
+- Inspected confirmation/status screenshots at 375 and 1440 pixels. Independent read-only gpt-5.6-sol review found no Critical or Required changes; it did not run extra tests. Conflict/unavailable recovery, lost responses, and the full keyboard/viewport matrix follow in separate slices.

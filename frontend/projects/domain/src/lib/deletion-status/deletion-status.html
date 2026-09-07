@@ -1,0 +1,16 @@
+@if (loading()) {
+  <p role="status">Loading cleanup status…</p>
+} @else if (error() === 'item_unavailable') {
+  <h2>Deletion record unavailable</h2>
+  <p>This record is unavailable in your library.</p>
+} @else {
+  @if (error()) {
+    <p role="alert">Cleanup status could not be loaded. Try again.</p>
+  }
+  @if (result()?.status === 'Pending') {
+    <p role="status">This item is no longer in your library. Its files are queued for removal.</p>
+  } @else if (result()?.status === 'Completed') {
+    <p role="status">Cleanup completed. The item’s active files have been removed.</p>
+  }
+  <button type="button" (click)="retry()">Check cleanup status</button>
+}

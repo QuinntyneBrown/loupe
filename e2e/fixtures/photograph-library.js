@@ -7,6 +7,7 @@ export class PhotographLibrary {
     this.calls = [];
     this.errors = { upload: [] };
     this.uploadReceipts = new Map();
+    this.deletions = new Map();
     this.lostUploadResponses = 0;
     const imageUrl = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#e0e0e0"/><path d="M0 600 450 0h100L100 600" fill="#9a9a9a"/></svg>');
     this.imageUrl = imageUrl;
@@ -37,6 +38,21 @@ export class PhotographLibrary {
       if (operation === 'get') {
         const photo = this.photos.find(photo => photo.id === input.id);
         return photo ? { data: photo } : { error: 'item_unavailable' };
+      }
+      if (operation === 'deletePhotograph') {
+        const previous = [...this.deletions.values()].find(deletion => deletion.resourceId === input.id);
+        if (previous) return { data: previous };
+        const photo = this.photos.find(photo => photo.id === input.id);
+        if (!photo) return { error: 'item_unavailable' };
+        if (photo.revision !== input.revision) return { error: 'revision_conflict' };
+        const deletion = { id: crypto.randomUUID(), resourceId: input.id, status: 'Pending', deletedAt: new Date().toISOString(), completedAt: null };
+        this.deletions.set(deletion.id, deletion);
+        this.photos = this.photos.filter(photo => photo.id !== input.id);
+        return { data: deletion };
+      }
+      if (operation === 'getDeletion') {
+        const deletion = this.deletions.get(input.id);
+        return deletion ? { data: deletion } : { error: 'item_unavailable' };
       }
       if (operation === 'upload') {
         const clean = value => value?.replace(/\r\n?/g, '\n').trim() || null;
@@ -96,4 +112,9 @@ export class PhotographLibrary {
   }
   expectReadsOnly() { expect(this.calls.every(operation => ['list', 'get'].includes(operation))).toBe(true); }
   expectSavedNotes(value) { expect(this.photos[0].notes).toBe(value); }
+  completeDeletion() {
+    const deletion = [...this.deletions.values()][0];
+    deletion.status = 'Completed';
+    deletion.completedAt = new Date().toISOString();
+  }
 }

@@ -3,6 +3,29 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographDetailPage {
   constructor(page) { this.page = page; }
+  deleteDialog() { return this.page.getByRole('dialog', { name: 'Delete “Study 01”?', exact: true }); }
+  async deletePhotograph() { await this.page.getByRole('button', { name: 'Delete photograph', exact: true }).click(); }
+  async expectDeleteConfirmation() {
+    await expect(this.deleteDialog()).toBeVisible();
+    await expect(this.deleteDialog()).toContainText('images, critique, notes, and capture settings');
+    await expect(this.deleteDialog()).toContainText('Any unsaved changes will be discarded.');
+    await expect(this.deleteDialog().getByRole('button', { name: 'Cancel', exact: true })).toBeFocused();
+  }
+  async cancelDeletion() { await this.deleteDialog().getByRole('button', { name: 'Cancel', exact: true }).click(); }
+  async confirmDeletion() { await this.deleteDialog().getByRole('button', { name: 'Delete photograph', exact: true }).click(); }
+  async expectDeletionCancelled() {
+    await expect(this.deleteDialog()).toHaveCount(0);
+    await expect(this.page.getByRole('button', { name: 'Delete photograph', exact: true })).toBeFocused();
+  }
+  async expectDeleting() {
+    await expect(this.deleteDialog().getByRole('status')).toHaveText('Deleting photograph…');
+    await expect(this.deleteDialog().getByRole('button', { name: 'Delete photograph', exact: true })).toBeDisabled();
+    await expect(this.deleteDialog().getByRole('button', { name: 'Cancel', exact: true })).toBeDisabled();
+  }
+  async expectDeletionFailure() {
+    await expect(this.deleteDialog().getByRole('alert')).toHaveText('Deletion was not confirmed. Retry to check its status.');
+  }
+  async retryDeletion() { await this.deleteDialog().getByRole('button', { name: 'Retry deletion', exact: true }).click(); }
   async expectImage(title) {
     await expect(this.page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();
     await expect(this.page.getByRole('img', { name: title, exact: true })).toBeVisible();

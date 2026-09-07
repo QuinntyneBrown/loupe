@@ -51,3 +51,10 @@ dd,
 [role='alert'] {
   color: var(--lp-color-danger);
 }
+.delete,
+.delete:hover {
+  margin-top: var(--lp-space-7);
+  background: var(--lp-color-danger-bg);
+  color: var(--lp-color-danger);
+  border-color: var(--lp-color-danger);
+}

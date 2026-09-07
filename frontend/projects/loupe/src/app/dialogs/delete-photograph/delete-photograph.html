@@ -1,0 +1,27 @@
+<dialog
+  #dialog
+  tabindex="-1"
+  aria-labelledby="delete-title"
+  aria-describedby="delete-effects"
+  (cancel)="cancel($event)"
+  (keydown)="trapFocus($event)"
+>
+  <h2 id="delete-title">Delete “{{ photograph()?.title }}”?</h2>
+  <p id="delete-effects">
+    This removes the photograph from My Work and schedules its images, critique, notes, and capture
+    settings for removal. Any running critique will be canceled. Any unsaved changes will be
+    discarded.
+  </p>
+  @if (busy()) {
+    <p role="status">Deleting photograph…</p>
+  }
+  @if (failed()) {
+    <p role="alert">Deletion was not confirmed. Retry to check its status.</p>
+  }
+  <div class="actions">
+    <button type="button" autofocus [disabled]="busy()" (click)="cancel()">Cancel</button>
+    <button type="button" class="danger" [disabled]="busy()" (click)="confirm()">
+      {{ failed() ? 'Retry deletion' : 'Delete photograph' }}
+    </button>
+  </div>
+</dialog>

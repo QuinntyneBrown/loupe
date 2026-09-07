@@ -1,0 +1,15 @@
+:host {
+  display: block;
+  max-width: var(--lp-content-max);
+  margin: auto;
+  padding: var(--lp-space-8) var(--lp-gutter);
+}
+h1 {
+  font-size: var(--lp-text-3xl);
+  line-height: var(--lp-leading-tight);
+}
+a {
+  display: inline-block;
+  padding: var(--lp-space-3) var(--lp-zero);
+  color: var(--lp-color-text);
+}

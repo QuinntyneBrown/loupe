@@ -22,6 +22,7 @@ import { PhotographBrief } from '../photograph-brief/photograph-brief';
 export class PhotographDetail {
   readonly id = input.required<string>();
   readonly discardRequested = output<() => void>();
+  readonly deleteRequested = output<PhotographResult>();
   private readonly notesEditor = viewChild(PhotographNotes);
   private readonly briefEditor = viewChild(PhotographBrief);
   readonly dirty = computed(() => !!(this.notesEditor()?.dirty() || this.briefEditor()?.dirty()));

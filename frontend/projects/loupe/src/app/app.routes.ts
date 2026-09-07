@@ -6,11 +6,18 @@ import { PhotographDetailPage } from './pages/photograph-detail/photograph-detai
 import { photographUnsavedGuard } from './photograph-unsaved.guard';
 import { PhotographUploadPage } from './pages/photograph-upload/photograph-upload-page';
 import { photographUploadUnsavedGuard } from './photograph-upload-unsaved.guard';
+import { DeletionPage } from './pages/deletion/deletion-page';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'my-work' },
   { path: 'sign-in', component: SignIn, title: 'Sign in · Loupe' },
   { path: 'my-work', component: MyWork, canActivate: [sessionGuard], title: 'My Work · Loupe' },
+  {
+    path: 'deletions/:id',
+    component: DeletionPage,
+    canActivate: [sessionGuard],
+    title: 'Deletion status · Loupe',
+  },
   {
     path: 'my-work/upload',
     component: PhotographUploadPage,

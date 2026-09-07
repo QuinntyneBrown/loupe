@@ -1,0 +1,32 @@
+dialog {
+  width: calc(var(--lp-full) - var(--lp-gutter) - var(--lp-gutter));
+  max-width: var(--lp-dialog-max);
+  max-height: var(--lp-dialog-height);
+  padding: var(--lp-space-6);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+  color: var(--lp-color-text);
+  background: var(--lp-color-surface);
+  box-shadow: var(--lp-shadow-lg);
+  overflow: auto;
+}
+dialog::backdrop {
+  background: var(--lp-color-overlay);
+}
+h2 {
+  overflow-wrap: anywhere;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lp-space-3);
+}
+.danger,
+.danger:hover {
+  background: var(--lp-color-danger-bg);
+  color: var(--lp-color-danger);
+  border-color: var(--lp-color-danger);
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}

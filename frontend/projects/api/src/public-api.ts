@@ -11,3 +11,6 @@ export * from './lib/photograph/critique-brief';
 export * from './lib/photograph/capture-metadata';
 export * from './lib/common/service-error';
 export * from './lib/common/upload-progress';
+export * from './lib/deletion/deletion-result';
+export * from './lib/deletion/deletion.service.contract';
+export * from './lib/deletion/deletion.service';

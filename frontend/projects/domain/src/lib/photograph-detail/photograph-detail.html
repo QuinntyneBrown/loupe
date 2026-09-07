@@ -41,6 +41,14 @@
       </section>
     </div>
   </div>
+  <button
+    #deleteButton
+    type="button"
+    class="delete"
+    (click)="deleteButton.focus(); deleteRequested.emit(item)"
+  >
+    Delete photograph
+  </button>
 } @else if (error() === 'item_unavailable') {
   <h1>Photograph unavailable</h1>
   <p>This photograph is unavailable in your library.</p>
