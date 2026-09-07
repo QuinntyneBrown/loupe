@@ -2,7 +2,6 @@ import {
   Component,
   DestroyRef,
   DOCUMENT,
-  effect,
   ElementRef,
   inject,
   input,
@@ -16,7 +15,7 @@ import { SESSION_SERVICE } from 'api';
   styleUrl: './unsaved-changes.css',
 })
 export class UnsavedChanges {
-  readonly dirty = input(false);
+  readonly dirty = input.required<() => boolean>();
   readonly warning = input<string | null>(null);
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('discardDialog');
   private readonly keepButton = viewChild.required<ElementRef<HTMLButtonElement>>('keepButton');
@@ -28,17 +27,18 @@ export class UnsavedChanges {
   private resolveChoice: ((discard: boolean) => void) | null = null;
 
   constructor() {
-    effect((onCleanup) => {
-      const window = this.document.defaultView;
-      if (!window || !this.session.current() || !this.dirty()) return;
-      const protect = (event: BeforeUnloadEvent) => {
+    const window = this.document.defaultView;
+    const protect = (event: BeforeUnloadEvent) => {
+      if (this.session.current() && this.dirty()()) {
         event.preventDefault();
         event.returnValue = '';
-      };
-      window.addEventListener('beforeunload', protect);
-      onCleanup(() => window.removeEventListener('beforeunload', protect));
+      }
+    };
+    window?.addEventListener('beforeunload', protect);
+    inject(DestroyRef).onDestroy(() => {
+      window?.removeEventListener('beforeunload', protect);
+      this.resolveChoice?.(false);
     });
-    inject(DestroyRef).onDestroy(() => this.resolveChoice?.(false));
   }
   canLeave(dirty: boolean): boolean | Promise<boolean> {
     return this.session.current() && dirty ? this.confirmDiscard() : true;

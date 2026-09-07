@@ -391,3 +391,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: 42 deletion/unsaved-navigation checks and 42 deletion/notes-conflict/brief-conflict checks passed across all three browsers. Production build and diff checks passed.
 - A revision conflict removes the destructive action until the latest saved brief and notes have been fetched and displayed. Confirmation then uses that revision; another intervening change conflicts again. Failed reads remain retryable, cancellation preserves the original editor drafts, and unavailable items provide a safe explanation without an endless delete retry.
 - A simulated response lost after deletion verifies that retry returns the same operation and creates no duplicate journal entry. This uses the injected mock boundary; real database commit-uncertainty coverage remains in API-25.
+
+## UI-23: protect departure while deletion is unconfirmed
+
+- Red: a clean pending deletion lacked unload protection, and Back from a dirty pending deletion opened a second discard dialog.
+- Regression discovery: the first 48-case run passed 47 and exposed an existing WebKit unload timing gap immediately after typing. The run's teardown stalled after reporting all cases and was interrupted. Assertions were preserved; the listener now reads current draft and session state at event dispatch instead of waiting for an effect to install it.
+- Green: all 75 deletion, editor-navigation and upload-navigation checks passed across all three engines; production build and diff checks passed. Pending deletion blocks route departure until the bounded request resolves, while acknowledgment clears both pending and dirty protection before status navigation.
+- Independent read-only gpt-5.6-sol review of UI-22/23 found no Critical or Required changes, without additional test execution. Synthetic unload events verify handler behavior; native close/reload prompts and sign-out during pending deletion remain outside these specific checks.

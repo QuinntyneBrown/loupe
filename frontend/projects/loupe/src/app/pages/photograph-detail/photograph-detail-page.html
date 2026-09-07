@@ -11,5 +11,5 @@
     />
   }
 </main>
-<lp-unsaved-changes [dirty]="dirty()" />
+<lp-unsaved-changes [dirty]="protectUnload" />
 <lp-delete-photograph #deleteDialog (deleted)="onDeleted($event)" />

@@ -14,6 +14,7 @@ export class PhotographUploadPage {
   readonly form = viewChild(PhotographUpload);
   private readonly dialog = viewChild.required(UnsavedChanges);
   private readonly router = inject(Router);
+  readonly dirty = () => this.form()?.dirty() ?? false;
   canLeave(): boolean | Promise<boolean> {
     return this.dialog().canLeave(this.form()?.dirty() ?? false);
   }

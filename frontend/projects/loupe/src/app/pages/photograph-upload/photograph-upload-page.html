@@ -4,7 +4,7 @@
   <lp-photograph-upload (saved)="saved($event)" />
 </main>
 <lp-unsaved-changes
-  [dirty]="form()?.dirty() ?? false"
+  [dirty]="dirty"
   [warning]="
     form()?.saving()
       ? 'This upload may finish after you leave. Check My Work before uploading it again.'

@@ -139,3 +139,21 @@ test('L2-031.5/L2-043: an unavailable photograph explains recovery and retains u
   await detail.cancelDeletion();
   await detail.expectNotes('My unsaved observation');
 });
+
+for (const dirty of [false, true]) {
+  test(`L2-031/L2-043: pending deletion protects browser departure with dirty=${dirty}`, async ({ page }) => {
+    const { work, detail, deletion } = await openPhotograph(page);
+    if (dirty) await detail.editNotes('Keep until deletion is confirmed');
+    work.library.pause('deletePhotograph');
+    await detail.deletePhotograph();
+    await detail.confirmDeletion();
+    await detail.expectDeleting();
+    await detail.expectUnloadProtection(true);
+    await page.goBack();
+    await detail.expectDeleting();
+    await detail.expectNoDiscardChoice();
+    work.library.release('deletePhotograph');
+    await deletion.expectPending();
+    await detail.expectUnloadProtection(false);
+  });
+}
