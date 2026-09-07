@@ -36,6 +36,12 @@ public static class AuthenticationSetup
             options.MapInboundClaims = false;
             options.GetClaimsFromUserInfoEndpoint = false;
             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.Events.OnRemoteFailure = context =>
+            {
+                context.HandleResponse();
+                context.Response.Redirect("/sign-in?error=authentication_failed");
+                return Task.CompletedTask;
+            };
         });
         return services;
     }

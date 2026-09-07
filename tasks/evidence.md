@@ -52,3 +52,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: all five malicious-return tests received redirects instead of field errors.
 - Green: all seven backend API tests and dotnet format --verify-no-changes passed after Application validation and safe exception mapping.
 - No OIDC completion, durable-session or real Keycloak check is claimed yet.
+
+## API-03: safe invalid OIDC callbacks
+
+- Red: all six invalid callback cases returned generic 500 responses.
+- Green: 13 backend tests passed, covering nonce/issuer/audience/expiry/signature/state rejection, safe retry redirect and absent application session. Formatting passed after whitespace-only fixes.
+- Identity fixture uses signed RSA tokens through the actual OIDC code-exchange handler; no production authentication replacement is registered.
