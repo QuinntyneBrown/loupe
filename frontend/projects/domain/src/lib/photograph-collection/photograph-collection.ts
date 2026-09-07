@@ -1,4 +1,13 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  inject,
+  Injector,
+  input,
+  OnInit,
+  signal,
+  viewChildren,
+} from '@angular/core';
 import { PHOTOGRAPH_SERVICE, PhotographSummary } from 'api';
 import { PhotographCard } from 'components';
 
@@ -9,6 +18,9 @@ import { PhotographCard } from 'components';
   styleUrl: './photograph-collection.css',
 })
 export class PhotographCollection implements OnInit {
+  readonly detailBase = input.required<string>();
+  private readonly cards = viewChildren(PhotographCard);
+  private readonly injector = inject(Injector);
   private readonly service = inject(PHOTOGRAPH_SERVICE);
   readonly items = signal<PhotographSummary[]>([]);
   readonly loading = signal(false);
@@ -24,11 +36,14 @@ export class PhotographCollection implements OnInit {
     if (this.loading()) return;
     this.loading.set(true);
     this.failed.set(false);
+    const previousCount = this.items().length;
     try {
       const page = await this.service.list(this.nextCursor() ?? undefined);
       this.items.update((items) => [...items, ...page.items]);
       this.nextCursor.set(page.nextCursor);
       this.loaded.set(true);
+      if (previousCount > 0 && page.items.length)
+        afterNextRender(() => this.cards()[previousCount]?.focus(), { injector: this.injector });
     } catch {
       this.failed.set(true);
     } finally {

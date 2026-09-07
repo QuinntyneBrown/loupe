@@ -188,3 +188,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: ten larger viewport checks found one column instead of the specified two, three, four or five; the four XS cases already passed.
 - Green: all 42 grid/axe/reflow checks passed across three browser engines and 14 viewport sizes. All 12 collection workflow regressions, all 99 independent design-system checks, and the production build passed.
 - Added authoritative grid sizing tokens to the design system and mirrored them into Angular. Inspected 375x667 and 1440x900 screenshots: cards, titles, localized dates and header remain legible with the required column counts. This is automated desktop-engine evidence, not a claim of manual device/screen-reader conformance.
+
+## UI-07: open and revisit saved photograph details
+
+- Red: four detail/navigation checks failed at missing card links, the missing route and missing pagination focus. A fifth check then exposed the unexplained empty EXIF section.
+- Green: all 132 browser checks passed across Chromium, Firefox and WebKit; the production build and diff checks passed. Details show the full image, normalized brief, available capture settings and separate notes. Missing metadata is explicit. Direct URL reloads perform reads only; unavailable content and temporary failure have distinct states.
+- Pagination focuses the first newly added card. Routed pages own routes and back links; domain consumes the photograph token. The controlled library now runs through a Playwright binding so saved fixture state survives page reload without browser storage. No production HTTP adapter is used in Playwright.
+- Responsive detail composition and editing are subsequent slices. Tooling-only interruptions while applying the patch were corrected before the clean production build and full regression run.

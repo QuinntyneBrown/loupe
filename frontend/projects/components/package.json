@@ -2,6 +2,7 @@
   "name": "components",
   "version": "0.0.1",
   "peerDependencies": {
+    "@angular/router": "^22.1.0",
     "@angular/common": "^22.1.0",
     "@angular/core": "^22.1.0"
   },

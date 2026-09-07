@@ -1,14 +1,16 @@
 <article>
-  <img
-    [src]="previewUrl()"
-    alt=""
-    [width]="width()"
-    [height]="height()"
-    loading="lazy"
-    decoding="async"
-  />
-  <div>
+  <a #link [routerLink]="destination()">
+    <img
+      [src]="previewUrl()"
+      alt=""
+      [width]="width()"
+      [height]="height()"
+      loading="lazy"
+      decoding="async"
+    />
     <h2>{{ title() }}</h2>
+  </a>
+  <div>
     <time [attr.datetime]="createdAt()">{{ createdAt() | date: 'mediumDate' }}</time>
   </div>
 </article>

@@ -2,6 +2,7 @@
   <div class="grid">
     @for (item of items(); track item.id) {
       <lp-photograph-card
+        [destination]="detailBase() + '/' + item.id"
         [title]="item.title"
         [previewUrl]="item.previewUrl"
         [createdAt]="item.createdAt"

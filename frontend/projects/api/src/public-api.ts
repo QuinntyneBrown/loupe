@@ -5,3 +5,7 @@ export * from './lib/photograph/photograph-summary';
 export * from './lib/photograph/photograph-page';
 export * from './lib/photograph/photograph.service.contract';
 export * from './lib/photograph/photograph.service';
+export * from './lib/photograph/photograph-result';
+export * from './lib/photograph/critique-brief';
+export * from './lib/photograph/capture-metadata';
+export * from './lib/common/service-error';

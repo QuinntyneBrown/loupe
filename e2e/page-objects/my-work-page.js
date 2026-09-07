@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { PhotographLibrary } from '../fixtures/photograph-library.js';
 
 export class MyWorkPage {
   constructor(page) { this.page = page; }
@@ -11,11 +12,16 @@ export class MyWorkPage {
   async signOut() { await this.page.getByRole('button', { name: 'Sign out', exact: true }).click(); }
   async expectContentFocus() { await expect(this.page.getByRole('main')).toBeFocused(); }
   async configureCollection(count, failures = 0) {
-    await this.page.addInitScript(({ count, failures }) => {
-      window.loupeFixture = { photoCount: count, photoListFailures: failures };
-    }, { count, failures });
+    this.library = new PhotographLibrary(count);
+    this.library.failures.list = failures;
+    await this.library.attach(this.page);
   }
-  async failNextPage() { await this.page.evaluate(() => { window.loupeFixture.photoListFailures = 1; }); }
+  async failNextPage() {
+    this.library.failures.list = 1;
+  }
+  async openPhotograph(title) { await this.page.getByRole('link', { name: title, exact: true }).click(); }
+  async expectNewPhotographFocus(title) { await expect(this.page.getByRole('link', { name: title, exact: true })).toBeFocused(); }
+  async openFocusedPhotograph() { await this.page.keyboard.press('Enter'); }
   async expectPhotographs(count) {
     await expect(this.page.getByRole('article')).toHaveCount(count);
     if (count) await expect(this.page.getByRole('heading', { name: 'Study 01', exact: true })).toBeVisible();
