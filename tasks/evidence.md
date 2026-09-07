@@ -158,3 +158,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: both saved/absent brief reads lacked the brief property, and all four invalid-field cases returned 201 instead of 400.
 - Green: all 65 existing container API checks passed; four additional boundary checks passed for 2,000-scalar intent/feedback, 100-character genre and each allowed experience (10 brief checks total). Format verification passed.
 - Brief values normalize before image processing and persist as an explicit JSON value object. Empty values remain absent; experience is serialized by name. Update/version conflict behavior is the next independent slice.
+
+## API-15: edit and clear briefs with revision conflicts
+
+- Red: all eight new API checks failed because PUT brief returned 404 instead of applying updates or returning field/conflict errors.
+- Green: all 77 API checks passed. Normalized edits and clearing survive another API instance; invalid fields preserve the existing brief and revision. Two simultaneous writers across separate instances produce exactly one success and one 409, with the winner retained. Another owner and an absent identifier both receive item_unavailable.
+- Revisions start at one, including existing migrated photographs. EF includes the revision in update predicates; concurrency exceptions become safe 409 responses. Formatter and diff checks passed. Source: [EF concurrency handling](https://learn.microsoft.com/en-us/ef/core/saving/concurrency).

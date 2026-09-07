@@ -11,5 +11,6 @@ public sealed class Photograph
     public required int Width { get; init; }
     public required int Height { get; init; }
     public CaptureMetadata Exif { get; init; } = new();
-    public CritiqueBrief Brief { get; init; } = new();
+    public CritiqueBrief Brief { get; set; } = new();
+    public long Revision { get; set; } = 1;
 }
