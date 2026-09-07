@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographUploadPage {
   constructor(page) { this.page = page; }
@@ -73,6 +74,34 @@ export class PhotographUploadPage {
     await this.expectDraft({ title: '', intent: '', genre: '', experience: '', requestedFeedback: '' });
     await expect(this.page.getByLabel('Photograph', { exact: true })).toHaveValue('');
     await this.expectSaveDisabled();
+  }
+  async expectAccessibleUpload() {
+    expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(audit.violations).toEqual([]);
+    for (const label of ['Photograph', 'Title (optional)', 'Intent (optional)', 'Genre (optional)', 'Experience (optional)', 'Requested feedback (optional)']) {
+      const control = this.page.getByLabel(label, { exact: true });
+      const box = await control.boundingBox();
+      expect(box.width).toBeGreaterThanOrEqual(24);
+      expect(box.height).toBeGreaterThanOrEqual(24);
+    }
+  }
+  async expectDiscardKeyboardAndLayout() {
+    await this.expectDiscardChoice();
+    await this.page.keyboard.press('Tab');
+    await expect(this.discardDialog().getByRole('button', { name: 'Discard', exact: true })).toBeFocused();
+    await this.page.keyboard.press('Tab');
+    await expect(this.discardDialog().getByRole('button', { name: 'Keep editing', exact: true })).toBeFocused();
+    await this.page.keyboard.press('Shift+Tab');
+    await expect(this.discardDialog().getByRole('button', { name: 'Discard', exact: true })).toBeFocused();
+    const box = await this.discardDialog().boundingBox();
+    const viewport = this.page.viewportSize();
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+    expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+    const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(audit.violations).toEqual([]);
   }
   async expectSaving() {
     await expect(this.page.getByRole('status')).toContainText('Saving photograph');

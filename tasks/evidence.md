@@ -320,3 +320,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 411 browser checks passed, followed by the production build and diff check. Inspected phone and desktop upload-error and pending-discard screenshots. Independent read-only review by gpt-5.6-sol found no Critical or Required changes; the reviewer did not run additional tests.
 - Uploads remain dirty until acknowledged. Keep editing/Escape retain drafts; Discard permits departure. Pending uploads warn that they may finish after leaving. Completion after departure does not navigate back, and acknowledgment during an open prompt opens the saved detail without a second prompt. Guards use the caller's current dirty state so a synchronous saved event need not wait for template input propagation.
 - Full upload viewport coverage is the next slice. Native unload checks establish listener behavior, not guarantees about mobile browser prompts.
+
+## UI-20: upload recovery across the viewport matrix
+
+- All 42 added checks passed across fourteen viewports in Chromium, Firefox and WebKit. These extend coverage of previously implemented behavior; the first run was green and no production change was needed.
+- Checks cover file/field errors, determinate and indeterminate transfer progress, failed-save recovery, pending-departure warnings, dialog focus wrapping and bounds, control targets, horizontal overflow and axe WCAG checks.
+- The preceding full 411-test browser regression and production build passed on the same production code. Diff checks passed. Automated coverage does not replace the outstanding manual device and assistive-technology release reviews.
