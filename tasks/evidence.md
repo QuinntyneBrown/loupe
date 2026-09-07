@@ -87,3 +87,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Composition replaces SESSION_SERVICE with a deterministic mock in the Playwright build. Production uses the HTTP adapter; consumers import only its contract/token. No local/session storage is used. Template, style and component files are separate. My Work currently provides its private page heading; its library contents and upload workflow remain upcoming slices.
 - Removed only generated welcome components and their generated scaffold tests. All handwritten behavior tests remain. Exact dependency versions and lockfiles are retained; npm reported no known vulnerabilities.
 - References: [Angular guards](https://angular.dev/guide/routing/route-guards), [Angular CLI](https://angular.dev/tools/cli).
+
+## UI-02: recover from identity failure and unsafe destinations
+
+- Red: all five focused Chromium checks failed: missing retry feedback, and four unsafe destinations prevented arrival at My Work.
+- Green: all 18 browser acceptance checks passed across Chromium, Firefox and WebKit. The production Angular build passed.
+- Failed callbacks display a generic retry message; unsafe or malformed local destinations fall back to My Work. Backend validation remains independently enforced.

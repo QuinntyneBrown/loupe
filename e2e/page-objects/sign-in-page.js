@@ -12,4 +12,10 @@ export class SignInPage {
     await expect(this.page.getByRole('heading', { name: 'A private space for your photography' })).toBeVisible();
     await expect(this.page.getByRole('button', { name: 'Sign out', exact: true })).toHaveCount(0);
   }
+  async openFailedCallback() { await this.page.goto('/sign-in?error=authentication_failed'); }
+  async expectRetryableFailure() {
+    await expect(this.page.getByRole('alert')).toHaveText('Sign-in could not be completed. Please try again.');
+    await expect(this.page.getByRole('button', { name: 'Continue to sign in' })).toBeEnabled();
+  }
+  async openWithDestination(destination) { await this.page.goto(`/sign-in?returnUrl=${encodeURIComponent(destination)}`); }
 }
