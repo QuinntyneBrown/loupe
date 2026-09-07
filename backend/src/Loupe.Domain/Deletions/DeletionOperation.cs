@@ -8,5 +8,6 @@ public sealed class DeletionOperation
     public required Guid ResourceId { get; init; }
     public required DateTimeOffset DeletedAt { get; init; }
     public DateTimeOffset? CompletedAt { get; set; }
+    public DateTimeOffset? LastAttemptAt { get; set; }
     public required string[] MediaKeys { get; set; }
 }

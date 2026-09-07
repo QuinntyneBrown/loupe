@@ -13,11 +13,12 @@ public sealed class DeletedContentCleaner(LibraryDbContext database, IImageStore
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         var operations = await database.Deletions.FromSqlRaw("""
             SELECT * FROM journal.deletions WHERE "CompletedAt" IS NULL
-            ORDER BY "DeletedAt", "Id" LIMIT 100 FOR UPDATE SKIP LOCKED
+            ORDER BY "LastAttemptAt" NULLS FIRST, "DeletedAt", "Id" LIMIT 100 FOR UPDATE SKIP LOCKED
             """).ToListAsync(cancellationToken);
         var completed = 0;
         foreach (var operation in operations)
         {
+            operation.LastAttemptAt = clock.GetUtcNow();
             foreach (var key in operation.MediaKeys.ToArray())
             {
                 cancellationToken.ThrowIfCancellationRequested();

@@ -29,6 +29,6 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<DeletionOperation>().Property(deletion => deletion.OwnerId).HasMaxLength(64);
         modelBuilder.Entity<DeletionOperation>().Property(deletion => deletion.ResourceType).HasMaxLength(64);
         modelBuilder.Entity<DeletionOperation>().HasIndex(deletion => new { deletion.OwnerId, deletion.ResourceType, deletion.ResourceId }).IsUnique();
-        modelBuilder.Entity<DeletionOperation>().HasIndex(deletion => new { deletion.CompletedAt, deletion.DeletedAt });
+        modelBuilder.Entity<DeletionOperation>().HasIndex(deletion => new { deletion.CompletedAt, deletion.LastAttemptAt, deletion.DeletedAt });
     }
 }

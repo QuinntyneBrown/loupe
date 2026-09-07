@@ -349,3 +349,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - The independent gpt-5.6-sol review found no Critical or Required changes. It did not run extra tests. Direct cleaner database-failure/cancellation injection and intentionally shared-key coverage remain unexecuted; the tested live-photo control has independent files.
 - Adding the worker refreshed stale API/test lock entries for the already removed NetVips.Native dependency. No package version was upgraded; Linux distribution HEVC decoding remains verified by the full suite.
 - Fairness beyond a full failed batch, overdue alerts, abandoned-media scanning, journal retention and backup restore remain subsequent increments. Reference: [scoped services in .NET background workers](https://learn.microsoft.com/en-us/dotnet/core/extensions/scoped-service).
+
+## API-27: prevent failed cleanup batches from starving later deletions
+
+- Red: a worker repeatedly selected 100 blocked manifests and never completed the healthy deletion behind them before the acceptance deadline.
+- Green: all 137 container API checks passed; format and diff checks passed. The test creates the full backlog through the API, retains real filesystem obstructions, and verifies later completion while blocked cleanup remains Pending.
+- A persisted last-attempt timestamp rotates retry priority behind unattempted and less recently attempted records. Selection remains bounded and row-locked across worker instances. The migration updates the cleanup index; the public deletion response is unchanged.
