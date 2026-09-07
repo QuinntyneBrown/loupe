@@ -55,6 +55,25 @@ export class PhotographUploadPage {
     await expect(this.page.getByRole('status')).toHaveText(transferred === null ? 'Saving photograph…' : `${transferred.toLocaleString('en-US')} bytes transferred. Total size unavailable.`);
   }
   async expectNoProgress() { await expect(this.page.getByRole('progressbar', { name: 'Upload progress', exact: true })).toHaveCount(0); }
+  async returnToLibrary() { await this.page.getByRole('link', { name: 'My Work', exact: true }).click(); }
+  discardDialog() { return this.page.getByRole('dialog', { name: 'Discard unsaved changes?', exact: true }); }
+  async expectDiscardChoice() {
+    await expect(this.discardDialog()).toBeVisible();
+    await expect(this.discardDialog().getByRole('button', { name: 'Keep editing', exact: true })).toBeFocused();
+  }
+  async expectPendingWarning() { await expect(this.discardDialog()).toContainText('This upload may finish after you leave. Check My Work before uploading it again.'); }
+  async keepEditing() { await this.discardDialog().getByRole('button', { name: 'Keep editing', exact: true }).click(); }
+  async discardChanges() { await this.discardDialog().getByRole('button', { name: 'Discard', exact: true }).click(); }
+  async escapeDiscard() { await this.page.keyboard.press('Escape'); }
+  async expectNoDiscardChoice() { await expect(this.discardDialog()).toHaveCount(0); }
+  async expectUnloadProtection(expected) {
+    expect(await this.page.evaluate(() => !window.dispatchEvent(new Event('beforeunload', { cancelable: true })))).toBe(expected);
+  }
+  async expectEmptyDraft() {
+    await this.expectDraft({ title: '', intent: '', genre: '', experience: '', requestedFeedback: '' });
+    await expect(this.page.getByLabel('Photograph', { exact: true })).toHaveValue('');
+    await this.expectSaveDisabled();
+  }
   async expectSaving() {
     await expect(this.page.getByRole('status')).toContainText('Saving photograph');
     await expect(this.page.getByRole('button', { name: 'Save photograph', exact: true })).toBeDisabled();

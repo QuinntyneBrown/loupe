@@ -39,6 +39,16 @@ export class PhotographUpload {
   });
   readonly saving = signal(false);
   readonly progress = signal<UploadProgress | null>(null);
+  private readonly attempted = signal(false);
+  private readonly acknowledged = signal(false);
+  readonly dirty = computed(
+    () =>
+      !this.acknowledged() &&
+      (!!this.image() ||
+        this.attempted() ||
+        this.title().trim().length > 0 ||
+        Object.values(this.brief()).some((value) => !!value?.trim())),
+  );
   readonly failure = signal<string | null>(null);
   readonly failed = computed(() => this.failure() !== null);
   readonly failureMessage = computed(() => {
@@ -103,6 +113,7 @@ export class PhotographUpload {
     const image = this.image();
     if (!image || this.saving() || this.invalid()) return;
     this.saving.set(true);
+    this.attempted.set(true);
     this.progress.set(null);
     this.failure.set(null);
     try {
@@ -117,7 +128,10 @@ export class PhotographUpload {
           if (!this.destroy.destroyed) this.progress.set(progress);
         },
       );
-      if (!this.destroy.destroyed) this.saved.emit(photo);
+      if (!this.destroy.destroyed) {
+        this.acknowledged.set(true);
+        this.saved.emit(photo);
+      }
     } catch (error) {
       if (!this.destroy.destroyed) {
         const code = error instanceof ServiceError ? error.code : 'request_failed';

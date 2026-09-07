@@ -5,6 +5,7 @@ import { MyWork } from './pages/my-work/my-work';
 import { PhotographDetailPage } from './pages/photograph-detail/photograph-detail-page';
 import { photographUnsavedGuard } from './photograph-unsaved.guard';
 import { PhotographUploadPage } from './pages/photograph-upload/photograph-upload-page';
+import { photographUploadUnsavedGuard } from './photograph-upload-unsaved.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'my-work' },
@@ -14,6 +15,7 @@ export const routes: Routes = [
     path: 'my-work/upload',
     component: PhotographUploadPage,
     canActivate: [sessionGuard],
+    canDeactivate: [photographUploadUnsavedGuard],
     title: 'Upload photograph · Loupe',
   },
   {

@@ -313,3 +313,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 
 - Extracted the existing native dialog and unload listener into an application-owned component for reuse. Existing notes/brief behavior, Escape, focus wrapping and session-aware departure are preserved.
 - All 411 browser checks passed (10.2 minutes), including the existing editor and dialog regressions. Production build and diff checks passed. The related upload behavior is committed separately below.
+
+## UI-19b: protect unfinished upload navigation
+
+- Red: seven checks demonstrated missing file/text/failed-draft confirmation, unload protection and in-flight departure behavior. Empty-form departure and explicit sign-out controls already passed.
+- Green: all 411 browser checks passed, followed by the production build and diff check. Inspected phone and desktop upload-error and pending-discard screenshots. Independent read-only review by gpt-5.6-sol found no Critical or Required changes; the reviewer did not run additional tests.
+- Uploads remain dirty until acknowledged. Keep editing/Escape retain drafts; Discard permits departure. Pending uploads warn that they may finish after leaving. Completion after departure does not navigate back, and acknowledgment during an open prompt opens the saved detail without a second prompt. Guards use the caller's current dirty state so a synchronous saved event need not wait for template input propagation.
+- Full upload viewport coverage is the next slice. Native unload checks establish listener behavior, not guarantees about mobile browser prompts.
