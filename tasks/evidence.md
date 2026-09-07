@@ -369,3 +369,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: the 36-day completed record remained indefinitely. The 34-day and 36-day pending-cleanup controls already passed.
 - Green: all 142 container API checks passed; format and diff checks passed. Completed records expire after 35 days, retained records resolve repeated deletion, and incomplete cleanup remains available even beyond retention age. Deleted media access stays unavailable after journal expiry.
 - Retention runs before media maintenance so a filesystem outage does not prevent completed-record pruning on the next iteration. Backup retention and preservation/replay of the independent journal are still deployment/restore work.
+
+## API-30: diagnose overdue deletion cleanup
+
+- Red: both below/above-threshold checks lacked the expected structured diagnostics. Each case has an isolated database so an older blocked fixture cannot contaminate the control.
+- Green: all 144 container API checks passed; format, build (zero warnings/errors), and diff checks passed. A real storage obstruction at 23 hours produces a structured warning; at 25 hours it also produces an Error alert with backlog count, oldest age, runbook path and a correlated worker run. Captured output excludes the private title, media key and connection string.
+- Worker console output is JSON with UTC timestamps and scopes naming the entry point and run. Event 3201 reports cleanup at or beyond 24 hours; event 3202 reports retryable media removal. The operational runbook defines the symptom and safe recovery actions.
+- This verifies the local alert signal. Monitoring-stack routing, metrics/tracing export and operational alert delivery remain release work; no external notification was sent. Source: [Microsoft JSON console logging](https://learn.microsoft.com/en-us/dotnet/core/extensions/logging/console-log-formatter).

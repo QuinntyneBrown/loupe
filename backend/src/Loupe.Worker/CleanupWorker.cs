@@ -14,6 +14,11 @@ public sealed class CleanupWorker(IServiceScopeFactory scopes, IOptions<CleanupO
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            using var run = logger.BeginScope(new Dictionary<string, object>
+            {
+                ["EntryPoint"] = "cleanup_worker",
+                ["RunId"] = Guid.NewGuid().ToString("N")
+            });
             try
             {
                 await using var scope = scopes.CreateAsyncScope();

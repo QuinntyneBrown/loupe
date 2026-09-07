@@ -11,6 +11,15 @@ public sealed class DeletedContentCleaner(LibraryDbContext database, IImageStore
     public async Task<int> CleanAsync(CancellationToken cancellationToken)
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
+        var now = clock.GetUtcNow();
+        var overdueAt = now - TimeSpan.FromHours(24);
+        var overdue = await database.Deletions.Where(operation => operation.CompletedAt == null && operation.DeletedAt <= overdueAt)
+            .GroupBy(operation => 1).Select(group => new { Count = group.Count(), Oldest = group.Min(operation => operation.DeletedAt) })
+            .SingleOrDefaultAsync(cancellationToken);
+        if (overdue is not null)
+            logger.LogError(new EventId(3201, "cleanup_overdue"),
+                "{EventName}: cleanup is overdue for {PendingCount} deletions; oldest age {OldestAgeSeconds}s. See {Runbook}",
+                "cleanup_overdue", overdue.Count, (now - overdue.Oldest).TotalSeconds, "docs/operations/cleanup.md");
         var operations = await database.Deletions.FromSqlRaw("""
             SELECT * FROM journal.deletions WHERE "CompletedAt" IS NULL
             ORDER BY "LastAttemptAt" NULLS FIRST, "DeletedAt", "Id" LIMIT 100 FOR UPDATE SKIP LOCKED
@@ -30,7 +39,8 @@ public sealed class DeletedContentCleaner(LibraryDbContext database, IImageStore
                 }
                 catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
                 {
-                    logger.LogWarning("Deletion {DeletionId} has pending media cleanup", operation.Id);
+                    logger.LogWarning(new EventId(3202, "cleanup_media_pending"),
+                        "{EventName}: deletion {DeletionId} has pending media cleanup", "cleanup_media_pending", operation.Id);
                 }
             }
             if (operation.MediaKeys.Length == 0)

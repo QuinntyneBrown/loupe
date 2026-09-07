@@ -2,6 +2,7 @@ using Loupe.Application.Maintenance;
 using Loupe.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Loupe.Worker;
 
@@ -10,6 +11,12 @@ public static class Program
     public static async Task Main(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);
+        builder.Logging.ClearProviders().AddJsonConsole(options =>
+        {
+            options.IncludeScopes = true;
+            options.UseUtcTimestamp = true;
+            options.TimestampFormat = "yyyy-MM-ddTHH:mm:ss.fff'Z'";
+        });
         builder.Services.AddLoupePersistence();
         builder.Services.AddMediatR(options =>
         {
@@ -21,6 +28,8 @@ public static class Program
                 "Cleanup:PollInterval must be positive and at most five minutes.").ValidateOnStart();
         builder.Services.AddHostedService<CleanupWorker>();
         using var host = builder.Build();
+        using var scope = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Loupe.Worker.Host")
+            .BeginScope(new Dictionary<string, object> { ["EntryPoint"] = "worker_host", ["RunId"] = Guid.NewGuid().ToString("N") });
         await host.RunAsync();
     }
 }
