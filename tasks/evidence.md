@@ -260,3 +260,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: a real filesystem obstacle at the test-owned media root produced a generic 500 response.
 - Green: all 105 container API checks passed; format verification and diff checks passed. The failed request returns 503/Retry-After without a photograph. Removing the obstacle and retrying the same key saves one photograph with two readable media files.
 - The private image adapter translates write I/O failures to the existing service-unavailable contract. The test restores its explicitly owned temporary path in a finally block.
+
+## API-21: reject extra multipart files
+
+- Red: both duplicate image fields and an additional attachment field were silently accepted as a single successful upload.
+- Green: all 107 container API checks passed; format verification and diff checks passed. Extra files return an image field error before decoding, creating a photograph, writing media or reserving a receipt. The corrected single-file request can reuse its key.
+- The controller binds the multipart file count; the application validator enforces exactly one file.

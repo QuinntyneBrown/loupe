@@ -15,6 +15,7 @@ public sealed class UploadPhotographCommandHandler(ICurrentOwner owner, IPhotogr
     public async Task<PhotographResult> Handle(UploadPhotographCommand request, CancellationToken cancellationToken)
     {
         var key = UploadPhotographCommandValidator.Key(request);
+        UploadPhotographCommandValidator.Files(request);
         var title = UploadPhotographCommandValidator.Title(request);
         var brief = CritiqueBriefValidator.Normalize(request.Brief);
         var image = await request.Image.ReadAsync(cancellationToken);
