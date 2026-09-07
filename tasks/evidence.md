@@ -287,3 +287,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 36 upload, detail and library checks passed across Chromium, Firefox and WebKit. Production build and diff checks passed.
 - An application route composes the signal-backed domain form. The API contract accepts a file, optional title/brief and operation key; the HTTP adapter owns multipart serialization and antiforgery headers. Acknowledgment opens the saved detail. Empty defaults and normalized full briefs survive reload, and pending submission cannot create a second request.
 - The controlled library now accepts uploads through the injected mock. File validation, progress, retry recovery and unsaved protection are subsequent slices. The dedicated route keeps the full brief usable and gives the application ownership of later navigation dialogs.
+
+## UI-16: validate upload fields before submission
+
+- Red: seven new checks demonstrated missing text limits and empty/oversize/unsupported-file feedback. The 25 MB control already passed.
+- Green: all 33 upload and validation checks passed across three browser engines. Production build and diff check passed. Inspected the form at 375x667 and 1440x900.
+- Field errors count normalized Unicode scalars, associate messages with their controls, disable invalid submission, and retain the brief while files are corrected. Empty/generic MIME declarations remain eligible for authoritative API byte validation. Browser boundary fixtures test the form's service boundary; native decoding and dimension limits remain covered by API acceptance.

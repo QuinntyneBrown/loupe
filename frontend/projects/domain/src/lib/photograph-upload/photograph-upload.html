@@ -7,9 +7,13 @@
     accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
     (change)="choose(fileInput.files)"
     [disabled]="saving()"
-    aria-describedby="upload-help"
+    [attr.aria-invalid]="!!fileError()"
+    [attr.aria-describedby]="fileError() ? 'upload-help upload-file-error' : 'upload-help'"
   />
   <p id="upload-help">One still JPEG, PNG, HEIC or WebP, up to 25 MB. Private to you.</p>
+  @if (fileError(); as error) {
+    <p id="upload-file-error" role="alert">{{ error }}</p>
+  }
   <label for="upload-title">Title (optional)</label>
   <input
     id="upload-title"
@@ -17,7 +21,12 @@
     [ngModel]="title()"
     (ngModelChange)="setTitle($event)"
     [disabled]="saving()"
+    [attr.aria-invalid]="errors().title"
+    [attr.aria-describedby]="errors().title ? 'upload-title-error' : null"
   />
+  @if (errors().title) {
+    <p id="upload-title-error" role="alert">Use 200 characters or fewer.</p>
+  }
   <h2>Critique brief</h2>
   <p>Add context for a future critique. Saving this photograph does not request one.</p>
   <label for="upload-intent">Intent (optional)</label>
@@ -27,7 +36,12 @@
     [ngModel]="brief().intent ?? ''"
     (ngModelChange)="setBrief('intent', $event)"
     [disabled]="saving()"
+    [attr.aria-invalid]="errors().intent"
+    [attr.aria-describedby]="errors().intent ? 'upload-intent-error' : null"
   ></textarea>
+  @if (errors().intent) {
+    <p id="upload-intent-error" role="alert">Use 2,000 characters or fewer.</p>
+  }
   <label for="upload-genre">Genre (optional)</label>
   <input
     id="upload-genre"
@@ -35,7 +49,12 @@
     [ngModel]="brief().genre ?? ''"
     (ngModelChange)="setBrief('genre', $event)"
     [disabled]="saving()"
+    [attr.aria-invalid]="errors().genre"
+    [attr.aria-describedby]="errors().genre ? 'upload-genre-error' : null"
   />
+  @if (errors().genre) {
+    <p id="upload-genre-error" role="alert">Use 100 characters or fewer.</p>
+  }
   <label for="upload-experience">Experience (optional)</label>
   <select
     id="upload-experience"
@@ -57,11 +76,16 @@
     [ngModel]="brief().requestedFeedback ?? ''"
     (ngModelChange)="setBrief('requestedFeedback', $event)"
     [disabled]="saving()"
+    [attr.aria-invalid]="errors().requestedFeedback"
+    [attr.aria-describedby]="errors().requestedFeedback ? 'upload-feedback-error' : null"
   ></textarea>
+  @if (errors().requestedFeedback) {
+    <p id="upload-feedback-error" role="alert">Use 2,000 characters or fewer.</p>
+  }
   @if (failed()) {
     <p role="alert">The photograph could not be saved. Your fields are still here.</p>
   }
-  <button type="submit" [disabled]="!image() || saving()">Save photograph</button>
+  <button type="submit" [disabled]="invalid() || saving()">Save photograph</button>
   @if (saving()) {
     <p role="status">Saving photograph…</p>
   }
