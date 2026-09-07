@@ -58,3 +58,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: all six invalid callback cases returned generic 500 responses.
 - Green: 13 backend tests passed, covering nonce/issuer/audience/expiry/signature/state rejection, safe retry redirect and absent application session. Formatting passed after whitespace-only fixes.
 - Identity fixture uses signed RSA tokens through the actual OIDC code-exchange handler; no production authentication replacement is registered.
+
+## API-04: durable opaque session and idle expiry
+
+- Red: a valid OIDC login followed by exactly 30 idle minutes returned 200 instead of 401, including against the real PostgreSQL fixture.
+- Green: all 14 API integration tests passed with PostgreSQL and the production authentication handler; format verification passed.
+- The browser receives a Secure, HttpOnly opaque cookie; PostgreSQL stores its SHA-256 digest and validated identity. An atomic update enforces the idle boundary. EF migration creates the session table.
+- Review caught OIDC claim mapping: the validated subject claim carries its issuer after the raw issuer claim is removed. No tokens or cookie contents are logged. Absolute lifetime, rotation, restart and sign-out get separate behavioral checks next.

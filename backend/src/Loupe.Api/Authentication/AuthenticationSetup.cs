@@ -14,18 +14,10 @@ public static class AuthenticationSetup
             .Validate(options => !string.IsNullOrWhiteSpace(options.ClientId), "Identity:ClientId is required.")
             .Validate(options => !string.IsNullOrWhiteSpace(options.ClientSecret), "Identity:ClientSecret is required.")
             .ValidateOnStart();
-        services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
-        {
-            options.Cookie.Name = "__Host-loupe-session";
-            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-            options.Cookie.HttpOnly = true;
-            options.Cookie.SameSite = SameSiteMode.Lax;
-            options.Events.OnRedirectToLogin = context =>
-            {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                return Task.CompletedTask;
-            };
-        }).AddOpenIdConnect("oidc", options => options.ResponseType = "code");
+        services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddScheme<SessionAuthenticationOptions, SessionAuthenticationHandler>(CookieAuthenticationDefaults.AuthenticationScheme,
+                options => options.ClaimsIssuer = "Loupe")
+            .AddOpenIdConnect("oidc", options => options.ResponseType = "code");
         services.AddOptions<OpenIdConnectOptions>("oidc").Configure<IOptions<IdentityOptions>>((options, settings) =>
         {
             options.Authority = settings.Value.Authority;

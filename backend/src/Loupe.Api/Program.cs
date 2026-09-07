@@ -3,6 +3,7 @@ using Loupe.Application.Sessions;
 using Loupe.Infrastructure.Security;
 using Loupe.Api.Authentication;
 using Loupe.Api.Errors;
+using Loupe.Infrastructure.Persistence;
 
 namespace Loupe.Api;
 
@@ -12,6 +13,7 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddControllers();
+        builder.Services.AddLoupePersistence();
         builder.Services.AddExceptionHandler<ApiExceptionHandler>();
         builder.Services.AddProblemDetails();
         builder.Services.AddMediatR(options => options.RegisterServicesFromAssemblyContaining<GetSessionQuery>());

@@ -7,12 +7,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols;
 using Loupe.Api.Tests.Security;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace Loupe.Api.Tests;
 
-public sealed class ApiFactory : WebApplicationFactory<Program>
+public sealed class ApiFactory(string? connectionString = null) : WebApplicationFactory<Program>
 {
     public ControlledIdentityProvider Identity { get; } = new();
+    public TestClock Clock { get; } = new();
+    public CapturedApiFailure Failure { get; } = new();
 
     public override async ValueTask DisposeAsync()
     {
@@ -26,12 +30,19 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         {
             ["Identity:Authority"] = "https://identity.example",
             ["Identity:ClientId"] = "loupe-fixture",
-            ["Identity:ClientSecret"] = "fixture-only-not-a-real-secret"
+            ["Identity:ClientSecret"] = "fixture-only-not-a-real-secret",
+            ["ConnectionStrings:Library"] = connectionString ?? "Host=localhost;Database=unused;Username=unused"
         }));
         builder.ConfigureTestServices(services => services.PostConfigure<OpenIdConnectOptions>("oidc", options =>
         {
             options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(Identity.Configuration);
             options.Backchannel = new HttpClient(Identity, disposeHandler: false);
         }));
+        builder.ConfigureTestServices(services =>
+        {
+            services.Insert(0, ServiceDescriptor.Singleton<IExceptionHandler>(Failure));
+            services.RemoveAll<TimeProvider>();
+            services.AddSingleton<TimeProvider>(Clock);
+        });
     }
 }
