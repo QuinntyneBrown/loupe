@@ -13,4 +13,5 @@ public sealed class Photograph
     public CaptureMetadata Exif { get; init; } = new();
     public CritiqueBrief Brief { get; set; } = new();
     public long Revision { get; set; } = 1;
+    public string? Notes { get; set; }
 }

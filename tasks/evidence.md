@@ -164,3 +164,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: all eight new API checks failed because PUT brief returned 404 instead of applying updates or returning field/conflict errors.
 - Green: all 77 API checks passed. Normalized edits and clearing survive another API instance; invalid fields preserve the existing brief and revision. Two simultaneous writers across separate instances produce exactly one success and one 409, with the winner retained. Another owner and an absent identifier both receive item_unavailable.
 - Revisions start at one, including existing migrated photographs. EF includes the revision in update predicates; concurrency exceptions become safe 409 responses. Formatter and diff checks passed. Source: [EF concurrency handling](https://learn.microsoft.com/en-us/ef/core/saving/concurrency).
+
+## API-16: private personal notes
+
+- Red: all six notes checks failed at the missing PUT endpoint; existing foreign detail/image/preview reads already produced safe 404 responses.
+- Green: all 83 container API checks passed after the notes implementation and consolidation of revision-checked persistence. Notes normalize line endings, accept exactly 10,000 Unicode scalars, survive another instance and clear to null. Oversized, stale and foreign edits preserve stored values. Formatter verification passed.
+- Notes remain a separate field from the brief. Their exclusion from external providers will be verified when those adapters are added.

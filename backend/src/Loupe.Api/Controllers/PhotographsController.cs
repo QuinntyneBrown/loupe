@@ -31,6 +31,10 @@ public sealed class PhotographsController(ISender sender) : ControllerBase
         sender.Send(new UpdateBriefCommand(id, request.Revision,
             new CritiqueBriefInput(request.Intent, request.Genre, request.Experience, request.RequestedFeedback)), cancellationToken);
 
+    [HttpPut("{id:guid}/notes")]
+    public Task<PhotographResult> UpdateNotes(Guid id, UpdateNotesRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new UpdateNotesCommand(id, request.Revision, request.Notes), cancellationToken);
+
     [HttpGet("{id:guid}/image")]
     public async Task<IActionResult> Image(Guid id, CancellationToken cancellationToken)
     {
