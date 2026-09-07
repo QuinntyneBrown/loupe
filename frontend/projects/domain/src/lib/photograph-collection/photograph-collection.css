@@ -3,6 +3,7 @@
 }
 .grid {
   display: grid;
+  grid-template-columns: repeat(var(--lp-image-columns), minmax(var(--lp-zero), var(--lp-fraction)));
   gap: var(--lp-space-6);
 }
 .empty {

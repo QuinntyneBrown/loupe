@@ -41,5 +41,5 @@ export class MyWorkPage {
     const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
     expect(audit.violations).toEqual([]);
   }
-  async capture(path) { await this.page.screenshot({ path, fullPage: true }); }
+  async capture(path) { await this.page.screenshot({ path, fullPage: false }); }
 }

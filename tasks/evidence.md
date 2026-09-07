@@ -182,3 +182,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: four Chromium acceptance checks found no cards, empty state or retry UI.
 - Green: all 75 browser checks passed across Chromium, Firefox and WebKit. The collection appends 24-item pages, distinguishes empty success from failure, preserves existing cards on next-page failure and retries that cursor. The production application and all three library builds pass; the bundle totals 263.90 kB before transfer compression.
 - HTTP remains in the api adapter. Domain owns signal state and consumes PHOTOGRAPH_SERVICE; the app composes it with a presentational card. Playwright substitutes the interface with controlled synthetic images and failures. Responsive grid and detail navigation remain the next slices.
+
+## UI-06: responsive photograph grid
+
+- Red: ten larger viewport checks found one column instead of the specified two, three, four or five; the four XS cases already passed.
+- Green: all 42 grid/axe/reflow checks passed across three browser engines and 14 viewport sizes. All 12 collection workflow regressions, all 99 independent design-system checks, and the production build passed.
+- Added authoritative grid sizing tokens to the design system and mirrored them into Angular. Inspected 375x667 and 1440x900 screenshots: cards, titles, localized dates and header remain legible with the required column counts. This is automated desktop-engine evidence, not a claim of manual device/screen-reader conformance.
