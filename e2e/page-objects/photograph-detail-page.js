@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographDetailPage {
   constructor(page) { this.page = page; }
@@ -22,4 +23,16 @@ export class PhotographDetailPage {
     await expect(this.page.getByText('No capture settings available.', { exact: true })).toBeVisible();
     await expect(this.page.getByText('No notes yet.', { exact: true })).toBeVisible();
   }
+  async expectAccessibleLayout(sideBySide) {
+    const image = await this.page.getByRole('img', { name: 'Study 01', exact: true }).boundingBox();
+    const context = await this.page.getByRole('region', { name: 'Critique brief', exact: true }).boundingBox();
+    if (sideBySide) {
+      expect(context.x).toBeGreaterThanOrEqual(image.x + image.width);
+      expect(Math.abs(context.y - image.y)).toBeLessThan(2);
+    } else expect(context.y).toBeGreaterThanOrEqual(image.y + image.height);
+    expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(audit.violations).toEqual([]);
+  }
+  async capture(path) { await this.page.screenshot({ path }); }
 }

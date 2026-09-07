@@ -195,3 +195,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 132 browser checks passed across Chromium, Firefox and WebKit; the production build and diff checks passed. Details show the full image, normalized brief, available capture settings and separate notes. Missing metadata is explicit. Direct URL reloads perform reads only; unavailable content and temporary failure have distinct states.
 - Pagination focuses the first newly added card. Routed pages own routes and back links; domain consumes the photograph token. The controlled library now runs through a Playwright binding so saved fixture state survives page reload without browser storage. No production HTTP adapter is used in Playwright.
 - Responsive detail composition and editing are subsequent slices. Tooling-only interruptions while applying the patch were corrected before the clean production build and full regression run.
+
+## UI-08: responsive photograph detail
+
+- Red: the five desktop-width checks found stacked context instead of the required adjacent pane; nine smaller viewports already passed.
+- Green: all 57 detail workflow/layout checks, all 99 design-system regressions and the production build passed. Inspected 375x667 and 1440x900 screenshots. The full image retains its aspect ratio, context stacks below 992px and sits alongside above it, and automated accessibility/reflow checks pass.
+- The authoritative detail-column token lives in the independent design system and is mirrored into Angular.

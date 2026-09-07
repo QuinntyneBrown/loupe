@@ -1,6 +1,10 @@
 :host {
   display: block;
 }
+.detail {
+  grid-template-columns: var(--lp-detail-columns);
+  align-items: start;
+}
 h1 {
   font-size: var(--lp-text-3xl);
   line-height: var(--lp-leading-tight);
