@@ -44,6 +44,17 @@ export class PhotographUploadPage {
     await expect(this.page.getByRole('button', { name: 'Retry upload', exact: true })).toBeDisabled();
   }
   async retry() { await this.page.getByRole('button', { name: 'Retry upload', exact: true }).click(); }
+  async expectProgress(transferred, total) {
+    const progress = this.page.getByRole('progressbar', { name: 'Upload progress', exact: true });
+    await expect(progress).toHaveJSProperty('value', transferred);
+    await expect(progress).toHaveJSProperty('max', total);
+    await expect(this.page.getByRole('status')).toHaveText(`${transferred.toLocaleString('en-US')} of ${total.toLocaleString('en-US')} bytes transferred.`);
+  }
+  async expectIndeterminate(transferred = null) {
+    await expect(this.page.getByRole('progressbar', { name: 'Upload progress', exact: true })).toHaveJSProperty('position', -1);
+    await expect(this.page.getByRole('status')).toHaveText(transferred === null ? 'Saving photograph…' : `${transferred.toLocaleString('en-US')} bytes transferred. Total size unavailable.`);
+  }
+  async expectNoProgress() { await expect(this.page.getByRole('progressbar', { name: 'Upload progress', exact: true })).toHaveCount(0); }
   async expectSaving() {
     await expect(this.page.getByRole('status')).toContainText('Saving photograph');
     await expect(this.page.getByRole('button', { name: 'Save photograph', exact: true })).toBeDisabled();

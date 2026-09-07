@@ -300,3 +300,11 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 57 upload/save/validation/retry checks passed across three browser engines, followed by production build and diff checks.
 - One operation key lives for the form's lifetime, including file reselection and edits. Unconfirmed saves offer an explicit retry; changed payloads conflict and can be restored to resolve the original photograph. Specific image errors retain the brief. An unreadable file clears the picker and requests reselection; the HTTP adapter checks file readability before submitting.
 - The mock hashes actual selected bytes so same-name replacements cannot evade the conflict checks. API acceptance separately establishes durable receipt and media behavior.
+
+## UI-18: report transfer progress without claiming persistence
+
+- Red: all three progress checks failed because no progress indicator existed.
+- Green: all 42 progress/retry/save checks passed across Chromium, Firefox and WebKit. Production build and diff checks passed.
+- The upload contract reports transferred bytes and an optional total. Domain stores those values in signals. Known totals drive a native progress bar; unknown totals stay indeterminate. Transfer completion retains the saving state until the response, and retries reset previous progress.
+- Angular HTTP events and RxJS conversion stay inside the API adapter. Production composition selects XHR for upload progress; the injected mock has a controlled progress event boundary that is removed after completion.
+- Reference: [Angular upload progress and XHR configuration](https://angular.dev/guide/http/making-requests#receiving-raw-progress-events).

@@ -94,6 +94,21 @@
     {{ failed() ? 'Retry upload' : 'Save photograph' }}
   </button>
   @if (saving()) {
-    <p role="status">Saving photograph…</p>
+    @let transfer = progress();
+    <progress
+      aria-label="Upload progress"
+      [attr.max]="transfer?.total || 1"
+      [attr.value]="transfer?.total ? transfer?.transferred : null"
+    ></progress>
+    <p role="status">
+      @if (transfer && transfer.total && transfer.transferred < transfer.total) {
+        {{ transfer.transferred | number: '1.0-0' }} of {{ transfer.total | number: '1.0-0' }} bytes
+        transferred.
+      } @else if (transfer && !transfer.total) {
+        {{ transfer.transferred | number: '1.0-0' }} bytes transferred. Total size unavailable.
+      } @else {
+        Saving photograph…
+      }
+    </p>
   }
 </form>

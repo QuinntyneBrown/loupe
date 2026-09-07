@@ -6,11 +6,15 @@ import {
   ServiceError,
   CritiqueBrief,
   PhotographUpload,
+  UploadProgress,
 } from 'api';
 
 @Injectable()
 export class MockPhotographService implements IPhotographService {
-  async upload(input: PhotographUpload): Promise<PhotographResult> {
+  async upload(
+    input: PhotographUpload,
+    onProgress?: (progress: UploadProgress) => void,
+  ): Promise<PhotographResult> {
     let bytes: ArrayBuffer;
     try {
       bytes = await input.image.arrayBuffer();
@@ -21,14 +25,22 @@ export class MockPhotographService implements IPhotographService {
     const hash = Array.from(new Uint8Array(digest), (value) =>
       value.toString(16).padStart(2, '0'),
     ).join('');
-    return this.request<PhotographResult>('upload', {
-      filename: input.image.name,
-      title: input.title,
-      brief: input.brief,
-      operationKey: input.operationKey,
-      hash,
-      contentType: input.image.type,
-    });
+    const report = (event: Event) => {
+      if (event instanceof CustomEvent) onProgress?.(event.detail as UploadProgress);
+    };
+    window.addEventListener('loupe-upload-progress', report);
+    try {
+      return await this.request<PhotographResult>('upload', {
+        filename: input.image.name,
+        title: input.title,
+        brief: input.brief,
+        operationKey: input.operationKey,
+        hash,
+        contentType: input.image.type,
+      });
+    } finally {
+      window.removeEventListener('loupe-upload-progress', report);
+    }
   }
   updateBrief(id: string, revision: number, brief: CritiqueBrief): Promise<PhotographResult> {
     return this.request<PhotographResult>('updateBrief', { id, revision, ...brief });

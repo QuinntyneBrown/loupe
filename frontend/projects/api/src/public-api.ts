@@ -10,3 +10,4 @@ export * from './lib/photograph/photograph-upload';
 export * from './lib/photograph/critique-brief';
 export * from './lib/photograph/capture-metadata';
 export * from './lib/common/service-error';
+export * from './lib/common/upload-progress';

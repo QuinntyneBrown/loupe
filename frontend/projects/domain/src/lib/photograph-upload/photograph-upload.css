@@ -39,3 +39,9 @@ button {
 button:disabled {
   cursor: default;
 }
+progress {
+  display: block;
+  width: var(--lp-full);
+  margin-top: var(--lp-space-4);
+  accent-color: var(--lp-color-ink);
+}

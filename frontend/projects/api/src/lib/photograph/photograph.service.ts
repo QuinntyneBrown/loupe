@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
+import { filter, firstValueFrom, map, tap } from 'rxjs';
 import { IPhotographService } from './photograph.service.contract';
 import { PhotographPage } from './photograph-page';
 import { PhotographResult } from './photograph-result';
@@ -8,12 +8,16 @@ import { ServiceError } from '../common/service-error';
 import { SESSION_SERVICE } from '../session/session.service.contract';
 import { CritiqueBrief } from './critique-brief';
 import { PhotographUpload } from './photograph-upload';
+import { UploadProgress } from '../common/upload-progress';
 
 @Injectable()
 export class PhotographService implements IPhotographService {
   private readonly http = inject(HttpClient);
   private readonly session = inject(SESSION_SERVICE);
-  async upload(input: PhotographUpload): Promise<PhotographResult> {
+  async upload(
+    input: PhotographUpload,
+    onProgress?: (progress: UploadProgress) => void,
+  ): Promise<PhotographResult> {
     try {
       await input.image.slice(0, 1).arrayBuffer();
     } catch {
@@ -28,9 +32,25 @@ export class PhotographService implements IPhotographService {
     }
     try {
       return await firstValueFrom(
-        this.http.post<PhotographResult>('/api/photographs', body, {
-          headers: { 'X-CSRF-Token': token, 'Idempotency-Key': input.operationKey },
-        }),
+        this.http
+          .post<PhotographResult>('/api/photographs', body, {
+            headers: { 'X-CSRF-Token': token, 'Idempotency-Key': input.operationKey },
+            reportProgress: true,
+            observe: 'events',
+          })
+          .pipe(
+            tap((event) => {
+              if (event.type === HttpEventType.UploadProgress)
+                onProgress?.({ transferred: event.loaded, total: event.total ?? null });
+            }),
+            filter(
+              (event): event is HttpResponse<PhotographResult> => event instanceof HttpResponse,
+            ),
+            map((response) => {
+              if (!response.body) throw new ServiceError('request_failed');
+              return response.body;
+            }),
+          ),
       );
     } catch (error) {
       throw new ServiceError(

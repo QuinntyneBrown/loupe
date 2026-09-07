@@ -9,11 +9,18 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CritiqueBrief, PHOTOGRAPH_SERVICE, PhotographResult, ServiceError } from 'api';
+import {
+  CritiqueBrief,
+  PHOTOGRAPH_SERVICE,
+  PhotographResult,
+  ServiceError,
+  UploadProgress,
+} from 'api';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'lp-photograph-upload',
-  imports: [FormsModule],
+  imports: [FormsModule, DecimalPipe],
   templateUrl: './photograph-upload.html',
   styleUrl: './photograph-upload.css',
 })
@@ -31,6 +38,7 @@ export class PhotographUpload {
     requestedFeedback: null,
   });
   readonly saving = signal(false);
+  readonly progress = signal<UploadProgress | null>(null);
   readonly failure = signal<string | null>(null);
   readonly failed = computed(() => this.failure() !== null);
   readonly failureMessage = computed(() => {
@@ -95,14 +103,20 @@ export class PhotographUpload {
     const image = this.image();
     if (!image || this.saving() || this.invalid()) return;
     this.saving.set(true);
+    this.progress.set(null);
     this.failure.set(null);
     try {
-      const photo = await this.service.upload({
-        image,
-        title: this.title(),
-        brief: this.brief(),
-        operationKey: this.operationKey,
-      });
+      const photo = await this.service.upload(
+        {
+          image,
+          title: this.title(),
+          brief: this.brief(),
+          operationKey: this.operationKey,
+        },
+        (progress) => {
+          if (!this.destroy.destroyed) this.progress.set(progress);
+        },
+      );
       if (!this.destroy.destroyed) this.saved.emit(photo);
     } catch (error) {
       if (!this.destroy.destroyed) {

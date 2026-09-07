@@ -91,6 +91,9 @@ export class PhotographLibrary {
     this.gates[operation] = gate;
   }
   release(operation) { this.gates[operation].release(); delete this.gates[operation]; }
+  async reportUploadProgress(page, progress) {
+    await page.evaluate(detail => window.dispatchEvent(new CustomEvent('loupe-upload-progress', { detail })), progress);
+  }
   expectReadsOnly() { expect(this.calls.every(operation => ['list', 'get'].includes(operation))).toBe(true); }
   expectSavedNotes(value) { expect(this.photos[0].notes).toBe(value); }
 }
