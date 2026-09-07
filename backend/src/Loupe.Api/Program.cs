@@ -1,7 +1,8 @@
 using Loupe.Application.Security;
 using Loupe.Application.Sessions;
 using Loupe.Infrastructure.Security;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Loupe.Api.Authentication;
+using Loupe.Api.Errors;
 
 namespace Loupe.Api;
 
@@ -11,21 +12,12 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddControllers();
+        builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+        builder.Services.AddProblemDetails();
         builder.Services.AddMediatR(options => options.RegisterServicesFromAssemblyContaining<GetSessionQuery>());
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<ICurrentOwner, CurrentOwner>();
-        builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
-        {
-            options.Cookie.Name = "__Host-loupe-session";
-            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-            options.Cookie.HttpOnly = true;
-            options.Cookie.SameSite = SameSiteMode.Lax;
-            options.Events.OnRedirectToLogin = context =>
-            {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                return Task.CompletedTask;
-            };
-        });
+        builder.Services.AddLoupeAuthentication(builder.Configuration);
         builder.Services.AddAuthorization();
         var app = builder.Build();
         app.Use(async (context, next) =>
@@ -44,6 +36,7 @@ public class Program
                 ["correlationId"] = context.HttpContext.TraceIdentifier
             }).ExecuteAsync(context.HttpContext);
         });
+        app.UseExceptionHandler();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();

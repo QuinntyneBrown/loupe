@@ -13,7 +13,7 @@ public sealed class AnonymousSessionTests
     [Fact]
     public async Task L2_037_1_And_038_5_Anonymous_session_read_returns_private_401()
     {
-        await using var factory = new WebApplicationFactory<Program>();
+        await using var factory = new ApiFactory();
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false,

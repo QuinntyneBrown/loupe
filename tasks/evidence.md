@@ -44,3 +44,11 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: 13 focused Chromium gallery checks passed. Full two-worker regression: 98 passed, one WebKit dialog exceeded aggregate 30s after successful scan/save/cancel actions. Four affected WebKit dialog checks then passed with a 60s total harness allowance; every 5s interaction assertion and all L2 product budgets remain unchanged. No assertions or accessibility rules removed.
 - Reduced runner parallelism from four to two after traces identified scanner contention. Port 4173 was occupied by an unrelated Python server; moved this project's preview/tests to 4187.
 - Reviewed desktop rendering, generated breakpoint behavior, inert synthetic examples, and JS syntax. Full named manual accessibility/visual approval remains a release gate.
+
+## API-02: OIDC challenge and local return destinations
+
+- Red: challenge test received 404 instead of redirect. The controlled metadata fixture was corrected to replace ConfigurationManager, preventing any external discovery request.
+- Green: code/PKCE/state/nonce challenge and anonymous regression passed.
+- Red: all five malicious-return tests received redirects instead of field errors.
+- Green: all seven backend API tests and dotnet format --verify-no-changes passed after Application validation and safe exception mapping.
+- No OIDC completion, durable-session or real Keycloak check is claimed yet.
