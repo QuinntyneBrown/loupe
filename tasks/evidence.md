@@ -308,3 +308,8 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - The upload contract reports transferred bytes and an optional total. Domain stores those values in signals. Known totals drive a native progress bar; unknown totals stay indeterminate. Transfer completion retains the saving state until the response, and retries reset previous progress.
 - Angular HTTP events and RxJS conversion stay inside the API adapter. Production composition selects XHR for upload progress; the injected mock has a controlled progress event boundary that is removed after completion.
 - Reference: [Angular upload progress and XHR configuration](https://angular.dev/guide/http/making-requests#receiving-raw-progress-events).
+
+## UI-19a: share the application discard dialog
+
+- Extracted the existing native dialog and unload listener into an application-owned component for reuse. Existing notes/brief behavior, Escape, focus wrapping and session-aware departure are preserved.
+- All 411 browser checks passed (10.2 minutes), including the existing editor and dialog regressions. Production build and diff checks passed. The related upload behavior is committed separately below.
