@@ -30,3 +30,9 @@ h2 {
 [role='alert'] {
   color: var(--lp-color-danger);
 }
+dd {
+  margin-inline-start: var(--lp-zero);
+  margin-block-end: var(--lp-space-3);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

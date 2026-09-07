@@ -9,6 +9,7 @@ export class PhotographLibrary {
     this.uploadReceipts = new Map();
     this.deletions = new Map();
     this.lostUploadResponses = 0;
+    this.lostDeleteResponses = 0;
     const imageUrl = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#e0e0e0"/><path d="M0 600 450 0h100L100 600" fill="#9a9a9a"/></svg>');
     this.imageUrl = imageUrl;
     this.photos = Array.from({ length: count }, (_, index) => ({
@@ -48,6 +49,7 @@ export class PhotographLibrary {
         const deletion = { id: crypto.randomUUID(), resourceId: input.id, status: 'Pending', deletedAt: new Date().toISOString(), completedAt: null };
         this.deletions.set(deletion.id, deletion);
         this.photos = this.photos.filter(photo => photo.id !== input.id);
+        if (this.lostDeleteResponses > 0) { this.lostDeleteResponses--; return { error: 'request_failed' }; }
         return { data: deletion };
       }
       if (operation === 'getDeletion') {

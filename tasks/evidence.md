@@ -384,3 +384,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Named native confirmation preserves drafts on cancellation/failure, prevents duplicate requests, and navigates only after acknowledgment. Explicit deletion bypasses a second unsaved-edits prompt. The owned status URL survives reload and polls Pending operations until Completed.
 - The first cross-browser run exposed WebKit returning focus to the notes editor on cancellation. Explicitly focusing the delete trigger before opening the dialog fixed this without changing assertions.
 - Inspected confirmation/status screenshots at 375 and 1440 pixels. Independent read-only gpt-5.6-sol review found no Critical or Required changes; it did not run extra tests. Conflict/unavailable recovery, lost responses, and the full keyboard/viewport matrix follow in separate slices.
+
+## UI-22: recover deletion conflicts and uncertain responses
+
+- Red: stale-revision review, failed-review recovery and unavailable-item checks received only the generic retry message. The lost-response control already passed using the retained operation.
+- Green: 42 deletion/unsaved-navigation checks and 42 deletion/notes-conflict/brief-conflict checks passed across all three browsers. Production build and diff checks passed.
+- A revision conflict removes the destructive action until the latest saved brief and notes have been fetched and displayed. Confirmation then uses that revision; another intervening change conflicts again. Failed reads remain retryable, cancellation preserves the original editor drafts, and unavailable items provide a safe explanation without an endless delete retry.
+- A simulated response lost after deletion verifies that retry returns the same operation and creates no duplicate journal entry. This uses the injected mock boundary; real database commit-uncertainty coverage remains in API-25.

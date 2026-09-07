@@ -26,6 +26,23 @@ export class PhotographDetailPage {
     await expect(this.deleteDialog().getByRole('alert')).toHaveText('Deletion was not confirmed. Retry to check its status.');
   }
   async retryDeletion() { await this.deleteDialog().getByRole('button', { name: 'Retry deletion', exact: true }).click(); }
+  async expectDeletionConflict() {
+    await expect(this.deleteDialog().getByRole('alert')).toContainText('This photograph changed. Review its latest saved details before deleting.');
+    await expect(this.deleteDialog().getByRole('button', { name: 'Delete photograph', exact: true })).toHaveCount(0);
+    await expect(this.deleteDialog().getByRole('button', { name: 'Retry deletion', exact: true })).toHaveCount(0);
+  }
+  async reviewDeletion() { await this.deleteDialog().getByRole('button', { name: 'Review latest photograph', exact: true }).click(); }
+  async expectDeletionReview(notes, intent) {
+    const review = this.deleteDialog().getByRole('region', { name: 'Latest saved details', exact: true });
+    await expect(review).toContainText(notes);
+    await expect(review).toContainText(intent);
+    await expect(this.deleteDialog().getByRole('button', { name: 'Delete photograph', exact: true })).toBeEnabled();
+  }
+  async expectDeletionReviewFailure() { await expect(this.deleteDialog().getByRole('alert')).toContainText('Latest details could not be loaded. Your unsaved changes are still here.'); }
+  async expectDeletionUnavailable() {
+    await expect(this.deleteDialog().getByRole('alert')).toHaveText('This photograph is no longer available. Close this dialog to return to your library or keep your unsaved text.');
+    await expect(this.deleteDialog().getByRole('button', { name: /Delete photograph|Retry deletion|Review latest photograph/ })).toHaveCount(0);
+  }
   async expectImage(title) {
     await expect(this.page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();
     await expect(this.page.getByRole('img', { name: title, exact: true })).toBeVisible();

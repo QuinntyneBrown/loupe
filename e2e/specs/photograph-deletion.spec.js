@@ -76,3 +76,66 @@ test('L2-031.5/6: an unconfirmed deletion offers an explicit retry', async ({ pa
   await detail.retryDeletion();
   await deletion.expectPending();
 });
+
+// Given a stale revision or uncertain response, when deletion is recovered,
+// then explicit review protects newer edits and retry resolves one operation.
+test('L2-030/L2-031: a changed photograph requires latest-detail review before deletion', async ({ page }) => {
+  const { work, detail, deletion } = await openPhotograph(page);
+  await detail.editNotes('My unsaved observation');
+  work.library.photos[0].notes = 'New saved observation';
+  work.library.photos[0].brief.intent = 'New saved intent';
+  work.library.photos[0].revision++;
+  await detail.deletePhotograph();
+  await detail.confirmDeletion();
+  await detail.expectDeletionConflict();
+  expect(work.library.photos).toHaveLength(1);
+  await detail.reviewDeletion();
+  await detail.expectDeletionReview('New saved observation', 'New saved intent');
+  await detail.confirmDeletion();
+  await deletion.expectPending();
+  expect(work.library.deletions.size).toBe(1);
+  expect(work.library.calls).not.toContain('updateNotes');
+});
+
+test('L2-030/L2-043: failed deletion review and cancellation preserve unsaved edits', async ({ page }) => {
+  const { work, detail } = await openPhotograph(page);
+  await detail.editNotes('My unsaved observation');
+  work.library.photos[0].revision++;
+  await detail.deletePhotograph();
+  await detail.confirmDeletion();
+  await detail.expectDeletionConflict();
+  work.library.failures.get = 1;
+  await detail.reviewDeletion();
+  await detail.expectDeletionReviewFailure();
+  await detail.reviewDeletion();
+  await detail.expectDeletionReview(work.library.photos[0].notes, work.library.photos[0].brief.intent);
+  await detail.cancelDeletion();
+  await detail.expectDeletionCancelled();
+  await detail.expectNotes('My unsaved observation');
+  expect(work.library.photos).toHaveLength(1);
+});
+
+test('L2-031.5: retry after a lost deletion response returns the existing operation', async ({ page }) => {
+  const { work, detail, deletion } = await openPhotograph(page);
+  work.library.lostDeleteResponses = 1;
+  await detail.deletePhotograph();
+  await detail.confirmDeletion();
+  await detail.expectDeletionFailure();
+  expect(work.library.photos).toHaveLength(0);
+  const operation = [...work.library.deletions.keys()][0];
+  await detail.retryDeletion();
+  await deletion.expectPending();
+  expect(work.library.deletions.size).toBe(1);
+  expect(page.url()).toContain(operation);
+});
+
+test('L2-031.5/L2-043: an unavailable photograph explains recovery and retains unsaved text', async ({ page }) => {
+  const { work, detail } = await openPhotograph(page);
+  await detail.editNotes('My unsaved observation');
+  work.library.photos = [];
+  await detail.deletePhotograph();
+  await detail.confirmDeletion();
+  await detail.expectDeletionUnavailable();
+  await detail.cancelDeletion();
+  await detail.expectNotes('My unsaved observation');
+});
