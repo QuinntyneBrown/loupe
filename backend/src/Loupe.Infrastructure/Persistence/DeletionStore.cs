@@ -5,6 +5,7 @@ using Loupe.Application.Common;
 using Loupe.Application.Deletions;
 using Loupe.Domain.Deletions;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Loupe.Infrastructure.Persistence;
 
@@ -14,6 +15,16 @@ public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock)
         database.Deletions.AsNoTracking().SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken);
 
     public async Task<DeletionOperation> DeletePhotographAsync(Guid id, string ownerId, long revision, CancellationToken cancellationToken)
+    {
+        try { return await DeletePhotographCoreAsync(id, ownerId, revision, cancellationToken); }
+        catch (Exception exception) when (exception is NpgsqlException { IsTransient: true }
+            or DbUpdateException { InnerException: NpgsqlException { IsTransient: true } })
+        {
+            throw new ServiceUnavailableException();
+        }
+    }
+
+    private async Task<DeletionOperation> DeletePhotographCoreAsync(Guid id, string ownerId, long revision, CancellationToken cancellationToken)
     {
         var lockKey = BinaryPrimitives.ReadInt64BigEndian(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { ownerId, type = "delete-photograph", id })));
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);

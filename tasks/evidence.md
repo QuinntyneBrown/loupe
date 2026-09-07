@@ -334,3 +334,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - DELETE /api/photographs/{id}?revision=... removes the owned photograph and records its two media keys atomically. Existing revision concurrency protects concurrent edits; a transaction advisory lock serializes repeated deletion across instances. GET /api/deletions/{id} exposes only the owner's status, never storage keys.
 - The operation remains Pending until physical cleanup. Its journal schema is separate from content for later independent restore retention. Worker cleanup, retention and disaster recovery are subsequent slices; this does not claim those guarantees are complete.
 - Sources: [EF concurrency on deletion](https://learn.microsoft.com/en-us/ef/core/saving/concurrency), [PostgreSQL advisory locks](https://www.postgresql.org/docs/current/explicit-locking.html#ADVISORY-LOCKS).
+
+## API-25: retry uncertain deletion commits
+
+- Red: controlled failures before and after the real PostgreSQL commit returned generic 500 responses.
+- Green: all 134 container API checks passed; formatting and diff checks passed. A second API instance observes the photograph before rollback or its revocation after commit, and retry resolves one durable Pending operation with unavailable content.
+- Transient database failures use the existing 503/Retry-After contract without exposing private diagnostics. This proves the live deletion transaction boundary; backup restore and independently durable disaster recovery remain separate gates.
