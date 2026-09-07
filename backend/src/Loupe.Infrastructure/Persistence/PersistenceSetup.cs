@@ -26,6 +26,7 @@ public static class PersistenceSetup
         services.AddScoped<IDeletionStore, DeletionStore>();
         services.AddScoped<IDeletedContentCleaner, DeletedContentCleaner>();
         services.AddScoped<IAbandonedMediaCleaner, AbandonedMediaCleaner>();
+        services.AddScoped<IDeletionRetention, DeletionRetention>();
         services.AddOptions<MediaOptions>().BindConfiguration("Media")
             .Validate(options => Path.IsPathFullyQualified(options.Root), "Media:Root must be an absolute private storage path.").ValidateOnStart();
         services.AddSingleton<IImageStore, FileImageStore>();

@@ -51,3 +51,7 @@ them. It removes up to 100 per iteration, excludes unknown names and reparse
 points, and coordinates with active upload transactions before taking its
 reference snapshot. Framework multipart temporary storage is a separate private
 staging mount in the deployment work.
+
+Completed deletion records are pruned after 35 days. Pending cleanup records are
+retained until their files are removed, even if that takes longer. Repeating a
+delete after its record expires returns the normal unavailable response.

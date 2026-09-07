@@ -17,6 +17,7 @@ public sealed class CleanupWorker(IServiceScopeFactory scopes, IOptions<CleanupO
             try
             {
                 await using var scope = scopes.CreateAsyncScope();
+                await scope.ServiceProvider.GetRequiredService<ISender>().Send(new PruneDeletionRecordsCommand(), stoppingToken);
                 await scope.ServiceProvider.GetRequiredService<ISender>().Send(new CleanDeletedContentCommand(), stoppingToken);
                 await scope.ServiceProvider.GetRequiredService<ISender>().Send(new CleanAbandonedMediaCommand(), stoppingToken);
             }
