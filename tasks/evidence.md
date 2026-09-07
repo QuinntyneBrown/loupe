@@ -73,3 +73,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 17 API tests passed, including acknowledged sign-out followed by rejected access from both the browser and a second API instance replaying its copied cookie. Format verification passed.
 - Session reads issue a framework antiforgery token; next increment verifies rejection of missing/invalid tokens and untrusted origins before any mutation. This intermediate commit is not release-ready.
 - Reference: [ASP.NET antiforgery](https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery?view=aspnetcore-10.0).
+
+## API-06: protect cookie-authenticated mutations
+
+- Red: seven missing/invalid antiforgery or missing/untrusted-origin cases returned 204 and revoked the session instead of 403.
+- Green: all 24 backend integration tests passed. Each rejected mutation leaves its session usable; valid same-origin sign-out still succeeds. Format verification passed after formatting a dictionary initializer.
+- Allowed HTTPS browser origins are explicitly configured and validated on startup. Unsafe authenticated API requests require an exact origin match plus the framework cookie/header antiforgery pair before dispatch. The OIDC callback remains protected by its protocol state/nonce validation.

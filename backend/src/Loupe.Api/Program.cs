@@ -20,6 +20,12 @@ public class Program
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<ICurrentOwner, CurrentOwner>();
         builder.Services.AddLoupeAuthentication(builder.Configuration);
+        builder.Services.AddOptions<BrowserOptions>().BindConfiguration("Browser")
+            .Validate(options => options.AllowedOrigins.Length > 0 && options.AllowedOrigins.All(origin =>
+                Uri.TryCreate(origin, UriKind.Absolute, out var uri) && uri.Scheme == "https"
+                && uri.GetLeftPart(UriPartial.Authority) == origin && string.IsNullOrEmpty(uri.UserInfo)),
+                "Browser:AllowedOrigins must explicitly list HTTPS origins without paths or credentials.")
+            .ValidateOnStart();
         builder.Services.AddAntiforgery(options =>
         {
             options.HeaderName = "X-CSRF-Token";

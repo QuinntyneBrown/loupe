@@ -11,6 +11,31 @@ namespace Loupe.Api.Tests.Security;
 
 public sealed class SignOutTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
 {
+    [Theory]
+    [InlineData("https://localhost", "missing")]
+    [InlineData("https://localhost", "invalid")]
+    [InlineData("https://attacker.example", "valid")]
+    [InlineData("https://localhost.attacker.example", "valid")]
+    [InlineData("http://localhost", "valid")]
+    [InlineData("null", "valid")]
+    [InlineData(null, "valid")]
+    public async Task L2_039_4_Invalid_protections_are_rejected_before_revocation(string? origin, string tokenKind)
+    {
+        await using var factory = new ApiFactory(database.ConnectionString);
+        await using (var scope = factory.Services.CreateAsyncScope())
+            await scope.ServiceProvider.GetRequiredService<LibraryDbContext>().Database.MigrateAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, BaseAddress = new Uri("https://localhost") });
+        using var callback = await OidcFlow.CompleteAsync(factory, client);
+        using var session = await client.GetAsync("/api/session");
+        if (origin is not null) client.DefaultRequestHeaders.Add("Origin", origin);
+        if (tokenKind != "missing") client.DefaultRequestHeaders.Add("X-CSRF-Token",
+            tokenKind == "valid" ? session.Headers.GetValues("X-CSRF-Token").Single() : "tampered-token");
+        using var rejected = await client.PostAsync("/api/session/sign-out", null);
+        Assert.Equal(HttpStatusCode.Forbidden, rejected.StatusCode);
+        using var stillActive = await client.GetAsync("/api/session");
+        Assert.Equal(HttpStatusCode.OK, stillActive.StatusCode);
+    }
+
     [Fact]
     public async Task L2_037_4_Protected_sign_out_revokes_the_session_on_every_instance()
     {

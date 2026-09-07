@@ -31,6 +31,7 @@ public sealed class ApiFactory(string? connectionString = null) : WebApplication
             ["Identity:Authority"] = "https://identity.example",
             ["Identity:ClientId"] = "loupe-fixture",
             ["Identity:ClientSecret"] = "fixture-only-not-a-real-secret",
+            ["Browser:AllowedOrigins:0"] = "https://localhost",
             ["ConnectionStrings:Library"] = connectionString ?? "Host=localhost;Database=unused;Username=unused"
         }));
         builder.ConfigureTestServices(services => services.PostConfigure<OpenIdConnectOptions>("oidc", options =>
