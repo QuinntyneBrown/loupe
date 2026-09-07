@@ -35,3 +35,15 @@ code { font-family: var(--lp-font-mono); font-size: var(--lp-text-sm); }
 .token-example-radius { border-radius: var(--lp-example); background: var(--lp-color-surface-3); }
 .token-example-borders { border: var(--lp-example) solid var(--lp-color-text); }
 .token-example-elevation { box-shadow: var(--lp-example); }
+dialog { width: min(var(--lp-dialog-max), calc(var(--lp-full) - var(--lp-space-6))); max-height: var(--lp-dialog-height); padding: var(--lp-space-6); border: var(--lp-hairline) solid var(--lp-color-border-strong); border-radius: var(--lp-radius-lg); box-shadow: var(--lp-shadow-lg); color: var(--lp-color-text); overflow: auto; }
+dialog::backdrop { background: var(--lp-color-overlay); }
+body:has(dialog[open]) { overflow: hidden; }
+label { display: block; margin-block: var(--lp-space-4) var(--lp-space-2); font-weight: var(--lp-weight-medium); }
+input, select, textarea { width: var(--lp-full); min-height: var(--lp-control-height); padding: var(--lp-space-2) var(--lp-space-3); border: var(--lp-hairline) solid var(--lp-color-border-strong); border-radius: var(--lp-radius-sm); background: var(--lp-color-bg); color: var(--lp-color-text); font: inherit; }
+textarea { resize: vertical; }
+input:disabled { background: var(--lp-color-surface-2); color: var(--lp-color-text-2); }
+[aria-invalid="true"] { border-color: var(--lp-color-danger); }
+.field-error { color: var(--lp-color-danger); font-size: var(--lp-text-sm); }
+form .actions { margin-top: var(--lp-space-6); }
+.secondary { background: var(--lp-color-bg); color: var(--lp-color-text); border-color: var(--lp-color-border-strong); }
+.secondary:hover:not(:disabled) { background: var(--lp-color-surface-2); }

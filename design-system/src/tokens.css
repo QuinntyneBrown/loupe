@@ -8,6 +8,7 @@
   --lp-skip-hidden: -200%;
   --lp-token-min: 15rem;
   --lp-example-height: 3rem;
+  --lp-dialog-height: 90dvh;
   /* Colour: a neutral gallery wall. No warm cast, so photographs read true. */
   --lp-color-bg: #ffffff;
   --lp-color-surface: #ffffff;

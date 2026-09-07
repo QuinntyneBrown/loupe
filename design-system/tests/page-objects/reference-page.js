@@ -11,7 +11,7 @@ export class ReferencePage {
     await this.page.keyboard.press('Enter');
   }
   async expectPrimaryFeedback() {
-    await expect(this.page.getByRole('status')).toHaveText('Primary button activated.');
+    await expect(this.page.getByRole('status', { name: 'Button feedback' })).toHaveText('Primary button activated.');
   }
   async expectDisabledExample() {
     await expect(this.page.getByRole('button', { name: 'Unavailable example' })).toBeDisabled();
@@ -30,5 +30,28 @@ export class ReferencePage {
   async expectNoAccessibilityViolations() {
     const { default: AxeBuilder } = await import('@axe-core/playwright');
     expect((await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]);
+  }
+  async openEditor() { await this.page.getByRole('button', { name: 'Try editor dialog' }).click(); }
+  async expectEditorFocus() { await expect(this.page.getByRole('textbox', { name: 'Example title' })).toBeFocused(); }
+  async saveEditor(title) {
+    await this.page.getByRole('textbox', { name: 'Example title' }).fill(title);
+    await this.page.getByRole('button', { name: 'Save example', exact: true }).click();
+  }
+  async expectInvalidTitle() { await expect(this.page.getByText('Enter a title for this example.', { exact: true })).toBeVisible(); }
+  async expectSaved(title) {
+    await expect(this.page.getByRole('dialog')).not.toBeVisible();
+    await expect(this.page.getByRole('status', { name: 'Editor feedback' })).toHaveText(`Saved example: ${title}`);
+    await expect(this.page.getByRole('button', { name: 'Try editor dialog' })).toBeFocused();
+  }
+  async cancelEditorWithKeyboard() {
+    await this.page.keyboard.press('Escape');
+    await expect(this.page.getByRole('dialog')).not.toBeVisible();
+    await expect(this.page.getByRole('button', { name: 'Try editor dialog' })).toBeFocused();
+  }
+  async expectFocusContained() {
+    for (let i = 0; i < 9; i++) {
+      await this.page.keyboard.press('Tab');
+      expect(await this.page.getByRole('dialog').evaluate(dialog => dialog.contains(document.activeElement))).toBe(true);
+    }
   }
 }

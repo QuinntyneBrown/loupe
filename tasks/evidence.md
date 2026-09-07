@@ -15,3 +15,9 @@ No application behavior was implemented before this log was created.
 
 - Red: focused Chromium token test failed on missing Tokens navigation.
 - Green: npm test passed 48 checks across Chromium/Firefox/WebKit, including 14 viewport sizes per engine, axe A/AA scans, no external requests, and no runtime exceptions. Reviewed inert DOM construction and direct use of authoritative values. Typography/motion specimen refinements remain part of the gallery slice.
+
+## DS-03: editor dialog
+
+- Red: focused Chromium test failed because the editor trigger was absent.
+- First implementation exposed focus escape in Chromium/WebKit; retained assertions and added explicit Tab wrapping.
+- Green: npm test passed 60 browser checks, including modal keyboard containment, error accessibility scans, save/cancel focus recovery and the full token viewport regression. Build passed within the test command.

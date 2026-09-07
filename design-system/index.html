@@ -15,14 +15,29 @@
       <p class="eyebrow">01 / FOUNDATIONS</p>
       <h1>A clear frame for photography.</h1>
       <p class="intro">Quiet surfaces, precise controls, and room for the image. The shared visual language for learning to see.</p>
-      <nav aria-label="Reference"><a href="#buttons-heading">Buttons</a><a href="#tokens">Tokens</a></nav>
+      <nav aria-label="Reference"><a href="#buttons-heading">Buttons</a><a href="#forms">Forms &amp; dialogs</a><a href="#tokens">Tokens</a></nav>
       <section aria-labelledby="buttons-heading">
         <div class="section-heading"><h2 id="buttons-heading">Buttons</h2><p>One clear action. A visible response.</p></div>
         <div class="specimen">
           <div class="actions"><button id="primary" type="button">Try primary button</button><button type="button" disabled>Unavailable example</button></div>
-          <p role="status" aria-live="polite">Activate the primary button to try its feedback.</p>
+          <p role="status" aria-label="Button feedback" aria-live="polite">Activate the primary button to try its feedback.</p>
         </div>
         <p class="caption">Use a primary button for the main action. Disabled controls retain a readable label; keyboard focus has a distinct outline.</p>
+      </section>
+      <section id="forms" aria-labelledby="forms-heading">
+        <h2 id="forms-heading">Forms &amp; dialogs</h2><p>Keep the task in focus. Explain errors beside their fields and preserve the draft.</p>
+        <div class="specimen"><button id="open-editor" type="button">Try editor dialog</button><p role="status" aria-label="Editor feedback">No example saved.</p></div>
+        <dialog aria-labelledby="editor-heading" aria-describedby="editor-description">
+          <form id="editor" novalidate>
+            <h3 id="editor-heading">Edit a synthetic example</h3><p id="editor-description">Try an empty title to see validation. This example stays in this page only.</p>
+            <label for="example-title">Example title</label><input id="example-title" name="title" autofocus required aria-describedby="title-error">
+            <p id="title-error" class="field-error" hidden>Enter a title for this example.</p>
+            <label for="example-genre">Example genre</label><select id="example-genre"><option>Portrait</option><option>Landscape</option><option>Street</option></select>
+            <label for="example-notes">Example notes</label><textarea id="example-notes" rows="3">Watch where the window light falls.</textarea>
+            <label for="example-source">Unavailable source field</label><input id="example-source" disabled value="Synthetic example">
+            <div class="actions"><button type="submit">Save example</button><button id="cancel-editor" class="secondary" type="button">Cancel</button></div>
+          </form>
+        </dialog>
       </section>
       <section id="tokens" aria-labelledby="tokens-heading"><h2 id="tokens-heading">Tokens</h2><p>Names describe roles. Every specimen reads the same CSS values used by Loupe.</p><div id="token-catalog"></div></section>
     </main>
