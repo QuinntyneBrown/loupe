@@ -3,6 +3,18 @@
 Record the command, observed red failure, green result, and review for each slice.
 No application behavior was implemented before this log was created.
 
+## API-01: reject anonymous session reads
+
+- Repository-local NuGet source configuration avoids a missing machine-level
+  offline feed; this setup failure was resolved before recording behavioral red.
+- Red: `dotnet test backend/Loupe.slnx --filter FullyQualifiedName~AnonymousSessionTests`
+  compiled successfully and failed with expected Unauthorized, actual NotFound.
+- Green: the same command passed; all current backend tests compiled with warnings
+  as errors. `dotnet format backend/Loupe.slnx --verify-no-changes --no-restore` passed.
+- Reviewed thin MediatR controller, inward dependencies, one type per file,
+  non-cacheable safe errors and absence of client-controlled ownership.
+  This is partial L2-037/L2-038 coverage, not completed identity integration.
+
 Reference sources: [Playwright web servers](https://playwright.dev/docs/test-webserver),
 [Angular compatibility](https://angular.dev/reference/versions),
 [ASP.NET OIDC](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-oidc-web-authentication?view=aspnetcore-10.0).

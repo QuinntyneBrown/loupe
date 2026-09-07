@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="../Loupe.Application/Loupe.Application.csproj" />
+    <ProjectReference Include="../Loupe.Infrastructure/Loupe.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

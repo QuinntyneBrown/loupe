@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Loupe.Api/Loupe.Api.csproj" />
+    <Project Path="src/Loupe.Application/Loupe.Application.csproj" />
+    <Project Path="src/Loupe.Domain/Loupe.Domain.csproj" />
+    <Project Path="src/Loupe.Infrastructure/Loupe.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Loupe.Api.Tests/Loupe.Api.Tests.csproj" />
+  </Folder>
+</Solution>
