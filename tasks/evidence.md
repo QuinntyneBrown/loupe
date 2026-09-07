@@ -254,3 +254,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: controlled transient failures immediately before and after the real PostgreSQL commit returned generic 500 responses instead of retryable 503 responses.
 - Green: all 104 container API checks passed; format verification and diff checks passed. Retry from a second API instance creates one record after rollback, or resolves the existing identifier and its two media files after commit. The saved preview remains decodable and private diagnostic text is absent from the response.
 - Infrastructure translates transient Npgsql failures to the application failure contract. The API returns 503 with a five-second Retry-After. A test-only EF transaction interceptor supplies the controlled fault while persistence remains real PostgreSQL.
+
+## API-20: retry an upload after media storage recovers
+
+- Red: a real filesystem obstacle at the test-owned media root produced a generic 500 response.
+- Green: all 105 container API checks passed; format verification and diff checks passed. The failed request returns 503/Retry-After without a photograph. Removing the obstacle and retrying the same key saves one photograph with two readable media files.
+- The private image adapter translates write I/O failures to the existing service-unavailable contract. The test restores its explicitly owned temporary path in a finally block.

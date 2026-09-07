@@ -1,4 +1,5 @@
 using Loupe.Application.Images;
+using Loupe.Application.Common;
 using Microsoft.Extensions.Options;
 
 namespace Loupe.Infrastructure.Images;
@@ -6,6 +7,12 @@ namespace Loupe.Infrastructure.Images;
 public sealed class FileImageStore(IOptions<MediaOptions> options) : IImageStore
 {
     public async Task<string> WriteAsync(byte[] content, CancellationToken cancellationToken)
+    {
+        try { return await WriteCoreAsync(content, cancellationToken); }
+        catch (IOException) { throw new ServiceUnavailableException(); }
+    }
+
+    private async Task<string> WriteCoreAsync(byte[] content, CancellationToken cancellationToken)
     {
         Directory.CreateDirectory(options.Value.Root);
         var key = Guid.NewGuid().ToString("N");
