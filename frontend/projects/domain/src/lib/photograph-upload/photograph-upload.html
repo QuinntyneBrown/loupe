@@ -1,0 +1,68 @@
+<form (ngSubmit)="save()" [attr.aria-busy]="saving()">
+  <label for="upload-image">Photograph</label>
+  <input
+    #fileInput
+    id="upload-image"
+    type="file"
+    accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+    (change)="choose(fileInput.files)"
+    [disabled]="saving()"
+    aria-describedby="upload-help"
+  />
+  <p id="upload-help">One still JPEG, PNG, HEIC or WebP, up to 25 MB. Private to you.</p>
+  <label for="upload-title">Title (optional)</label>
+  <input
+    id="upload-title"
+    name="title"
+    [ngModel]="title()"
+    (ngModelChange)="setTitle($event)"
+    [disabled]="saving()"
+  />
+  <h2>Critique brief</h2>
+  <p>Add context for a future critique. Saving this photograph does not request one.</p>
+  <label for="upload-intent">Intent (optional)</label>
+  <textarea
+    id="upload-intent"
+    name="intent"
+    [ngModel]="brief().intent ?? ''"
+    (ngModelChange)="setBrief('intent', $event)"
+    [disabled]="saving()"
+  ></textarea>
+  <label for="upload-genre">Genre (optional)</label>
+  <input
+    id="upload-genre"
+    name="genre"
+    [ngModel]="brief().genre ?? ''"
+    (ngModelChange)="setBrief('genre', $event)"
+    [disabled]="saving()"
+  />
+  <label for="upload-experience">Experience (optional)</label>
+  <select
+    id="upload-experience"
+    name="experience"
+    [ngModel]="brief().experience ?? ''"
+    (ngModelChange)="setBrief('experience', $event)"
+    [disabled]="saving()"
+  >
+    <option value="">Not specified</option>
+    <option>Beginner</option>
+    <option>Intermediate</option>
+    <option>Advanced</option>
+    <option>Professional</option>
+  </select>
+  <label for="upload-feedback">Requested feedback (optional)</label>
+  <textarea
+    id="upload-feedback"
+    name="feedback"
+    [ngModel]="brief().requestedFeedback ?? ''"
+    (ngModelChange)="setBrief('requestedFeedback', $event)"
+    [disabled]="saving()"
+  ></textarea>
+  @if (failed()) {
+    <p role="alert">The photograph could not be saved. Your fields are still here.</p>
+  }
+  <button type="submit" [disabled]="!image() || saving()">Save photograph</button>
+  @if (saving()) {
+    <p role="status">Saving photograph…</p>
+  }
+</form>

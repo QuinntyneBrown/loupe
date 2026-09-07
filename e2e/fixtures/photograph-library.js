@@ -6,6 +6,7 @@ export class PhotographLibrary {
     this.gates = {};
     this.calls = [];
     const imageUrl = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#e0e0e0"/><path d="M0 600 450 0h100L100 600" fill="#9a9a9a"/></svg>');
+    this.imageUrl = imageUrl;
     this.photos = Array.from({ length: count }, (_, index) => ({
       id: `00000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
       title: `Study ${String(index + 1).padStart(2, '0')}`, createdAt: '2026-09-07T12:00:00Z',
@@ -31,6 +32,17 @@ export class PhotographLibrary {
       if (operation === 'get') {
         const photo = this.photos.find(photo => photo.id === input.id);
         return photo ? { data: photo } : { error: 'item_unavailable' };
+      }
+      if (operation === 'upload') {
+        const clean = value => value?.replace(/\r\n?/g, '\n').trim() || null;
+        const photo = {
+          id: crypto.randomUUID(), title: clean(input.title) || input.filename.replace(/\.[^.]*$/, '') || 'Untitled photograph',
+          createdAt: new Date().toISOString(), width: 800, height: 600,
+          imageUrl: this.imageUrl, previewUrl: this.imageUrl, revision: 1, exif: {}, notes: null,
+          brief: { intent: clean(input.brief.intent), genre: clean(input.brief.genre), experience: input.brief.experience, requestedFeedback: clean(input.brief.requestedFeedback) },
+        };
+        this.photos.unshift(photo);
+        return { data: photo };
       }
       if (operation === 'updateNotes') {
         const photo = this.photos.find(photo => photo.id === input.id);

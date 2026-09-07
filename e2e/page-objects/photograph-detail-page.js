@@ -3,6 +3,10 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographDetailPage {
   constructor(page) { this.page = page; }
+  async expectImage(title) {
+    await expect(this.page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();
+    await expect(this.page.getByRole('img', { name: title, exact: true })).toBeVisible();
+  }
   async openMissing() { await this.page.goto('/my-work/00000000-0000-4000-8000-999999999999'); }
   async expectSaved(title = 'Study 01') {
     await expect(this.page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();

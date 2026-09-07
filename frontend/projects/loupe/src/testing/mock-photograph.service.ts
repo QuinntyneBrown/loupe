@@ -5,10 +5,19 @@ import {
   PhotographResult,
   ServiceError,
   CritiqueBrief,
+  PhotographUpload,
 } from 'api';
 
 @Injectable()
 export class MockPhotographService implements IPhotographService {
+  upload(input: PhotographUpload): Promise<PhotographResult> {
+    return this.request<PhotographResult>('upload', {
+      filename: input.image.name,
+      title: input.title,
+      brief: input.brief,
+      operationKey: input.operationKey,
+    });
+  }
   updateBrief(id: string, revision: number, brief: CritiqueBrief): Promise<PhotographResult> {
     return this.request<PhotographResult>('updateBrief', { id, revision, ...brief });
   }

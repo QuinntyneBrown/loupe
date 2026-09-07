@@ -280,3 +280,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 126 container API checks passed. Format, build (zero warnings/errors), and diff checks passed. Every accepted fixture produces a readable preview; false declarations and unsupported bytes remain rejected.
 - MIME parsing compares the base media type and allows absent/generic declarations. HEIF recognition bounds the file-type box, supports its extended size and compatible HEVC still-image brands, and uses the explicit native HEIF loader. Sequence brands remain unsupported.
 - Sources: [HEIF brands](https://nokiatech.github.io/heif/technical.html), [HEIC media type](https://www.iana.org/assignments/media-types/image/heic), [NetVips HEIF loader](https://kleisauke.github.io/net-vips/api/NetVips.Image.html).
+
+## UI-15: save a photograph from My Work
+
+- Red: all three upload workflows failed at the missing Upload photograph link.
+- Green: all 36 upload, detail and library checks passed across Chromium, Firefox and WebKit. Production build and diff checks passed.
+- An application route composes the signal-backed domain form. The API contract accepts a file, optional title/brief and operation key; the HTTP adapter owns multipart serialization and antiforgery headers. Acknowledgment opens the saved detail. Empty defaults and normalized full briefs survive reload, and pending submission cannot create a second request.
+- The controlled library now accepts uploads through the injected mock. File validation, progress, retry recovery and unsaved protection are subsequent slices. The dedicated route keeps the full brief usable and gives the application ownership of later navigation dialogs.

@@ -7,11 +7,34 @@ import { PhotographResult } from './photograph-result';
 import { ServiceError } from '../common/service-error';
 import { SESSION_SERVICE } from '../session/session.service.contract';
 import { CritiqueBrief } from './critique-brief';
+import { PhotographUpload } from './photograph-upload';
 
 @Injectable()
 export class PhotographService implements IPhotographService {
   private readonly http = inject(HttpClient);
   private readonly session = inject(SESSION_SERVICE);
+  async upload(input: PhotographUpload): Promise<PhotographResult> {
+    const token = await this.session.getRequestToken();
+    const body = new FormData();
+    body.append('image', input.image, input.image.name);
+    body.append('title', input.title);
+    for (const [field, value] of Object.entries(input.brief)) {
+      if (value !== null) body.append(field, value);
+    }
+    try {
+      return await firstValueFrom(
+        this.http.post<PhotographResult>('/api/photographs', body, {
+          headers: { 'X-CSRF-Token': token, 'Idempotency-Key': input.operationKey },
+        }),
+      );
+    } catch (error) {
+      throw new ServiceError(
+        error instanceof HttpErrorResponse && typeof error.error?.code === 'string'
+          ? error.error.code
+          : 'request_failed',
+      );
+    }
+  }
   updateNotes(id: string, revision: number, notes: string): Promise<PhotographResult> {
     return this.update(id, 'notes', { revision, notes });
   }
