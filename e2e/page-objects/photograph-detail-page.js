@@ -83,4 +83,11 @@ export class PhotographDetailPage {
   async retryBrief() { await this.brief().getByRole('button', { name: 'Retry brief save', exact: true }).click(); }
   async cancelBrief() { await this.brief().getByRole('button', { name: 'Cancel brief edit', exact: true }).click(); }
   async expectBriefLimit(maximum = 2000) { await expect(this.brief().getByText(`Use ${maximum.toLocaleString('en-US')} characters or fewer.`, { exact: true })).toBeVisible(); }
+  async expectBriefConflict() { await expect(this.brief().getByRole('alert')).toHaveText('This photograph changed. Your brief has been kept.'); }
+  async reloadLatestBrief() { await this.brief().getByRole('button', { name: 'Reload latest brief', exact: true }).click(); }
+  async expectLatestBrief(values) {
+    const latest = this.brief().getByRole('region', { name: 'Latest saved brief', exact: true });
+    for (const value of Object.values(values)) await expect(latest.getByText(value, { exact: true })).toBeVisible();
+  }
+  async expectBriefReloadFailure() { await expect(this.brief().getByRole('alert')).toHaveText('Latest brief could not be loaded. Your changes are still here.'); }
 }

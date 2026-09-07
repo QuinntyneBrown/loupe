@@ -220,3 +220,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: six brief checks failed at the absent editor. The first implementation then exposed a stale notes revision after a brief save, preventing an otherwise valid note save.
 - Green: all 33 brief, notes and conflict checks passed across Chromium, Firefox and WebKit. Production build and diff checks passed. A build initially overlapped the browser run and temporarily removed shared library output; checks were rerun after the build completed.
 - The editor saves normalized optional fields, enforces scalar limits, retains failed edits for retry and restores focus on close. Saving a brief preserves an unsaved note and updates its revision only when the saved note has not changed. Brief conflict recovery, discard confirmation and viewport coverage remain subsequent slices.
+
+## UI-12: recover and review a stale brief
+
+- Red: two conflict checks received a generic retry response; a third could not save an open brief after notes advanced the photograph revision.
+- Green: all 42 brief/notes/save/conflict checks passed across three browser engines, followed by the production build and diff check.
+- Failed and stale drafts remain editable. Reload presents all latest brief values separately and requires an explicit Save to replace them. Reload failure retains the draft. A notes-only save updates the open brief's revision when its saved brief values still match.

@@ -23,7 +23,7 @@
   }
   <button #editButton type="button" (click)="open()">Edit brief</button>
 } @else {
-  <form (ngSubmit)="save()" [attr.aria-busy]="saving()">
+  <form (ngSubmit)="save()" [attr.aria-busy]="busy()">
     <label for="brief-intent">Intent</label>
     <textarea
       #firstField
@@ -31,7 +31,7 @@
       name="intent"
       [ngModel]="draft().intent ?? ''"
       (ngModelChange)="setText('intent', $event)"
-      [disabled]="saving()"
+      [disabled]="busy()"
       [attr.aria-invalid]="errors().intent"
       [attr.aria-describedby]="errors().intent ? 'intent-error' : null"
     ></textarea>
@@ -44,7 +44,7 @@
       name="genre"
       [ngModel]="draft().genre ?? ''"
       (ngModelChange)="setText('genre', $event)"
-      [disabled]="saving()"
+      [disabled]="busy()"
       [attr.aria-invalid]="errors().genre"
       [attr.aria-describedby]="errors().genre ? 'genre-error' : null"
     />
@@ -57,7 +57,7 @@
       name="experience"
       [ngModel]="draft().experience ?? ''"
       (ngModelChange)="setExperience($event)"
-      [disabled]="saving()"
+      [disabled]="busy()"
     >
       <option value="">Not specified</option>
       <option>Beginner</option>
@@ -71,7 +71,7 @@
       name="feedback"
       [ngModel]="draft().requestedFeedback ?? ''"
       (ngModelChange)="setText('requestedFeedback', $event)"
-      [disabled]="saving()"
+      [disabled]="busy()"
       [attr.aria-invalid]="errors().requestedFeedback"
       [attr.aria-describedby]="errors().requestedFeedback ? 'feedback-error' : null"
     ></textarea>
@@ -81,14 +81,41 @@
     @if (failed()) {
       <p role="alert">The brief could not be saved. Your changes are still here.</p>
     }
+    @if (conflicted()) {
+      <p role="alert">
+        {{
+          reloadFailed()
+            ? 'Latest brief could not be loaded. Your changes are still here.'
+            : 'This photograph changed. Your brief has been kept.'
+        }}
+      </p>
+      <button type="button" [disabled]="busy()" (click)="reloadLatest()">
+        Reload latest brief
+      </button>
+    }
+    @if (latestBrief(); as latest) {
+      <section aria-label="Latest saved brief">
+        <h3>Latest saved brief</h3>
+        <dl>
+          @for (field of fields; track field.key) {
+            <dt>{{ field.label }}</dt>
+            <dd>{{ latest[field.key] || 'Not specified' }}</dd>
+          }
+        </dl>
+        <p>Review your draft above before saving.</p>
+      </section>
+    }
     <div class="actions">
-      <button type="submit" [disabled]="saving() || invalid()">
+      <button type="submit" [disabled]="busy() || conflicted() || invalid()">
         {{ failed() ? 'Retry brief save' : 'Save brief' }}
       </button>
-      <button type="button" [disabled]="saving()" (click)="close()">Cancel brief edit</button>
+      <button type="button" [disabled]="busy()" (click)="close()">Cancel brief edit</button>
     </div>
     @if (saving()) {
       <p role="status">Saving brief…</p>
+    }
+    @if (reloading()) {
+      <p role="status">Loading latest brief…</p>
     }
   </form>
 }

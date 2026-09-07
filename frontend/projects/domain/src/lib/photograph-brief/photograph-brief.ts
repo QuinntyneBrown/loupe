@@ -3,16 +3,18 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
   Injector,
   input,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CritiqueBrief, PHOTOGRAPH_SERVICE, PhotographResult } from 'api';
+import { CritiqueBrief, PHOTOGRAPH_SERVICE, PhotographResult, ServiceError } from 'api';
 
 @Component({
   selector: 'lp-photograph-brief',
@@ -31,6 +33,18 @@ export class PhotographBrief {
   readonly editing = signal(false);
   readonly saving = signal(false);
   readonly failed = signal(false);
+  readonly conflicted = signal(false);
+  readonly reloading = signal(false);
+  readonly reloadFailed = signal(false);
+  readonly latestBrief = signal<CritiqueBrief | null>(null);
+  private readonly savedBrief = signal<CritiqueBrief | null>(null);
+  readonly busy = computed(() => this.saving() || this.reloading());
+  readonly fields = [
+    { key: 'intent', label: 'Intent' },
+    { key: 'genre', label: 'Genre' },
+    { key: 'experience', label: 'Experience' },
+    { key: 'requestedFeedback', label: 'Requested feedback' },
+  ] as const;
   readonly draft = signal<CritiqueBrief>({
     intent: null,
     genre: null,
@@ -58,10 +72,27 @@ export class PhotographBrief {
   });
   readonly invalid = computed(() => Object.values(this.errors()).some(Boolean));
 
+  constructor() {
+    effect(() => {
+      const photo = this.photograph();
+      untracked(() => {
+        if (
+          this.editing() &&
+          this.fields.every((field) => photo.brief[field.key] === this.savedBrief()?.[field.key])
+        )
+          this.revision.set(photo.revision);
+      });
+    });
+  }
+
   open(): void {
     this.draft.set({ ...this.photograph().brief });
+    this.savedBrief.set(this.photograph().brief);
     this.revision.set(this.photograph().revision);
     this.failed.set(false);
+    this.conflicted.set(false);
+    this.reloadFailed.set(false);
+    this.latestBrief.set(null);
     this.editing.set(true);
     afterNextRender(() => this.firstField()?.nativeElement.focus(), { injector: this.injector });
   }
@@ -78,7 +109,7 @@ export class PhotographBrief {
     this.failed.set(false);
   }
   async save(): Promise<void> {
-    if (this.saving() || this.invalid()) return;
+    if (this.busy() || this.conflicted() || this.invalid()) return;
     this.saving.set(true);
     this.failed.set(false);
     try {
@@ -90,10 +121,33 @@ export class PhotographBrief {
       if (this.destroy.destroyed) return;
       this.saved.emit(photo);
       this.close();
-    } catch {
-      if (!this.destroy.destroyed) this.failed.set(true);
+    } catch (error) {
+      if (!this.destroy.destroyed) {
+        if (error instanceof ServiceError && error.code === 'revision_conflict') {
+          this.conflicted.set(true);
+          this.latestBrief.set(null);
+        } else this.failed.set(true);
+      }
     } finally {
       if (!this.destroy.destroyed) this.saving.set(false);
+    }
+  }
+  async reloadLatest(): Promise<void> {
+    if (!this.conflicted() || this.busy()) return;
+    this.reloading.set(true);
+    this.reloadFailed.set(false);
+    try {
+      const photo = await this.service.get(this.photograph().id);
+      if (this.destroy.destroyed) return;
+      this.revision.set(photo.revision);
+      this.savedBrief.set(photo.brief);
+      this.latestBrief.set(photo.brief);
+      this.conflicted.set(false);
+      this.saved.emit(photo);
+    } catch {
+      if (!this.destroy.destroyed) this.reloadFailed.set(true);
+    } finally {
+      if (!this.destroy.destroyed) this.reloading.set(false);
     }
   }
 }
