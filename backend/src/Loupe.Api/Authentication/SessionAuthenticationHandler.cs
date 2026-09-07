@@ -33,6 +33,7 @@ public sealed class SessionAuthenticationHandler(IOptionsMonitor<SessionAuthenti
     {
         await sender.Send(new RevokeSessionCommand(Request.Cookies[Options.CookieName]), Context.RequestAborted);
         Response.Cookies.Delete(Options.CookieName, CookieOptions());
+        Response.StatusCode = StatusCodes.Status204NoContent;
     }
 
     protected override Task HandleChallengeAsync(AuthenticationProperties properties)

@@ -20,6 +20,15 @@ public class Program
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<ICurrentOwner, CurrentOwner>();
         builder.Services.AddLoupeAuthentication(builder.Configuration);
+        builder.Services.AddAntiforgery(options =>
+        {
+            options.HeaderName = "X-CSRF-Token";
+            options.Cookie.Name = "__Host-loupe-csrf";
+            options.Cookie.Path = "/";
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SameSite = SameSiteMode.Strict;
+        });
         builder.Services.AddAuthorization();
         var app = builder.Build();
         app.Use(async (context, next) =>
@@ -41,6 +50,7 @@ public class Program
         app.UseExceptionHandler();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseMiddleware<SessionCsrfMiddleware>();
         app.MapControllers();
         app.Run();
     }

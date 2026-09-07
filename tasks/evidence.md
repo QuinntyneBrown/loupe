@@ -65,3 +65,11 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 14 API integration tests passed with PostgreSQL and the production authentication handler; format verification passed.
 - The browser receives a Secure, HttpOnly opaque cookie; PostgreSQL stores its SHA-256 digest and validated identity. An atomic update enforces the idle boundary. EF migration creates the session table.
 - Review caught OIDC claim mapping: the validated subject claim carries its issuer after the raw issuer claim is removed. No tokens or cookie contents are logged. Absolute lifetime, rotation, restart and sign-out get separate behavioral checks next.
+
+## API-05: server-side sign-out
+
+- Added regression evidence for already-present absolute expiry and rotation: activity succeeds until one millisecond before 12 hours, then fails at the boundary; another API instance rejects the replaced cookie and accepts the current cookie. All three lifetime checks passed without production changes.
+- Red: sign-out acceptance failed because the authenticated response did not supply its antiforgery token.
+- Green: all 17 API tests passed, including acknowledged sign-out followed by rejected access from both the browser and a second API instance replaying its copied cookie. Format verification passed.
+- Session reads issue a framework antiforgery token; next increment verifies rejection of missing/invalid tokens and untrusted origins before any mutation. This intermediate commit is not release-ready.
+- Reference: [ASP.NET antiforgery](https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery?view=aspnetcore-10.0).

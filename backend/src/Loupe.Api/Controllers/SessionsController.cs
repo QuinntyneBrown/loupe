@@ -11,6 +11,9 @@ namespace Loupe.Api.Controllers;
 [Route("api/session")]
 public sealed class SessionsController(ISender sender) : ControllerBase
 {
+    [HttpPost("sign-out")]
+    public IActionResult End() => SignOut("Cookies");
+
     [HttpGet("sign-in")]
     [AllowAnonymous]
     public async Task<IActionResult> SignIn([FromQuery] string? returnUrl, CancellationToken cancellationToken) =>
