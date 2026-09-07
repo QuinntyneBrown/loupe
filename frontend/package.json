@@ -1,0 +1,32 @@
+{
+  "name": "loupe",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "node scripts/mirror-tokens.mjs && ng build api && ng build components && ng build domain && ng build loupe",
+    "watch": "ng build --watch --configuration development",
+    "test": "npm --prefix ../e2e test",
+    "start:e2e": "node scripts/mirror-tokens.mjs && ng build api && ng serve loupe --configuration e2e --host 127.0.0.1 --port 4207"
+  },
+  "private": true,
+  "packageManager": "npm@11.16.0",
+  "dependencies": {
+    "@angular/common": "22.1.5",
+    "@angular/compiler": "22.1.5",
+    "@angular/core": "22.1.5",
+    "@angular/forms": "22.1.5",
+    "@angular/platform-browser": "22.1.5",
+    "@angular/router": "22.1.5",
+    "rxjs": "7.8.2",
+    "tslib": "2.8.1"
+  },
+  "devDependencies": {
+    "@angular/build": "22.1.7",
+    "@angular/cli": "22.1.7",
+    "@angular/compiler-cli": "22.1.5",
+    "ng-packagr": "22.1.1",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3"
+  }
+}

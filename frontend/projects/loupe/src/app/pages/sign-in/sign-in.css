@@ -1,0 +1,36 @@
+:host {
+  display: block;
+  padding: var(--lp-space-9) var(--lp-gutter);
+}
+main {
+  max-width: var(--lp-auth-max);
+  margin: auto;
+}
+.wordmark {
+  color: var(--lp-color-text);
+  font-size: var(--lp-text-2xl);
+  font-weight: var(--lp-weight-semibold);
+  text-decoration: none;
+}
+.eyebrow {
+  margin-top: var(--lp-space-10);
+  font: var(--lp-weight-medium) var(--lp-text-xs)/var(--lp-leading-normal) var(--lp-font-mono);
+  letter-spacing: var(--lp-tracking-wide);
+}
+h1 {
+  font-size: var(--lp-text-3xl);
+  line-height: var(--lp-leading-tight);
+  letter-spacing: var(--lp-tracking-tight);
+}
+p {
+  color: var(--lp-color-text-2);
+  line-height: var(--lp-leading-relaxed);
+}
+button {
+  width: var(--lp-full);
+  margin-top: var(--lp-space-5);
+}
+.privacy {
+  font-size: var(--lp-text-sm);
+  margin-top: var(--lp-space-6);
+}

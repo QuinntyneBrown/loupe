@@ -79,3 +79,11 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: seven missing/invalid antiforgery or missing/untrusted-origin cases returned 204 and revoked the session instead of 403.
 - Green: all 24 backend integration tests passed. Each rejected mutation leaves its session usable; valid same-origin sign-out still succeeds. Format verification passed after formatting a dictionary initializer.
 - Allowed HTTPS browser origins are explicitly configured and validated on startup. Unsafe authenticated API requests require an exact origin match plus the framework cookie/header antiforgery pair before dispatch. The OIDC callback remains protected by its protocol state/nonce validation.
+
+## UI-01: private route, sign-in and sign-out
+
+- Red: Playwright served the blank Angular application and failed on the missing sign-in heading. After adding the guarded route, it failed on the missing sign-out control.
+- Green: the complete sign-in, return to My Work, sign-out and browser Back flow passed in Chromium, Firefox and WebKit. Production builds passed for the application and all three sibling libraries; initial bundle was 235.66 kB before transfer compression.
+- Composition replaces SESSION_SERVICE with a deterministic mock in the Playwright build. Production uses the HTTP adapter; consumers import only its contract/token. No local/session storage is used. Template, style and component files are separate. My Work currently provides its private page heading; its library contents and upload workflow remain upcoming slices.
+- Removed only generated welcome components and their generated scaffold tests. All handwritten behavior tests remain. Exact dependency versions and lockfiles are retained; npm reported no known vulnerabilities.
+- References: [Angular guards](https://angular.dev/guide/routing/route-guards), [Angular CLI](https://angular.dev/tools/cli).

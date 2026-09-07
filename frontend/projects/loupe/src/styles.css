@@ -1,0 +1,31 @@
+@import './tokens.css';
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: var(--lp-zero);
+  background: var(--lp-color-bg);
+  color: var(--lp-color-text);
+  font: var(--lp-text-md)/var(--lp-leading-normal) var(--lp-font-sans);
+}
+button {
+  font: inherit;
+  min-height: var(--lp-control-height);
+  padding: var(--lp-space-2) var(--lp-space-4);
+  border: var(--lp-hairline) solid var(--lp-color-ink);
+  border-radius: var(--lp-radius-md);
+  background: var(--lp-color-ink);
+  color: var(--lp-color-on-ink);
+  cursor: pointer;
+}
+button:hover {
+  background: var(--lp-color-ink-hover);
+}
+button:disabled {
+  cursor: wait;
+}
+:focus-visible {
+  outline: var(--lp-ring-width) solid var(--lp-color-focus);
+  outline-offset: var(--lp-space-1);
+}

@@ -1,0 +1,14 @@
+<a class="skip" href="#main">Skip to content</a>
+@if (session.current(); as user) {
+  <header>
+    <a routerLink="/my-work" class="wordmark">Loupe</a>
+    <span>{{ user.name }}</span>
+    <button type="button" (click)="signOut()" [disabled]="endingSession()">
+      {{ endingSession() ? 'Signing out…' : 'Sign out' }}
+    </button>
+  </header>
+}
+@if (error()) {
+  <p role="alert">{{ error() }}</p>
+}
+<router-outlet />

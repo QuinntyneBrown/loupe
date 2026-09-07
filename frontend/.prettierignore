@@ -1,0 +1,4 @@
+dist/
+node_modules/
+.angular/
+projects/loupe/src/tokens.css
