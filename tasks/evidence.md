@@ -326,3 +326,11 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - All 42 added checks passed across fourteen viewports in Chromium, Firefox and WebKit. These extend coverage of previously implemented behavior; the first run was green and no production change was needed.
 - Checks cover file/field errors, determinate and indeterminate transfer progress, failed-save recovery, pending-departure warnings, dialog focus wrapping and bounds, control targets, horizontal overflow and axe WCAG checks.
 - The preceding full 411-test browser regression and production build passed on the same production code. Diff checks passed. Automated coverage does not replace the outstanding manual device and assistive-technology release reviews.
+
+## API-24: revoke photograph access with a durable deletion operation
+
+- Red: all six new checks failed at the missing DELETE endpoint (405).
+- Green: all 132 container API checks passed; format, build (zero warnings/errors), and diff checks passed. The first regression exposed PostgreSQL timestamp precision differences; returning the persisted record fixed repeat-response consistency without changing assertions.
+- DELETE /api/photographs/{id}?revision=... removes the owned photograph and records its two media keys atomically. Existing revision concurrency protects concurrent edits; a transaction advisory lock serializes repeated deletion across instances. GET /api/deletions/{id} exposes only the owner's status, never storage keys.
+- The operation remains Pending until physical cleanup. Its journal schema is separate from content for later independent restore retention. Worker cleanup, retention and disaster recovery are subsequent slices; this does not claim those guarantees are complete.
+- Sources: [EF concurrency on deletion](https://learn.microsoft.com/en-us/ef/core/saving/concurrency), [PostgreSQL advisory locks](https://www.postgresql.org/docs/current/explicit-locking.html#ADVISORY-LOCKS).
