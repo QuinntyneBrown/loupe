@@ -10,9 +10,7 @@ public sealed class UploadPhotographCommandHandler(ICurrentOwner owner, IPhotogr
 {
     public async Task<PhotographResult> Handle(UploadPhotographCommand request, CancellationToken cancellationToken)
     {
-        var title = request.Title?.Trim();
-        if (string.IsNullOrEmpty(title)) title = Path.GetFileNameWithoutExtension(request.Image.Filename.Replace('\\', '/')).Trim();
-        if (string.IsNullOrEmpty(title)) title = "Untitled photograph";
+        var title = UploadPhotographCommandValidator.Title(request);
         var processed = await ingestor.ProcessAsync(request.Image, cancellationToken);
         string? imageKey = null, previewKey = null;
         try

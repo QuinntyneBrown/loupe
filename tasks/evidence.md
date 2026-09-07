@@ -147,3 +147,8 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 53 container API checks passed. Camera, lens, aperture, shutter speed, ISO, focal length and capture time persist in an explicit allowlisted value object; GPS, owner and serial fields are absent from returned metadata and both retained image variants. The second API instance retrieves the same settings.
 - Added regression evidence for all eight EXIF orientations: full image and preview preserve expected dimensions and the expected quadrant's pixel value. These checks passed without changing the existing orientation pipeline. Format verification passed.
 - Capture settings use EF 10 complex JSON mapping; no unfiltered EXIF dictionary or original EXIF blob is persisted. Source: [Npgsql JSON mapping](https://www.npgsql.org/efcore/mapping/json.html).
+
+## API-13: normalize and bound photograph titles
+
+- Red: overlong manual titles were accepted, line endings were not normalized, and filename defaults were not capped. Three existing default/boundary cases already passed.
+- Green: all 59 container API checks passed. Exactly 200 Unicode scalar values are accepted, 201 are rejected before files or rows are retained, and defaults are truncated without splitting surrogate pairs. Empty/path-containing filenames receive safe title defaults. Format verification passed.
