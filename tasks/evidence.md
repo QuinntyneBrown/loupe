@@ -421,3 +421,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Admission atomically saves an immutable image/brief/EXIF snapshot and operation receipt. Notes are excluded. Owner-scoped status survives an API restart; explicit Demo/Live configuration is required for new work. Deletion locks the photograph, cancels queued work and clears its snapshot in the same transaction.
 - Independent read-only gpt-5.6-sol review found no Critical or Required findings. Forced simultaneous admission/deletion and direct persisted-snapshot inspection remain coverage limits. Provider execution, quotas, leases and result publication are later slices. Keyed replay after configuration removal is the next slice.
 - Verified the official OpenAI model and Responses structured-output/image-input documentation. The configured Live model defaults to gpt-5.4-mini-2026-03-17; no provider calls or credentials were used.
+
+## API-32: resolve keyed critique replays
+
+- Red: restart replay and a response lost after commit returned 503 when analysis configuration was removed. New invalid-key controls initially expected the wrong error code; corrected them to the established invalid_request contract. Concurrent same-key and separate-owner controls already passed.
+- Green: all 158 container API checks passed, including eight new replay cases; format, build and diff checks passed.
+- Configuration is evaluated only inside the receipt's new-operation callback. A retained request resolves its original operation despite later brief edits or disabled new admissions. Deletion still makes the photograph unavailable. Concurrent requests across API instances resolve one identifier; changed payload conflicts; failures before/after commit remain safely retryable.
