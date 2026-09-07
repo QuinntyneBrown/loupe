@@ -340,3 +340,12 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: controlled failures before and after the real PostgreSQL commit returned generic 500 responses.
 - Green: all 134 container API checks passed; formatting and diff checks passed. A second API instance observes the photograph before rollback or its revocation after commit, and retry resolves one durable Pending operation with unavailable content.
 - Transient database failures use the existing 503/Retry-After contract without exposing private diagnostics. This proves the live deletion transaction boundary; backup restore and independently durable disaster recovery remain separate gates.
+
+## API-26: finish photograph cleanup in an independent worker
+
+- Red: both acceptance workflows failed because the independent worker executable was absent.
+- Green: all 136 container API checks passed, including concurrent worker processes and recovery from a filesystem obstruction after process restart. Format, build (zero warnings/errors), locked restore and diff checks passed. The full suite was rerun successfully after refreshing dependency locks.
+- The worker dispatches a scoped MediatR maintenance command each minute by default. PostgreSQL row locks with SKIP LOCKED coordinate bounded manifests across instances. Each file is rechecked against current photograph references; successful removals leave the manifest even when another file fails. Completion clears all storage keys and survives API restart. Filesystem and database failures leave retryable durable work.
+- The independent gpt-5.6-sol review found no Critical or Required changes. It did not run extra tests. Direct cleaner database-failure/cancellation injection and intentionally shared-key coverage remain unexecuted; the tested live-photo control has independent files.
+- Adding the worker refreshed stale API/test lock entries for the already removed NetVips.Native dependency. No package version was upgraded; Linux distribution HEVC decoding remains verified by the full suite.
+- Fairness beyond a full failed batch, overdue alerts, abandoned-media scanning, journal retention and backup restore remain subsequent increments. Reference: [scoped services in .NET background workers](https://learn.microsoft.com/en-us/dotnet/core/extensions/scoped-service).

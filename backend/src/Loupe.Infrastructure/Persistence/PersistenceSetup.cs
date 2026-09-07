@@ -3,6 +3,7 @@ using Loupe.Application.Photographs;
 using Loupe.Application.Images;
 using Loupe.Application.Operations;
 using Loupe.Application.Deletions;
+using Loupe.Application.Maintenance;
 using Loupe.Infrastructure.Images;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,7 @@ public static class PersistenceSetup
         services.AddScoped<IPhotographStore, PhotographStore>();
         services.AddScoped<IOperationReceiptStore, OperationReceiptStore>();
         services.AddScoped<IDeletionStore, DeletionStore>();
+        services.AddScoped<IDeletedContentCleaner, DeletedContentCleaner>();
         services.AddOptions<MediaOptions>().BindConfiguration("Media")
             .Validate(options => Path.IsPathFullyQualified(options.Root), "Media:Root must be an absolute private storage path.").ValidateOnStart();
         services.AddSingleton<IImageStore, FileImageStore>();

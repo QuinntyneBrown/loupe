@@ -30,3 +30,17 @@ the same upload. Normalized title/brief fields, declared format and the byte
 digest identify its payload. A key is scoped to its owner and operation for 24
 hours; conflicting content returns 409. A retained receipt for an unavailable
 photograph returns 404 rather than recreating it.
+
+Photograph deletion uses `DELETE /api/photographs/{id}?revision={revision}`.
+A 200 response acknowledges revoked access and returns a deletion operation;
+`Pending` means physical cleanup has not completed. Owners can read
+`GET /api/deletions/{id}` or repeat the deletion to resolve its current status.
+
+Run `dotnet run --project backend/src/Loupe.Worker` as a separate process after
+applying migrations. It uses the same `ConnectionStrings:Library` and private
+`Media:Root` as the API, with no browser identity configuration. Supply secrets
+through deployment configuration. `Cleanup:PollInterval` defaults to one minute
+and must be positive and at most five minutes. Multiple worker instances can
+share the store. Failed media removal stays pending for subsequent iterations;
+completed manifests retain only the deletion identity and timestamps. Journal
+retention, orphan scanning and backup restore are subsequent increments.

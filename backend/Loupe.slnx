@@ -4,6 +4,7 @@
     <Project Path="src/Loupe.Application/Loupe.Application.csproj" />
     <Project Path="src/Loupe.Domain/Loupe.Domain.csproj" />
     <Project Path="src/Loupe.Infrastructure/Loupe.Infrastructure.csproj" />
+    <Project Path="src/Loupe.Worker/Loupe.Worker.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Loupe.Api.Tests/Loupe.Api.Tests.csproj" />
