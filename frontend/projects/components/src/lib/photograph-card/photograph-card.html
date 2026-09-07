@@ -1,0 +1,14 @@
+<article>
+  <img
+    [src]="previewUrl()"
+    alt=""
+    [width]="width()"
+    [height]="height()"
+    loading="lazy"
+    decoding="async"
+  />
+  <div>
+    <h2>{{ title() }}</h2>
+    <time [attr.datetime]="createdAt()">{{ createdAt() | date: 'mediumDate' }}</time>
+  </div>
+</article>

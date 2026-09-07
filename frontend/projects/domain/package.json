@@ -2,6 +2,8 @@
   "name": "domain",
   "version": "0.0.1",
   "peerDependencies": {
+    "api": "0.0.1",
+    "components": "0.0.1",
     "@angular/common": "^22.1.0",
     "@angular/core": "^22.1.0"
   },

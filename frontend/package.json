@@ -7,7 +7,7 @@
     "build": "node scripts/mirror-tokens.mjs && ng build api && ng build components && ng build domain && ng build loupe",
     "watch": "ng build --watch --configuration development",
     "test": "npm --prefix ../e2e test",
-    "start:e2e": "node scripts/mirror-tokens.mjs && ng build api && ng serve loupe --configuration e2e --host 127.0.0.1 --port 4207"
+    "start:e2e": "node scripts/mirror-tokens.mjs && ng build api && ng build components && ng build domain && ng serve loupe --configuration e2e --host 127.0.0.1 --port 4207"
   },
   "private": true,
   "packageManager": "npm@11.16.0",

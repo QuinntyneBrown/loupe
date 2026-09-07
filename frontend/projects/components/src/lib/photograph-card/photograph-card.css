@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  min-width: var(--lp-zero);
+}
+article {
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+  overflow: hidden;
+}
+img {
+  display: block;
+  width: var(--lp-full);
+  height: auto;
+  aspect-ratio: var(--lp-study-ratio);
+  object-fit: cover;
+  background: var(--lp-color-image-fallback);
+}
+div {
+  padding: var(--lp-space-4);
+}
+h2 {
+  margin: var(--lp-zero) var(--lp-zero) var(--lp-space-2);
+  font-size: var(--lp-text-lg);
+  line-height: var(--lp-leading-tight);
+  overflow-wrap: anywhere;
+}
+time {
+  font-family: var(--lp-font-mono);
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-text-2);
+}

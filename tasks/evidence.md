@@ -176,3 +176,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: all eight list checks returned 405 because the GET collection endpoint was absent.
 - Green: all 91 container API checks passed. Twenty-five uploaded photographs traverse default 24-item pages across API instances in descending creation time/ascending identifier order, including timestamp ties. Another owner's photograph is excluded. Empty pages succeed and invalid sizes/cursors have field errors. Format verification passed.
 - Query uses a bounded keyset cursor and selects only card fields, leaving notes and brief text out of collection payloads. Critique status and reference exclusion fixtures will be extended when those record types are introduced.
+
+## UI-05: browse photographs with honest collection states
+
+- Red: four Chromium acceptance checks found no cards, empty state or retry UI.
+- Green: all 75 browser checks passed across Chromium, Firefox and WebKit. The collection appends 24-item pages, distinguishes empty success from failure, preserves existing cards on next-page failure and retries that cursor. The production application and all three library builds pass; the bundle totals 263.90 kB before transfer compression.
+- HTTP remains in the api adapter. Domain owns signal state and consumes PHOTOGRAPH_SERVICE; the app composes it with a presentational card. Playwright substitutes the interface with controlled synthetic images and failures. Responsive grid and detail navigation remain the next slices.
