@@ -9,8 +9,10 @@ test('L2-037.1: a signed-out visitor signs in and returns to the private destina
   await signIn.continue();
   const myWork = new MyWorkPage(page);
   await myWork.expectOpen();
+  await myWork.expectContentFocus();
   await myWork.signOut();
   await signIn.expectSignedOut();
+  await signIn.expectContentFocus();
   await page.goBack();
   await signIn.expectSignedOut();
 });

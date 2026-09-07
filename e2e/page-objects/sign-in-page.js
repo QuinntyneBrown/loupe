@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 export class SignInPage {
   constructor(page) { this.page = page; }
@@ -18,4 +19,17 @@ export class SignInPage {
     await expect(this.page.getByRole('button', { name: 'Continue to sign in' })).toBeEnabled();
   }
   async openWithDestination(destination) { await this.page.goto(`/sign-in?returnUrl=${encodeURIComponent(destination)}`); }
+  async expectContentFocus() { await expect(this.page.getByRole('main')).toBeFocused(); }
+  async expectAccessibleLayout() {
+    const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(audit.violations).toEqual([]);
+    const fits = await this.page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
+    expect(fits).toBe(true);
+    const button = this.page.getByRole('button', { name: 'Continue to sign in' });
+    await button.scrollIntoViewIfNeeded();
+    const box = await button.boundingBox();
+    expect(box?.width).toBeGreaterThanOrEqual(24);
+    expect(box?.height).toBeGreaterThanOrEqual(24);
+  }
+  async capture(path) { await this.page.screenshot({ path, fullPage: true }); }
 }

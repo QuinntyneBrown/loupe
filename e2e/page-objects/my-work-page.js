@@ -8,4 +8,5 @@ export class MyWorkPage {
     await expect(this.page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible();
   }
   async signOut() { await this.page.getByRole('button', { name: 'Sign out', exact: true }).click(); }
+  async expectContentFocus() { await expect(this.page.getByRole('main')).toBeFocused(); }
 }

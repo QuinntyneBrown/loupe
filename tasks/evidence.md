@@ -93,3 +93,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: all five focused Chromium checks failed: missing retry feedback, and four unsafe destinations prevented arrival at My Work.
 - Green: all 18 browser acceptance checks passed across Chromium, Firefox and WebKit. The production Angular build passed.
 - Failed callbacks display a generic retry message; unsafe or malformed local destinations fall back to My Work. Backend validation remains independently enforced.
+
+## UI-03: navigation focus and sign-in accessibility
+
+- Red: the signed-in destination's main content remained unfocused.
+- Green: all 18 identity workflow checks passed with destination focus assertions; 42 additional viewport/browser checks passed with axe A/AA scans, reflow and target-size assertions, and reduced-motion preference. Production build passed.
+- Inspected 375x667 and 1440x900 screenshots; content and actions remain visible without horizontal scrolling. Screenshots include the main landmark's keyboard focus indicator.
+- This is automated sign-in coverage only. Named screen-reader reviews, actual browser zoom checks and iOS/Android device evidence remain required release gates.
