@@ -128,3 +128,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Added `backend/Test.ps1`; its pinned-package rebuild and all eight format/boundary checks passed under 4 CPUs/8 GiB. Format verification passed. Subsequent backend acceptance uses this command from Windows.
 - SDK 10.0.303-noble was not published; the container uses published SDK 10.0.400, pinned by digest. Native packages are libvips 8.15.1-1.1build4 and libheif HEVC plugins 1.17.6-1ubuntu4.8 from Ubuntu's repositories. Local compilation remains on .NET 10. MediatR remains 12.5.0.
 - Sources: [prebuilt codec exclusions](https://github.com/libvips/build-win64-mxe), [official SDK images](https://github.com/dotnet/dotnet-docker/blob/main/README.sdk.md), [Ubuntu HEVC decoder](https://packages.ubuntu.com/noble/libheif-plugin-libde265).
+
+## API-10: reject animated WebP and multi-image HEIC
+
+- Red: verified two-page WebP and HEIC fixtures were incorrectly saved as single photographs with 201 responses.
+- Green: all 43 container API integration checks passed. Both inputs now return 415 with no record or retained media; all valid still images and boundary inputs remain accepted. Format verification passed.
+- Checks the decoder's top-level page count before rendering. Animated PNG needs its own explicit chunk check because the installed PNG decoder treats APNG as a static PNG.

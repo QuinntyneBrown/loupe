@@ -24,6 +24,8 @@ public sealed class ImageIngestor : IImageIngestor
         try
         {
             using var decoded = Image.NewFromBuffer(bytes, failOn: Enums.FailOn.Error);
+            if (decoded.GetTypeOf("n-pages") != 0 && (int)decoded.Get("n-pages") != 1)
+                throw new ImageValidationException(ImageFailure.Unsupported);
             if (decoded.Width > UploadLimits.Edge || decoded.Height > UploadLimits.Edge || (long)decoded.Width * decoded.Height > UploadLimits.Pixels)
                 throw new ImageValidationException(ImageFailure.Invalid);
             using var oriented = decoded.Autorot();

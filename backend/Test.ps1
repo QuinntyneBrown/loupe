@@ -2,7 +2,7 @@ param([string]$Filter)
 $ErrorActionPreference = 'Stop'
 Push-Location (Split-Path $PSScriptRoot -Parent)
 try {
-    & docker build -f backend/Dockerfile.acceptance -t loupe-acceptance .
+    & docker build --quiet -f backend/Dockerfile.acceptance -t loupe-acceptance .
     if ($LASTEXITCODE -ne 0) { throw 'Acceptance image build failed.' }
     $dockerArguments = @('run', '--rm', '--cpus', '4', '--memory', '8g',
         '--mount', 'type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock',
