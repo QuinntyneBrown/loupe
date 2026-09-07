@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Diagnostics;
 
 namespace Loupe.Api.Tests;
 
-public sealed class ApiFactory(string? connectionString = null) : WebApplicationFactory<Program>
+public sealed class ApiFactory(string? connectionString = null, string? mediaRoot = null) : WebApplicationFactory<Program>
 {
     public ControlledIdentityProvider Identity { get; } = new();
     public TestClock Clock { get; } = new();
@@ -32,6 +32,7 @@ public sealed class ApiFactory(string? connectionString = null) : WebApplication
             ["Identity:ClientId"] = "loupe-fixture",
             ["Identity:ClientSecret"] = "fixture-only-not-a-real-secret",
             ["Browser:AllowedOrigins:0"] = "https://localhost",
+            ["Media:Root"] = mediaRoot ?? Path.Combine(Path.GetTempPath(), "loupe-unused-media"),
             ["ConnectionStrings:Library"] = connectionString ?? "Host=localhost;Database=unused;Username=unused"
         }));
         builder.ConfigureTestServices(services => services.PostConfigure<OpenIdConnectOptions>("oidc", options =>

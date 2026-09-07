@@ -106,3 +106,11 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: controlled session-service failure left the private route blank instead of displaying retry feedback.
 - Green: nine focused workflow checks and the remaining 54 browser regressions passed; production build passed. An initial contradictory include/exclude test filter selected no tests; corrected to exclude the nine already-run checks before recording the 54 passing regressions.
 - Route query parameters now bind to signal inputs, keeping retry feedback correct when Angular reuses the sign-in component. Retry rechecks the original safe destination without storing private state in browser storage.
+
+## API-07: durable photograph and private preview
+
+- Red: PNG upload returned 404 instead of 201 through the authenticated, antiforgery-protected API.
+- Green: all 25 backend integration checks passed, including a real decode, database migration, private filesystem writes and a second API instance reading the same saved record and preview bytes. Format verification passed.
+- Owner keys derive from validated issuer and subject. Storage keys are generated identifiers, and media reads authorize the owning photograph before opening files. Persisted full-frame PNG and JPEG preview omit metadata; allowed EXIF extraction remains a separate slice.
+- This establishes the PNG save/revisit path. Format/byte/pixel/frame bounds, field normalization, cleanup failure recovery and remaining formats are required next increments before this feature can be released.
+- References: [NetVips 3.2.0](https://www.nuget.org/packages/NetVips/3.2.0), [Image API](https://kleisauke.github.io/net-vips/api/NetVips.Image.html). Native libvips is pinned to 8.18.6.

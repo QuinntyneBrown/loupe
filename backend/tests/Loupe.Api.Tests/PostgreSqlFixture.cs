@@ -9,6 +9,13 @@ public sealed class PostgreSqlFixture : IAsyncLifetime
         .WithDatabase("loupe_acceptance").WithUsername("loupe")
         .WithPassword(Guid.NewGuid().ToString("N")).Build();
     public string ConnectionString => database.GetConnectionString();
+    public string MediaRoot { get; } = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "loupe-acceptance", Guid.NewGuid().ToString("N")));
     public Task InitializeAsync() => database.StartAsync();
-    public Task DisposeAsync() => database.DisposeAsync().AsTask();
+    public async Task DisposeAsync()
+    {
+        await database.DisposeAsync();
+        var relative = Path.GetRelativePath(Path.GetFullPath(Path.Combine(Path.GetTempPath(), "loupe-acceptance")), MediaRoot);
+        if (relative.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relative)) throw new InvalidOperationException("Unsafe fixture cleanup path.");
+        if (Directory.Exists(MediaRoot)) Directory.Delete(MediaRoot, recursive: true);
+    }
 }
