@@ -21,6 +21,7 @@ public sealed class ImageIngestor : IImageIngestor
         var contentType = ImageSignature.ContentType(bytes);
         if (contentType is null || !string.Equals(contentType, upload.ContentType, StringComparison.OrdinalIgnoreCase))
             throw new ImageValidationException(ImageFailure.Unsupported);
+        if (contentType == "image/png") PngContainerValidator.Validate(bytes);
         try
         {
             using var decoded = Image.NewFromBuffer(bytes, failOn: Enums.FailOn.Error);

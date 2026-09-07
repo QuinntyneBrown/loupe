@@ -15,6 +15,7 @@ public sealed class MultiImageTests(PostgreSqlFixture database) : IClassFixture<
     [Theory]
     [InlineData("webp")]
     [InlineData("heic")]
+    [InlineData("png")]
     public async Task L2_039_1_Multiple_images_are_rejected_without_retaining_the_first_frame(string format)
     {
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot);
@@ -22,9 +23,15 @@ public sealed class MultiImageTests(PostgreSqlFixture database) : IClassFixture<
         using var black = Image.Black(32, 32, bands: 3);
         using var white = black.NewFromImage(255);
         using var frames = black.Join(white, Enums.Direction.Vertical);
-        var bytes = format == "webp" ? frames.WebpsaveBuffer(pageHeight: 32) : frames.HeifsaveBuffer(pageHeight: 32, compression: Enums.ForeignHeifCompression.Hevc);
+        var bytes = format switch
+        {
+            "webp" => frames.WebpsaveBuffer(pageHeight: 32),
+            "heic" => frames.HeifsaveBuffer(pageHeight: 32, compression: Enums.ForeignHeifCompression.Hevc),
+            _ => AnimatedPng.Create()
+        };
         using var decoded = Image.NewFromBuffer(bytes);
-        Assert.Equal(2, decoded.Get("n-pages"));
+        if (format != "png") Assert.Equal(2, decoded.Get("n-pages"));
+        else Assert.Equal(2, decoded.Width);
         using var upload = new MultipartFormDataContent();
         var part = new ByteArrayContent(bytes);
         part.Headers.ContentType = new MediaTypeHeaderValue("image/" + format);

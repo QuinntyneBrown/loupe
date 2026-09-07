@@ -134,3 +134,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: verified two-page WebP and HEIC fixtures were incorrectly saved as single photographs with 201 responses.
 - Green: all 43 container API integration checks passed. Both inputs now return 415 with no record or retained media; all valid still images and boundary inputs remain accepted. Format verification passed.
 - Checks the decoder's top-level page count before rendering. Animated PNG needs its own explicit chunk check because the installed PNG decoder treats APNG as a static PNG.
+
+## API-11: reject APNG even with a static-only decoder
+
+- Red: a synthetic two-frame APNG returned 201 because the decoder exposed its static first frame.
+- Green: all 44 container API checks passed. A bounded PNG chunk walk rejects animation before decoding while accepting the existing still-image and exact-byte fixtures. Format verification passed.
+- Fixture includes valid frame-control sequence numbers, zlib image data and PNG CRCs, following the [APNG specification](https://wiki.mozilla.org/APNG_Specification).
