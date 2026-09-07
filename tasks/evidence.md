@@ -214,3 +214,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: both conflict tests received a generic retry message instead of a conflict/reload workflow.
 - Green: all 72 relevant notes, conflict, detail and viewport checks passed. A six-check cross-browser follow-up verified wording that correctly refers to the photograph revision, which can change independently of notes. Production build and diff checks passed.
 - Two browser editors share one controlled library: the second retains its text, loads the latest saved notes separately, and only changes storage after an intentional Save. A failed reload preserves the draft and offers retry. The same conflict/review flow passes axe/reflow checks at all 14 viewport sizes.
+
+## UI-11: edit and clear a photograph brief
+
+- Red: six brief checks failed at the absent editor. The first implementation then exposed a stale notes revision after a brief save, preventing an otherwise valid note save.
+- Green: all 33 brief, notes and conflict checks passed across Chromium, Firefox and WebKit. Production build and diff checks passed. A build initially overlapped the browser run and temporarily removed shared library output; checks were rerun after the build completed.
+- The editor saves normalized optional fields, enforces scalar limits, retains failed edits for retry and restores focus on close. Saving a brief preserves an unsaved note and updates its revision only when the saved note has not changed. Brief conflict recovery, discard confirmation and viewport coverage remain subsequent slices.

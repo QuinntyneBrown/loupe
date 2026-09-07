@@ -1,0 +1,94 @@
+@if (!editing()) {
+  @let brief = photograph().brief;
+  <dl>
+    @if (brief.intent) {
+      <dt>Intent</dt>
+      <dd>{{ brief.intent }}</dd>
+    }
+    @if (brief.genre) {
+      <dt>Genre</dt>
+      <dd>{{ brief.genre }}</dd>
+    }
+    @if (brief.experience) {
+      <dt>Experience</dt>
+      <dd>{{ brief.experience }}</dd>
+    }
+    @if (brief.requestedFeedback) {
+      <dt>Requested feedback</dt>
+      <dd>{{ brief.requestedFeedback }}</dd>
+    }
+  </dl>
+  @if (!brief.intent && !brief.genre && !brief.experience && !brief.requestedFeedback) {
+    <p>No brief added.</p>
+  }
+  <button #editButton type="button" (click)="open()">Edit brief</button>
+} @else {
+  <form (ngSubmit)="save()" [attr.aria-busy]="saving()">
+    <label for="brief-intent">Intent</label>
+    <textarea
+      #firstField
+      id="brief-intent"
+      name="intent"
+      [ngModel]="draft().intent ?? ''"
+      (ngModelChange)="setText('intent', $event)"
+      [disabled]="saving()"
+      [attr.aria-invalid]="errors().intent"
+      [attr.aria-describedby]="errors().intent ? 'intent-error' : null"
+    ></textarea>
+    @if (errors().intent) {
+      <p id="intent-error" role="alert">Use 2,000 characters or fewer.</p>
+    }
+    <label for="brief-genre">Genre</label>
+    <input
+      id="brief-genre"
+      name="genre"
+      [ngModel]="draft().genre ?? ''"
+      (ngModelChange)="setText('genre', $event)"
+      [disabled]="saving()"
+      [attr.aria-invalid]="errors().genre"
+      [attr.aria-describedby]="errors().genre ? 'genre-error' : null"
+    />
+    @if (errors().genre) {
+      <p id="genre-error" role="alert">Use 100 characters or fewer.</p>
+    }
+    <label for="brief-experience">Experience</label>
+    <select
+      id="brief-experience"
+      name="experience"
+      [ngModel]="draft().experience ?? ''"
+      (ngModelChange)="setExperience($event)"
+      [disabled]="saving()"
+    >
+      <option value="">Not specified</option>
+      <option>Beginner</option>
+      <option>Intermediate</option>
+      <option>Advanced</option>
+      <option>Professional</option>
+    </select>
+    <label for="brief-feedback">Requested feedback</label>
+    <textarea
+      id="brief-feedback"
+      name="feedback"
+      [ngModel]="draft().requestedFeedback ?? ''"
+      (ngModelChange)="setText('requestedFeedback', $event)"
+      [disabled]="saving()"
+      [attr.aria-invalid]="errors().requestedFeedback"
+      [attr.aria-describedby]="errors().requestedFeedback ? 'feedback-error' : null"
+    ></textarea>
+    @if (errors().requestedFeedback) {
+      <p id="feedback-error" role="alert">Use 2,000 characters or fewer.</p>
+    }
+    @if (failed()) {
+      <p role="alert">The brief could not be saved. Your changes are still here.</p>
+    }
+    <div class="actions">
+      <button type="submit" [disabled]="saving() || invalid()">
+        {{ failed() ? 'Retry brief save' : 'Save brief' }}
+      </button>
+      <button type="button" [disabled]="saving()" (click)="close()">Cancel brief edit</button>
+    </div>
+    @if (saving()) {
+      <p role="status">Saving brief…</p>
+    }
+  </form>
+}

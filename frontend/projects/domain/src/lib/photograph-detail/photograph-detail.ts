@@ -2,10 +2,11 @@ import { Component, computed, effect, inject, input, signal } from '@angular/cor
 import { DatePipe } from '@angular/common';
 import { PHOTOGRAPH_SERVICE, PhotographResult, ServiceError } from 'api';
 import { PhotographNotes } from '../photograph-notes/photograph-notes';
+import { PhotographBrief } from '../photograph-brief/photograph-brief';
 
 @Component({
   selector: 'lp-photograph-detail',
-  imports: [DatePipe, PhotographNotes],
+  imports: [DatePipe, PhotographNotes, PhotographBrief],
   templateUrl: './photograph-detail.html',
   styleUrl: './photograph-detail.css',
 })

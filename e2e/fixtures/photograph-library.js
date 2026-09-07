@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 
 export class PhotographLibrary {
   constructor(count) {
-    this.failures = { list: 0, get: 0, updateNotes: 0 };
+    this.failures = { list: 0, get: 0, updateNotes: 0, updateBrief: 0 };
     this.gates = {};
     this.calls = [];
     const imageUrl = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#e0e0e0"/><path d="M0 600 450 0h100L100 600" fill="#9a9a9a"/></svg>');
@@ -39,6 +39,18 @@ export class PhotographLibrary {
         const notes = input.notes.replace(/\r\n?/g, '\n').trim();
         if ([...notes].length > 10000) return { error: 'invalid_request' };
         photo.notes = notes || null;
+        photo.revision++;
+        return { data: photo };
+      }
+      if (operation === 'updateBrief') {
+        const photo = this.photos.find(photo => photo.id === input.id);
+        if (!photo) return { error: 'item_unavailable' };
+        if (photo.revision !== input.revision) return { error: 'revision_conflict' };
+        const clean = value => value?.replace(/\r\n?/g, '\n').trim() || null;
+        const brief = { intent: clean(input.intent), genre: clean(input.genre), experience: clean(input.experience), requestedFeedback: clean(input.requestedFeedback) };
+        if ([...brief.intent ?? ''].length > 2000 || [...brief.genre ?? ''].length > 100 || [...brief.requestedFeedback ?? ''].length > 2000)
+          return { error: 'invalid_request' };
+        photo.brief = brief;
         photo.revision++;
         return { data: photo };
       }

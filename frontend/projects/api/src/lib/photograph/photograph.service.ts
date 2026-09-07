@@ -6,18 +6,29 @@ import { PhotographPage } from './photograph-page';
 import { PhotographResult } from './photograph-result';
 import { ServiceError } from '../common/service-error';
 import { SESSION_SERVICE } from '../session/session.service.contract';
+import { CritiqueBrief } from './critique-brief';
 
 @Injectable()
 export class PhotographService implements IPhotographService {
   private readonly http = inject(HttpClient);
   private readonly session = inject(SESSION_SERVICE);
-  async updateNotes(id: string, revision: number, notes: string): Promise<PhotographResult> {
+  updateNotes(id: string, revision: number, notes: string): Promise<PhotographResult> {
+    return this.update(id, 'notes', { revision, notes });
+  }
+  updateBrief(id: string, revision: number, brief: CritiqueBrief): Promise<PhotographResult> {
+    return this.update(id, 'brief', { revision, ...brief });
+  }
+  private async update(
+    id: string,
+    field: 'notes' | 'brief',
+    body: object,
+  ): Promise<PhotographResult> {
     const token = await this.session.getRequestToken();
     try {
       return await firstValueFrom(
         this.http.put<PhotographResult>(
-          `/api/photographs/${encodeURIComponent(id)}/notes`,
-          { revision, notes },
+          `/api/photographs/${encodeURIComponent(id)}/${field}`,
+          body,
           { headers: { 'X-CSRF-Token': token } },
         ),
       );

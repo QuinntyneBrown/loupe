@@ -15,32 +15,7 @@
     <div class="context">
       <section aria-labelledby="brief-heading">
         <h2 id="brief-heading">Critique brief</h2>
-        <dl>
-          @if (item.brief.intent) {
-            <dt>Intent</dt>
-            <dd>{{ item.brief.intent }}</dd>
-          }
-          @if (item.brief.genre) {
-            <dt>Genre</dt>
-            <dd>{{ item.brief.genre }}</dd>
-          }
-          @if (item.brief.experience) {
-            <dt>Experience</dt>
-            <dd>{{ item.brief.experience }}</dd>
-          }
-          @if (item.brief.requestedFeedback) {
-            <dt>Requested feedback</dt>
-            <dd>{{ item.brief.requestedFeedback }}</dd>
-          }
-        </dl>
-        @if (
-          !item.brief.intent &&
-          !item.brief.genre &&
-          !item.brief.experience &&
-          !item.brief.requestedFeedback
-        ) {
-          <p>No brief added.</p>
-        }
+        <lp-photograph-brief [photograph]="item" (saved)="photo.set($event)" />
       </section>
       <section aria-labelledby="capture-heading">
         <h2 id="capture-heading">Capture settings</h2>

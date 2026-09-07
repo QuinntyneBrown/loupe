@@ -47,6 +47,8 @@ export class PhotographNotes {
           this.draft.set(photo.notes ?? '');
           this.savedText.set(photo.notes ?? '');
           this.revision.set(photo.revision);
+        } else if ((photo.notes ?? '') === this.savedText()) {
+          this.revision.set(photo.revision);
         }
       });
     });

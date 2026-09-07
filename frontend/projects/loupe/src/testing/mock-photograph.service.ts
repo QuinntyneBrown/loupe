@@ -1,8 +1,17 @@
 import { Injectable } from '@angular/core';
-import { IPhotographService, PhotographPage, PhotographResult, ServiceError } from 'api';
+import {
+  IPhotographService,
+  PhotographPage,
+  PhotographResult,
+  ServiceError,
+  CritiqueBrief,
+} from 'api';
 
 @Injectable()
 export class MockPhotographService implements IPhotographService {
+  updateBrief(id: string, revision: number, brief: CritiqueBrief): Promise<PhotographResult> {
+    return this.request<PhotographResult>('updateBrief', { id, revision, ...brief });
+  }
   updateNotes(id: string, revision: number, notes: string): Promise<PhotographResult> {
     return this.request<PhotographResult>('updateNotes', { id, revision, notes });
   }

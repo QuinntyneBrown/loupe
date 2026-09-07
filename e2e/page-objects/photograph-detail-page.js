@@ -38,7 +38,7 @@ export class PhotographDetailPage {
   async editNotes(value) { await this.page.getByRole('textbox', { name: 'Notes', exact: true }).fill(value); }
   async expectNotes(value) { await expect(this.page.getByRole('textbox', { name: 'Notes', exact: true })).toHaveValue(value); }
   async saveNotes() { await this.page.getByRole('button', { name: 'Save notes', exact: true }).click(); }
-  async expectNotesState(value) { await expect(this.page.getByRole('status')).toHaveText(value); }
+  async expectNotesState(value) { await expect(this.page.getByRole('region', { name: 'Personal notes', exact: true }).getByRole('status')).toHaveText(value); }
   async expectNotesFailure() {
     await expect(this.page.getByRole('alert')).toHaveText('Notes could not be saved. Your text is still here.');
     await expect(this.page.getByRole('button', { name: 'Retry save', exact: true })).toBeEnabled();
@@ -61,4 +61,26 @@ export class PhotographDetailPage {
   async reloadLatestNotes() { await this.page.getByRole('button', { name: 'Reload latest notes', exact: true }).click(); }
   async expectLatestNotes(value) { await expect(this.page.getByRole('region', { name: 'Latest saved notes', exact: true })).toContainText(value); }
   async expectNotesReloadFailure() { await expect(this.page.getByRole('alert')).toContainText('Latest notes could not be loaded. Your text is still here.'); }
+  brief() { return this.page.getByRole('region', { name: 'Critique brief', exact: true }); }
+  async editBrief() { await this.brief().getByRole('button', { name: 'Edit brief', exact: true }).click(); }
+  async fillBrief(values) {
+    const labels = { intent: 'Intent', genre: 'Genre', requestedFeedback: 'Requested feedback' };
+    for (const [field, value] of Object.entries(values)) {
+      if (field === 'experience') await this.brief().getByLabel('Experience', { exact: true }).selectOption(value);
+      else await this.brief().getByLabel(labels[field], { exact: true }).fill(value);
+    }
+  }
+  async saveBrief() { await this.brief().getByRole('button', { name: 'Save brief', exact: true }).click(); }
+  async expectBriefValues(values) {
+    for (const value of Object.values(values)) await expect(this.brief().getByText(value, { exact: true })).toBeVisible();
+  }
+  async expectBriefDraft(values) {
+    const labels = { intent: 'Intent', genre: 'Genre', experience: 'Experience', requestedFeedback: 'Requested feedback' };
+    for (const [field, value] of Object.entries(values)) await expect(this.brief().getByLabel(labels[field], { exact: true })).toHaveValue(value);
+  }
+  async expectNoBrief() { await expect(this.brief().getByText('No brief added.', { exact: true })).toBeVisible(); }
+  async expectBriefFailure() { await expect(this.brief().getByRole('alert')).toHaveText('The brief could not be saved. Your changes are still here.'); }
+  async retryBrief() { await this.brief().getByRole('button', { name: 'Retry brief save', exact: true }).click(); }
+  async cancelBrief() { await this.brief().getByRole('button', { name: 'Cancel brief edit', exact: true }).click(); }
+  async expectBriefLimit(maximum = 2000) { await expect(this.brief().getByText(`Use ${maximum.toLocaleString('en-US')} characters or fewer.`, { exact: true })).toBeVisible(); }
 }
