@@ -42,7 +42,12 @@ export class DeletionStatus {
           pending = false;
           if (active) {
             this.loading.set(false);
-            if (this.result()?.status === 'Pending' || this.error() === 'request_failed')
+            if (
+              this.result()?.status === 'Pending' ||
+              ['request_failed', 'service_unavailable', 'unexpected_failure'].includes(
+                this.error() ?? '',
+              )
+            )
               timer = setTimeout(() => void load(), 5000);
           }
         }

@@ -398,3 +398,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Regression discovery: the first 48-case run passed 47 and exposed an existing WebKit unload timing gap immediately after typing. The run's teardown stalled after reporting all cases and was interrupted. Assertions were preserved; the listener now reads current draft and session state at event dispatch instead of waiting for an effect to install it.
 - Green: all 75 deletion, editor-navigation and upload-navigation checks passed across all three engines; production build and diff checks passed. Pending deletion blocks route departure until the bounded request resolves, while acknowledgment clears both pending and dirty protection before status navigation.
 - Independent read-only gpt-5.6-sol review of UI-22/23 found no Critical or Required changes, without additional test execution. Synthetic unload events verify handler behavior; native close/reload prompts and sign-out during pending deletion remain outside these specific checks.
+
+## UI-24: recover cleanup status polling
+
+- Red: the initial service-unavailable response did not schedule another status check; four other lifecycle/single-flight controls already passed.
+- Green: all 48 deletion/status checks passed across Chromium, Firefox and WebKit; production build and diff checks passed.
+- Initial transient server failures now retry on the same five-second cadence as transport failures. Failed refreshes retain the last known Pending result. Completed/unavailable outcomes stop automatic polling, repeated manual checks share the outstanding request, and departure ignores late results and clears polling.
+- Polling-stop checks advance the browser clock after observing the terminal state, following [Playwright's clock API](https://playwright.dev/docs/clock). They observe service calls and rendered behavior without inspecting implementation timers.
