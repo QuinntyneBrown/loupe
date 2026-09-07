@@ -273,3 +273,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 110 container API checks passed; format verification and diff checks passed. Oversized bodies have the image-too-large contract without a photograph or managed media, and a boundary-valid streamed image succeeds.
 - A read-only body wrapper enforces the existing 26 MB whole-request allowance before antiforgery/form parsing. Declared oversize is rejected immediately, and streamed bytes are counted independently. The separate 25 MB image limit remains unchanged. Native server 413 read failures retain the same application error contract.
 - Reference: [ASP.NET Core upload buffering and request limits](https://learn.microsoft.com/en-us/aspnet/core/mvc/models/file-uploads?view=aspnetcore-10.0). Private placement and cleanup of framework temporary buffering remain part of deployment/cleanup work.
+
+## API-23: recognize supported image bytes and HEIF brands
+
+- Red: thirteen valid-image cases returned 415 for absent/generic MIME declarations, parameters, or HEIF brands. Three rejection controls already passed. The extended-size fixture first failed automatic format detection; explicit HEIF decoding established its validity before the API failure was recorded.
+- Green: all 126 container API checks passed. Format, build (zero warnings/errors), and diff checks passed. Every accepted fixture produces a readable preview; false declarations and unsupported bytes remain rejected.
+- MIME parsing compares the base media type and allows absent/generic declarations. HEIF recognition bounds the file-type box, supports its extended size and compatible HEVC still-image brands, and uses the explicit native HEIF loader. Sequence brands remain unsupported.
+- Sources: [HEIF brands](https://nokiatech.github.io/heif/technical.html), [HEIC media type](https://www.iana.org/assignments/media-types/image/heic), [NetVips HEIF loader](https://kleisauke.github.io/net-vips/api/NetVips.Image.html).
