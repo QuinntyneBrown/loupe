@@ -100,3 +100,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 18 identity workflow checks passed with destination focus assertions; 42 additional viewport/browser checks passed with axe A/AA scans, reflow and target-size assertions, and reduced-motion preference. Production build passed.
 - Inspected 375x667 and 1440x900 screenshots; content and actions remain visible without horizontal scrolling. Screenshots include the main landmark's keyboard focus indicator.
 - This is automated sign-in coverage only. Named screen-reader reviews, actual browser zoom checks and iOS/Android device evidence remain required release gates.
+
+## UI-04: session outage recovery
+
+- Red: controlled session-service failure left the private route blank instead of displaying retry feedback.
+- Green: nine focused workflow checks and the remaining 54 browser regressions passed; production build passed. An initial contradictory include/exclude test filter selected no tests; corrected to exclude the nine already-run checks before recording the 54 passing regressions.
+- Route query parameters now bind to signal inputs, keeping retry feedback correct when Angular reuses the sign-in component. Retry rechecks the original safe destination without storing private state in browser storage.

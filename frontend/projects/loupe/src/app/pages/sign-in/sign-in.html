@@ -2,12 +2,17 @@
   <a class="wordmark" href="/">Loupe</a>
   <p class="eyebrow">LOOK CLOSER. KEEP LEARNING.</p>
   <h1>A private space for your photography</h1>
-  @if (failed) {
+  @if (error() === 'authentication_failed') {
     <p role="alert">Sign-in could not be completed. Please try again.</p>
   }
   <p>
     Develop your eye through thoughtful photo critiques and a library of work that inspires you.
   </p>
-  <button type="button" (click)="continue()">Continue to sign in</button>
+  @if (error() === 'session_unavailable') {
+    <p role="alert">Your session could not be checked. Please try again.</p>
+    <button type="button" (click)="retry()">Try again</button>
+  } @else {
+    <button type="button" (click)="continue()">Continue to sign in</button>
+  }
   <p class="privacy">Your photographs, references, and notes are private to you.</p>
 </main>

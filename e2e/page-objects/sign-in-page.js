@@ -32,4 +32,12 @@ export class SignInPage {
     expect(box?.height).toBeGreaterThanOrEqual(24);
   }
   async capture(path) { await this.page.screenshot({ path, fullPage: true }); }
+  async makeSessionUnavailable() {
+    await this.page.addInitScript(() => { window.loupeFixture = { sessionUnavailable: true }; });
+  }
+  async expectSessionRetry() {
+    await expect(this.page.getByRole('alert')).toHaveText('Your session could not be checked. Please try again.');
+    await expect(this.page.getByRole('button', { name: 'Try again', exact: true })).toBeEnabled();
+  }
+  async retrySession() { await this.page.getByRole('button', { name: 'Try again', exact: true }).click(); }
 }

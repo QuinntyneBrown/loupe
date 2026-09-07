@@ -25,6 +25,17 @@ test('L2-037.2: a failed identity callback offers a safe retry', async ({ page }
   await new MyWorkPage(page).expectOpen();
 });
 
+test('L2-043: session service failure offers retry without a blank private page', async ({ page }) => {
+  const signIn = new SignInPage(page);
+  await signIn.makeSessionUnavailable();
+  await signIn.openPrivateDestination();
+  await signIn.expectSessionRetry();
+  await signIn.retrySession();
+  await signIn.expectSignInRequired();
+  await signIn.continue();
+  await new MyWorkPage(page).expectOpen();
+});
+
 for (const destination of ['https://attacker.example', '//attacker.example', '/\\attacker.example', '/%2f%2fattacker.example']) {
   test(`L2-037.1: unsafe destination ${destination} falls back to My Work`, async ({ page }) => {
     const signIn = new SignInPage(page);
