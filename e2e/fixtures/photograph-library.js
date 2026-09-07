@@ -5,6 +5,9 @@ export class PhotographLibrary {
     this.failures = { list: 0, get: 0, updateNotes: 0, updateBrief: 0 };
     this.gates = {};
     this.calls = [];
+    this.errors = { upload: [] };
+    this.uploadReceipts = new Map();
+    this.lostUploadResponses = 0;
     const imageUrl = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#e0e0e0"/><path d="M0 600 450 0h100L100 600" fill="#9a9a9a"/></svg>');
     this.imageUrl = imageUrl;
     this.photos = Array.from({ length: count }, (_, index) => ({
@@ -20,6 +23,8 @@ export class PhotographLibrary {
     await page.exposeFunction('loupePhotographs', async (operation, input) => {
       this.calls.push(operation);
       await this.gates[operation]?.promise;
+      const error = this.errors[operation]?.shift();
+      if (error) return { error };
       if (this.failures[operation] > 0) {
         this.failures[operation]--;
         return { error: 'request_failed' };
@@ -35,13 +40,24 @@ export class PhotographLibrary {
       }
       if (operation === 'upload') {
         const clean = value => value?.replace(/\r\n?/g, '\n').trim() || null;
+        const title = clean(input.title) || input.filename.replace(/\.[^.]*$/, '') || 'Untitled photograph';
+        const brief = { intent: clean(input.brief.intent), genre: clean(input.brief.genre), experience: input.brief.experience, requestedFeedback: clean(input.brief.requestedFeedback) };
+        const fingerprint = JSON.stringify({ title, brief, hash: input.hash, contentType: input.contentType });
+        const receipt = this.uploadReceipts.get(input.operationKey);
+        if (receipt) {
+          if (receipt.fingerprint !== fingerprint) return { error: 'operation_conflict' };
+          const photo = this.photos.find(photo => photo.id === receipt.id);
+          return photo ? { data: photo } : { error: 'item_unavailable' };
+        }
         const photo = {
-          id: crypto.randomUUID(), title: clean(input.title) || input.filename.replace(/\.[^.]*$/, '') || 'Untitled photograph',
+          id: crypto.randomUUID(), title,
           createdAt: new Date().toISOString(), width: 800, height: 600,
           imageUrl: this.imageUrl, previewUrl: this.imageUrl, revision: 1, exif: {}, notes: null,
-          brief: { intent: clean(input.brief.intent), genre: clean(input.brief.genre), experience: input.brief.experience, requestedFeedback: clean(input.brief.requestedFeedback) },
+          brief,
         };
         this.photos.unshift(photo);
+        this.uploadReceipts.set(input.operationKey, { id: photo.id, fingerprint });
+        if (this.lostUploadResponses > 0) { this.lostUploadResponses--; return { error: 'request_failed' }; }
         return { data: photo };
       }
       if (operation === 'updateNotes') {

@@ -14,6 +14,11 @@ export class PhotographService implements IPhotographService {
   private readonly http = inject(HttpClient);
   private readonly session = inject(SESSION_SERVICE);
   async upload(input: PhotographUpload): Promise<PhotographResult> {
+    try {
+      await input.image.slice(0, 1).arrayBuffer();
+    } catch {
+      throw new ServiceError('file_unavailable');
+    }
     const token = await this.session.getRequestToken();
     const body = new FormData();
     body.append('image', input.image, input.image.name);

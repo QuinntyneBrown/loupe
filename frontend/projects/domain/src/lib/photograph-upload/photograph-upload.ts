@@ -1,6 +1,15 @@
-import { Component, computed, DestroyRef, inject, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CritiqueBrief, PHOTOGRAPH_SERVICE, PhotographResult } from 'api';
+import { CritiqueBrief, PHOTOGRAPH_SERVICE, PhotographResult, ServiceError } from 'api';
 
 @Component({
   selector: 'lp-photograph-upload',
@@ -12,6 +21,7 @@ export class PhotographUpload {
   readonly saved = output<PhotographResult>();
   private readonly service = inject(PHOTOGRAPH_SERVICE);
   private readonly destroy = inject(DestroyRef);
+  private readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
   readonly image = signal<File | null>(null);
   readonly title = signal('');
   readonly brief = signal<CritiqueBrief>({
@@ -21,7 +31,24 @@ export class PhotographUpload {
     requestedFeedback: null,
   });
   readonly saving = signal(false);
-  readonly failed = signal(false);
+  readonly failure = signal<string | null>(null);
+  readonly failed = computed(() => this.failure() !== null);
+  readonly failureMessage = computed(() => {
+    switch (this.failure()) {
+      case 'file_unavailable':
+        return 'The selected file could not be read. Your fields are still here.';
+      case 'unsupported_media':
+        return 'This upload was rejected. Choose a still JPEG, PNG, HEIC or WebP image.';
+      case 'image_too_large':
+        return 'This upload was rejected because it exceeds the upload size limit. Choose an image of 25 MB or less.';
+      case 'invalid_image':
+        return 'This image could not be decoded within the limits of 100 megapixels and 20,000 pixels per edge. Choose another image.';
+      case 'operation_conflict':
+        return 'This retry differs from an earlier upload. Restore the original file and fields, or return to My Work to start a new upload.';
+      default:
+        return 'The upload was not confirmed. Your fields are still here. Retry to check whether it was saved.';
+    }
+  });
   readonly errors = computed(() => {
     const length = (value: string | null) =>
       [...(value ?? '').replace(/\r\n?/g, '\n').trim()].length;
@@ -53,26 +80,22 @@ export class PhotographUpload {
   readonly invalid = computed(
     () => !this.image() || !!this.fileError() || Object.values(this.errors()).some(Boolean),
   );
-  private operationKey = crypto.randomUUID();
+  private readonly operationKey = crypto.randomUUID();
 
   choose(files: FileList | null): void {
     this.image.set(files?.item(0) ?? null);
-    this.operationKey = crypto.randomUUID();
-    this.failed.set(false);
   }
   setTitle(value: string): void {
     this.title.set(value);
-    this.operationKey = crypto.randomUUID();
   }
   setBrief(field: keyof CritiqueBrief, value: string): void {
     this.brief.update((brief) => ({ ...brief, [field]: value || null }));
-    this.operationKey = crypto.randomUUID();
   }
   async save(): Promise<void> {
     const image = this.image();
     if (!image || this.saving() || this.invalid()) return;
     this.saving.set(true);
-    this.failed.set(false);
+    this.failure.set(null);
     try {
       const photo = await this.service.upload({
         image,
@@ -81,8 +104,15 @@ export class PhotographUpload {
         operationKey: this.operationKey,
       });
       if (!this.destroy.destroyed) this.saved.emit(photo);
-    } catch {
-      if (!this.destroy.destroyed) this.failed.set(true);
+    } catch (error) {
+      if (!this.destroy.destroyed) {
+        const code = error instanceof ServiceError ? error.code : 'request_failed';
+        this.failure.set(code);
+        if (code === 'file_unavailable') {
+          this.image.set(null);
+          this.fileInput().nativeElement.value = '';
+        }
+      }
     } finally {
       if (!this.destroy.destroyed) this.saving.set(false);
     }

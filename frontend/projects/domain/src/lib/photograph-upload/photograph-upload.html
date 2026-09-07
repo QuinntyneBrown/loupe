@@ -83,9 +83,16 @@
     <p id="upload-feedback-error" role="alert">Use 2,000 characters or fewer.</p>
   }
   @if (failed()) {
-    <p role="alert">The photograph could not be saved. Your fields are still here.</p>
+    <p role="alert">{{ failureMessage() }}</p>
+    <p>
+      {{
+        image() ? 'The selected file is still available.' : 'Select the photograph again to retry.'
+      }}
+    </p>
   }
-  <button type="submit" [disabled]="invalid() || saving()">Save photograph</button>
+  <button type="submit" [disabled]="invalid() || saving()">
+    {{ failed() ? 'Retry upload' : 'Save photograph' }}
+  </button>
   @if (saving()) {
     <p role="status">Saving photograph…</p>
   }

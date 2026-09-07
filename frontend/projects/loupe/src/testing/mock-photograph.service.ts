@@ -10,12 +10,24 @@ import {
 
 @Injectable()
 export class MockPhotographService implements IPhotographService {
-  upload(input: PhotographUpload): Promise<PhotographResult> {
+  async upload(input: PhotographUpload): Promise<PhotographResult> {
+    let bytes: ArrayBuffer;
+    try {
+      bytes = await input.image.arrayBuffer();
+    } catch {
+      throw new ServiceError('file_unavailable');
+    }
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    const hash = Array.from(new Uint8Array(digest), (value) =>
+      value.toString(16).padStart(2, '0'),
+    ).join('');
     return this.request<PhotographResult>('upload', {
       filename: input.image.name,
       title: input.title,
       brief: input.brief,
       operationKey: input.operationKey,
+      hash,
+      contentType: input.image.type,
     });
   }
   updateBrief(id: string, revision: number, brief: CritiqueBrief): Promise<PhotographResult> {

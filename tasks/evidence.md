@@ -293,3 +293,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: seven new checks demonstrated missing text limits and empty/oversize/unsupported-file feedback. The 25 MB control already passed.
 - Green: all 33 upload and validation checks passed across three browser engines. Production build and diff check passed. Inspected the form at 375x667 and 1440x900.
 - Field errors count normalized Unicode scalars, associate messages with their controls, disable invalid submission, and retain the brief while files are corrected. Empty/generic MIME declarations remain eligible for authoritative API byte validation. Browser boundary fixtures test the form's service boundary; native decoding and dimension limits remain covered by API acceptance.
+
+## UI-17: recover upload failures without duplicating photographs
+
+- Red: all eight retry checks failed at generic failure feedback or absent reselection guidance. The acceptance library now retains operation receipts and can lose a committed response.
+- Green: all 57 upload/save/validation/retry checks passed across three browser engines, followed by production build and diff checks.
+- One operation key lives for the form's lifetime, including file reselection and edits. Unconfirmed saves offer an explicit retry; changed payloads conflict and can be restored to resolve the original photograph. Specific image errors retain the brief. An unreadable file clears the picker and requests reselection; the HTTP adapter checks file readability before submitting.
+- The mock hashes actual selected bytes so same-name replacements cannot evade the conflict checks. API acceptance separately establishes durable receipt and media behavior.

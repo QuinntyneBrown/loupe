@@ -30,6 +30,20 @@ export class PhotographUploadPage {
     await this.expectSaveDisabled();
   }
   async expectSaveDisabled() { await expect(this.page.getByRole('button', { name: 'Save photograph', exact: true })).toBeDisabled(); }
+  async expectFailure(message = 'The upload was not confirmed. Your fields are still here. Retry to check whether it was saved.') {
+    await expect(this.page.getByRole('alert')).toHaveText(message);
+    await expect(this.page).toHaveURL(/\/my-work\/upload$/);
+  }
+  async expectDraft(values) {
+    const labels = { title: 'Title (optional)', intent: 'Intent (optional)', genre: 'Genre (optional)', experience: 'Experience (optional)', requestedFeedback: 'Requested feedback (optional)' };
+    for (const [field, value] of Object.entries(values)) await expect(this.page.getByLabel(labels[field], { exact: true })).toHaveValue(value);
+  }
+  async expectFileRetained() { await expect(this.page.getByText('The selected file is still available.', { exact: true })).toBeVisible(); }
+  async expectReselectionRequired() {
+    await expect(this.page.getByText('Select the photograph again to retry.', { exact: true })).toBeVisible();
+    await expect(this.page.getByRole('button', { name: 'Retry upload', exact: true })).toBeDisabled();
+  }
+  async retry() { await this.page.getByRole('button', { name: 'Retry upload', exact: true }).click(); }
   async expectSaving() {
     await expect(this.page.getByRole('status')).toContainText('Saving photograph');
     await expect(this.page.getByRole('button', { name: 'Save photograph', exact: true })).toBeDisabled();
