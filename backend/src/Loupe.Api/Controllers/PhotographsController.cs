@@ -18,7 +18,8 @@ public sealed class PhotographsController(ISender sender) : ControllerBase
     public async Task<ActionResult<PhotographResult>> Upload([FromForm] UploadPhotographRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new UploadPhotographCommand(new ImageUpload(request.Image.OpenReadStream,
-            request.Image.FileName, request.Image.ContentType, request.Image.Length), request.Title), cancellationToken);
+            request.Image.FileName, request.Image.ContentType, request.Image.Length), request.Title,
+            new CritiqueBriefInput(request.Intent, request.Genre, request.Experience, request.RequestedFeedback)), cancellationToken);
         return Created($"/api/photographs/{result.Id}", result);
     }
 

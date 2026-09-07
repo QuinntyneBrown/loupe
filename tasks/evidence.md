@@ -152,3 +152,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 
 - Red: overlong manual titles were accepted, line endings were not normalized, and filename defaults were not capped. Three existing default/boundary cases already passed.
 - Green: all 59 container API checks passed. Exactly 200 Unicode scalar values are accepted, 201 are rejected before files or rows are retained, and defaults are truncated without splitting surrogate pairs. Empty/path-containing filenames receive safe title defaults. Format verification passed.
+
+## API-14: optional critique brief on upload
+
+- Red: both saved/absent brief reads lacked the brief property, and all four invalid-field cases returned 201 instead of 400.
+- Green: all 65 existing container API checks passed; four additional boundary checks passed for 2,000-scalar intent/feedback, 100-character genre and each allowed experience (10 brief checks total). Format verification passed.
+- Brief values normalize before image processing and persist as an explicit JSON value object. Empty values remain absent; experience is serialized by name. Update/version conflict behavior is the next independent slice.
