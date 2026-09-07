@@ -7,13 +7,14 @@
   aria-labelledby="discard-heading"
   aria-describedby="discard-description"
   (cancel)="cancelDiscard($event)"
+  (keydown)="trapDiscardFocus($event)"
 >
   <h2 id="discard-heading">Discard unsaved changes?</h2>
   <p id="discard-description">
     Keep editing to save your changes, or discard this unfinished edit.
   </p>
   <div class="actions">
-    <button type="button" autofocus (click)="finishDiscard(false)">Keep editing</button>
-    <button type="button" (click)="finishDiscard(true)">Discard</button>
+    <button #keepButton type="button" autofocus (click)="finishDiscard(false)">Keep editing</button>
+    <button #discardButton type="button" (click)="finishDiscard(true)">Discard</button>
   </div>
 </dialog>

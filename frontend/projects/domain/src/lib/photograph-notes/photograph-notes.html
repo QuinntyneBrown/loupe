@@ -30,7 +30,7 @@
   }
   @if (latestNotes() !== null) {
     <section aria-labelledby="latest-notes-heading">
-      <h3 id="latest-notes-heading">Latest saved notes</h3>
+      <h3 #latestHeading id="latest-notes-heading" tabindex="-1">Latest saved notes</h3>
       <p class="latest">{{ latestNotes() || 'No notes saved.' }}</p>
       <p>Review your draft before saving again.</p>
     </section>

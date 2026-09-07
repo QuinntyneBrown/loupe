@@ -1,13 +1,17 @@
 import {
+  afterNextRender,
   Component,
   computed,
   DestroyRef,
   effect,
+  ElementRef,
   inject,
+  Injector,
   input,
   output,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PHOTOGRAPH_SERVICE, PhotographResult, ServiceError } from 'api';
@@ -23,6 +27,8 @@ export class PhotographNotes {
   readonly saved = output<PhotographResult>();
   private readonly service = inject(PHOTOGRAPH_SERVICE);
   private readonly destroy = inject(DestroyRef);
+  private readonly injector = inject(Injector);
+  private readonly latestHeading = viewChild<ElementRef<HTMLHeadingElement>>('latestHeading');
   readonly draft = signal('');
   private readonly savedText = signal('');
   private readonly revision = signal(1);
@@ -97,6 +103,9 @@ export class PhotographNotes {
       this.latestNotes.set(photo.notes ?? '');
       this.conflicted.set(false);
       this.saved.emit(photo);
+      afterNextRender(() => this.latestHeading()?.nativeElement.focus(), {
+        injector: this.injector,
+      });
     } catch {
       if (!this.destroy.destroyed) this.reloadFailed.set(true);
     } finally {

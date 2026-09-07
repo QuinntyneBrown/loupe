@@ -104,4 +104,31 @@ export class PhotographDetailPage {
     const prevented = await this.page.evaluate(() => !window.dispatchEvent(new Event('beforeunload', { cancelable: true })));
     expect(prevented).toBe(expected);
   }
+  async expectBriefSaving() {
+    await expect(this.brief().getByRole('status')).toHaveText('Saving brief…');
+    await expect(this.brief().getByRole('button', { name: 'Save brief', exact: true })).toBeDisabled();
+  }
+  async expectAccessibleBrief() {
+    expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(audit.violations).toEqual([]);
+  }
+  async expectBriefReviewFocus() { await expect(this.brief().getByRole('heading', { name: 'Latest saved brief', exact: true })).toBeFocused(); }
+  async expectNotesReviewFocus() { await expect(this.page.getByRole('heading', { name: 'Latest saved notes', exact: true })).toBeFocused(); }
+  async expectDiscardKeyboardAndLayout() {
+    await this.expectDiscardChoice();
+    await this.page.keyboard.press('Tab');
+    await expect(this.discardDialog().getByRole('button', { name: 'Discard', exact: true })).toBeFocused();
+    await this.page.keyboard.press('Tab');
+    await expect(this.discardDialog().getByRole('button', { name: 'Keep editing', exact: true })).toBeFocused();
+    await this.page.keyboard.press('Shift+Tab');
+    await expect(this.discardDialog().getByRole('button', { name: 'Discard', exact: true })).toBeFocused();
+    const box = await this.discardDialog().boundingBox();
+    const viewport = this.page.viewportSize();
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+    expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+    await this.expectAccessibleBrief();
+  }
 }

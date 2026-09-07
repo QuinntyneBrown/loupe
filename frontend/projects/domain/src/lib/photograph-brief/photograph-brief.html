@@ -95,7 +95,7 @@
     }
     @if (latestBrief(); as latest) {
       <section aria-label="Latest saved brief">
-        <h3>Latest saved brief</h3>
+        <h3 #latestHeading tabindex="-1">Latest saved brief</h3>
         <dl>
           @for (field of fields; track field.key) {
             <dt>{{ field.label }}</dt>

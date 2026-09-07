@@ -234,3 +234,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - The application page owns the native modal and route guard. Keep editing and Escape retain the draft; Discard allows the requested departure. Closing a brief discards only that editor. A dirty page requests the browser's available unload protection and removes the listener after saving. This event-level check does not claim reliable unload prompts on mobile platforms.
 - Existing brief-cancel acceptance now explicitly chooses Discard, preserving its prior saved-content assertion. L2-002.1/.2 and L2-004.3/.4 are checked complete based on the API and browser evidence above; criteria involving unfinished capabilities remain open.
 - Sources: [Angular route guards](https://angular.dev/guide/routing/route-guards), [native dialog](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog), [beforeunload behavior and limitations](https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event).
+
+## UI-14: retain keyboard focus through editor recovery
+
+- Red: both latest-value headings remained unfocused after their reload buttons disappeared. The subsequent viewport run also demonstrated Tab leaving the discard dialog after its final button.
+- Green: all 60 relevant checks passed across three browser engines, including brief error/validation/pending/conflict/review/discard workflows at all 14 sizes, axe/reflow audits and both dialog tab directions. Production build and diff check passed.
+- Latest brief and notes headings receive focus after rendering. The application dialog wraps Tab between its two choices. A strict-template event-type error was corrected using the native keydown event and an explicit Tab check, without type suppression.

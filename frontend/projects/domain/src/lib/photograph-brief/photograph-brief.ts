@@ -31,6 +31,7 @@ export class PhotographBrief {
   private readonly injector = inject(Injector);
   private readonly editButton = viewChild<ElementRef<HTMLButtonElement>>('editButton');
   private readonly firstField = viewChild<ElementRef<HTMLTextAreaElement>>('firstField');
+  private readonly latestHeading = viewChild<ElementRef<HTMLHeadingElement>>('latestHeading');
   readonly editing = signal(false);
   readonly saving = signal(false);
   readonly failed = signal(false);
@@ -154,6 +155,9 @@ export class PhotographBrief {
       this.latestBrief.set(photo.brief);
       this.conflicted.set(false);
       this.saved.emit(photo);
+      afterNextRender(() => this.latestHeading()?.nativeElement.focus(), {
+        injector: this.injector,
+      });
     } catch {
       if (!this.destroy.destroyed) this.reloadFailed.set(true);
     } finally {
