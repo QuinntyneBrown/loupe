@@ -1,0 +1,18 @@
+:host {
+  display: block;
+  margin-top: var(--lp-space-8);
+}
+h2 {
+  font-size: var(--lp-text-2xl);
+}
+p {
+  max-width: var(--lp-measure);
+  overflow-wrap: anywhere;
+}
+.timestamp {
+  color: var(--lp-color-text-2);
+  font-size: var(--lp-text-sm);
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}

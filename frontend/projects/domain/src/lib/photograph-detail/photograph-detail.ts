@@ -13,10 +13,11 @@ import { PHOTOGRAPH_SERVICE, PhotographResult, ServiceError } from 'api';
 import { PhotographNotes } from '../photograph-notes/photograph-notes';
 import { PhotographBrief } from '../photograph-brief/photograph-brief';
 import { PhotographCritique } from '../photograph-critique/photograph-critique';
+import { CritiqueStatus } from '../critique-status/critique-status';
 
 @Component({
   selector: 'lp-photograph-detail',
-  imports: [DatePipe, PhotographNotes, PhotographBrief, PhotographCritique],
+  imports: [DatePipe, PhotographNotes, PhotographBrief, PhotographCritique, CritiqueStatus],
   templateUrl: './photograph-detail.html',
   styleUrl: './photograph-detail.css',
 })
@@ -29,6 +30,7 @@ export class PhotographDetail {
   readonly dirty = computed(() => !!(this.notesEditor()?.dirty() || this.briefEditor()?.dirty()));
   private readonly service = inject(PHOTOGRAPH_SERVICE);
   readonly photo = signal<PhotographResult | null>(null);
+  readonly completedCritiqueId = signal<string | null>(null);
   readonly hasCaptureSettings = computed(() =>
     Object.values(this.photo()?.exif ?? {}).some(Boolean),
   );

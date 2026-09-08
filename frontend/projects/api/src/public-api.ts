@@ -17,3 +17,4 @@ export * from './lib/deletion/deletion.service';
 export * from './lib/critique/critique-result';
 export * from './lib/critique/critique.service.contract';
 export * from './lib/critique/critique.service';
+export * from './lib/operation/operation-result';

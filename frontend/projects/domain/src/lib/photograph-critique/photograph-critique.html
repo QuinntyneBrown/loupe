@@ -1,5 +1,9 @@
 <section [attr.aria-labelledby]="'critique-' + id()">
   <h2 #heading [id]="'critique-' + id()" tabindex="-1">Photo critique</h2>
+  @if (error() && critique()) {
+    <p role="alert">The latest critique could not be loaded. The previous result is still shown.</p>
+    <button type="button" (click)="retry()">Retry loading critique</button>
+  }
   @if (loading()) {
     <p role="status">Loading critique…</p>
   } @else if (critique(); as item) {

@@ -9,6 +9,7 @@ export class PhotographLibrary {
     this.uploadReceipts = new Map();
     this.deletions = new Map();
     this.critiques = new Map();
+    this.critiqueOperations = new Map();
     this.lostUploadResponses = 0;
     this.lostDeleteResponses = 0;
     const imageUrl = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#e0e0e0"/><path d="M0 600 450 0h100L100 600" fill="#9a9a9a"/></svg>');
@@ -44,6 +45,10 @@ export class PhotographLibrary {
       if (operation === 'getCritique') {
         return this.photos.some(photo => photo.id === input.id)
           ? { data: this.critiques.get(input.id) ?? null } : { error: 'item_unavailable' };
+      }
+      if (operation === 'getCritiqueOperation') {
+        return this.photos.some(photo => photo.id === input.id)
+          ? { data: this.critiqueOperations.get(input.id) ?? null } : { error: 'item_unavailable' };
       }
       if (operation === 'deletePhotograph') {
         const previous = [...this.deletions.values()].find(deletion => deletion.resourceId === input.id);
@@ -117,7 +122,7 @@ export class PhotographLibrary {
   async reportUploadProgress(page, progress) {
     await page.evaluate(detail => window.dispatchEvent(new CustomEvent('loupe-upload-progress', { detail })), progress);
   }
-  expectReadsOnly() { expect(this.calls.every(operation => ['list', 'get', 'getCritique'].includes(operation))).toBe(true); }
+  expectReadsOnly() { expect(this.calls.every(operation => ['list', 'get', 'getCritique', 'getCritiqueOperation'].includes(operation))).toBe(true); }
   expectSavedNotes(value) { expect(this.photos[0].notes).toBe(value); }
   completeDeletion() {
     const deletion = [...this.deletions.values()][0];

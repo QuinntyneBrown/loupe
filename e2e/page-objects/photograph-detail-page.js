@@ -3,6 +3,17 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographDetailPage {
   constructor(page) { this.page = page; }
+  critiqueStatus() { return this.page.getByRole('region', { name: 'Critique status', exact: true }); }
+  async expectCritiqueStatus(status, message) {
+    await expect(this.critiqueStatus().getByRole('status')).toContainText(status);
+    await expect(this.critiqueStatus()).toContainText(message);
+  }
+  async expectCritiqueRetryTime(value) { await expect(this.critiqueStatus().getByText('Automatic retry after', { exact: false })).toBeVisible(); await expect(this.critiqueStatus().locator('time[data-retry]')).toHaveAttribute('datetime', value); }
+  async checkCritiqueStatus() { await this.critiqueStatus().getByRole('button', { name: 'Check critique status', exact: true }).click(); }
+  async expectCritiqueStatusFailure() { await expect(this.critiqueStatus().getByRole('alert')).toHaveText('Critique status could not be updated. Your saved content is still available.'); }
+  async expectCritiqueStatusUnavailable() { await expect(this.critiqueStatus().getByRole('alert')).toHaveText('Critique status unavailable. The photograph may have been removed.'); }
+  async focusNotes() { await this.page.getByRole('textbox', { name: 'Notes', exact: true }).focus(); }
+  async expectNotesFocus() { await expect(this.page.getByRole('textbox', { name: 'Notes', exact: true })).toBeFocused(); }
   critique() { return this.page.getByRole('region', { name: 'Photo critique', exact: true }); }
   async expectCritique(mode = 'Live') {
     const critique = this.critique();

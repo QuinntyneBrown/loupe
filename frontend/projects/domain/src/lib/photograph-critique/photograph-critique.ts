@@ -8,6 +8,7 @@ import {
   Injector,
   input,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
@@ -21,6 +22,7 @@ import { CRITIQUE_SERVICE, SavedCritique, ServiceError } from 'api';
 })
 export class PhotographCritique {
   readonly id = input.required<string>();
+  readonly operationId = input<string | null>(null);
   private readonly service = inject(CRITIQUE_SERVICE);
   private readonly injector = inject(Injector);
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
@@ -76,16 +78,22 @@ export class PhotographCritique {
   ] as const;
 
   constructor() {
+    let previousId: string | null = null;
+    let previousAttempt = 0;
     effect((onCleanup) => {
       const id = this.id();
+      this.operationId();
       const attempt = this.attempt();
+      const focusAfterRetry = attempt !== previousAttempt && id === previousId;
+      previousAttempt = attempt;
       let active = true;
       onCleanup(() => {
         active = false;
       });
-      this.loading.set(true);
+      if (id !== previousId) this.critique.set(null);
+      previousId = id;
+      this.loading.set(!untracked(this.critique));
       this.error.set(null);
-      this.critique.set(null);
       void this.service
         .get(id)
         .then((result) => {
@@ -97,10 +105,15 @@ export class PhotographCritique {
         .finally(() => {
           if (!active) return;
           this.loading.set(false);
-          if (attempt > 0)
-            afterNextRender(() => this.heading()?.nativeElement.focus(), {
-              injector: this.injector,
-            });
+          if (focusAfterRetry)
+            afterNextRender(
+              () => {
+                if (active) this.heading()?.nativeElement.focus();
+              },
+              {
+                injector: this.injector,
+              },
+            );
         });
     });
   }
