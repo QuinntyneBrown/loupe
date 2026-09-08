@@ -1,30 +1,46 @@
-import { Component, effect, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { CRITIQUE_SERVICE, OperationResult, ServiceError } from 'api';
+import { CRITIQUE_SERVICE, OperationResult, PhotographResult, ServiceError } from 'api';
+import { RequestCritique } from '../request-critique/request-critique';
 
 @Component({
   selector: 'lp-critique-status',
-  imports: [DatePipe],
+  imports: [DatePipe, RequestCritique],
   templateUrl: './critique-status.html',
   styleUrl: './critique-status.css',
 })
 export class CritiqueStatus {
-  readonly id = input.required<string>();
+  readonly photograph = input.required<PhotographResult>();
+  readonly briefDirty = input(false);
+  readonly id = computed(() => this.photograph().id);
+  readonly admitted = signal<OperationResult | null>(null);
   readonly completed = output<string>();
   readonly operation = signal<OperationResult | null>(null);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   private readonly service = inject(CRITIQUE_SERVICE);
+  private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
   private refresh: (() => Promise<void>) | null = null;
 
   constructor() {
     effect((onCleanup) => {
       const id = this.id();
+      const admitted = this.admitted();
       let active = true;
       let pending = false;
       let completedId: string | null = null;
       let timer: ReturnType<typeof setTimeout> | undefined;
-      this.operation.set(null);
+      this.operation.set(admitted?.resourceId === id ? admitted : null);
       this.error.set(null);
       this.loading.set(true);
       const load = async () => {
@@ -74,5 +90,8 @@ export class CritiqueStatus {
   }
   check(): void {
     void this.refresh?.();
+  }
+  focus(): void {
+    this.heading()?.nativeElement.focus();
   }
 }

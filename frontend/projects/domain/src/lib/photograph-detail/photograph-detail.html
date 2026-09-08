@@ -41,7 +41,11 @@
       </section>
     </div>
   </div>
-  <lp-critique-status [id]="item.id" (completed)="completedCritiqueId.set($event)" />
+  <lp-critique-status
+    [photograph]="item"
+    [briefDirty]="briefDirty()"
+    (completed)="completedCritiqueId.set($event)"
+  />
   <lp-photograph-critique [id]="item.id" [operationId]="completedCritiqueId()" />
   <button
     #deleteButton

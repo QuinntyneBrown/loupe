@@ -1,0 +1,19 @@
+<p>This uses your saved image and brief. Personal notes are not sent for critique.</p>
+@if (briefDirty() && !submission()) {
+  <p>Save or cancel your brief edits before requesting a critique.</p>
+}
+@if (busy()) {
+  <p role="status">Requesting critique…</p>
+}
+@if (error()) {
+  <p role="alert">
+    {{
+      error() === 'integration_not_configured'
+        ? 'AI critique is not configured. Your photograph is saved and you can keep editing it.'
+        : 'Critique admission was not confirmed. Retry to check the same request.'
+    }}
+  </p>
+}
+<button type="button" [disabled]="blocked()" (click)="request()">
+  {{ error() ? 'Retry critique request' : 'Request critique' }}
+</button>

@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { critiqueOperation } from './critique-operation.js';
 
 export class PhotographLibrary {
   constructor(count) {
@@ -10,6 +11,9 @@ export class PhotographLibrary {
     this.deletions = new Map();
     this.critiques = new Map();
     this.critiqueOperations = new Map();
+    this.critiqueReceipts = new Map();
+    this.critiqueRequests = [];
+    this.lostCritiqueResponses = 0;
     this.lostUploadResponses = 0;
     this.lostDeleteResponses = 0;
     const imageUrl = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#e0e0e0"/><path d="M0 600 450 0h100L100 600" fill="#9a9a9a"/></svg>');
@@ -49,6 +53,22 @@ export class PhotographLibrary {
       if (operation === 'getCritiqueOperation') {
         return this.photos.some(photo => photo.id === input.id)
           ? { data: this.critiqueOperations.get(input.id) ?? null } : { error: 'item_unavailable' };
+      }
+      if (operation === 'requestCritique') {
+        this.critiqueRequests.push(input);
+        const photo = this.photos.find(photo => photo.id === input.id);
+        if (!photo) return { error: 'item_unavailable' };
+        const previous = this.critiqueReceipts.get(input.operationKey);
+        if (previous) {
+          if (previous.revision !== input.revision) return { error: 'operation_conflict' };
+          return { data: previous.operation };
+        }
+        if (photo.revision !== input.revision) return { error: 'revision_conflict' };
+        const result = critiqueOperation(input.id);
+        this.critiqueOperations.set(input.id, result);
+        this.critiqueReceipts.set(input.operationKey, { revision: input.revision, operation: result });
+        if (this.lostCritiqueResponses > 0) { this.lostCritiqueResponses--; return { error: 'request_failed' }; }
+        return { data: result };
       }
       if (operation === 'deletePhotograph') {
         const previous = [...this.deletions.values()].find(deletion => deletion.resourceId === input.id);

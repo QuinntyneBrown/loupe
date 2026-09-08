@@ -48,7 +48,7 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 - [ ] L2-007.5: Given a failed release evaluation or a changed model/prompt affecting critique behavior, when release validation runs, then the quality gate fails until the changed configuration passes the same evaluation; deterministic acceptance fixtures remain unchanged unless their expected behavior changes through specification review.
 
 ## L2-008: Request and replace the current critique
-- [ ] L2-008.1: Given a saved photograph without a critique, when Request critique is selected, then a durable asynchronous job is acknowledged and the UI shows its status without waiting for analysis.
+- [x] L2-008.1: Given a saved photograph without a critique, when Request critique is selected, then a durable asynchronous job is acknowledged and the UI shows its status without waiting for analysis.
 - [ ] L2-008.2: Given upload-and-critique selected, when the image persists but job admission fails, then the photograph remains saved, the UI states that critique was not queued, and the user can request it without uploading again.
 - [ ] L2-008.3: Given a current critique, when replacement is requested, then the UI first states that success replaces the current critique and keeps notes, and the old critique remains available while the job runs or fails.
 - [ ] L2-008.4: Given a validated replacement, when it commits, then the new critique, generation timestamp, execution mode, and submitted brief snapshot become current together, with notes unchanged.

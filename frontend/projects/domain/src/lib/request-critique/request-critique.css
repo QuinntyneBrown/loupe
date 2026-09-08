@@ -1,0 +1,11 @@
+p {
+  max-width: var(--lp-measure);
+  overflow-wrap: anywhere;
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}
+button {
+  margin-block-end: var(--lp-space-4);
+  margin-inline-end: var(--lp-space-3);
+}

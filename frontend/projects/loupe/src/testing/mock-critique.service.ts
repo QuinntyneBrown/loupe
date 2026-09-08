@@ -1,15 +1,24 @@
 import { Injectable } from '@angular/core';
-import { ICritiqueService, OperationResult, SavedCritique, ServiceError } from 'api';
+import {
+  CritiqueRequest,
+  ICritiqueService,
+  OperationResult,
+  SavedCritique,
+  ServiceError,
+} from 'api';
 
 @Injectable()
 export class MockCritiqueService implements ICritiqueService {
   async get(id: string): Promise<SavedCritique | null> {
-    return this.read('getCritique', id) as Promise<SavedCritique | null>;
+    return this.call('getCritique', { id }) as Promise<SavedCritique | null>;
   }
   async getOperation(id: string): Promise<OperationResult | null> {
-    return this.read('getCritiqueOperation', id) as Promise<OperationResult | null>;
+    return this.call('getCritiqueOperation', { id }) as Promise<OperationResult | null>;
   }
-  private async read(operation: string, id: string): Promise<unknown> {
+  async request(id: string, request: CritiqueRequest): Promise<OperationResult> {
+    return this.call('requestCritique', { id, ...request }) as Promise<OperationResult>;
+  }
+  private async call(operation: string, input: object): Promise<unknown> {
     const callback = (
       window as Window & {
         loupePhotographs?: (
@@ -19,7 +28,7 @@ export class MockCritiqueService implements ICritiqueService {
       }
     ).loupePhotographs;
     if (!callback) throw new ServiceError('item_unavailable');
-    const response = await callback(operation, { id });
+    const response = await callback(operation, input);
     if (response.error) throw new ServiceError(response.error);
     return response.data;
   }

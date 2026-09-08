@@ -1,5 +1,5 @@
 <section [attr.aria-labelledby]="'critique-status-' + id()">
-  <h2 [id]="'critique-status-' + id()">Critique status</h2>
+  <h2 #heading [id]="'critique-status-' + id()" tabindex="-1">Critique status</h2>
   @if (operation(); as item) {
     <p role="status">
       <strong>{{ item.status }}</strong> · {{ item.message }}
@@ -31,6 +31,13 @@
   } @else if (!error()) {
     <p>No critique requested yet.</p>
   }
+  <lp-request-critique
+    [hidden]="!!operation() || loading() || !!error()"
+    [photograph]="photograph()"
+    [briefDirty]="briefDirty()"
+    (started)="focus()"
+    (admitted)="admitted.set($event)"
+  />
   @if (error() === 'item_unavailable') {
     <p role="alert">Critique status unavailable. The photograph may have been removed.</p>
   } @else {

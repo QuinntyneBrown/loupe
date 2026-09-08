@@ -4,6 +4,24 @@ import AxeBuilder from '@axe-core/playwright';
 export class PhotographDetailPage {
   constructor(page) { this.page = page; }
   critiqueStatus() { return this.page.getByRole('region', { name: 'Critique status', exact: true }); }
+  async requestCritique() { await this.critiqueStatus().getByRole('button', { name: 'Request critique', exact: true }).click(); }
+  async expectCritiqueStatusFocus() { await expect(this.critiqueStatus().getByRole('heading', { name: 'Critique status', exact: true })).toBeFocused(); }
+  async expectCritiqueRequestLayout() {
+    const request = await this.critiqueStatus().getByRole('button', { name: 'Request critique', exact: true }).boundingBox();
+    const check = await this.critiqueStatus().getByRole('button', { name: 'Check critique status', exact: true }).boundingBox();
+    expect(Math.max(check.x - (request.x + request.width), check.y - (request.y + request.height))).toBeGreaterThan(0);
+    await this.expectAccessibleBrief();
+  }
+  async expectRequestingCritique() {
+    await expect(this.critiqueStatus().getByRole('status')).toHaveText('Requesting critique…');
+    await expect(this.critiqueStatus().getByRole('button', { name: 'Request critique', exact: true })).toBeDisabled();
+  }
+  async expectCritiqueRequestFailure(message = 'Critique admission was not confirmed. Retry to check the same request.') { await expect(this.critiqueStatus().getByRole('alert')).toHaveText(message); }
+  async retryCritiqueRequest() { await this.critiqueStatus().getByRole('button', { name: 'Retry critique request', exact: true }).click(); }
+  async expectCritiqueRequestBlocked() {
+    await expect(this.critiqueStatus()).toContainText('Save or cancel your brief edits before requesting a critique.');
+    await expect(this.critiqueStatus().getByRole('button', { name: 'Request critique', exact: true })).toBeDisabled();
+  }
   async expectCritiqueStatus(status, message) {
     await expect(this.critiqueStatus().getByRole('status')).toContainText(status);
     await expect(this.critiqueStatus()).toContainText(message);

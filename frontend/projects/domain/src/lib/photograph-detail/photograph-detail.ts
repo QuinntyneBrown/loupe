@@ -28,6 +28,9 @@ export class PhotographDetail {
   private readonly notesEditor = viewChild(PhotographNotes);
   private readonly briefEditor = viewChild(PhotographBrief);
   readonly dirty = computed(() => !!(this.notesEditor()?.dirty() || this.briefEditor()?.dirty()));
+  readonly briefDirty = computed(
+    () => !!(this.briefEditor()?.dirty() || this.briefEditor()?.busy()),
+  );
   private readonly service = inject(PHOTOGRAPH_SERVICE);
   readonly photo = signal<PhotographResult | null>(null);
   readonly completedCritiqueId = signal<string | null>(null);
