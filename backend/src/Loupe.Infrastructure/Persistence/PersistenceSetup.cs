@@ -32,6 +32,26 @@ public static class PersistenceSetup
         services.AddSingleton<IReferenceImportConfiguration, ReferenceImportConfiguration>();
         services.AddOptions<ReferenceImportOptions>().BindConfiguration("Imports")
             .Validate(options => options.Mode is null or "Demo" or "Live", "Imports:Mode must be Demo or Live when configured.").ValidateOnStart();
+        services.AddSingleton<IDnsResolver, DnsResolver>();
+        services.AddSingleton<ISourceConnector, SocketSourceConnector>();
+        services.AddScoped<IRestrictedPageFetcher, RestrictedPageFetcher>();
+        services.AddHttpClient("sourceFetch", client => client.Timeout = Timeout.InfiniteTimeSpan)
+            .ConfigurePrimaryHttpMessageHandler(provider => new SocketsHttpHandler
+            {
+                AllowAutoRedirect = false,
+                UseCookies = false,
+                ConnectTimeout = TimeSpan.FromSeconds(10),
+                ConnectCallback = async (context, cancellationToken) =>
+                {
+                    var resolver = provider.GetRequiredService<IDnsResolver>();
+                    var connector = provider.GetRequiredService<ISourceConnector>();
+                    var addresses = await resolver.ResolveAsync(context.DnsEndPoint.Host, cancellationToken);
+                    var address = addresses.FirstOrDefault(PublicAddressPolicy.IsPublic)
+                        ?? throw new SourceFetchException(SourceFetchFailureKind.ForbiddenDestination);
+                    return await connector.ConnectAsync(address, context.DnsEndPoint.Port, cancellationToken);
+                }
+            })
+            .RemoveAllLoggers();
         services.AddScoped<IOperationReceiptStore, OperationReceiptStore>();
         services.AddScoped<IBackgroundOperationStore, BackgroundOperationStore>();
         services.AddSingleton<ICritiqueConfiguration, CritiqueConfiguration>();

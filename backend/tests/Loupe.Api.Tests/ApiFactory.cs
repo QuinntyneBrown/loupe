@@ -25,6 +25,8 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
     public DbTransactionInterceptor? TransactionInterceptor { get; init; }
     public ICritiqueProvider? CritiqueProvider { get; init; }
     public HttpMessageHandler? AiTransport { get; init; }
+    public Loupe.Application.ReferenceImports.IDnsResolver? SourceDnsResolver { get; init; }
+    public Loupe.Application.ReferenceImports.ISourceConnector? SourceConnector { get; init; }
     public IReadOnlyDictionary<string, string?> Settings { get; init; } = new Dictionary<string, string?>();
 
     public async Task<HttpClient> CreateAuthenticatedClientAsync(string subject = "owner-a")
@@ -75,6 +77,16 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
             {
                 services.RemoveAll<ICritiqueProvider>();
                 services.AddSingleton(CritiqueProvider);
+            }
+            if (SourceDnsResolver is not null)
+            {
+                services.RemoveAll<Loupe.Application.ReferenceImports.IDnsResolver>();
+                services.AddSingleton(SourceDnsResolver);
+            }
+            if (SourceConnector is not null)
+            {
+                services.RemoveAll<Loupe.Application.ReferenceImports.ISourceConnector>();
+                services.AddSingleton(SourceConnector);
             }
             var interceptor = TransactionInterceptor;
             if (interceptor is not null) services.AddDbContext<LibraryDbContext>(options => options.AddInterceptors(interceptor));
