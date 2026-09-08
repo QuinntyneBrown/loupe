@@ -76,6 +76,21 @@ public sealed class CritiqueWorkStore(LibraryDbContext database, TimeProvider cl
                 .SetProperty(item => item.Message, retry ? "The critique was incomplete. Waiting to try once more." : "The critique could not be validated. Your saved content is unchanged."), cancellationToken);
     }
 
+    public Task RejectTimeoutAsync(BackgroundOperation operation, CancellationToken cancellationToken)
+    {
+        var now = clock.GetUtcNow();
+        var retry = operation.AttemptCount < 3;
+        var delay = TimeSpan.FromSeconds(operation.AttemptCount == 1 ? 5 : 30);
+        return database.BackgroundOperations.Where(item => item.Id == operation.Id && item.LeaseToken == operation.LeaseToken
+            && item.Status == OperationStatus.Running && item.LeaseExpiresAt > now)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.Status, retry ? OperationStatus.Queued : OperationStatus.Failed)
+                .SetProperty(item => item.NextAttemptAt, retry ? now.Add(delay) : (DateTimeOffset?)null)
+                .SetProperty(item => item.CompletedAt, retry ? (DateTimeOffset?)null : now).SetProperty(item => item.UpdatedAt, now)
+                .SetProperty(item => item.LeaseToken, (Guid?)null).SetProperty(item => item.LeaseExpiresAt, (DateTimeOffset?)null)
+                .SetProperty(item => item.FailureCode, "provider_timeout")
+                .SetProperty(item => item.Message, retry ? "Analysis timed out. Waiting to try again." : "Analysis timed out after three attempts. Your saved content is unchanged."), cancellationToken);
+    }
+
     public async Task PublishAsync(BackgroundOperation operation, CritiqueResult result, CancellationToken cancellationToken)
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);

@@ -9,4 +9,5 @@ public interface ICritiqueWorkStore
     Task<bool> RenewAsync(BackgroundOperation operation, CancellationToken cancellationToken);
     Task PublishAsync(BackgroundOperation operation, CritiqueResult result, CancellationToken cancellationToken);
     Task RejectInvalidAsync(BackgroundOperation operation, CancellationToken cancellationToken);
+    Task RejectTimeoutAsync(BackgroundOperation operation, CancellationToken cancellationToken);
 }

@@ -12,12 +12,19 @@ public sealed class RunCritiqueCommandHandler(ICritiqueWorkStore work, ICritique
         var operation = await work.ClaimAsync(ExecutionMode.Demo, cancellationToken);
         if (operation is null) return false;
         var input = JsonSerializer.Deserialize<CritiqueInput>(operation.InputJson!)!;
-        using var attempt = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(120), clock);
+        using var attempt = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         using var renewal = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var ownsLease = true;
         var renewing = RenewAsync();
-        CritiqueResult result;
-        try { result = await provider.GenerateAsync(input, new AnalysisIdentity(operation.Mode, operation.Model, operation.PromptVersion), attempt.Token); }
+        CritiqueResult? result = null;
+        var timedOut = false;
+        try
+        {
+            result = await provider.GenerateAsync(input, new AnalysisIdentity(operation.Mode, operation.Model, operation.PromptVersion), attempt.Token)
+                .WaitAsync(attempt.Token);
+        }
+        catch (OperationCanceledException) when (timeout.IsCancellationRequested && !cancellationToken.IsCancellationRequested) { timedOut = true; }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && attempt.IsCancellationRequested) { return true; }
         finally
         {
@@ -26,7 +33,8 @@ public sealed class RunCritiqueCommandHandler(ICritiqueWorkStore work, ICritique
             await renewing;
         }
         if (!ownsLease) return true;
-        if (CritiqueResultValidator.IsValid(result, input.Exif)) await work.PublishAsync(operation, result, cancellationToken);
+        if (timedOut) await work.RejectTimeoutAsync(operation, cancellationToken);
+        else if (result is not null && CritiqueResultValidator.IsValid(result, input.Exif)) await work.PublishAsync(operation, result, cancellationToken);
         else await work.RejectInvalidAsync(operation, cancellationToken);
         return true;
 
