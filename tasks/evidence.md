@@ -454,3 +454,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Additional red: migrating an existing current critique to the new cache schema admitted duplicate work. The migration now backfills the only recoverable earlier result from the photograph's current critique, matched by owner, resource and operation identity. Historical outputs discarded before this schema cannot be reconstructed.
 - All 175 container API checks passed; format, builds and diff checks passed. Reuse prefers the current equivalent result, preserves original generation provenance, and atomically restores an earlier matching result when needed. Regeneration keeps the prior critique visible until success.
 - Independent read-only gpt-5.6-sol review found no Critical or Required findings. Forced cache-restore/manual-edit races and corrupted cache hardening remain unexecuted coverage limits. The cache is private and deletion redacts both its input and output.
+
+## API-37: recover interrupted work with lease fencing
+
+- Red: both expired-worker scenarios failed because Running work could not be reclaimed.
+- Green: all 177 container API checks passed; format, builds and diff checks passed. Recovery becomes eligible at 60 seconds, assigns a new token and permits one recovery within the three-attempt budget. Both stale publication and stale invalid-result rejection are ineffective. A second interrupted recovery becomes safe terminal failure.
+- Independent read-only gpt-5.6-sol review found no Critical or Required findings. Concurrent recovery-claimer stress and corrupted null-expiry rows remain coverage limits. Lease timestamps currently use host clocks; deployment time synchronization remains an operational assumption. Renewal and bounded provider calls follow next.

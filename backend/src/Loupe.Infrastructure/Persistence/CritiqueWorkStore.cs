@@ -12,9 +12,32 @@ public sealed class CritiqueWorkStore(LibraryDbContext database, TimeProvider cl
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         var now = clock.GetUtcNow();
-        var operation = await database.BackgroundOperations.FromSqlInterpolated($"SELECT * FROM background_operations WHERE \"Type\" = 'Critique' AND \"Mode\" = {mode.ToString()} AND \"Status\" = 'Queued' AND (\"NextAttemptAt\" IS NULL OR \"NextAttemptAt\" <= {now}) ORDER BY \"CreatedAt\", \"Id\" LIMIT 1 FOR UPDATE SKIP LOCKED")
+        var operation = await database.BackgroundOperations.FromSqlInterpolated($"""
+            SELECT * FROM background_operations
+            WHERE "Type" = 'Critique' AND "Mode" = {mode.ToString()}
+              AND (("Status" = 'Queued' AND ("NextAttemptAt" IS NULL OR "NextAttemptAt" <= {now}))
+                OR ("Status" = 'Running' AND "LeaseExpiresAt" <= {now}))
+            ORDER BY "CreatedAt", "Id" LIMIT 1 FOR UPDATE SKIP LOCKED
+            """)
             .SingleOrDefaultAsync(cancellationToken);
         if (operation is null) return null;
+        if (operation.Status == OperationStatus.Running)
+        {
+            if (operation.RecoveryCount >= 1 || operation.AttemptCount >= 3)
+            {
+                operation.Status = OperationStatus.Failed;
+                operation.FailureCode = "worker_interrupted";
+                operation.Message = "Processing was interrupted. Your saved content is unchanged; request a retry when processing is available.";
+                operation.UpdatedAt = now;
+                operation.CompletedAt = now;
+                operation.LeaseToken = null;
+                operation.LeaseExpiresAt = null;
+                await database.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return null;
+            }
+            operation.RecoveryCount++;
+        }
         operation.Status = OperationStatus.Running;
         operation.UpdatedAt = now;
         operation.AttemptCount++;
