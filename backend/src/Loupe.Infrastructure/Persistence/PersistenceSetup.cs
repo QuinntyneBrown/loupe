@@ -1,3 +1,5 @@
+using Loupe.Application.ReferenceImports;
+using Loupe.Infrastructure.ReferenceImports;
 using Loupe.Application.Sessions;
 using Loupe.Application.Photographs;
 using Loupe.Application.Images;
@@ -26,6 +28,10 @@ public static class PersistenceSetup
         services.AddScoped<ISessionStore, SessionStore>();
         services.AddScoped<IPhotographStore, PhotographStore>();
         services.AddScoped<IReferenceStore, ReferenceStore>();
+        services.AddScoped<IReferenceImportStore, ReferenceImportStore>();
+        services.AddSingleton<IReferenceImportConfiguration, ReferenceImportConfiguration>();
+        services.AddOptions<ReferenceImportOptions>().BindConfiguration("Imports")
+            .Validate(options => options.Mode is null or "Demo" or "Live", "Imports:Mode must be Demo or Live when configured.").ValidateOnStart();
         services.AddScoped<IOperationReceiptStore, OperationReceiptStore>();
         services.AddScoped<IBackgroundOperationStore, BackgroundOperationStore>();
         services.AddSingleton<ICritiqueConfiguration, CritiqueConfiguration>();
