@@ -7,12 +7,32 @@ export class ReferenceLibrary {
       width: 800, height: 600, imageUrl, previewUrl: imageUrl, revision: 1,
       sourceUrl: 'https://source.example/photo', attribution: 'Supplied photographer', notes: 'Study the separation.\nKeep the source context.',
     }));
+    this.importCalls=[];this.importOperations=new Map();this.importReceipts=new Map();this.importFailures={};this.importErrors={};this.lostImportResponses=0;
     this.linkReceipts=new Map(); this.lostLinkResponses=0;
     this.updates = []; this.lostUpdateResponses = 0;
     this.uploadReceipts = new Map(); this.lostUploadResponses = 0;
     this.calls = []; this.failures = {}; this.errors = {}; this.gates = {};
   }
   async attach(page) {
+    await page.exposeFunction('loupeReferenceImports',async(operation,input)=>{
+      this.importCalls.push({operation,...input});await this.gates['import-'+operation]?.promise;
+      const error=this.importErrors[operation]?.shift();if(error)return {error};
+      if(this.importFailures[operation]>0){this.importFailures[operation]--;return {error:'request_failed'};}
+      const reference=this.items.find(item=>item.id===input.id);if(!reference)return {error:'item_unavailable'};
+      if(operation==='current')return {data:this.importOperations.get(input.id)||null};
+      if(operation==='request') {
+        const fingerprint=JSON.stringify({id:input.id,revision:input.revision}),receipt=this.importReceipts.get(input.operationKey);
+        if(receipt&&receipt.fingerprint!==fingerprint)return {error:'operation_conflict'};
+        if(receipt)return {data:receipt.operation};
+        if(reference.revision!==input.revision)return {error:'revision_conflict'};
+        const current=this.importOperations.get(input.id);
+        const result=current&&['Queued','Running'].includes(current.status)?current:{id:crypto.randomUUID(),resourceId:input.id,type:'ReferenceImport',status:'Queued',mode:'Demo',createdAt:'2026-09-08T12:00:00Z',updatedAt:'2026-09-08T12:00:00Z',completedAt:null,nextAttemptAt:null,retryAvailableAt:null,failureCode:null,message:'Waiting to start.'};
+        this.importOperations.set(input.id,result);this.importReceipts.set(input.operationKey,{fingerprint,operation:result});
+        if(this.lostImportResponses>0){this.lostImportResponses--;return {error:'request_failed'};}
+        return {data:result};
+      }
+      throw new Error('Unexpected import operation: '+operation);
+    });
     await page.exposeFunction('loupeReferences', async (operation, input) => {
       this.calls.push(operation); await this.gates[operation]?.promise;
       const error = this.errors[operation]?.shift(); if (error) return { error };

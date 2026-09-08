@@ -1,3 +1,5 @@
+import { REFERENCE_IMPORT_SERVICE } from 'api';
+import { MockReferenceImportService } from './mock-reference-import.service';
 import { REFERENCE_SERVICE } from 'api';
 import { MockReferenceService } from './mock-reference.service';
 import { SESSION_SERVICE, PHOTOGRAPH_SERVICE, DELETION_SERVICE, CRITIQUE_SERVICE } from 'api';
@@ -9,6 +11,7 @@ import { COMPARISON_SERVICE } from 'api';
 import { MockComparisonService } from './mock-comparison.service';
 
 export const appProviders = [
+  { provide: REFERENCE_IMPORT_SERVICE, useClass: MockReferenceImportService },
   { provide: REFERENCE_SERVICE, useClass: MockReferenceService },
   { provide: COMPARISON_SERVICE, useClass: MockComparisonService },
   { provide: SESSION_SERVICE, useClass: MockSessionService },

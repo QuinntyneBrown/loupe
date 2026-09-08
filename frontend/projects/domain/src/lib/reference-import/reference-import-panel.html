@@ -1,0 +1,56 @@
+<section aria-labelledby="source-import-heading">
+  <h2 #heading id="source-import-heading" tabindex="-1">Source import</h2>
+  @if (loading() && !operation()) {
+    <p role="status">Loading import status…</p>
+  }
+  @if (operation(); as current) {
+    <p>
+      <strong>{{ current.status }}</strong> · {{ current.mode }}
+    </p>
+    <p [attr.role]="active() ? 'status' : null">{{ current.message }}</p>
+  } @else if (!reference().sourceUrl) {
+    <p>Add a source URL in metadata to request an import.</p>
+  } @else {
+    <p>
+      Import a permitted image from the saved source. Your reference stays saved if retrieval is
+      unavailable.
+    </p>
+    @if (metadataDirty()) {
+      <p>Save or cancel metadata edits before requesting an import.</p>
+    }
+    <button type="button" (click)="request()" [disabled]="blocked()">
+      {{ error() && !needsReview() ? 'Retry import request' : 'Request import' }}
+    </button>
+  }
+  @if (busy()) {
+    <p role="status">Requesting import…</p>
+  }
+  @if (error()) {
+    <p role="alert">{{ message() }}</p>
+  }
+  @if (needsReview()) {
+    <button type="button" (click)="review()" [disabled]="reviewing() || metadataDirty()">
+      Review latest source
+    </button>
+  }
+  @if (latest(); as reviewed) {
+    <p class="source">Latest saved source: {{ reviewed.sourceUrl || 'No source URL saved.' }}</p>
+  }
+  @if (loadFailed()) {
+    <p role="alert">Import status could not be loaded. Your reference is still available.</p>
+    <button type="button" (click)="load()" [disabled]="loading()">
+      Retry loading import status
+    </button>
+  }
+  @if (refreshingFailed()) {
+    <p role="alert">Import finished, but the updated reference could not be loaded.</p>
+    <button type="button" (click)="load()" [disabled]="loading()">
+      Retry loading import status
+    </button>
+  }
+  @if (error() === 'analysis_active') {
+    <button type="button" (click)="load()" [disabled]="loading() || busy()">
+      Check import status
+    </button>
+  }
+</section>

@@ -1,3 +1,4 @@
+import { ReferenceImportPanel } from '../reference-import/reference-import-panel';
 import { ReferenceMetadataEditor } from '../reference-metadata/reference-metadata-editor';
 import { computed, output } from '@angular/core';
 import {
@@ -16,7 +17,7 @@ import { REFERENCE_SERVICE, ReferenceResult, ServiceError } from 'api';
 
 @Component({
   selector: 'lp-reference-detail-panel',
-  imports: [DatePipe, ReferenceMetadataEditor],
+  imports: [DatePipe, ReferenceMetadataEditor, ReferenceImportPanel],
   templateUrl: './reference-detail-panel.html',
   styleUrl: './reference-detail-panel.css',
 })

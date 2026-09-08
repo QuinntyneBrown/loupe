@@ -6,6 +6,20 @@ export class ReferenceDetailPage {
   async expectHeadingFocus(title) { await expect(this.page.getByRole('heading', { name: title, exact: true })).toBeFocused(); }
   async edit() { await this.page.getByRole('button',{name:'Edit metadata',exact:true}).click(); await expect(this.page.getByLabel('Title',{exact:true})).toBeFocused(); }
   async fillMetadata(values) { for(const [key,value] of Object.entries(values)) await this.page.getByLabel(this.metadataLabel(key),{exact:true}).fill(value); }
+  importRegion() {return this.page.getByRole('region',{name:'Source import',exact:true});}
+  async requestImport() {await this.importRegion().getByRole('button',{name:'Request import',exact:true}).click();}
+  async retryImportAdmission() {await this.importRegion().getByRole('button',{name:'Retry import request',exact:true}).click();}
+  async expectImportReady() {await expect(this.importRegion().getByRole('button',{name:'Request import',exact:true})).toBeEnabled();}
+  async expectImportDisabled() {await expect(this.importRegion().getByRole('button',{name:/^(Request import|Retry import request)$/})).toBeDisabled();}
+  async expectNoImportSource() {await expect(this.importRegion()).toContainText('Add a source URL in metadata to request an import.');}
+  async expectImportState(state) {await expect(this.importRegion().getByText(state,{exact:true})).toBeVisible();}
+  async expectImportMessage(text) {await expect(this.importRegion()).toContainText(text);}
+  async expectImportError(text) {await expect(this.importRegion().getByRole('alert')).toContainText(text);}
+  async expectImportFocused() {await expect(this.importRegion().getByRole('heading',{name:'Source import',exact:true})).toBeFocused();}
+  async retryImportStatus() {await this.importRegion().getByRole('button',{name:'Retry loading import status',exact:true}).click();}
+  async reviewImportSource() {await this.importRegion().getByRole('button',{name:'Review latest source',exact:true}).click();}
+  async expectReviewedImportSource(source) {await expect(this.importRegion()).toContainText(source);}
+  async expectMetadataFieldFocused(key) {await expect(this.page.getByLabel(this.metadataLabel(key),{exact:true})).toBeFocused();}
   metadataLabel(key) { return {title:'Title',sourceUrl:'Source URL (optional)',attribution:'Attribution (optional)',notes:'Notes (optional)'}[key]; }
   async expectDraft(values) { for(const [key,value] of Object.entries(values)) await expect(this.page.getByLabel(this.metadataLabel(key),{exact:true})).toHaveValue(value); }
   async saveMetadata() { await this.page.getByRole('button',{name:/^(Save metadata|Retry metadata save)$/}).click(); }

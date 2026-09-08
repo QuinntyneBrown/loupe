@@ -32,6 +32,11 @@
         (saved)="reference.set($event)"
         (discardRequested)="discardRequested.emit($event)"
       />
+      <lp-reference-import-panel
+        [reference]="item"
+        [metadataDirty]="dirty()"
+        (refreshed)="reference.set($event)"
+      />
       <section>
         <h2>Source and attribution</h2>
         @if (item.sourceUrl) {

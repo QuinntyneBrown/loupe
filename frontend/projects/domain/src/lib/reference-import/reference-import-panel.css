@@ -1,0 +1,17 @@
+section {
+  margin-top: var(--lp-space-6);
+  border-top: var(--lp-hairline) solid var(--lp-color-border);
+  padding-top: var(--lp-space-4);
+}
+h2 {
+  font-size: var(--lp-text-xl);
+}
+p {
+  color: var(--lp-color-text-2);
+}
+.source {
+  overflow-wrap: anywhere;
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}

@@ -1,7 +1,7 @@
 export interface OperationResult {
   id: string;
   resourceId: string;
-  type: 'Critique';
+  type: 'Critique' | 'ReferenceImport';
   status: 'Queued' | 'Running' | 'Succeeded' | 'Failed' | 'Canceled';
   mode: 'Demo' | 'Live';
   createdAt: string;
