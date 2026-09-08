@@ -1,5 +1,6 @@
 using Loupe.Application.Photographs;
 using Loupe.Domain.Photographs;
+using Loupe.Domain.Operations;
 using Microsoft.EntityFrameworkCore;
 using Loupe.Application.Common;
 
@@ -24,7 +25,10 @@ public sealed class PhotographStore(LibraryDbContext database) : IPhotographStor
                 || photograph.CreatedAt == cursor.CreatedAt && photograph.Id.CompareTo(cursor.Id) > 0);
         return await query.OrderByDescending(photograph => photograph.CreatedAt).ThenBy(photograph => photograph.Id).Take(count)
             .Select(photograph => new PhotographSummary(photograph.Id, photograph.Title, photograph.CreatedAt,
-                photograph.Width, photograph.Height, $"/api/photographs/{photograph.Id}/preview")).ToListAsync(cancellationToken);
+                photograph.Width, photograph.Height, $"/api/photographs/{photograph.Id}/preview", photograph.CritiqueJson != null,
+                database.BackgroundOperations.Where(operation => operation.Id == photograph.CurrentCritiqueOperationId
+                    && operation.OwnerId == ownerId && operation.ResourceId == photograph.Id && operation.Type == OperationType.Critique)
+                    .Select(operation => (OperationStatus?)operation.Status).FirstOrDefault())).ToListAsync(cancellationToken);
     }
 
     public Task<Photograph> UpdateBriefAsync(Guid id, string ownerId, long revision, CritiqueBrief brief, CancellationToken cancellationToken) =>
