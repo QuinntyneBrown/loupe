@@ -1,0 +1,76 @@
+<form (ngSubmit)="save()" [attr.aria-busy]="saving()" novalidate>
+  <label for="reference-image">Reference image</label>
+  <input
+    #fileInput
+    id="reference-image"
+    type="file"
+    accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+    (change)="choose(fileInput.files)"
+    [disabled]="saving()"
+    [attr.aria-invalid]="!!fileError()"
+    [attr.aria-describedby]="fileError() ? 'reference-help reference-file-error' : 'reference-help'"
+  />
+  <p id="reference-help">One still JPEG, PNG, HEIC or WebP, up to 25 MB. Private to you.</p>
+  @if (fileError(); as error) {
+    <p id="reference-file-error" role="alert">{{ error }}</p>
+  }
+  @for (field of fields; track field.key) {
+    <label [for]="'reference-' + field.key">{{ field.label }}</label>
+    @if (field.key === 'notes') {
+      <textarea
+        [id]="'reference-' + field.key"
+        [name]="field.key"
+        [ngModel]="metadata()[field.key]"
+        (ngModelChange)="setField(field.key, $event)"
+        [disabled]="saving()"
+        [attr.aria-invalid]="!!errors()[field.key]"
+        [attr.aria-describedby]="errors()[field.key] ? 'reference-' + field.key + '-error' : null"
+      ></textarea>
+    } @else {
+      <input
+        [id]="'reference-' + field.key"
+        [name]="field.key"
+        [type]="field.key === 'sourceUrl' ? 'url' : 'text'"
+        [ngModel]="metadata()[field.key]"
+        (ngModelChange)="setField(field.key, $event)"
+        [disabled]="saving()"
+        [attr.aria-invalid]="!!errors()[field.key]"
+        [attr.aria-describedby]="errors()[field.key] ? 'reference-' + field.key + '-error' : null"
+      />
+    }
+    @if (errors()[field.key]; as error) {
+      <p [id]="'reference-' + field.key + '-error'" role="alert">{{ error }}</p>
+    }
+  }
+  @if (failure()) {
+    <p role="alert">{{ failureMessage() }}</p>
+    <p>
+      {{
+        image()
+          ? 'The selected file is still available.'
+          : 'Select the reference image again to retry.'
+      }}
+    </p>
+  }
+  <button type="submit" [disabled]="invalid() || saving()">
+    {{ failure() ? 'Retry upload' : 'Save reference' }}
+  </button>
+  @if (saving()) {
+    @let transfer = progress();
+    <progress
+      aria-label="Upload progress"
+      [attr.max]="transfer?.total || 1"
+      [attr.value]="transfer?.total ? transfer?.transferred : null"
+    ></progress>
+    <p role="status">
+      @if (transfer && transfer.total && transfer.transferred < transfer.total) {
+        {{ transfer.transferred | number: '1.0-0' }} of {{ transfer.total | number: '1.0-0' }} bytes
+        transferred.
+      } @else if (transfer && !transfer.total) {
+        {{ transfer.transferred | number: '1.0-0' }} bytes transferred. Total size unavailable.
+      } @else {
+        Saving reference…
+      }
+    </p>
+  }
+</form>

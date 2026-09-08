@@ -55,8 +55,8 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 - [ ] L2-008.5: Given repeated requests for unchanged completed inputs, when submitted without explicit Regenerate, then the completed result is reused; explicit Regenerate creates one new job under L2-035.
 
 ## L2-009: Save an uploaded reference
-- [ ] L2-009.1: Given a valid uploaded image and optional metadata, when saved as a reference, then one inspiration record and preview appear after reload, with metadata intact and no entry in My Work.
-- [ ] L2-009.2: Given no source or attribution, when saved, then the UI shows that these are unknown without inventing a photographer or source.
+- [x] L2-009.1: Given a valid uploaded image and optional metadata, when saved as a reference, then one inspiration record and preview appear after reload, with metadata intact and no entry in My Work.
+- [x] L2-009.2: Given no source or attribution, when saved, then the UI shows that these are unknown without inventing a photographer or source.
 - [ ] L2-009.3: Given a saved image reference, when AI metadata work is queued, delayed, or fails, then the user can still open the image, edit manual metadata, and assign boards.
 - [ ] L2-009.4: Given invalid image or metadata input, when submitted, then the shared limits/errors apply and no partial reference is created.
 

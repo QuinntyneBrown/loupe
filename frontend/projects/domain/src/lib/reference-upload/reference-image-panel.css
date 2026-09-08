@@ -1,0 +1,47 @@
+:host {
+  display: block;
+}
+label {
+  display: block;
+  margin: var(--lp-space-4) var(--lp-zero) var(--lp-space-2);
+  font-weight: var(--lp-weight-medium);
+}
+input,
+textarea,
+select {
+  display: block;
+  width: var(--lp-full);
+  min-height: var(--lp-control-height);
+  padding: var(--lp-space-3);
+  border: var(--lp-hairline) solid var(--lp-color-border-strong);
+  border-radius: var(--lp-radius-md);
+  font: inherit;
+  color: var(--lp-color-text);
+  background: var(--lp-color-surface);
+}
+textarea {
+  min-height: var(--lp-space-12);
+  resize: vertical;
+}
+h2 {
+  margin-top: var(--lp-space-7);
+  font-size: var(--lp-text-xl);
+}
+p {
+  color: var(--lp-color-text-2);
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}
+button {
+  margin-top: var(--lp-space-5);
+}
+button:disabled {
+  cursor: default;
+}
+progress {
+  display: block;
+  width: var(--lp-full);
+  margin-top: var(--lp-space-4);
+  accent-color: var(--lp-color-ink);
+}

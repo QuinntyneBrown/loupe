@@ -26,3 +26,4 @@ export * from './lib/comparison/comparison.service';
 export * from './lib/reference/reference-result';
 export * from './lib/reference/reference.service.contract';
 export * from './lib/reference/reference.service';
+export * from './lib/reference/reference-upload';

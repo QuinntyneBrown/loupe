@@ -1,0 +1,13 @@
+<main id="main" tabindex="-1">
+  <a routerLink="/inspiration">Back to Inspiration</a>
+  <h1>Upload reference</h1>
+  <lp-reference-image-panel (saved)="saved($event)" />
+</main>
+<lp-unsaved-changes
+  [dirty]="dirty"
+  [warning]="
+    form()?.saving()
+      ? 'This upload may finish after you leave. Check Inspiration before uploading it again.'
+      : null
+  "
+/>

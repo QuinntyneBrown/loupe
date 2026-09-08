@@ -1,8 +1,42 @@
+import { ReferenceUpload, UploadProgress } from 'api';
 import { Injectable } from '@angular/core';
 import { IReferenceService, ReferencePage, ReferenceResult, ServiceError } from 'api';
 
 @Injectable()
 export class MockReferenceService implements IReferenceService {
+  async upload(
+    input: ReferenceUpload,
+    onProgress?: (progress: UploadProgress) => void,
+  ): Promise<ReferenceResult> {
+    let bytes: ArrayBuffer;
+    try {
+      bytes = await input.image.arrayBuffer();
+    } catch {
+      throw new ServiceError('file_unavailable');
+    }
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    const hash = Array.from(new Uint8Array(digest), (value) =>
+      value.toString(16).padStart(2, '0'),
+    ).join('');
+    const report = (event: Event) => {
+      if (event instanceof CustomEvent) onProgress?.(event.detail as UploadProgress);
+    };
+    window.addEventListener('loupe-reference-upload-progress', report);
+    try {
+      return await this.call<ReferenceResult>('upload', {
+        filename: input.image.name,
+        title: input.title,
+        sourceUrl: input.sourceUrl,
+        attribution: input.attribution,
+        notes: input.notes,
+        operationKey: input.operationKey,
+        hash,
+        contentType: input.image.type,
+      });
+    } finally {
+      window.removeEventListener('loupe-reference-upload-progress', report);
+    }
+  }
   list(cursor?: string): Promise<ReferencePage> {
     return this.call('list', { cursor });
   }
