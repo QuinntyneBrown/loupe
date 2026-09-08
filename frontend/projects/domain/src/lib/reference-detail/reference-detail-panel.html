@@ -27,6 +27,11 @@
       }
     </figure>
     <div class="context">
+      <lp-reference-metadata-editor
+        [reference]="item"
+        (saved)="reference.set($event)"
+        (discardRequested)="discardRequested.emit($event)"
+      />
       <section>
         <h2>Source and attribution</h2>
         @if (item.sourceUrl) {

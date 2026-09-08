@@ -1,3 +1,12 @@
 <main id="main" tabindex="-1">
-  <a routerLink="/inspiration">Back to Inspiration</a><lp-reference-detail-panel [id]="id()" />
+  <a routerLink="/inspiration">Back to Inspiration</a
+  ><lp-reference-detail-panel [id]="id()" (discardRequested)="requestDiscard($event)" />
 </main>
+<lp-unsaved-changes
+  [dirty]="dirty"
+  [warning]="
+    detail()?.saving()
+      ? 'This save may finish after you leave. Reopen the reference to check its saved metadata.'
+      : null
+  "
+/>

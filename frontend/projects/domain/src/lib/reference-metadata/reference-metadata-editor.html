@@ -1,0 +1,81 @@
+@if (!editing()) {
+  <button #editButton type="button" (click)="open()">Edit metadata</button>
+} @else {
+  <form (ngSubmit)="save()" [attr.aria-busy]="busy()" novalidate>
+    <h2>Edit metadata</h2>
+    @for (field of fields; track field.key) {
+      <label [for]="'metadata-' + field.key">{{
+        field.key === 'title' ? 'Title' : field.label
+      }}</label>
+      @if (field.key === 'notes') {
+        <textarea
+          [id]="'metadata-' + field.key"
+          [name]="field.key"
+          [ngModel]="draft()[field.key] ?? ''"
+          (ngModelChange)="setField(field.key, $event)"
+          [disabled]="busy()"
+          [attr.aria-invalid]="!!errors()[field.key]"
+          [attr.aria-describedby]="errors()[field.key] ? 'metadata-' + field.key + '-error' : null"
+        ></textarea>
+      } @else {
+        <input
+          #firstField
+          [id]="'metadata-' + field.key"
+          [name]="field.key"
+          [type]="field.key === 'sourceUrl' ? 'url' : 'text'"
+          [ngModel]="draft()[field.key] ?? ''"
+          (ngModelChange)="setField(field.key, $event)"
+          [disabled]="busy()"
+          [attr.aria-invalid]="!!errors()[field.key]"
+          [attr.aria-describedby]="errors()[field.key] ? 'metadata-' + field.key + '-error' : null"
+        />
+      }
+      @if (errors()[field.key]; as error) {
+        <p [id]="'metadata-' + field.key + '-error'" role="alert">{{ error }}</p>
+      }
+    }
+    @if (unavailable()) {
+      <p role="alert">Reference unavailable. Your metadata draft has been kept.</p>
+    } @else if (conflicted()) {
+      <p role="alert">
+        {{
+          reloadFailed()
+            ? 'Latest metadata could not be loaded. Your changes are still here.'
+            : 'This reference changed. Your metadata draft has been kept.'
+        }}
+      </p>
+      <button type="button" [disabled]="busy()" (click)="reloadLatest()">
+        Reload latest metadata
+      </button>
+    } @else if (failed()) {
+      <p role="alert">The metadata save was not confirmed. Your changes are still here.</p>
+    }
+    @if (latest(); as metadata) {
+      <section aria-label="Latest saved metadata">
+        <h3 #latestHeading tabindex="-1">Latest saved metadata</h3>
+        <dl>
+          @for (field of fields; track field.key) {
+            <dt>{{ field.key === 'title' ? 'Title' : field.label }}</dt>
+            <dd>{{ metadata[field.key] || 'Not specified' }}</dd>
+          }
+        </dl>
+        <p>Review your draft above before saving.</p>
+      </section>
+    }
+    <div class="actions">
+      <button
+        type="submit"
+        [disabled]="busy() || conflicted() || unavailable() || invalid() || !dirty()"
+      >
+        {{ failed() ? 'Retry metadata save' : 'Save metadata' }}
+      </button>
+      <button type="button" [disabled]="busy()" (click)="cancel()">Cancel metadata edit</button>
+    </div>
+    @if (saving()) {
+      <p role="status">Saving metadata…</p>
+    }
+    @if (reloading()) {
+      <p role="status">Loading latest metadata…</p>
+    }
+  </form>
+}

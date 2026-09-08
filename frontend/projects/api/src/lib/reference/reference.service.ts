@@ -1,3 +1,4 @@
+import { ReferenceMetadata } from './reference-metadata';
 import { SESSION_SERVICE } from '../session/session.service.contract';
 import { UploadProgress } from '../common/upload-progress';
 import { ReferenceUpload } from './reference-upload';
@@ -47,6 +48,28 @@ export class ReferenceService implements IReferenceService {
               return response.body;
             }),
           ),
+      );
+    } catch (error) {
+      throw new ServiceError(
+        error instanceof HttpErrorResponse && typeof error.error?.code === 'string'
+          ? error.error.code
+          : 'request_failed',
+      );
+    }
+  }
+  async update(
+    id: string,
+    revision: number,
+    metadata: ReferenceMetadata,
+  ): Promise<ReferenceResult> {
+    const token = await this.session.getRequestToken();
+    try {
+      return await firstValueFrom(
+        this.http.put<ReferenceResult>(
+          '/api/references/' + encodeURIComponent(id),
+          { revision, ...metadata },
+          { headers: { 'X-CSRF-Token': token }, timeout: 15000 },
+        ),
       );
     } catch (error) {
       throw new ServiceError(

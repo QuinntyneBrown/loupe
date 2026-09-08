@@ -1,4 +1,8 @@
 import {
+  referenceMetadataErrors,
+  referenceMetadataFields,
+} from '../reference-metadata/reference-metadata-fields';
+import {
   Component,
   computed,
   DestroyRef,
@@ -23,12 +27,7 @@ export class ReferenceImagePanel {
   private readonly service = inject(REFERENCE_SERVICE);
   private readonly destroy = inject(DestroyRef);
   private readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
-  readonly fields = [
-    { key: 'title', label: 'Title (optional)', maximum: 200 },
-    { key: 'sourceUrl', label: 'Source URL (optional)', maximum: 2048 },
-    { key: 'attribution', label: 'Attribution (optional)', maximum: 200 },
-    { key: 'notes', label: 'Notes (optional)', maximum: 10000 },
-  ] as const;
+  readonly fields = referenceMetadataFields;
   readonly metadata = signal({ title: '', sourceUrl: '', attribution: '', notes: '' });
   readonly image = signal<File | null>(null);
   readonly saving = signal(false);
@@ -44,30 +43,7 @@ export class ReferenceImagePanel {
         Object.values(this.metadata()).some((value) => !!value.trim())),
   );
   private readonly operationKey = crypto.randomUUID();
-  readonly errors = computed(() => {
-    const errors: Record<string, string> = {};
-    for (const field of this.fields) {
-      if ([...this.metadata()[field.key].replace(/\r\n?/g, '\n').trim()].length > field.maximum)
-        errors[field.key] = `Use ${field.maximum.toLocaleString('en-US')} characters or fewer.`;
-    }
-    const source = this.metadata().sourceUrl.trim();
-    if (source && !errors['sourceUrl']) {
-      try {
-        const url = new URL(source);
-        if (
-          !/^https?:\/\//i.test(source) ||
-          /[\s\\]/.test(source) ||
-          url.username ||
-          url.password ||
-          url.port
-        )
-          throw new Error('invalid_source');
-      } catch {
-        errors['sourceUrl'] = 'Use an HTTP or HTTPS URL without credentials or a nonstandard port.';
-      }
-    }
-    return errors;
-  });
+  readonly errors = computed(() => referenceMetadataErrors(this.metadata(), false));
   readonly fileError = computed(() => {
     const file = this.image();
     if (!file) return null;

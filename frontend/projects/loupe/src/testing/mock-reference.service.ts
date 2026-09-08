@@ -1,3 +1,4 @@
+import { ReferenceMetadata } from 'api';
 import { ReferenceUpload, UploadProgress } from 'api';
 import { Injectable } from '@angular/core';
 import { IReferenceService, ReferencePage, ReferenceResult, ServiceError } from 'api';
@@ -36,6 +37,9 @@ export class MockReferenceService implements IReferenceService {
     } finally {
       window.removeEventListener('loupe-reference-upload-progress', report);
     }
+  }
+  update(id: string, revision: number, metadata: ReferenceMetadata): Promise<ReferenceResult> {
+    return this.call('update', { id, revision, ...metadata });
   }
   list(cursor?: string): Promise<ReferencePage> {
     return this.call('list', { cursor });

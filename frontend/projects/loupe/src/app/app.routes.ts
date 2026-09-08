@@ -1,3 +1,4 @@
+import { referenceUnsavedGuard } from './reference-unsaved.guard';
 import { ReferenceUploadPage } from './pages/reference-upload/reference-upload-page';
 import { referenceUploadUnsavedGuard } from './reference-upload-unsaved.guard';
 import { InspirationPage } from './pages/inspiration/inspiration-page';
@@ -31,6 +32,7 @@ export const routes: Routes = [
     path: 'inspiration/:id',
     component: ReferenceDetailPage,
     canActivate: [sessionGuard],
+    canDeactivate: [referenceUnsavedGuard],
     title: 'Reference \u00b7 Loupe',
   },
   {

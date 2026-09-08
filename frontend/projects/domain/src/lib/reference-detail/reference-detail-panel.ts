@@ -1,3 +1,5 @@
+import { ReferenceMetadataEditor } from '../reference-metadata/reference-metadata-editor';
+import { computed, output } from '@angular/core';
 import {
   afterNextRender,
   Component,
@@ -14,11 +16,15 @@ import { REFERENCE_SERVICE, ReferenceResult, ServiceError } from 'api';
 
 @Component({
   selector: 'lp-reference-detail-panel',
-  imports: [DatePipe],
+  imports: [DatePipe, ReferenceMetadataEditor],
   templateUrl: './reference-detail-panel.html',
   styleUrl: './reference-detail-panel.css',
 })
 export class ReferenceDetailPanel {
+  readonly discardRequested = output<() => void>();
+  private readonly editor = viewChild(ReferenceMetadataEditor);
+  readonly dirty = computed(() => !!(this.editor()?.dirty() || this.editor()?.busy()));
+  readonly saving = computed(() => !!this.editor()?.saving());
   readonly id = input.required<string>();
   private readonly service = inject(REFERENCE_SERVICE);
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');

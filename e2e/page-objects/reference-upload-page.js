@@ -1,4 +1,5 @@
-import { expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { open } from 'node:fs/promises';
 import AxeBuilder from '@axe-core/playwright';
 
 const labels = { title: 'Title (optional)', sourceUrl: 'Source URL (optional)', attribution: 'Attribution (optional)', notes: 'Notes (optional)' };
@@ -7,7 +8,14 @@ export class ReferenceUploadPage {
   async open() { await this.page.getByRole('link', { name: 'Upload reference', exact: true }).click(); }
   async expectOpen() { await expect(this.page.getByRole('heading', { name: 'Upload reference', exact: true })).toBeVisible(); }
   async chooseImage() { await this.page.getByLabel('Reference image', { exact: true }).setInputFiles({ name: 'Morning.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64') }); }
-  async chooseFile(size, mimeType = 'image/png') { await this.page.getByLabel('Reference image', { exact: true }).setInputFiles({ name: 'Image.png', mimeType, buffer: Buffer.alloc(size) }); }
+  async chooseFile(size, mimeType = 'image/png') {
+    const input=this.page.getByLabel('Reference image', { exact: true });
+    if(size>1000000 && mimeType==='image/png') {
+      const path=test.info().outputPath('Image.png'),file=await open(path,'w');
+      try { await file.truncate(size); } finally { await file.close(); }
+      await input.setInputFiles(path);
+    } else await input.setInputFiles({ name: 'Image.png', mimeType, buffer: Buffer.alloc(size) });
+  }
   async fill(values) { for (const [key,value] of Object.entries(values)) await this.page.getByLabel(labels[key], { exact: true }).fill(value); }
   async expectDraft(values) { for (const [key,value] of Object.entries(values)) await expect(this.page.getByLabel(labels[key], { exact: true })).toHaveValue(value); }
   async save() { await this.page.getByRole('button', { name: 'Save reference', exact: true }).click(); }

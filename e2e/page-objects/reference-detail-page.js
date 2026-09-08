@@ -4,6 +4,24 @@ export class ReferenceDetailPage {
   constructor(page) { this.page = page; }
   async expectTitle() { await expect(this.page).toHaveTitle('Reference \u00b7 Loupe'); }
   async expectHeadingFocus(title) { await expect(this.page.getByRole('heading', { name: title, exact: true })).toBeFocused(); }
+  async edit() { await this.page.getByRole('button',{name:'Edit metadata',exact:true}).click(); await expect(this.page.getByLabel('Title',{exact:true})).toBeFocused(); }
+  async fillMetadata(values) { for(const [key,value] of Object.entries(values)) await this.page.getByLabel(this.metadataLabel(key),{exact:true}).fill(value); }
+  metadataLabel(key) { return {title:'Title',sourceUrl:'Source URL (optional)',attribution:'Attribution (optional)',notes:'Notes (optional)'}[key]; }
+  async expectDraft(values) { for(const [key,value] of Object.entries(values)) await expect(this.page.getByLabel(this.metadataLabel(key),{exact:true})).toHaveValue(value); }
+  async saveMetadata() { await this.page.getByRole('button',{name:/^(Save metadata|Retry metadata save)$/}).click(); }
+  async expectMetadataClosed() { await expect(this.page.getByRole('button',{name:'Edit metadata',exact:true})).toBeFocused(); }
+  async expectMetadataDisabled() { await expect(this.page.getByRole('button',{name:/^(Save metadata|Retry metadata save)$/})).toBeDisabled(); }
+  async expectMetadataError(message) { await expect(this.page.getByRole('alert')).toHaveText(message); }
+  async expectMetadataFieldError(key,message) { await expect(this.page.getByLabel(this.metadataLabel(key),{exact:true})).toHaveAttribute('aria-invalid','true'); await this.expectMetadataError(message); await this.expectMetadataDisabled(); }
+  async reloadMetadata() { await this.page.getByRole('button',{name:'Reload latest metadata',exact:true}).click(); }
+  async expectLatestMetadata(values) { const latest=this.page.getByRole('region',{name:'Latest saved metadata',exact:true}); await expect(latest.getByRole('heading',{name:'Latest saved metadata',exact:true})).toBeFocused(); for(const value of Object.values(values)) await expect(latest).toContainText(value||'Not specified'); }
+  async cancelMetadata() { await this.page.getByRole('button',{name:'Cancel metadata edit',exact:true}).click(); }
+  async expectMetadataSaving() { await expect(this.page.getByRole('status')).toHaveText('Saving metadata…'); await this.expectMetadataDisabled(); }
+  metadataDialog() { return this.page.getByRole('dialog',{name:'Discard unsaved changes?',exact:true}); }
+  async expectMetadataDiscard() { await expect(this.metadataDialog()).toBeVisible(); await expect(this.metadataDialog().getByRole('button',{name:'Keep editing',exact:true})).toBeFocused(); }
+  async keepMetadata() { await this.metadataDialog().getByRole('button',{name:'Keep editing',exact:true}).click(); }
+  async discardMetadata() { await this.metadataDialog().getByRole('button',{name:'Discard',exact:true}).click(); }
+  async expectUnload(expected) { expect(await this.page.evaluate(()=>!window.dispatchEvent(new Event('beforeunload',{cancelable:true})))).toBe(expected); }
   async expectSaved(item) {
     await expect(this.page.getByRole('heading', { name: item.title, exact: true })).toBeVisible();
     const main = this.page.getByRole('main');

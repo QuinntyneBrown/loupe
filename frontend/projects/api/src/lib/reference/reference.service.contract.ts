@@ -1,3 +1,4 @@
+import { ReferenceMetadata } from './reference-metadata';
 import { ReferenceUpload } from './reference-upload';
 import { UploadProgress } from '../common/upload-progress';
 import { InjectionToken } from '@angular/core';
@@ -8,6 +9,7 @@ export interface IReferenceService {
     input: ReferenceUpload,
     onProgress?: (progress: UploadProgress) => void,
   ): Promise<ReferenceResult>;
+  update(id: string, revision: number, metadata: ReferenceMetadata): Promise<ReferenceResult>;
   list(cursor?: string): Promise<ReferencePage>;
   get(id: string): Promise<ReferenceResult>;
 }
