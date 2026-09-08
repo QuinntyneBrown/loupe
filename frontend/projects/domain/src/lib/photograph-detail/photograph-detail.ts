@@ -9,7 +9,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { PHOTOGRAPH_SERVICE, PhotographResult, ServiceError } from 'api';
+import { PHOTOGRAPH_SERVICE, PhotographResult, OperationResult, ServiceError } from 'api';
 import { PhotographNotes } from '../photograph-notes/photograph-notes';
 import { PhotographBrief } from '../photograph-brief/photograph-brief';
 import { PhotographCritique } from '../photograph-critique/photograph-critique';
@@ -25,6 +25,18 @@ export class PhotographDetail {
   readonly id = input.required<string>();
   readonly discardRequested = output<() => void>();
   readonly deleteRequested = output<PhotographResult>();
+  readonly regenerateRequested = output<PhotographResult>();
+  private readonly critiqueStatus = viewChild(CritiqueStatus);
+  readonly regenerationBlocked = computed(() => {
+    const status = this.critiqueStatus();
+    return (
+      !status ||
+      status.loading() ||
+      !!status.error() ||
+      this.briefDirty() ||
+      ['Queued', 'Running'].includes(status.operation()?.status ?? '')
+    );
+  });
   private readonly notesEditor = viewChild(PhotographNotes);
   private readonly briefEditor = viewChild(PhotographBrief);
   readonly dirty = computed(() => !!(this.notesEditor()?.dirty() || this.briefEditor()?.dirty()));
@@ -76,5 +88,10 @@ export class PhotographDetail {
   }
   retry(): void {
     this.attempt.update((value) => value + 1);
+  }
+  followCritique(operation: OperationResult): void {
+    if (operation.resourceId !== this.id()) return;
+    this.critiqueStatus()?.admitted.set(operation);
+    this.critiqueStatus()?.focus();
   }
 }

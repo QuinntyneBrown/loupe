@@ -7,6 +7,7 @@ import {
   inject,
   Injector,
   input,
+  output,
   signal,
   untracked,
   viewChild,
@@ -23,6 +24,8 @@ import { CRITIQUE_SERVICE, SavedCritique, ServiceError } from 'api';
 export class PhotographCritique {
   readonly id = input.required<string>();
   readonly operationId = input<string | null>(null);
+  readonly regenerationBlocked = input(false);
+  readonly regenerationRequested = output<void>();
   private readonly service = inject(CRITIQUE_SERVICE);
   private readonly injector = inject(Injector);
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');

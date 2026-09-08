@@ -16,6 +16,7 @@ import {
 export class RequestCritique {
   readonly photograph = input.required<PhotographResult>();
   readonly briefDirty = input(false);
+  readonly regenerate = input(false);
   readonly admitted = output<OperationResult>();
   readonly started = output<void>();
   readonly reviewed = output<PhotographResult>();
@@ -67,7 +68,7 @@ export class RequestCritique {
     if (this.blocked()) return;
     const submission = this.submission() ?? {
       revision: photo.revision,
-      regenerate: false,
+      regenerate: this.regenerate(),
       operationKey: crypto.randomUUID(),
     };
     this.submission.set(submission);

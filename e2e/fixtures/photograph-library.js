@@ -60,13 +60,13 @@ export class PhotographLibrary {
         if (!photo) return { error: 'item_unavailable' };
         const previous = this.critiqueReceipts.get(input.operationKey);
         if (previous) {
-          if (previous.revision !== input.revision) return { error: 'operation_conflict' };
+          if (previous.revision !== input.revision || previous.regenerate !== input.regenerate) return { error: 'operation_conflict' };
           return { data: previous.operation };
         }
         if (photo.revision !== input.revision) return { error: 'revision_conflict' };
-        const result = critiqueOperation(input.id);
+        const result = { ...critiqueOperation(input.id), id: crypto.randomUUID() };
         this.critiqueOperations.set(input.id, result);
-        this.critiqueReceipts.set(input.operationKey, { revision: input.revision, operation: result });
+        this.critiqueReceipts.set(input.operationKey, { revision: input.revision, regenerate: input.regenerate, operation: result });
         if (this.lostCritiqueResponses > 0) { this.lostCritiqueResponses--; return { error: 'request_failed' }; }
         return { data: result };
       }

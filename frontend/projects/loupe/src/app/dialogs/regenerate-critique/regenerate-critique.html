@@ -1,0 +1,21 @@
+<dialog
+  #dialog
+  aria-labelledby="regenerate-title"
+  tabindex="-1"
+  (cancel)="cancel($event)"
+  (keydown)="trapFocus($event)"
+>
+  <h2 id="regenerate-title">Regenerate “{{ photograph()?.title }}”?</h2>
+  <p>A successful result replaces the current critique. Your personal notes stay unchanged.</p>
+  <p>The current critique stays available while analysis runs or if it fails.</p>
+  @if (photograph(); as photo) {
+    <lp-request-critique
+      [photograph]="photo"
+      [regenerate]="true"
+      (started)="focus()"
+      (admitted)="accept($event)"
+      (reviewed)="review($event)"
+    />
+  }
+  <button type="button" autofocus [disabled]="busy()" (click)="cancel()">Cancel</button>
+</dialog>

@@ -37,6 +37,97 @@ export class PhotographDetailPage {
   async focusNotes() { await this.page.getByRole('textbox', { name: 'Notes', exact: true }).focus(); }
   async expectNotesFocus() { await expect(this.page.getByRole('textbox', { name: 'Notes', exact: true })).toBeFocused(); }
   critique() { return this.page.getByRole('region', { name: 'Photo critique', exact: true }); }
+  regeneration() {
+    return this.page.getByRole('dialog', {
+      name: 'Regenerate “Study 01”?',
+      exact: true,
+    });
+  }
+  async regenerateCritique() {
+    await this.critique()
+      .getByRole('button', { name: 'Regenerate critique', exact: true })
+      .click();
+  }
+  async expectRegenerationConfirmation() {
+    await expect(this.regeneration()).toContainText(
+      'A successful result replaces the current critique. Your personal notes stay unchanged.',
+    );
+    await expect(this.regeneration()).toContainText(
+      'The current critique stays available while analysis runs or if it fails.',
+    );
+    await expect(
+      this.regeneration().getByRole('button', { name: 'Cancel', exact: true }),
+    ).toBeFocused();
+  }
+  async cancelRegeneration() {
+    await this.regeneration()
+      .getByRole('button', { name: 'Cancel', exact: true })
+      .click();
+  }
+  async expectRegenerationCancelled() {
+    await expect(this.regeneration()).not.toBeVisible();
+    await expect(
+      this.critique().getByRole('button', {
+        name: 'Regenerate critique',
+        exact: true,
+      }),
+    ).toBeFocused();
+  }
+  async confirmRegeneration() {
+    await this.regeneration()
+      .getByRole('button', { name: 'Regenerate critique', exact: true })
+      .click();
+  }
+  async expectRegenerationPending() {
+    await expect(this.regeneration().getByRole('status')).toHaveText(
+      'Requesting critique…',
+    );
+    await expect(
+      this.regeneration().getByRole('button', { name: 'Cancel', exact: true }),
+    ).toBeDisabled();
+  }
+  async expectRegenerationFailure(
+    message = 'Critique admission was not confirmed. Retry to check the same request.',
+  ) {
+    await expect(this.regeneration().getByRole('alert')).toHaveText(message);
+  }
+  async retryRegeneration() {
+    await this.regeneration()
+      .getByRole('button', { name: 'Retry critique request', exact: true })
+      .click();
+  }
+  async expectRegenerateDisabled() {
+    await expect(
+      this.critique().getByRole('button', {
+        name: 'Regenerate critique',
+        exact: true,
+      }),
+    ).toBeDisabled();
+  }
+  async expectCritiqueText(value) {
+    await expect(this.critique()).toContainText(value);
+  }
+  async reviewRegeneration() {
+    await this.regeneration()
+      .getByRole('button', { name: 'Review latest saved brief', exact: true })
+      .click();
+  }
+  async expectRegenerationBrief(value) {
+    await expect(
+      this.regeneration().getByRole('region', {
+        name: 'Latest brief for critique',
+        exact: true,
+      }),
+    ).toContainText(value);
+  }
+  async confirmReviewedRegeneration() {
+    await this.regeneration()
+      .getByRole('button', {
+        name: 'Regenerate critique with this saved brief',
+        exact: true,
+      })
+      .click();
+  }
   async expectCritique(mode = 'Live') {
     const critique = this.critique();
     await expect(critique.getByRole('heading', { name: 'Strengths', exact: true })).toBeVisible();

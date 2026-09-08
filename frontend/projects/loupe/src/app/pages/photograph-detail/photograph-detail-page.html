@@ -8,8 +8,14 @@
       [id]="id()"
       (discardRequested)="requestDiscard($event)"
       (deleteRequested)="deleteDialog.open($event)"
+      (regenerateRequested)="regenerationDialog.open($event)"
     />
   }
 </main>
 <lp-unsaved-changes [dirty]="protectUnload" />
 <lp-delete-photograph #deleteDialog (deleted)="onDeleted($event)" />
+<lp-regenerate-critique
+  #regenerationDialog
+  (admitted)="onCritiqueAdmitted($event)"
+  (reviewed)="onReviewed($event)"
+/>

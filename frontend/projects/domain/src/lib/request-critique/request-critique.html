@@ -22,7 +22,7 @@
       <p>Save or cancel your brief edits before requesting a critique.</p>
     }
     <button type="button" [disabled]="busy() || briefDirty()" (click)="requestLatest()">
-      Request critique with this saved brief
+      {{ regenerate() ? 'Regenerate' : 'Request' }} critique with this saved brief
     </button>
   </section>
 } @else if (error() === 'revision_conflict') {
@@ -34,6 +34,8 @@
   </button>
 } @else if (!cannotRetry()) {
   <button type="button" [disabled]="blocked()" (click)="request()">
-    {{ error() ? 'Retry critique request' : 'Request critique' }}
+    {{
+      error() ? 'Retry critique request' : regenerate() ? 'Regenerate critique' : 'Request critique'
+    }}
   </button>
 }

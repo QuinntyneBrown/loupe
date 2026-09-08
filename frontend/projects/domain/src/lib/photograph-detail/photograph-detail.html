@@ -47,7 +47,12 @@
     (completed)="completedCritiqueId.set($event)"
     (reviewed)="photo.set($event)"
   />
-  <lp-photograph-critique [id]="item.id" [operationId]="completedCritiqueId()" />
+  <lp-photograph-critique
+    [id]="item.id"
+    [operationId]="completedCritiqueId()"
+    [regenerationBlocked]="regenerationBlocked()"
+    (regenerationRequested)="regenerateRequested.emit(item)"
+  />
   <button
     #deleteButton
     type="button"

@@ -7,6 +7,14 @@
   @if (loading()) {
     <p role="status">Loading critique…</p>
   } @else if (critique(); as item) {
+    <button
+      #regenerateButton
+      type="button"
+      [disabled]="regenerationBlocked()"
+      (click)="regenerateButton.focus(); regenerationRequested.emit()"
+    >
+      Regenerate critique
+    </button>
     <p class="provenance">
       <strong>{{
         item.mode === 'Demo' ? 'Demo · illustrative sample' : 'AI-generated critique'
