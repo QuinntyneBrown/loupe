@@ -26,6 +26,7 @@ import { DecimalPipe } from '@angular/common';
 })
 export class PhotographUpload {
   readonly saved = output<PhotographResult>();
+  readonly requestCritique = signal(false);
   private readonly service = inject(PHOTOGRAPH_SERVICE);
   private readonly destroy = inject(DestroyRef);
   private readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');

@@ -3,6 +3,19 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographUploadPage {
   constructor(page) { this.page = page; }
+  async requestCritiqueAfterSaving() { await this.page.getByLabel('After saving', { exact: true }).selectOption({ label: 'Request critique' }); }
+  async expectSavedBeforeCritique() { await expect(this.page.getByRole('heading', { name: 'Photograph saved', exact: true })).toBeVisible(); }
+  async expectAccessibleSavedPhotograph() {
+    await expect(this.page.getByRole('heading', { name: 'Photograph saved', exact: true })).toBeFocused();
+    expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(audit.violations).toEqual([]);
+  }
+  async expectCritiquePending() { await expect(this.page.getByRole('status')).toHaveText('Requesting critique…'); }
+  async expectCritiqueNotQueued() { await expect(this.page.getByText('Critique was not queued. Your photograph is saved.', { exact: true })).toBeVisible(); }
+  async expectUncertainCritique() { await expect(this.page.getByRole('alert')).toHaveText('Critique admission was not confirmed. Retry to check the same request.'); }
+  async retryCritique() { await this.page.getByRole('button', { name: 'Retry critique request', exact: true }).click(); }
+  async viewSavedPhotograph() { await this.page.getByRole('link', { name: 'View saved photograph', exact: true }).click(); }
   async open() { await this.page.getByRole('link', { name: 'Upload photograph', exact: true }).click(); }
   async expectOpen() { await expect(this.page.getByRole('heading', { name: 'Upload photograph', exact: true })).toBeVisible(); }
   async chooseImage(name = 'Morning.png') {

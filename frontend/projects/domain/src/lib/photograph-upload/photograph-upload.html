@@ -28,7 +28,7 @@
     <p id="upload-title-error" role="alert">Use 200 characters or fewer.</p>
   }
   <h2>Critique brief</h2>
-  <p>Add context for a future critique. Saving this photograph does not request one.</p>
+  <p>Add context for critique. Choose below whether to request one after saving.</p>
   <label for="upload-intent">Intent (optional)</label>
   <textarea
     id="upload-intent"
@@ -90,6 +90,17 @@
       }}
     </p>
   }
+  <label for="upload-next">After saving</label>
+  <select
+    id="upload-next"
+    name="next"
+    [ngModel]="requestCritique()"
+    (ngModelChange)="requestCritique.set($event)"
+    [disabled]="saving()"
+  >
+    <option [ngValue]="false">Save only</option>
+    <option [ngValue]="true">Request critique</option>
+  </select>
   <button type="submit" [disabled]="invalid() || saving()">
     {{ failed() ? 'Retry upload' : 'Save photograph' }}
   </button>

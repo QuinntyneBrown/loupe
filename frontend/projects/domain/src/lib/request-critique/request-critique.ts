@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   Component,
   computed,
   DestroyRef,
@@ -26,6 +27,7 @@ export class RequestCritique {
   readonly photograph = input.required<PhotographResult>();
   readonly briefDirty = input(false);
   readonly regenerate = input(false);
+  readonly requestImmediately = input(false);
   readonly retryOperation = input<OperationResult | null>(null);
   readonly useCurrentInputs = signal(false);
   readonly newInputsRequired = signal(false);
@@ -111,6 +113,9 @@ export class RequestCritique {
   private readonly destroy = inject(DestroyRef);
 
   constructor() {
+    afterNextRender(() => {
+      if (this.requestImmediately()) void this.request();
+    });
     effect((onCleanup) => {
       const available = this.retryOperation()?.retryAvailableAt;
       let timer: ReturnType<typeof setTimeout> | undefined;
