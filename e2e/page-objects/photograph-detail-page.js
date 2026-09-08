@@ -3,6 +3,15 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographDetailPage {
   constructor(page) { this.page = page; }
+  async retryFailedCritique() { await this.critiqueStatus().getByRole('button', { name: 'Retry failed critique', exact: true }).click(); }
+  async expectFailedRetryDisabled() { await expect(this.critiqueStatus().getByRole('button', { name: 'Retry failed critique', exact: true })).toBeDisabled(); }
+  async expectNoFailedRetry() { await expect(this.critiqueStatus().getByRole('button', { name: 'Retry failed critique', exact: true })).toHaveCount(0); }
+  async requestNewCritiqueWithBrief() { await this.critiqueStatus().getByRole('button', { name: 'Request new critique with this saved brief', exact: true }).click(); }
+  async retryWithReviewedBrief() { await this.critiqueStatus().getByRole('button', { name: 'Retry critique with this saved brief', exact: true }).click(); }
+  async expectCritiqueRetryPending() {
+    await expect(this.critiqueStatus()).toContainText('Requesting critique…');
+    await this.expectFailedRetryDisabled();
+  }
   critiqueStatus() { return this.page.getByRole('region', { name: 'Critique status', exact: true }); }
   async requestCritique() { await this.critiqueStatus().getByRole('button', { name: 'Request critique', exact: true }).click(); }
   async expectCritiqueStatusFocus() { await expect(this.critiqueStatus().getByRole('heading', { name: 'Critique status', exact: true })).toBeFocused(); }
@@ -27,8 +36,9 @@ export class PhotographDetailPage {
     await expect(this.critiqueStatus().getByRole('button', { name: 'Request critique', exact: true })).toBeDisabled();
   }
   async expectCritiqueStatus(status, message) {
-    await expect(this.critiqueStatus().getByRole('status')).toContainText(status);
-    await expect(this.critiqueStatus()).toContainText(message);
+    const operationStatus = this.critiqueStatus().getByRole('status').filter({ hasText: status });
+    await expect(operationStatus).toContainText(status);
+    await expect(operationStatus).toContainText(message);
   }
   async expectCritiqueRetryTime(value) { await expect(this.critiqueStatus().getByText('Automatic retry after', { exact: false })).toBeVisible(); await expect(this.critiqueStatus().locator('time[data-retry]')).toHaveAttribute('datetime', value); }
   async checkCritiqueStatus() { await this.critiqueStatus().getByRole('button', { name: 'Check critique status', exact: true }).click(); }

@@ -1,4 +1,11 @@
-<p>This uses your saved image and brief. Personal notes are not sent for critique.</p>
+@if (retryingOriginal()) {
+  <p>
+    Retry uses the failed operation’s original image and brief. The current critique stays available
+    until a successful replacement. Personal notes are not sent.
+  </p>
+} @else {
+  <p>This uses your saved image and brief. Personal notes are not sent for critique.</p>
+}
 @if (briefDirty() && !submission()) {
   <p>Save or cancel your brief edits before requesting a critique.</p>
 }
@@ -22,10 +29,10 @@
       <p>Save or cancel your brief edits before requesting a critique.</p>
     }
     <button type="button" [disabled]="busy() || briefDirty()" (click)="requestLatest()">
-      {{ regenerate() ? 'Regenerate' : 'Request' }} critique with this saved brief
+      {{ reviewedAction() }} with this saved brief
     </button>
   </section>
-} @else if (error() === 'revision_conflict') {
+} @else if (needsReview()) {
   @if (reviewing()) {
     <p role="status">Loading latest saved brief…</p>
   }
@@ -34,8 +41,6 @@
   </button>
 } @else if (!cannotRetry()) {
   <button type="button" [disabled]="blocked()" (click)="request()">
-    {{
-      error() ? 'Retry critique request' : regenerate() ? 'Regenerate critique' : 'Request critique'
-    }}
+    {{ error() ? 'Retry critique request' : action() }}
   </button>
 }

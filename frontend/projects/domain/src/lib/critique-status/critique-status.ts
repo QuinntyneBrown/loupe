@@ -29,6 +29,19 @@ export class CritiqueStatus {
   readonly operation = signal<OperationResult | null>(null);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly retryable = computed(() => {
+    const operation = this.operation();
+    return (
+      operation?.status === 'Failed' &&
+      [
+        'invalid_output',
+        'provider_timeout',
+        'worker_interrupted',
+        'provider_unavailable',
+        'provider_rate_limited',
+      ].includes(operation.failureCode ?? '')
+    );
+  });
   private readonly service = inject(CRITIQUE_SERVICE);
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
   private refresh: (() => Promise<void>) | null = null;

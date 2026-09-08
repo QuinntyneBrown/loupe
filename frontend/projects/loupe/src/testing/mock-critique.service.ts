@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   CritiqueRequest,
+  CritiqueRetry,
   ICritiqueService,
   OperationResult,
   SavedCritique,
@@ -9,6 +10,9 @@ import {
 
 @Injectable()
 export class MockCritiqueService implements ICritiqueService {
+  async retry(operationId: string, request: CritiqueRetry): Promise<OperationResult> {
+    return this.call('retryCritique', { operationId, ...request }) as Promise<OperationResult>;
+  }
   async get(id: string): Promise<SavedCritique | null> {
     return this.call('getCritique', { id }) as Promise<SavedCritique | null>;
   }

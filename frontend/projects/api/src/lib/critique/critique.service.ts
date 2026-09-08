@@ -7,11 +7,29 @@ import { OperationResult } from '../operation/operation-result';
 import { ServiceError } from '../common/service-error';
 import { SESSION_SERVICE } from '../session/session.service.contract';
 import { CritiqueRequest } from './critique-request';
+import { CritiqueRetry } from './critique-retry';
 
 @Injectable()
 export class CritiqueService implements ICritiqueService {
   private readonly http = inject(HttpClient);
   private readonly session = inject(SESSION_SERVICE);
+  async retry(operationId: string, request: CritiqueRetry): Promise<OperationResult> {
+    const token = await this.session.getRequestToken();
+    try {
+      return await firstValueFrom(
+        this.http.post<OperationResult>(
+          `/api/operations/${encodeURIComponent(operationId)}/retry`,
+          { revision: request.revision },
+          {
+            headers: { 'X-CSRF-Token': token, 'Idempotency-Key': request.operationKey },
+            timeout: 15000,
+          },
+        ),
+      );
+    } catch (error) {
+      throw this.failure(error);
+    }
+  }
   async request(photographId: string, request: CritiqueRequest): Promise<OperationResult> {
     const token = await this.session.getRequestToken();
     try {

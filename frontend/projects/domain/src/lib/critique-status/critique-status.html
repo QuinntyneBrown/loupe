@@ -39,6 +39,16 @@
     (reviewed)="reviewed.emit($event)"
     (admitted)="admitted.set($event)"
   />
+  @if (retryable()) {
+    <lp-request-critique
+      [photograph]="photograph()"
+      [briefDirty]="briefDirty()"
+      [retryOperation]="operation()"
+      (started)="focus()"
+      (reviewed)="reviewed.emit($event)"
+      (admitted)="admitted.set($event)"
+    />
+  }
   @if (error() === 'item_unavailable') {
     <p role="alert">Critique status unavailable. The photograph may have been removed.</p>
   } @else {

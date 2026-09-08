@@ -14,6 +14,9 @@ export class PhotographLibrary {
     this.critiqueReceipts = new Map();
     this.critiqueRequests = [];
     this.lostCritiqueResponses = 0;
+    this.critiqueRetries = [];
+    this.critiqueRetryReceipts = new Map();
+    this.lostCritiqueRetryResponses = 0;
     this.lostUploadResponses = 0;
     this.lostDeleteResponses = 0;
     const imageUrl = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#e0e0e0"/><path d="M0 600 450 0h100L100 600" fill="#9a9a9a"/></svg>');
@@ -68,6 +71,23 @@ export class PhotographLibrary {
         this.critiqueOperations.set(input.id, result);
         this.critiqueReceipts.set(input.operationKey, { revision: input.revision, regenerate: input.regenerate, operation: result });
         if (this.lostCritiqueResponses > 0) { this.lostCritiqueResponses--; return { error: 'request_failed' }; }
+        return { data: result };
+      }
+      if (operation === 'retryCritique') {
+        this.critiqueRetries.push(input);
+        const previous = this.critiqueRetryReceipts.get(input.operationKey);
+        if (previous) {
+          if (previous.revision !== input.revision || previous.operationId !== input.operationId) return { error: 'operation_conflict' };
+          return { data: previous.operation };
+        }
+        const source = [...this.critiqueOperations.values()].find(item => item.id === input.operationId);
+        const photo = this.photos.find(photo => photo.id === source?.resourceId);
+        if (!photo) return { error: 'item_unavailable' };
+        if (photo.revision !== input.revision) return { error: 'revision_conflict' };
+        const result = { ...critiqueOperation(photo.id), id: crypto.randomUUID() };
+        this.critiqueOperations.set(photo.id, result);
+        this.critiqueRetryReceipts.set(input.operationKey, { ...input, operation: result });
+        if (this.lostCritiqueRetryResponses > 0) { this.lostCritiqueRetryResponses--; return { error: 'request_failed' }; }
         return { data: result };
       }
       if (operation === 'deletePhotograph') {
