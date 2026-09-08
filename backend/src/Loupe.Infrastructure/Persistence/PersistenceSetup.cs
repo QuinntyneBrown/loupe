@@ -28,7 +28,13 @@ public static class PersistenceSetup
         services.AddScoped<IBackgroundOperationStore, BackgroundOperationStore>();
         services.AddSingleton<ICritiqueConfiguration, CritiqueConfiguration>();
         services.AddScoped<ICritiqueWorkStore, CritiqueWorkStore>();
-        services.AddSingleton<ICritiqueProvider, DemoCritiqueProvider>();
+        services.AddSingleton<DemoCritiqueProvider>();
+        services.AddScoped<OpenAiCritiqueProvider>();
+        services.AddScoped<ICritiqueProvider>(provider => provider.GetRequiredService<IOptions<AiOptions>>().Value.Mode == "Demo"
+            ? provider.GetRequiredService<DemoCritiqueProvider>() : provider.GetRequiredService<OpenAiCritiqueProvider>());
+        services.AddHttpClient("openai", client => client.Timeout = Timeout.InfiniteTimeSpan)
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false, UseCookies = false, ConnectTimeout = TimeSpan.FromSeconds(10) })
+            .RemoveAllLoggers();
         services.AddOptions<AiOptions>().BindConfiguration("Ai")
             .Validate(options => options.MaxConcurrentCalls is >= 1 and <= 64, "Ai:MaxConcurrentCalls must be between one and 64.")
             .Validate(options => options.Mode is null or "Demo" or "Live", "Ai:Mode must be Demo or Live when configured.")

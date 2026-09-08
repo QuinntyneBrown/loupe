@@ -61,5 +61,14 @@ Explicit `Ai:Mode=Demo` enables the critique worker with illustrative results.
 every API/worker instance in a deployment. Each worker can fill that capacity;
 shared database leases enforce the deployment total and two calls per owner,
 with round-robin selection of eligible owners. Stop workers before lowering the
-cap so existing calls drain before the new limit applies. Live execution is a
-subsequent increment.
+cap so existing calls drain before the new limit applies.
+
+`Ai:Mode=Live` requires an externally supplied `Ai:ApiKey`. `Ai:Model` defaults to
+`gpt-5.4-mini-2026-03-17`. The worker calls the fixed OpenAI Responses endpoint
+with the admitted private JPEG preview, brief and allowlisted EXIF; notes and
+storage keys are excluded. It requests strict structured output with `store=false`.
+Provider responses are bounded to two million bytes, with a 120-second attempt
+deadline and durable retry policy. HTTP redirects and client request logging are
+disabled. Stored critiques identify their model, prompt version and execution
+mode. Controlled transport tests do not replace the required real-model quality
+evaluation or provider account/data-retention review before deployment.

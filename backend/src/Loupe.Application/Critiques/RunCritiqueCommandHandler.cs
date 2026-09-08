@@ -6,11 +6,11 @@ using MediatR;
 
 namespace Loupe.Application.Critiques;
 
-public sealed class RunCritiqueCommandHandler(ICritiqueWorkStore work, ICritiqueProvider provider, TimeProvider clock) : IRequestHandler<RunCritiqueCommand, bool>
+public sealed class RunCritiqueCommandHandler(ICritiqueWorkStore work, ICritiqueProvider provider, ICritiqueConfiguration configuration, TimeProvider clock) : IRequestHandler<RunCritiqueCommand, bool>
 {
     public async Task<bool> Handle(RunCritiqueCommand request, CancellationToken cancellationToken)
     {
-        var operation = await work.ClaimAsync(ExecutionMode.Demo, cancellationToken);
+        var operation = await work.ClaimAsync(configuration.GetIdentity().Mode, cancellationToken);
         if (operation is null) return false;
         var input = JsonSerializer.Deserialize<CritiqueInput>(operation.InputJson!)!;
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(120), clock);

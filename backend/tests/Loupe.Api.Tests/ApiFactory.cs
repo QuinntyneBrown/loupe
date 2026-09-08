@@ -24,6 +24,7 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
     public CapturedApiFailure Failure { get; } = new();
     public DbTransactionInterceptor? TransactionInterceptor { get; init; }
     public ICritiqueProvider? CritiqueProvider { get; init; }
+    public HttpMessageHandler? AiTransport { get; init; }
     public IReadOnlyDictionary<string, string?> Settings { get; init; } = new Dictionary<string, string?>();
 
     public async Task<HttpClient> CreateAuthenticatedClientAsync(string subject = "owner-a")
@@ -51,6 +52,8 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        if (AiTransport is not null)
+            builder.ConfigureTestServices(services => services.AddHttpClient("openai").ConfigurePrimaryHttpMessageHandler(() => AiTransport));
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["Identity:Authority"] = "https://identity.example",
