@@ -27,3 +27,19 @@ header {
   padding: var(--lp-space-4) var(--lp-gutter);
   color: var(--lp-color-danger);
 }
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  flex-basis: var(--lp-full);
+  gap: var(--lp-space-4);
+}
+nav a {
+  display: inline-block;
+  padding: var(--lp-space-2) var(--lp-zero);
+  color: var(--lp-color-text-2);
+}
+nav a[aria-current] {
+  color: var(--lp-color-text);
+  font-weight: var(--lp-weight-semibold);
+}

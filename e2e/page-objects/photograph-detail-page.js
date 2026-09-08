@@ -262,7 +262,7 @@ export class PhotographDetailPage {
   }
   async expectUnavailable() {
     await expect(this.page.getByRole('heading', { name: 'Photograph unavailable', exact: true })).toBeVisible();
-    await expect(this.page.getByRole('link', { name: 'My Work', exact: true })).toBeVisible();
+    await expect(this.page.getByRole('main').getByRole('link', { name: 'My Work', exact: true })).toBeVisible();
   }
   async expectFailure() { await expect(this.page.getByRole('alert')).toHaveText('This photograph could not be loaded. Try again.'); }
   async retry() { await this.page.getByRole('button', { name: 'Try again', exact: true }).click(); }
@@ -339,7 +339,7 @@ export class PhotographDetailPage {
     for (const value of Object.values(values)) await expect(latest.getByText(value, { exact: true })).toBeVisible();
   }
   async expectBriefReloadFailure() { await expect(this.brief().getByRole('alert')).toHaveText('Latest brief could not be loaded. Your changes are still here.'); }
-  async returnToLibrary() { await this.page.getByRole('link', { name: 'My Work', exact: true }).click(); }
+  async returnToLibrary() { await this.page.getByRole('main').getByRole('link', { name: 'My Work', exact: true }).click(); }
   discardDialog() { return this.page.getByRole('dialog', { name: 'Discard unsaved changes?', exact: true }); }
   async expectDiscardChoice() {
     await expect(this.discardDialog()).toBeVisible();

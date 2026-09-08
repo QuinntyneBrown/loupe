@@ -23,3 +23,6 @@ export * from './lib/operation/operation-result';
 export * from './lib/comparison/comparison-result';
 export * from './lib/comparison/comparison.service.contract';
 export * from './lib/comparison/comparison.service';
+export * from './lib/reference/reference-result';
+export * from './lib/reference/reference.service.contract';
+export * from './lib/reference/reference.service';

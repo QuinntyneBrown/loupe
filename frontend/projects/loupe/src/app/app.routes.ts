@@ -1,3 +1,5 @@
+import { InspirationPage } from './pages/inspiration/inspiration-page';
+import { ReferenceDetailPage } from './pages/reference-detail/reference-detail-page';
 import { Routes } from '@angular/router';
 import { sessionGuard } from './session.guard';
 import { SignIn } from './pages/sign-in/sign-in';
@@ -10,6 +12,18 @@ import { DeletionPage } from './pages/deletion/deletion-page';
 import { ComparePage } from './pages/compare/compare-page';
 
 export const routes: Routes = [
+  {
+    path: 'inspiration',
+    component: InspirationPage,
+    canActivate: [sessionGuard],
+    title: 'Inspiration \u00b7 Loupe',
+  },
+  {
+    path: 'inspiration/:id',
+    component: ReferenceDetailPage,
+    canActivate: [sessionGuard],
+    title: 'Reference \u00b7 Loupe',
+  },
   {
     path: 'compare',
     component: ComparePage,

@@ -12,6 +12,7 @@ import { SESSION_SERVICE } from 'api';
 export class App {
   protected readonly session = inject(SESSION_SERVICE);
   private readonly router = inject(Router);
+  protected readonly currentArea = signal('my-work');
   protected readonly endingSession = signal(false);
   protected readonly error = signal('');
   private readonly document = inject(DOCUMENT);
@@ -19,10 +20,14 @@ export class App {
 
   constructor() {
     this.router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
-      if (event instanceof NavigationEnd)
+      if (event instanceof NavigationEnd) {
+        this.currentArea.set(
+          event.urlAfterRedirects.startsWith('/inspiration') ? 'inspiration' : 'my-work',
+        );
         afterNextRender(() => this.document.querySelector('main')?.focus(), {
           injector: this.injector,
         });
+      }
     });
   }
 

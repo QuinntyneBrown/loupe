@@ -16,8 +16,8 @@ export class PhotographCard {
   }
   readonly title = input.required<string>();
   readonly status = input.required<string>();
-  readonly previewUrl = input.required<string>();
+  readonly previewUrl = input.required<string | null>();
   readonly createdAt = input.required<string>();
-  readonly width = input.required<number>();
-  readonly height = input.required<number>();
+  readonly width = input.required<number | null>();
+  readonly height = input.required<number | null>();
 }

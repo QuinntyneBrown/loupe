@@ -6,6 +6,16 @@
     <button type="button" (click)="signOut()" [disabled]="endingSession()">
       {{ endingSession() ? 'Signing out…' : 'Sign out' }}
     </button>
+    <nav aria-label="Library">
+      <a routerLink="/my-work" [attr.aria-current]="currentArea() === 'my-work' ? 'page' : null"
+        >My Work</a
+      >
+      <a
+        routerLink="/inspiration"
+        [attr.aria-current]="currentArea() === 'inspiration' ? 'page' : null"
+        >Inspiration</a
+      >
+    </nav>
   </header>
 }
 @if (error()) {

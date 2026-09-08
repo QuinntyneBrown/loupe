@@ -1,0 +1,51 @@
+@if (loading()) {
+  <p role="status">Loading reference…</p>
+}
+@if (error()) {
+  <h1 #heading tabindex="-1">Reference</h1>
+  <p role="alert">{{ error() }}</p>
+  <button type="button" (click)="retry()">Retry loading reference</button>
+}
+@if (reference(); as item) {
+  <header>
+    <h1 #heading tabindex="-1">{{ item.title }}</h1>
+    <p>
+      Saved <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'mediumDate' }}</time>
+    </p>
+  </header>
+  <div class="detail">
+    <figure>
+      @if (item.imageUrl) {
+        <img
+          [src]="item.imageUrl"
+          [alt]="item.title"
+          [attr.width]="item.width"
+          [attr.height]="item.height"
+        />
+      } @else {
+        <p class="placeholder">Link-only reference</p>
+      }
+    </figure>
+    <div class="context">
+      <section>
+        <h2>Source and attribution</h2>
+        @if (item.sourceUrl) {
+          <a
+            [href]="item.sourceUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            referrerpolicy="no-referrer"
+            >Open source</a
+          >
+        } @else {
+          <p>Source unknown</p>
+        }
+        <p class="plain-text">{{ item.attribution || 'Attribution unknown' }}</p>
+      </section>
+      <section>
+        <h2>Notes</h2>
+        <p class="plain-text">{{ item.notes || 'No notes saved.' }}</p>
+      </section>
+    </div>
+  </div>
+}

@@ -1,0 +1,19 @@
+export interface ReferenceSummary {
+  id: string;
+  title: string;
+  createdAt: string;
+  width: number | null;
+  height: number | null;
+  previewUrl: string | null;
+}
+export interface ReferenceResult extends ReferenceSummary {
+  sourceUrl: string | null;
+  attribution: string | null;
+  notes: string | null;
+  imageUrl: string | null;
+  revision: number;
+}
+export interface ReferencePage {
+  items: ReferenceSummary[];
+  nextCursor: string | null;
+}

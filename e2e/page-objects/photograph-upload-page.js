@@ -69,7 +69,7 @@ export class PhotographUploadPage {
     await expect(this.page.getByRole('status')).toHaveText(transferred === null ? 'Saving photograph…' : `${transferred.toLocaleString('en-US')} bytes transferred. Total size unavailable.`);
   }
   async expectNoProgress() { await expect(this.page.getByRole('progressbar', { name: 'Upload progress', exact: true })).toHaveCount(0); }
-  async returnToLibrary() { await this.page.getByRole('link', { name: 'My Work', exact: true }).click(); }
+  async returnToLibrary() { await this.page.getByRole('main').getByRole('link', { name: 'My Work', exact: true }).click(); }
   discardDialog() { return this.page.getByRole('dialog', { name: 'Discard unsaved changes?', exact: true }); }
   async expectDiscardChoice() {
     await expect(this.discardDialog()).toBeVisible();

@@ -5,3 +5,5 @@ export * from './lib/deletion-status/deletion-status';
 export * from './lib/request-critique/request-critique';
 export * from './lib/attempt-comparison/attempt-comparison';
 export * from './lib/attempt-picker/attempt-picker';
+export * from './lib/reference-collection/reference-collection';
+export * from './lib/reference-detail/reference-detail-panel';

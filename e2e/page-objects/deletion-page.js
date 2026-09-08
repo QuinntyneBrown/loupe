@@ -12,7 +12,7 @@ export class DeletionPage {
   async expectCompleted() {
     await expect(this.page.getByRole('status')).toHaveText('Cleanup completed. The item’s active files have been removed.', { timeout: 10000 });
   }
-  async backToMyWork() { await this.page.getByRole('link', { name: 'My Work', exact: true }).click(); }
+  async backToMyWork() { await this.page.getByRole('main').getByRole('link', { name: 'My Work', exact: true }).click(); }
   async expectFailure() { await expect(this.page.getByRole('alert')).toHaveText('Cleanup status could not be loaded. Try again.'); }
   async checkStatus() { await this.page.getByRole('button', { name: 'Check cleanup status', exact: true }).click(); }
   async expectUnavailable() { await expect(this.page.getByRole('heading', { name: 'Deletion record unavailable', exact: true })).toBeVisible(); }
