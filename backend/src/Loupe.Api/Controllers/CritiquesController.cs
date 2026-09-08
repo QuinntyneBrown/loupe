@@ -13,6 +13,13 @@ namespace Loupe.Api.Controllers;
 [Route("api/photographs/{id:guid}/critique")]
 public sealed class CritiquesController(ISender sender) : ControllerBase
 {
+    [HttpGet("operation")]
+    public async Task<ActionResult<OperationResult>> GetOperation(Guid id, CancellationToken cancellationToken)
+    {
+        var operation = await sender.Send(new GetCurrentCritiqueOperationQuery(id), cancellationToken);
+        return operation is null ? NoContent() : Ok(operation);
+    }
+
     [HttpGet]
     public async Task<ActionResult<SavedCritique>> Get(Guid id, CancellationToken cancellationToken)
     {

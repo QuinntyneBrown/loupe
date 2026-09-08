@@ -27,7 +27,11 @@ public sealed class BackgroundOperationStore(LibraryDbContext database, TimeProv
         {
             if (existing.Mode == identity.Mode && existing.Model == identity.Model && existing.PromptVersion == identity.PromptVersion
                 && JsonSerializer.Serialize(JsonSerializer.Deserialize<CritiqueInput>(existing.InputJson!)) == inputJson)
+            {
+                photograph.CurrentCritiqueOperationId = existing.Id;
+                await database.SaveChangesAsync(cancellationToken);
                 return existing.Id;
+            }
             throw new AnalysisActiveException();
         }
         if (!regenerate)
@@ -42,8 +46,9 @@ public sealed class BackgroundOperationStore(LibraryDbContext database, TimeProv
                 {
                     photograph.CritiqueJson = completed.OutputJson;
                     photograph.Revision++;
-                    await database.SaveChangesAsync(cancellationToken);
                 }
+                photograph.CurrentCritiqueOperationId = completed.Id;
+                await database.SaveChangesAsync(cancellationToken);
                 return completed.Id;
             }
         }
@@ -62,6 +67,7 @@ public sealed class BackgroundOperationStore(LibraryDbContext database, TimeProv
             UpdatedAt = now
         };
         database.BackgroundOperations.Add(operation);
+        photograph.CurrentCritiqueOperationId = operation.Id;
         await database.SaveChangesAsync(cancellationToken);
         return operation.Id;
     }
