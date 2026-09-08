@@ -605,3 +605,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: all six API checks failed at the missing eligible endpoint. Green: all six targeted checks and all 250 container API tests passed (full regression 1m47s).
 - GET /api/comparisons/eligible filters owned photographs with saved critique content before cursor ordering and bounded pagination. It shares the photograph-summary projection, so failed replacement jobs remain eligible when an earlier critique is available.
 - Tests cover sparse libraries spanning pages, reverse chronological ordering, owner isolation, deletion, zero/one candidates, invalid bounds/cursors, and no provider calls. Independent read-only review found no Critical or Required findings. C# format verification and diff checks passed; no schema change was needed.
+
+## UI-34: reuse complete critique presentation
+
+- Behavior-preserving refactor: the four existing Chromium saved-critique checks passed before extraction. All 63 saved-result, regeneration, and manual-retry checks then passed across Chromium, Firefox and WebKit (1.8m).
+- The domain maps saved API content to a display shape; the components library owns the input-only renderer, with no API or application-service dependency. Loading, error recovery, regeneration, and original content remain in their existing domain flow. All feedback fields and token styles are preserved.
+- Independent review found no Required findings. Phone/desktop critique screenshots were inspected and accessibility checks passed. Production libraries/application built at 418.81 kB raw / 104.80 kB estimated transfer; formatting and diff checks passed.

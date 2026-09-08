@@ -12,12 +12,13 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { CritiqueContent } from 'components';
+import { presentCritique } from './present-critique';
 import { CRITIQUE_SERVICE, SavedCritique, ServiceError } from 'api';
 
 @Component({
   selector: 'lp-photograph-critique',
-  imports: [DatePipe, NgTemplateOutlet],
+  imports: [CritiqueContent],
   templateUrl: './photograph-critique.html',
   styleUrl: './photograph-critique.css',
 })
@@ -33,52 +34,10 @@ export class PhotographCritique {
   readonly critique = signal<SavedCritique | null>(null);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
-  readonly hasBrief = computed(() => Object.values(this.critique()?.brief ?? {}).some(Boolean));
-  readonly briefFields = [
-    { key: 'intent', label: 'Intent' },
-    { key: 'genre', label: 'Genre' },
-    { key: 'experience', label: 'Experience' },
-    { key: 'requestedFeedback', label: 'Requested feedback' },
-  ] as const;
-  readonly evidenceLabels: Record<string, string> = {
-    VisibleObservation: 'Visible observation',
-    ExifFact: 'EXIF fact',
-    Hypothesis: 'Hypothesis',
-    StylisticPreference: 'Stylistic preference',
-  };
-  readonly exifLabels: Record<string, string> = {
-    Camera: 'Camera',
-    Lens: 'Lens',
-    Aperture: 'Aperture',
-    ShutterSpeed: 'Shutter speed',
-    Iso: 'ISO',
-    FocalLength: 'Focal length',
-    CapturedAt: 'Capture time',
-  };
-  readonly aspectGroups = [
-    {
-      label: 'Technical observations',
-      fields: [
-        { key: 'exposure', label: 'Exposure' },
-        { key: 'focus', label: 'Focus' },
-        { key: 'depthOfField', label: 'Depth of field' },
-        { key: 'motion', label: 'Motion' },
-        { key: 'lighting', label: 'Lighting' },
-        { key: 'color', label: 'Color' },
-        { key: 'processing', label: 'Processing' },
-      ],
-    },
-    {
-      label: 'Composition and expression',
-      fields: [
-        { key: 'framing', label: 'Framing' },
-        { key: 'subjectSeparation', label: 'Subject separation' },
-        { key: 'balance', label: 'Balance' },
-        { key: 'visualHierarchy', label: 'Visual hierarchy' },
-        { key: 'mood', label: 'Mood' },
-      ],
-    },
-  ] as const;
+  readonly presentation = computed(() => {
+    const item = this.critique();
+    return item ? presentCritique(item) : null;
+  });
 
   constructor() {
     let previousId: string | null = null;

@@ -15,74 +15,7 @@
     >
       Regenerate critique
     </button>
-    <p class="provenance">
-      <strong>{{
-        item.mode === 'Demo' ? 'Demo · illustrative sample' : 'AI-generated critique'
-      }}</strong>
-      · <time [attr.datetime]="item.generatedAt">{{ item.generatedAt | date: 'medium' }}</time>
-    </p>
-    @if (item.mode === 'Demo') {
-      <p>Sample guidance; no image analysis was performed.</p>
-    }
-    <p class="provenance">{{ item.model }} · {{ item.promptVersion }}</p>
-    <h3>Strengths</h3>
-    @for (strength of item.content.strengths; track $index) {
-      <p>{{ strength.explanation }}</p>
-      <ng-container
-        [ngTemplateOutlet]="evidence"
-        [ngTemplateOutletContext]="{ $implicit: strength.evidence }"
-      />
-    }
-    <h3>Three priorities</h3>
-    <ol class="priorities">
-      @for (priority of item.content.improvements; track $index) {
-        <li>
-          <p><strong>Observation</strong> {{ priority.observation }}</p>
-          <p><strong>Effect</strong> {{ priority.effect }}</p>
-          <p><strong>Action</strong> {{ priority.action }}</p>
-          <ng-container
-            [ngTemplateOutlet]="evidence"
-            [ngTemplateOutletContext]="{ $implicit: priority.evidence }"
-          />
-        </li>
-      }
-    </ol>
-    <h3>Practice exercise</h3>
-    <p>{{ item.content.exercise.action }}</p>
-    <p><strong>Compare</strong> {{ item.content.exercise.comparison }}</p>
-    @for (group of aspectGroups; track group.label) {
-      <h3>{{ group.label }}</h3>
-      <div class="observations">
-        @for (field of group.fields; track field.key) {
-          @let observation = item.content[field.key];
-          <section>
-            <h4>{{ field.label }}</h4>
-            <p>{{ observation.explanation }}</p>
-            @if (!observation.assessable) {
-              <p class="uncertainty">
-                <strong>Cannot assess:</strong> {{ observation.uncertaintyReason }}
-              </p>
-            }
-            <ng-container
-              [ngTemplateOutlet]="evidence"
-              [ngTemplateOutletContext]="{ $implicit: observation.evidence }"
-            />
-          </section>
-        }
-      </div>
-    }
-    <h3>Brief used for this critique</h3>
-    @if (!hasBrief()) {
-      <p>No brief supplied.</p>
-    }
-    <dl>
-      @for (field of briefFields; track field.key) {
-        @if (item.brief[field.key]) {
-          <dt>{{ field.label }}</dt>
-          <dd>{{ item.brief[field.key] }}</dd>
-        }
-      }
-    </dl>
+    <lp-critique-content [content]="presentation()!" />
   } @else if (error() === 'item_unavailable') {
     <p role="alert">Critique unavailable. The photograph may have been removed.</p>
   } @else if (error()) {
@@ -92,18 +25,3 @@
     <p>No critique saved yet.</p>
   }
 </section>
-<ng-template #evidence let-statements>
-  @if (statements.length) {
-    <ul class="evidence">
-      @for (statement of statements; track $index) {
-        <li>
-          <strong class="evidence-kind">{{ evidenceLabels[statement.kind] }}</strong>
-          {{ statement.statement }}
-          @if (statement.exifField) {
-            <span>({{ exifLabels[statement.exifField] }}: {{ statement.exifValue }})</span>
-          }
-        </li>
-      }
-    </ul>
-  }
-</ng-template>

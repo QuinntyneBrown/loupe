@@ -8,66 +8,6 @@
 h2 {
   font-size: var(--lp-text-2xl);
 }
-h3 {
-  font-size: var(--lp-text-xl);
-  margin-top: var(--lp-space-7);
-}
-h4 {
-  font-size: var(--lp-text-lg);
-  margin: var(--lp-zero);
-}
-p,
-li,
-dd {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-p,
-dl,
-.evidence {
-  max-width: var(--lp-measure);
-}
-.provenance,
-.uncertainty,
-dt {
-  color: var(--lp-color-text-2);
-}
-.provenance,
-.evidence,
-dt {
-  font-size: var(--lp-text-sm);
-}
-.observations {
-  display: grid;
-  grid-template-columns: var(--lp-detail-columns);
-  gap: var(--lp-space-6);
-}
-.observations section {
-  min-width: var(--lp-zero);
-  padding-block: var(--lp-space-4);
-  border-top: var(--lp-hairline) solid var(--lp-color-border);
-}
-.priorities {
-  display: grid;
-  gap: var(--lp-space-5);
-}
-.priorities,
-.evidence {
-  padding-inline-start: var(--lp-space-6);
-}
-.evidence li {
-  margin-block: var(--lp-space-2);
-}
-.evidence-kind {
-  display: inline-block;
-  margin-inline-end: var(--lp-space-2);
-}
-dt {
-  margin-top: var(--lp-space-4);
-}
-dd {
-  margin: var(--lp-space-1) var(--lp-zero) var(--lp-zero);
-}
 [role='alert'] {
   color: var(--lp-color-danger);
 }

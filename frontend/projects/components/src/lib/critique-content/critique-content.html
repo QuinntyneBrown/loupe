@@ -1,0 +1,77 @@
+@let item = content();
+<p class="provenance">
+  <strong>{{ item.demo ? 'Demo · illustrative sample' : 'AI-generated critique' }}</strong>
+  · <time [attr.datetime]="item.generatedAt">{{ item.generatedAt | date: 'medium' }}</time>
+</p>
+@if (item.demo) {
+  <p>Sample guidance; no image analysis was performed.</p>
+}
+<p class="provenance">{{ item.model }} · {{ item.promptVersion }}</p>
+<h3>Strengths</h3>
+@for (strength of item.strengths; track $index) {
+  <p>{{ strength.explanation }}</p>
+  <ng-container
+    [ngTemplateOutlet]="evidence"
+    [ngTemplateOutletContext]="{ $implicit: strength.evidence }"
+  />
+}
+<h3>Three priorities</h3>
+<ol class="priorities">
+  @for (priority of item.priorities; track $index) {
+    <li>
+      <p><strong>Observation</strong> {{ priority.observation }}</p>
+      <p><strong>Effect</strong> {{ priority.effect }}</p>
+      <p><strong>Action</strong> {{ priority.action }}</p>
+      <ng-container
+        [ngTemplateOutlet]="evidence"
+        [ngTemplateOutletContext]="{ $implicit: priority.evidence }"
+      />
+    </li>
+  }
+</ol>
+<h3>Practice exercise</h3>
+<p>{{ item.exercise.action }}</p>
+<p><strong>Compare</strong> {{ item.exercise.comparison }}</p>
+@for (group of item.groups; track group.label) {
+  <h3>{{ group.label }}</h3>
+  <div class="observations">
+    @for (observation of group.observations; track observation.label) {
+      <section>
+        <h4>{{ observation.label }}</h4>
+        <p>{{ observation.explanation }}</p>
+        @if (observation.uncertainty) {
+          <p class="uncertainty"><strong>Cannot assess:</strong> {{ observation.uncertainty }}</p>
+        }
+        <ng-container
+          [ngTemplateOutlet]="evidence"
+          [ngTemplateOutletContext]="{ $implicit: observation.evidence }"
+        />
+      </section>
+    }
+  </div>
+}
+<h3>Brief used for this critique</h3>
+@if (!item.brief.length) {
+  <p>No brief supplied.</p>
+}
+<dl>
+  @for (field of item.brief; track field.label) {
+    <dt>{{ field.label }}</dt>
+    <dd>{{ field.value }}</dd>
+  }
+</dl>
+<ng-template #evidence let-statements>
+  @if (statements.length) {
+    <ul class="evidence">
+      @for (statement of statements; track $index) {
+        <li>
+          <strong class="evidence-kind">{{ statement.label }}</strong>
+          {{ statement.statement }}
+          @if (statement.fact) {
+            <span>({{ statement.fact }})</span>
+          }
+        </li>
+      }
+    </ul>
+  }
+</ng-template>
