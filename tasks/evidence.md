@@ -599,3 +599,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Tests cover exact saved content on both sides, notes and subsequently edited brief, unchanged operation identities/no queued work, repeated/empty/uncritiqued selection, foreign/missing concealment before eligibility, deletion and surviving-content access, and authentication. Independent review found no Critical or Required findings; the first-side missing-critique branch is symmetric but not separately tested.
 - C# formatting passed. Existing IPhotographStore is reused instead of adding the proposal's redundant store/selection wrappers. Full regression results follow below; eligible selection and the comparison screen are separate upcoming slices.
 - All 244 container API tests passed (1m56s), including existing upload, ownership, revisions, critique lifecycle, cleanup, and recovery checks. Diff checks passed; no schema change was introduced.
+
+## API-49: page eligible comparison candidates
+
+- Red: all six API checks failed at the missing eligible endpoint. Green: all six targeted checks and all 250 container API tests passed (full regression 1m47s).
+- GET /api/comparisons/eligible filters owned photographs with saved critique content before cursor ordering and bounded pagination. It shares the photograph-summary projection, so failed replacement jobs remain eligible when an earlier critique is available.
+- Tests cover sparse libraries spanning pages, reverse chronological ordering, owner isolation, deletion, zero/one candidates, invalid bounds/cursors, and no provider calls. Independent read-only review found no Critical or Required findings. C# format verification and diff checks passed; no schema change was needed.

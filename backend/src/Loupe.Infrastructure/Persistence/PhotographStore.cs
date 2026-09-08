@@ -17,9 +17,16 @@ public sealed class PhotographStore(LibraryDbContext database) : IPhotographStor
     public Task<Photograph?> FindOwnedAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>
         database.Photographs.AsNoTracking().SingleOrDefaultAsync(photograph => photograph.Id == id && photograph.OwnerId == ownerId, cancellationToken);
 
-    public async Task<IReadOnlyList<PhotographSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, CancellationToken cancellationToken)
+    public Task<IReadOnlyList<PhotographSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, CancellationToken cancellationToken) =>
+        ListCoreAsync(ownerId, count, cursor, false, cancellationToken);
+
+    public Task<IReadOnlyList<PhotographSummary>> ListEligibleAsync(string ownerId, int count, CreatedCursor? cursor, CancellationToken cancellationToken) =>
+        ListCoreAsync(ownerId, count, cursor, true, cancellationToken);
+
+    private async Task<IReadOnlyList<PhotographSummary>> ListCoreAsync(string ownerId, int count, CreatedCursor? cursor, bool eligibleOnly, CancellationToken cancellationToken)
     {
         var query = database.Photographs.AsNoTracking().Where(photograph => photograph.OwnerId == ownerId);
+        if (eligibleOnly) query = query.Where(photograph => photograph.CritiqueJson != null);
         if (cursor is not null)
             query = query.Where(photograph => photograph.CreatedAt < cursor.CreatedAt
                 || photograph.CreatedAt == cursor.CreatedAt && photograph.Id.CompareTo(cursor.Id) > 0);
