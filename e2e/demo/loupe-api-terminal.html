@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Loupe API &amp; Worker</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #0b0f14; color: #d7dde3;
+    font: 15px/1.5 'Cascadia Code', 'Consolas', monospace;
+    height: 100vh; display: flex; flex-direction: column;
+  }
+  #caption {
+    padding: 18px 28px; background: #12181f; border-bottom: 1px solid #232b34;
+    font-size: 20px; font-weight: 600; color: #f4f6f8; min-height: 32px;
+  }
+  #caption .sub { display: block; font-size: 14px; font-weight: 400; color: #8b98a5; margin-top: 4px; }
+  #panes { flex: 1; display: flex; min-height: 0; }
+  .pane { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .pane + .pane { border-left: 1px solid #232b34; }
+  .pane h2 {
+    margin: 0; padding: 8px 16px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+    color: #6b98d4; background: #10151b; border-bottom: 1px solid #232b34;
+  }
+  .pane pre {
+    flex: 1; margin: 0; padding: 16px; overflow: hidden; white-space: pre-wrap; word-break: break-word;
+  }
+  #api-log .ok { color: #7ee787; }
+  #api-log .fail { color: #ff7b72; }
+  #worker-log { color: #9aa7b4; font-size: 13px; }
+  #status { padding: 10px 28px; background: #10151b; border-top: 1px solid #232b34; font-size: 13px; color: #6b98d4; }
+</style>
+</head>
+<body>
+  <div id="caption">Loupe API &amp; Worker<span class="sub">Preparing the real backend demo…</span></div>
+  <div id="panes">
+    <section class="pane">
+      <h2>API calls (real curl, real Loupe.Api)</h2>
+      <pre id="api-log"></pre>
+    </section>
+    <section class="pane">
+      <h2>Loupe.Worker (real container log)</h2>
+      <pre id="worker-log"></pre>
+    </section>
+  </div>
+  <div id="status" data-demo-done="false">Starting…</div>
+<script>
+  const captionEl = document.getElementById('caption');
+  const apiLogEl = document.getElementById('api-log');
+  const workerLogEl = document.getElementById('worker-log');
+  const statusEl = document.getElementById('status');
+
+  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  async function pollWorkerLog() {
+    try {
+      const res = await fetch('/worker-log');
+      const lines = await res.json();
+      if (lines.length) {
+        workerLogEl.textContent += (workerLogEl.textContent ? '\n' : '') + lines.join('\n');
+        workerLogEl.scrollTop = workerLogEl.scrollHeight;
+      }
+    } catch { /* server not ready yet */ }
+  }
+  setInterval(pollWorkerLog, 700);
+
+  async function revealLines(container, text, ok) {
+    const block = document.createElement('div');
+    block.className = ok ? 'ok' : 'fail';
+    container.appendChild(block);
+    for (const line of text.split('\n')) {
+      const lineEl = document.createElement('div');
+      lineEl.textContent = line || ' ';
+      block.appendChild(lineEl);
+      container.scrollTop = container.scrollHeight;
+      const isCommand = line.startsWith('$');
+      await wait(isCommand ? 700 : line.trim() ? 320 : 150);
+    }
+  }
+
+  async function main() {
+    captionEl.innerHTML = 'Loupe API &amp; Worker<span class="sub">A real ASP.NET Core API and background worker — real PostgreSQL, real image decoding, real worker leases. No mocked responses.</span>';
+    statusEl.textContent = 'Starting the real backend walkthrough…';
+    await wait(4000);
+
+    const steps = await (await fetch('/steps')).json();
+    let allOk = true;
+    for (const step of steps) {
+      captionEl.innerHTML = `${step.caption}<span class="sub">POST /steps/${step.name}</span>`;
+      await wait(1600);
+      const res = await fetch(`/steps/${step.name}`, { method: 'POST' });
+      const { ok, output } = await res.json();
+      allOk &&= ok;
+      await revealLines(apiLogEl, output, ok);
+      await wait(ok ? 1600 : 800);
+      if (!ok) break;
+    }
+    captionEl.innerHTML = allOk
+      ? 'Every step above ran against the real backend — nothing shown was mocked'
+      : 'A step failed — see the API log';
+    statusEl.textContent = allOk ? 'Done — every step above ran against the real Postgres-backed API and worker.' : 'Failed';
+    await wait(4000);
+    statusEl.dataset.demoDone = 'true';
+    statusEl.dataset.demoOk = String(allOk);
+  }
+  main();
+</script>
+</body>
+</html>

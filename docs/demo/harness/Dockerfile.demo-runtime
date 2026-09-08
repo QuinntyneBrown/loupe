@@ -1,0 +1,39 @@
+# Demo-only runtime image for recording docs/demo videos locally.
+#
+# Windows has no working native libvips for NetVips (see docs/demo/README.md),
+# so Loupe.Api and Loupe.Worker run inside a Linux container here, using the
+# exact apt package pins backend/Dockerfile.acceptance already validates for
+# image decoding. This image is never published or deployed; it exists only to
+# make `docker run` reproduce the demo stack from a clean environment.
+#
+# Build from the repository root:
+#   docker build -f docs/demo/harness/Dockerfile.demo-runtime -t loupe-demo-runtime .
+# A trusted local dev-certificate's PUBLIC certificate must be present at
+# backend/.demo-devcert.crt (backend/ is the only tree .dockerignore admits
+# into the build context; see docs/demo/harness/setup.ps1). It is not a
+# secret (no private key) and is deleted immediately after the build.
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0.400-noble@sha256:4beef5b8919dcaa2dc924233bd069257e883cc7a061e09088a97d152d6a48510
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libvips42t64=8.15.1-1.1build4 libheif-plugin-libde265=1.17.6-1ubuntu4.8 libheif-plugin-x265=1.17.6-1ubuntu4.8 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY backend/.demo-devcert.crt /usr/local/share/ca-certificates/loupe-demo.crt
+RUN update-ca-certificates
+
+WORKDIR /workspace
+COPY NuGet.Config ./
+COPY backend/Directory.Build.props backend/Loupe.slnx backend/
+COPY backend/src/Loupe.Domain/*.csproj backend/src/Loupe.Domain/packages.lock.json backend/src/Loupe.Domain/
+COPY backend/src/Loupe.Application/*.csproj backend/src/Loupe.Application/packages.lock.json backend/src/Loupe.Application/
+COPY backend/src/Loupe.Infrastructure/*.csproj backend/src/Loupe.Infrastructure/packages.lock.json backend/src/Loupe.Infrastructure/
+COPY backend/src/Loupe.Api/*.csproj backend/src/Loupe.Api/packages.lock.json backend/src/Loupe.Api/
+COPY backend/src/Loupe.Worker/*.csproj backend/src/Loupe.Worker/packages.lock.json backend/src/Loupe.Worker/
+COPY backend/tests/Loupe.Api.Tests/*.csproj backend/tests/Loupe.Api.Tests/packages.lock.json backend/tests/Loupe.Api.Tests/
+RUN dotnet restore backend/Loupe.slnx --locked-mode
+COPY backend/ backend/
+RUN dotnet publish backend/src/Loupe.Api/Loupe.Api.csproj -c Release -o /app/api --no-restore
+RUN dotnet publish backend/src/Loupe.Worker/Loupe.Worker.csproj -c Release -o /app/worker --no-restore
+
+WORKDIR /app
