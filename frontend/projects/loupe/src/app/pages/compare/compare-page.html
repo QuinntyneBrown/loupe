@@ -2,5 +2,10 @@
   <a routerLink="/my-work">Back to My Work</a>
   <h1>Compare attempts</h1>
   <p>Read your saved feedback together. Comparing does not run new analysis.</p>
-  <lp-attempt-comparison [firstId]="firstId()" [secondId]="secondId()" />
+  @if (firstId() && secondId()) {
+    <lp-attempt-comparison [firstId]="firstId()" [secondId]="secondId()" />
+  } @else {
+    <h2>Choose {{ firstId() ? 'second' : 'first' }} attempt</h2>
+    <lp-attempt-picker [excludeId]="firstId() || null" (chosen)="choose($event)" />
+  }
 </main>

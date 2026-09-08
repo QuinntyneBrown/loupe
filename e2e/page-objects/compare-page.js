@@ -3,6 +3,20 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class ComparePage {
   constructor(page) { this.page = page; }
+  choice(title) { return this.page.getByRole('button', { name: new RegExp('^Choose ' + title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ', attempt ') }); }
+  async choose(title) { await this.choice(title).click(); }
+  async chooseNumber(title, number) { await this.page.getByRole('button', { name: new RegExp(`^Choose ${title}, attempt ${number}, saved `) }).click(); }
+  async expectChoice(title, visible = true) { await expect(this.choice(title)).toHaveCount(visible ? 1 : 0); }
+  async expectChoosing(side) { await expect(this.page.getByRole('heading', { name: `Choose ${side} attempt`, exact: true })).toBeVisible(); }
+  async expectTooFew() {
+    await expect(this.page.getByText('Save another photograph with a critique to compare two attempts.', { exact: true })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Saved attempts', exact: true })).toHaveCount(0);
+    await expect(this.page.getByRole('button', { name: /^Choose / })).toHaveCount(0);
+  }
+  async loadMoreChoices() { await this.page.getByRole('button', { name: 'Load more attempts', exact: true }).click(); }
+  async expectChoiceFocus(title) { await expect(this.choice(title)).toBeFocused(); }
+  async expectChoicesFailure() { await expect(this.page.getByRole('alert')).toHaveText('Eligible attempts could not be loaded. Try again.'); }
+  async retryChoices() { await this.page.getByRole('button', { name: 'Retry loading attempts', exact: true }).click(); }
   destination(firstId, secondId) { return `/compare?firstId=${encodeURIComponent(firstId)}&secondId=${encodeURIComponent(secondId)}`; }
   side(label) { return this.page.getByRole('region', { name: label, exact: true }); }
   async expectAttempt(label, photograph, critique) {

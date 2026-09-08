@@ -1,0 +1,43 @@
+@if (error()) {
+  <p role="alert">Eligible attempts could not be loaded. Try again.</p>
+  <button type="button" (click)="load()" [disabled]="loading()">Retry loading attempts</button>
+}
+@if (loading()) {
+  <p role="status">Loading eligible attempts…</p>
+}
+@if (!loading() && !error() && tooFew()) {
+  <p>Save another photograph with a critique to compare two attempts.</p>
+} @else {
+  <ul>
+    @for (item of available(); track item.id) {
+      <li>
+        <button
+          #choice
+          class="choice"
+          type="button"
+          [attr.data-id]="item.id"
+          [attr.aria-label]="
+            'Choose ' +
+            item.title +
+            ', attempt ' +
+            ($index + 1) +
+            ', saved ' +
+            (item.createdAt | date: 'medium')
+          "
+          (click)="chosen.emit(item.id)"
+        >
+          <img [src]="item.previewUrl" alt="" [width]="item.width" [height]="item.height" />
+          <span
+            >{{ item.title
+            }}<time [attr.datetime]="item.createdAt">{{
+              item.createdAt | date: 'medium'
+            }}</time></span
+          >
+        </button>
+      </li>
+    }
+  </ul>
+}
+@if (nextCursor() && !error()) {
+  <button type="button" (click)="load()" [disabled]="loading()">Load more attempts</button>
+}

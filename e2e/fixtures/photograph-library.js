@@ -101,6 +101,12 @@ export class PhotographLibrary {
         return { data: { first: { photograph: first, critique: this.critiques.get(first.id) },
           second: { photograph: second, critique: this.critiques.get(second.id) } } };
       }
+      if (operation === 'eligible') {
+        const candidates = this.photos.filter(photo => this.critiques.has(photo.id));
+        const start = Number(input.cursor ?? 0), end = Math.min(candidates.length, start + 24);
+        return { data: { items: candidates.slice(start, end).map(photo => ({ ...photo, hasCritique: true,
+          critiqueStatus: this.critiqueOperations.get(photo.id)?.status ?? null })), nextCursor: end < candidates.length ? String(end) : null } };
+      }
       if (operation === 'deletePhotograph') {
         const previous = [...this.deletions.values()].find(deletion => deletion.resourceId === input.id);
         if (previous) return { data: previous };

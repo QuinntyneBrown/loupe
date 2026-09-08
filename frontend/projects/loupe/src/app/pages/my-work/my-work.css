@@ -13,6 +13,7 @@ p {
 }
 a {
   display: inline-block;
+  margin-inline-end: var(--lp-space-4);
   padding: var(--lp-space-3) var(--lp-zero);
   color: var(--lp-color-text);
 }
