@@ -481,3 +481,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: the original matrix passed. Additional missing/negative Retry-After and mixed invalid/transient budget controls passed in the full 196-test container API suite. Format, builds and diff checks passed.
 - Transient/rate-limit failures share the three-attempt budget, using five/30-second waits or a longer valid provider wait through 300 seconds. Longer waits fail with RetryAvailableAt; exhausted rate-limit attempts also preserve a requested manual wait. Permanent access/credential/input/disabled failures expose fixed fallback guidance. Prior saved critiques remain untouched.
 - Independent read-only gpt-5.6-sol review found no Critical or Required findings. MaxValue duration, undefined enum and exact failure/deletion races remain unexecuted controls; bounded arithmetic, safe default mapping and lease fencing cover their implementation paths. Deletion clears retry availability.
+
+## API-41: retry a failed critique without changing its inputs
+
+- Red: all four manual-retry workflows returned 404 because the endpoint did not exist.
+- Green: all 200 container API checks passed; format, builds and diff checks passed. Concurrent submissions of one retry key return one new operation. Notes edits do not change analysis inputs, later brief edits do not change an admitted snapshot, and replay preserves the original operation. Changed analysis inputs require a new critique request.
+- Retry admission enforces the original identity, current revision, retryable terminal state, provider wait and shared admission limits. Previous saved content remains visible. Foreign, unknown and deleted resources remain unavailable.
+- Independent read-only gpt-5.6-sol review found no Critical or Required findings. Forced different-key retry concurrency and an edit/delete exactly between comparison and locked admission remain unexecuted controls; admission locking and revision checks cover those paths.

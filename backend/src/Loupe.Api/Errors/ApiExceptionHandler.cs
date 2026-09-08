@@ -2,6 +2,7 @@ using Loupe.Application.Common;
 using Loupe.Application.Images;
 using Loupe.Application.Operations;
 using Microsoft.AspNetCore.Diagnostics;
+using System.Globalization;
 
 namespace Loupe.Api.Errors;
 
@@ -18,6 +19,9 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             OperationConflictException => 409,
             AnalysisActiveException => 409,
             AnalysisLimitException => 429,
+            AnalysisInputsChangedException => 409,
+            RetryUnavailableException => 409,
+            RetryNotReadyException => 429,
             ServiceUnavailableException => 503,
             IntegrationNotConfiguredException => 503,
             ImageValidationException { Failure: ImageFailure.TooLarge } => 413,
@@ -33,6 +37,9 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             OperationConflictException => "operation_conflict",
             AnalysisActiveException => "analysis_active",
             AnalysisLimitException => "analysis_limit",
+            AnalysisInputsChangedException => "analysis_inputs_changed",
+            RetryUnavailableException => "retry_unavailable",
+            RetryNotReadyException => "retry_not_ready",
             ServiceUnavailableException => "service_unavailable",
             IntegrationNotConfiguredException => "integration_not_configured",
             ImageValidationException { Failure: ImageFailure.TooLarge } => "image_too_large",
@@ -43,6 +50,8 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
         logger.LogWarning("Request {CorrelationId} failed with {Code}", context.TraceIdentifier, code);
         if (exception is ServiceUnavailableException or IntegrationNotConfiguredException) context.Response.Headers.RetryAfter = "5";
         if (exception is AnalysisLimitException) context.Response.Headers.RetryAfter = "30";
+        if (exception is RetryNotReadyException notReady)
+            context.Response.Headers.RetryAfter = Math.Ceiling(notReady.Wait.TotalSeconds).ToString("0", CultureInfo.InvariantCulture);
         await Results.Problem(statusCode: status, title: status < 500 ? exception.Message : "The request could not be completed.",
             extensions: new Dictionary<string, object?>
             {
