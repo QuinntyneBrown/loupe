@@ -52,6 +52,7 @@ public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock)
                 .SetProperty(item => item.OutputJson, (string?)null)
                 .SetProperty(item => item.LeaseToken, (Guid?)null).SetProperty(item => item.LeaseExpiresAt, (DateTimeOffset?)null)
                 .SetProperty(item => item.NextAttemptAt, (DateTimeOffset?)null).SetProperty(item => item.FailureCode, (string?)null)
+                .SetProperty(item => item.RetryAvailableAt, (DateTimeOffset?)null)
                 .SetProperty(item => item.UpdatedAt, operation.DeletedAt).SetProperty(item => item.Message, "The photograph was deleted."), cancellationToken);
         database.Photographs.Remove(photograph);
         try { await database.SaveChangesAsync(cancellationToken); }

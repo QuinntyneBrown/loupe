@@ -21,6 +21,7 @@ public sealed class BackgroundOperation
     public int RecoveryCount { get; set; }
     public int InvalidOutputCount { get; set; }
     public DateTimeOffset? NextAttemptAt { get; set; }
+    public DateTimeOffset? RetryAvailableAt { get; set; }
     public string? FailureCode { get; set; }
     public string Message { get; set; } = "Waiting to start.";
 }
