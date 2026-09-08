@@ -12,6 +12,14 @@ namespace Loupe.Api.Controllers;
 [Route("api/references")]
 public sealed class ReferencesController(ISender sender) : ControllerBase
 {
+    [HttpPost("links")]
+    public async Task<ActionResult<SaveReferenceUrlResult>> SaveLink(SaveReferenceUrlRequest request,
+        [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new SaveReferenceUrlCommand(request.SourceUrl, request.Title, request.Attribution, request.Notes, operationKey), cancellationToken);
+        return result.AlreadySaved ? Ok(result) : Created($"/api/references/{result.Reference.Id}", result);
+    }
+
     [HttpGet]
     public Task<ReferencePage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null) =>
         sender.Send(new ListReferencesQuery(pageSize, cursor), cancellationToken);

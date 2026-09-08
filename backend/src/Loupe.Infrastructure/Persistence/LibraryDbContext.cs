@@ -21,6 +21,9 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Reference>().ToTable("references").HasKey(reference => reference.Id);
         modelBuilder.Entity<Reference>().HasIndex(reference => new { reference.OwnerId, reference.CreatedAt, reference.Id });
         modelBuilder.Entity<Reference>().Property(reference => reference.Revision).HasDefaultValue(1L).IsConcurrencyToken();
+        modelBuilder.Entity<Reference>().Property<string>("SourceHash").HasMaxLength(32)
+            .HasComputedColumnSql("md5(loupe_normalize_source(\"SourceUrl\"))", stored: true);
+        modelBuilder.Entity<Reference>().HasIndex("OwnerId", "SourceHash");
         modelBuilder.Entity<AnalysisDispatchCursor>().ToTable("analysis_dispatch_cursor").HasKey(cursor => cursor.Id);
         modelBuilder.Entity<AnalysisDispatchCursor>().Property(cursor => cursor.OwnerId).HasMaxLength(64);
         modelBuilder.Entity<AnalysisDispatchCursor>().HasData(new AnalysisDispatchCursor());

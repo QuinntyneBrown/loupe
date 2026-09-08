@@ -2,13 +2,45 @@ using Loupe.Application.References;
 using Loupe.Application.Common;
 using Loupe.Domain.References;
 using Microsoft.EntityFrameworkCore;
+using System.Buffers.Binary;
+using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace Loupe.Infrastructure.Persistence;
 
 public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
 {
+    public async Task<Reference> SaveSourceAsync(Reference reference, CancellationToken cancellationToken)
+    {
+        var source = await LockSourceAsync(reference.OwnerId, reference.SourceUrl, cancellationToken)
+            ?? throw new InvalidOperationException("A source save requires a source URL.");
+        var existing = await database.References.FromSqlInterpolated($"""
+            SELECT * FROM "references" WHERE "OwnerId" = {reference.OwnerId} AND "SourceHash" = {source.Hash}
+              AND loupe_normalize_source("SourceUrl") = {source.NormalizedSource}
+            """).OrderBy(item => item.CreatedAt).ThenBy(item => item.Id).FirstOrDefaultAsync(cancellationToken);
+        if (existing is not null) return existing;
+        database.References.Add(reference);
+        await database.SaveChangesAsync(cancellationToken);
+        return reference;
+    }
+
+    private async Task<ReferenceSourceIdentity?> LockSourceAsync(string ownerId, string? sourceUrl, CancellationToken cancellationToken)
+    {
+        if (sourceUrl is null) return null;
+        if (database.Database.CurrentTransaction is null) throw new InvalidOperationException("Source writes require a transaction.");
+        var source = await database.Database.SqlQuery<ReferenceSourceIdentity>($"""
+            SELECT loupe_normalize_source({sourceUrl}) AS "NormalizedSource", md5(loupe_normalize_source({sourceUrl})) AS "Hash"
+            """).SingleAsync(cancellationToken);
+        var hash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { scope = "reference-source", ownerId, source.Hash }));
+        var key = BinaryPrimitives.ReadInt64BigEndian(hash);
+        await database.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({key})", cancellationToken);
+        return source;
+    }
+
     public async Task<Reference> UpdateAsync(Guid id, string ownerId, long revision, ReferenceMetadata metadata, CancellationToken cancellationToken)
     {
+        await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
+        await LockSourceAsync(ownerId, metadata.SourceUrl, cancellationToken);
         var reference = await database.References.SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken)
             ?? throw new ResourceNotFoundException();
         if (reference.Revision != revision) throw new RevisionConflictException();
@@ -19,6 +51,7 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
         reference.Revision++;
         try { await database.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateConcurrencyException) { throw new RevisionConflictException(); }
+        await transaction.CommitAsync(cancellationToken);
         return reference;
     }
 
@@ -34,6 +67,7 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
     }
     public async Task SaveAsync(Reference reference, CancellationToken cancellationToken)
     {
+        await LockSourceAsync(reference.OwnerId, reference.SourceUrl, cancellationToken);
         database.References.Add(reference);
         await database.SaveChangesAsync(cancellationToken);
     }
