@@ -12,6 +12,10 @@ namespace Loupe.Api.Controllers;
 [Route("api/references")]
 public sealed class ReferencesController(ISender sender) : ControllerBase
 {
+    [HttpGet]
+    public Task<ReferencePage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null) =>
+        sender.Send(new ListReferencesQuery(pageSize, cursor), cancellationToken);
+
     [HttpPost("images")]
     [RequestSizeLimit(UploadLimits.RequestBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = UploadLimits.RequestBytes)]
