@@ -13,6 +13,11 @@ public sealed class CritiqueWorker(IServiceScopeFactory scopes, IOptions<AiOptio
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (options.Value.Mode != "Demo") return;
+        await Task.WhenAll(Enumerable.Range(0, options.Value.MaxConcurrentCalls).Select(_ => ProcessAsync(stoppingToken)));
+    }
+
+    private async Task ProcessAsync(CancellationToken stoppingToken)
+    {
         while (!stoppingToken.IsCancellationRequested)
         {
             try

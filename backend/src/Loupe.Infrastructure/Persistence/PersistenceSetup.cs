@@ -30,6 +30,7 @@ public static class PersistenceSetup
         services.AddScoped<ICritiqueWorkStore, CritiqueWorkStore>();
         services.AddSingleton<ICritiqueProvider, DemoCritiqueProvider>();
         services.AddOptions<AiOptions>().BindConfiguration("Ai")
+            .Validate(options => options.MaxConcurrentCalls is >= 1 and <= 64, "Ai:MaxConcurrentCalls must be between one and 64.")
             .Validate(options => options.Mode is null or "Demo" or "Live", "Ai:Mode must be Demo or Live when configured.")
             .Validate(options => !string.IsNullOrWhiteSpace(options.Model), "Ai:Model must name a model.").ValidateOnStart();
         services.AddScoped<IDeletionStore, DeletionStore>();

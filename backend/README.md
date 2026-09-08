@@ -55,3 +55,11 @@ staging mount in the deployment work.
 Completed deletion records are pruned after 35 days. Pending cleanup records are
 retained until their files are removed, even if that takes longer. Repeating a
 delete after its record expires returns the normal unavailable response.
+
+Explicit `Ai:Mode=Demo` enables the critique worker with illustrative results.
+`Ai:MaxConcurrentCalls` defaults to four and accepts 1–64. Set the same value on
+every API/worker instance in a deployment. Each worker can fill that capacity;
+shared database leases enforce the deployment total and two calls per owner,
+with round-robin selection of eligible owners. Stop workers before lowering the
+cap so existing calls drain before the new limit applies. Live execution is a
+subsequent increment.

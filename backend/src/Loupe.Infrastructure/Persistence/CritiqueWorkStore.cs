@@ -3,11 +3,13 @@ using Loupe.Application.Critiques;
 using Loupe.Application.Operations;
 using Loupe.Domain.Critiques;
 using Loupe.Domain.Operations;
+using Loupe.Infrastructure.Ai;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Loupe.Infrastructure.Persistence;
 
-public sealed class CritiqueWorkStore(LibraryDbContext database, TimeProvider clock) : ICritiqueWorkStore
+public sealed class CritiqueWorkStore(LibraryDbContext database, TimeProvider clock, IOptions<AiOptions> options) : ICritiqueWorkStore
 {
     public async Task<BackgroundOperation?> ClaimAsync(ExecutionMode mode, CancellationToken cancellationToken)
     {
@@ -15,7 +17,7 @@ public sealed class CritiqueWorkStore(LibraryDbContext database, TimeProvider cl
         var cursor = await database.AnalysisDispatchCursors.FromSqlRaw("SELECT * FROM analysis_dispatch_cursor WHERE \"Id\" = 1 FOR UPDATE")
             .AsNoTracking().SingleAsync(cancellationToken);
         var now = clock.GetUtcNow();
-        if (await database.BackgroundOperations.CountAsync(item => item.Status == OperationStatus.Running && item.LeaseExpiresAt > now, cancellationToken) >= 4)
+        if (await database.BackgroundOperations.CountAsync(item => item.Status == OperationStatus.Running && item.LeaseExpiresAt > now, cancellationToken) >= options.Value.MaxConcurrentCalls)
             return null;
         var operation = await database.BackgroundOperations.FromSqlInterpolated($"""
             SELECT candidate.* FROM background_operations candidate

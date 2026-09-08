@@ -494,3 +494,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - After correcting a missing test import, all three behavior checks failed as expected: one owner claimed three jobs instead of two, and sequential/concurrent workers claimed eight instead of four.
 - Green: all 203 container API checks passed; format, builds and diff checks passed. A transaction locks the durable dispatch cursor before counting unexpired leases and selecting the next eligible owner. Owner selection wraps in stable order, with oldest work first within each owner. Releasing a slot admits the next eligible job.
 - Independent read-only gpt-5.6-sol review found no Critical or Required findings. The migration seeds the cursor for existing deployments. Claim/renewal/deletion at the exact same instant remain unexecuted races; row locks and token/status predicates protect them. Leases still assume synchronized host clocks. Parallel execution within one host and deployment-cap configuration follow next; this slice enforces the default four/two shared claim limits.
+
+## API-43: fill configured provider capacity within worker hosts
+
+- Red: all three controlled-provider workflows timed out waiting for a serial host to fill the configured capacity.
+- Green: all 206 container API checks passed; format, builds and diff checks passed. One host fills four slots, two hosts share four slots, and two hosts obey a lower three-slot configuration. All nine admitted jobs drain to saved results, with no owner exceeding two simultaneous calls.
+- The host runs one scoped processing loop per configured slot, awaits every loop on shutdown, and contains per-job failures. Ai:MaxConcurrentCalls defaults to four, validates 1–64, and controls shared claims as well as local pumps. Every deployment instance must use the same value; coordinated restart is required when lowering it.
+- Independent read-only gpt-5.6-sol review found no Critical or Required findings. Configuration is fixed at startup. This controlled-provider evidence does not establish real-service latency or resource capacity; those release gates remain outstanding.
