@@ -52,6 +52,15 @@ public sealed class CritiqueWorkStore(LibraryDbContext database, TimeProvider cl
         return operation;
     }
 
+    public async Task<bool> RenewAsync(BackgroundOperation operation, CancellationToken cancellationToken)
+    {
+        var now = clock.GetUtcNow();
+        return await database.BackgroundOperations.Where(item => item.Id == operation.Id && item.LeaseToken == operation.LeaseToken
+            && item.Status == OperationStatus.Running && item.LeaseExpiresAt > now)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.LeaseExpiresAt, now.AddSeconds(60))
+                .SetProperty(item => item.UpdatedAt, now), cancellationToken) == 1;
+    }
+
     public Task RejectInvalidAsync(BackgroundOperation operation, CancellationToken cancellationToken)
     {
         var now = clock.GetUtcNow();

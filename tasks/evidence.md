@@ -460,3 +460,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Red: both expired-worker scenarios failed because Running work could not be reclaimed.
 - Green: all 177 container API checks passed; format, builds and diff checks passed. Recovery becomes eligible at 60 seconds, assigns a new token and permits one recovery within the three-attempt budget. Both stale publication and stale invalid-result rejection are ineffective. A second interrupted recovery becomes safe terminal failure.
 - Independent read-only gpt-5.6-sol review found no Critical or Required findings. Concurrent recovery-claimer stress and corrupted null-expiry rows remain coverage limits. Lease timestamps currently use host clocks; deployment time synchronization remains an operational assumption. Renewal and bounded provider calls follow next.
+
+## API-38: renew ownership during provider work
+
+- Red: both controlled-clock workflows lacked persisted lease renewal. Green: an 80-second provider call renews every 20 seconds, remains unclaimable by another worker, and publishes once; deletion cancels a cooperative call on the next renewal tick. Terminal operations stop receiving renewal updates.
+- All 179 container API checks passed; format verification, builds and diff checks passed. The handler stops and awaits renewal before publication/rejection, keeping scoped database operations serialized. Lost ownership cancels the provider token; renewal failures leave durable work recoverable.
+- Independent read-only gpt-5.6-sol review found no Critical or Required findings. Database-renewal fault injection and exact completion/tick races remain coverage limits. Non-cooperative provider timeout handling is the next slice.
+- Added only the test dependency Microsoft.Extensions.TimeProvider.Testing, pinned to 10.9.0; existing dependency versions are unchanged. Existing timestamp-only fixture clocks remain intact. Sources: [Microsoft controllable time](https://learn.microsoft.com/en-us/dotnet/core/extensions/timeprovider-testing), [PeriodicTimer](https://learn.microsoft.com/en-us/dotnet/api/system.threading.periodictimer.-ctor?view=net-10.0).

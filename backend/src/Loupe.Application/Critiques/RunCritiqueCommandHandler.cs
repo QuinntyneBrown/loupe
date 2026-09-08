@@ -5,16 +5,51 @@ using MediatR;
 
 namespace Loupe.Application.Critiques;
 
-public sealed class RunCritiqueCommandHandler(ICritiqueWorkStore work, ICritiqueProvider provider) : IRequestHandler<RunCritiqueCommand, bool>
+public sealed class RunCritiqueCommandHandler(ICritiqueWorkStore work, ICritiqueProvider provider, TimeProvider clock) : IRequestHandler<RunCritiqueCommand, bool>
 {
     public async Task<bool> Handle(RunCritiqueCommand request, CancellationToken cancellationToken)
     {
         var operation = await work.ClaimAsync(ExecutionMode.Demo, cancellationToken);
         if (operation is null) return false;
         var input = JsonSerializer.Deserialize<CritiqueInput>(operation.InputJson!)!;
-        var result = await provider.GenerateAsync(input, new AnalysisIdentity(operation.Mode, operation.Model, operation.PromptVersion), cancellationToken);
+        using var attempt = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var renewal = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var ownsLease = true;
+        var renewing = RenewAsync();
+        CritiqueResult result;
+        try { result = await provider.GenerateAsync(input, new AnalysisIdentity(operation.Mode, operation.Model, operation.PromptVersion), attempt.Token); }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && attempt.IsCancellationRequested) { return true; }
+        finally
+        {
+            await renewal.CancelAsync();
+            // Finish renewal before publishing through the same scoped store.
+            await renewing;
+        }
+        if (!ownsLease) return true;
         if (CritiqueResultValidator.IsValid(result, input.Exif)) await work.PublishAsync(operation, result, cancellationToken);
         else await work.RejectInvalidAsync(operation, cancellationToken);
         return true;
+
+        async Task RenewAsync()
+        {
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(20), clock);
+            try
+            {
+                while (await timer.WaitForNextTickAsync(renewal.Token))
+                {
+                    if (await work.RenewAsync(operation, renewal.Token)) continue;
+                    ownsLease = false;
+                    await attempt.CancelAsync();
+                    return;
+                }
+            }
+            catch (OperationCanceledException) when (renewal.IsCancellationRequested) { }
+            catch
+            {
+                ownsLease = false;
+                await attempt.CancelAsync();
+                throw;
+            }
+        }
     }
 }

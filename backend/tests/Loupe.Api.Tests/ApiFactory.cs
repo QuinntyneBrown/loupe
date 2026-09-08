@@ -20,6 +20,7 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
 {
     public ControlledIdentityProvider Identity { get; } = new();
     public TestClock Clock { get; } = new();
+    public TimeProvider? ClockOverride { get; init; }
     public CapturedApiFailure Failure { get; } = new();
     public DbTransactionInterceptor? TransactionInterceptor { get; init; }
     public ICritiqueProvider? CritiqueProvider { get; init; }
@@ -76,7 +77,7 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
             if (interceptor is not null) services.AddDbContext<LibraryDbContext>(options => options.AddInterceptors(interceptor));
             services.Insert(0, ServiceDescriptor.Singleton<IExceptionHandler>(Failure));
             services.RemoveAll<TimeProvider>();
-            services.AddSingleton<TimeProvider>(Clock);
+            services.AddSingleton<TimeProvider>(ClockOverride ?? Clock);
         });
     }
 }
