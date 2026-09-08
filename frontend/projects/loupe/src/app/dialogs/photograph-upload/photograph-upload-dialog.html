@@ -4,8 +4,8 @@
     <h2 class="lp-dialog__title" id="photograph-upload-heading">Upload photograph</h2>
     <button class="lp-icon-button" type="button" aria-label="Close" (click)="cancel()"><svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg></button>
   </header>
-  <div class="lp-dialog__body">
   @if (savedPhotograph(); as photo) {
+   <div class="lp-dialog__body">
     <h1 #heading tabindex="-1" class="lp-title">Photograph saved</h1>
     <p class="lp-muted">“{{ photo.title }}” is in My Work. You can leave this page and return to it there.</p>
     @if (request.error() === 'integration_not_configured') {
@@ -20,10 +20,10 @@
       (admitted)="admitted($event)"
     />
     <a class="lp-button lp-button--secondary" [routerLink]="['/my-work', photo.id]">View saved photograph</a>
+   </div>
   } @else {
-    <lp-photograph-upload (saved)="saved($event)" />
+    <lp-photograph-upload (saved)="saved($event)" (closeRequested)="cancel()" />
   }
-  </div>
  </div>
 </dialog>
 <lp-unsaved-changes

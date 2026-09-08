@@ -34,7 +34,7 @@ export class PhotographUploadDialog {
   }
   trapFocus(event: KeyboardEvent): void {
     if (event.key !== 'Tab') return;
-    const controls = Array.from(this.modal().nativeElement.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], summary, [tabindex="0"]')).filter(control => control.getClientRects().length > 0);
+    const controls = Array.from(this.modal().nativeElement.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], summary, [tabindex="0"]')).filter(control => control.checkVisibility());
     const first = controls[0], last = controls.at(-1);
     if (event.shiftKey && event.target === first) { event.preventDefault(); last?.focus(); }
     else if (!event.shiftKey && event.target === last) { event.preventDefault(); first?.focus(); }
