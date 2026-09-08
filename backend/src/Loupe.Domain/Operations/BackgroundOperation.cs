@@ -16,5 +16,9 @@ public sealed class BackgroundOperation
     public DateTimeOffset? CompletedAt { get; set; }
     public Guid? LeaseToken { get; set; }
     public DateTimeOffset? LeaseExpiresAt { get; set; }
+    public int AttemptCount { get; set; }
+    public int InvalidOutputCount { get; set; }
+    public DateTimeOffset? NextAttemptAt { get; set; }
+    public string? FailureCode { get; set; }
     public string Message { get; set; } = "Waiting to start.";
 }

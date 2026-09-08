@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Loupe.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Loupe.Application.Critiques;
 
 namespace Loupe.Api.Tests;
 
@@ -21,6 +22,7 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
     public TestClock Clock { get; } = new();
     public CapturedApiFailure Failure { get; } = new();
     public DbTransactionInterceptor? TransactionInterceptor { get; init; }
+    public ICritiqueProvider? CritiqueProvider { get; init; }
     public IReadOnlyDictionary<string, string?> Settings { get; init; } = new Dictionary<string, string?>();
 
     public async Task<HttpClient> CreateAuthenticatedClientAsync(string subject = "owner-a")
@@ -65,6 +67,11 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
         }));
         builder.ConfigureTestServices(services =>
         {
+            if (CritiqueProvider is not null)
+            {
+                services.RemoveAll<ICritiqueProvider>();
+                services.AddSingleton(CritiqueProvider);
+            }
             var interceptor = TransactionInterceptor;
             if (interceptor is not null) services.AddDbContext<LibraryDbContext>(options => options.AddInterceptors(interceptor));
             services.Insert(0, ServiceDescriptor.Singleton<IExceptionHandler>(Failure));

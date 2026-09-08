@@ -13,7 +13,8 @@ public sealed class RunCritiqueCommandHandler(ICritiqueWorkStore work, ICritique
         if (operation is null) return false;
         var input = JsonSerializer.Deserialize<CritiqueInput>(operation.InputJson!)!;
         var result = await provider.GenerateAsync(input, new AnalysisIdentity(operation.Mode, operation.Model, operation.PromptVersion), cancellationToken);
-        await work.PublishAsync(operation, result, cancellationToken);
+        if (CritiqueResultValidator.IsValid(result, input.Exif)) await work.PublishAsync(operation, result, cancellationToken);
+        else await work.RejectInvalidAsync(operation, cancellationToken);
         return true;
     }
 }
