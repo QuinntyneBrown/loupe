@@ -3,6 +3,26 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographUploadPage {
   constructor(page) { this.page = page; }
+  modal() { return this.page.getByRole('dialog', { name: 'Upload photograph', exact: true }); }
+  trigger(entry = 'header') { return this.page.getByRole('button', { name: 'Upload photograph', exact: true }).nth(entry === 'empty' ? 1 : 0); }
+  async openFrom(entry) { await this.trigger(entry).click(); }
+  async expectModal() {
+    await expect(this.modal()).toBeVisible();
+    await expect(this.page).toHaveURL(/\/my-work$/);
+    expect(await this.modal().evaluate(dialog => dialog.matches(':modal'))).toBe(true);
+    await expect(this.page.locator('main h1')).toHaveText('My Work');
+  }
+  async expectFocusContained() {
+    for (let index = 0; index < 18; index++) {
+      await this.page.keyboard.press('Tab');
+      expect(await this.modal().evaluate(dialog => dialog.contains(document.activeElement))).toBe(true);
+    }
+  }
+  async closeDialog() { await this.modal().getByRole('button', { name: 'Close', exact: true }).click(); }
+  async expectClosedWithFocus(entry) {
+    await expect(this.modal()).toHaveCount(0);
+    await expect(this.trigger(entry)).toBeFocused();
+  }
   async requestCritiqueAfterSaving() { await this.page.getByLabel('After saving', { exact: true }).selectOption({ label: 'Request critique' }); }
   async expectSavedBeforeCritique() { await expect(this.page.getByRole('heading', { name: 'Photograph saved', exact: true })).toBeVisible(); }
   async expectAccessibleSavedPhotograph() {
@@ -16,7 +36,7 @@ export class PhotographUploadPage {
   async expectUncertainCritique() { await expect(this.page.getByRole('alert')).toHaveText('Critique admission was not confirmed. Retry to check the same request.'); }
   async retryCritique() { await this.page.getByRole('button', { name: 'Retry critique request', exact: true }).click(); }
   async viewSavedPhotograph() { await this.page.getByRole('link', { name: 'View saved photograph', exact: true }).click(); }
-  async open() { await this.page.getByRole('link', { name: 'Upload photograph', exact: true }).click(); }
+  async open() { await this.openFrom('header'); }
   async expectOpen() { await expect(this.page.getByRole('heading', { name: 'Upload photograph', exact: true })).toBeVisible(); }
   async chooseImage(name = 'Morning.png') {
     await this.page.getByLabel('Photograph', { exact: true }).setInputFiles({ name, mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64') });
@@ -30,7 +50,8 @@ export class PhotographUploadPage {
   }
   async save() { await this.page.getByRole('button', { name: 'Save photograph', exact: true }).click(); }
   async chooseFile({ name = 'Morning.png', mimeType = 'image/png', size = 100 } = {}) {
-    await this.page.getByLabel('Photograph', { exact: true }).setInputFiles({ name, mimeType, buffer: Buffer.alloc(size) });
+    // Large in-memory fixtures cross Playwright's protocol before application validation starts.
+    await this.page.getByLabel('Photograph', { exact: true }).setInputFiles({ name, mimeType, buffer: Buffer.alloc(size) }, { timeout: 15000 });
   }
   async expectFieldLimit(field, maximum) {
     const labels = { title: 'Title (optional)', intent: 'Intent (optional)', genre: 'Genre (optional)', requestedFeedback: 'Requested feedback (optional)' };
@@ -46,7 +67,7 @@ export class PhotographUploadPage {
   async expectSaveDisabled() { await expect(this.page.getByRole('button', { name: 'Save photograph', exact: true })).toBeDisabled(); }
   async expectFailure(message = 'The upload was not confirmed. Your fields are still here. Retry to check whether it was saved.') {
     await expect(this.page.getByRole('alert')).toHaveText(message);
-    await expect(this.page).toHaveURL(/\/my-work\/upload$/);
+    await expect(this.page).toHaveURL(/\/my-work$/);
   }
   async expectDraft(values) {
     const labels = { title: 'Title (optional)', intent: 'Intent (optional)', genre: 'Genre (optional)', experience: 'Experience (optional)', requestedFeedback: 'Requested feedback (optional)' };
@@ -69,7 +90,7 @@ export class PhotographUploadPage {
     await expect(this.page.getByRole('status')).toHaveText(transferred === null ? 'Saving photograph…' : `${transferred.toLocaleString('en-US')} bytes transferred. Total size unavailable.`);
   }
   async expectNoProgress() { await expect(this.page.getByRole('progressbar', { name: 'Upload progress', exact: true })).toHaveCount(0); }
-  async returnToLibrary() { await this.page.getByRole('main').getByRole('link', { name: 'My Work', exact: true }).click(); }
+  async returnToLibrary() { await this.closeDialog(); }
   discardDialog() { return this.page.getByRole('dialog', { name: 'Discard unsaved changes?', exact: true }); }
   async expectDiscardChoice() {
     await expect(this.discardDialog()).toBeVisible();
@@ -119,6 +140,6 @@ export class PhotographUploadPage {
   async expectSaving() {
     await expect(this.page.getByRole('status')).toContainText('Saving photograph');
     await expect(this.page.getByRole('button', { name: 'Save photograph', exact: true })).toBeDisabled();
-    await expect(this.page).toHaveURL(/\/my-work\/upload$/);
+    await expect(this.page).toHaveURL(/\/my-work$/);
   }
 }

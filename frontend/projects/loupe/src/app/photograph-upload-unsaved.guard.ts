@@ -1,5 +1,5 @@
 import { CanDeactivateFn } from '@angular/router';
-import { PhotographUploadPage } from './pages/photograph-upload/photograph-upload-page';
+import { MyWork } from './pages/my-work/my-work';
 
-export const photographUploadUnsavedGuard: CanDeactivateFn<PhotographUploadPage> = (page) =>
+export const photographUploadUnsavedGuard: CanDeactivateFn<MyWork> = (page) =>
   page.canLeave();

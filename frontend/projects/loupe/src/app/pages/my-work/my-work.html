@@ -12,11 +12,14 @@
         <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-compare" /></svg>
         Compare attempts
       </a>
-      <a class="lp-button lp-button--primary" routerLink="/my-work/upload">
+      <button class="lp-button lp-button--primary" type="button" (click)="uploading.set(true)">
         <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-upload" /></svg>
         Upload photograph
-      </a>
+      </button>
     </div>
   </div>
-  <lp-photograph-collection detailBase="/my-work" />
+  <lp-photograph-collection detailBase="/my-work" (uploadRequested)="uploading.set(true)" />
 </main>
+@if (uploading()) {
+  <lp-photograph-upload-dialog (closed)="uploading.set(false)" />
+}

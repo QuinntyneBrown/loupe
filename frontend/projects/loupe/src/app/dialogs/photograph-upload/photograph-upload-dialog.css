@@ -1,7 +1,5 @@
 :host {
   display: block;
-  max-width: var(--lp-measure);
-  margin: auto;
 }
 p {
   overflow-wrap: anywhere;

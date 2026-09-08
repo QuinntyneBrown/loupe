@@ -5,6 +5,7 @@ import {
   Injector,
   input,
   OnInit,
+  output,
   signal,
   viewChildren,
 } from '@angular/core';
@@ -18,6 +19,7 @@ import { PhotographCard } from 'components';
   styleUrl: './photograph-collection.css',
 })
 export class PhotographCollection implements OnInit {
+  readonly uploadRequested = output<void>();
   readonly detailBase = input.required<string>();
   private readonly cards = viewChildren(PhotographCard);
   private readonly injector = inject(Injector);
