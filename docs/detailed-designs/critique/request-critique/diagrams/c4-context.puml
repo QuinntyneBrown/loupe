@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Request or replace a critique
+Person(owner, "Library owner", "Collects inspiration and practices photography")
+System(loupe, "Loupe", "Request or replace a critique")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

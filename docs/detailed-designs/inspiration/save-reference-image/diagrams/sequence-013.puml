@@ -1,0 +1,54 @@
+@startuml
+title L2-013 - Add or replace a reference image
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "ReferenceImagePanel" as page
+participant "ReferenceService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "ReferencesController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "ReplaceReferenceImageCommandHandler" as handler
+participant "Reference" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IImageIngestor / IImageStore adapters" as ext
+end box
+actor -> page : Add or replace a reference image
+page -> client : image, version
+client -> controller : PUT /api/references/{id}/image
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch ReplaceReferenceImageCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> ext : Validate and stage replacement before pointer change [L2-013]
+ext --> handler : Complete new asset or upload failure
+alt failed upload
+handler --> controller : Error; old image remains visible
+else successful asset
+handler -> entity : Increment image revision; preserve manual metadata/links
+handler -> db : Swap pointer; invalidate old derived data; queue analysis + cleanup
+db --> handler : New version; old jobs cannot publish
+end
+handler --> controller : 200 same reference and new revision; review-relevance notice
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

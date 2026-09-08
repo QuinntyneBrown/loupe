@@ -1,0 +1,52 @@
+@startuml
+title L2-002 - Record and edit the critique brief
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "PhotographUploadPanel" as page
+participant "PhotographService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "PhotographsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "UpdatePhotographBriefCommandHandler" as handler
+participant "Photograph" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IImageIngestor / IImageStore adapters" as ext
+end box
+actor -> page : Record and edit the critique brief
+page -> client : intent?, genre?, experience?, requestedFeedback?, version
+client -> controller : PUT /api/photographs/{id}/brief
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch UpdatePhotographBriefCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> entity : Validate / normalize optional fields [L2-002]
+alt invalid length or experience
+handler --> controller : 400 field errors; preserve previous brief
+else valid brief
+handler -> db : Conditional brief update; keep admitted job snapshots
+db --> handler : Saved version or 409 conflict
+end
+handler --> controller : 200 normalized brief and version, or field/conflict error
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

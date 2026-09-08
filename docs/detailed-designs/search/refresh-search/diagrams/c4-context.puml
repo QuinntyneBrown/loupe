@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Keep search current as the library changes
+Person(owner, "Library owner", "Collects inspiration and practices photography")
+System(loupe, "Loupe", "Keep search current as the library changes")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

@@ -1,0 +1,64 @@
+@startuml
+title L2-021 - Generate grounded photographer summaries
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "PortfolioSummaryPanel" as page
+participant "PortfolioSummaryService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "PortfolioSummariesController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "GeneratePortfolioSummaryCommandHandler" as handler
+participant "GetOperationQueryHandler" as status
+participant "PortfolioSummarySuggestion" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IRestrictedPageFetcher / IPortfolioTextExtractor / IPortfolioSummaryProvider adapters" as ext
+participant "Durable work runner" as worker
+end box
+note over page, controller : Admission persists work before processing; status reads are owner-scoped
+worker -> db : Lease admitted job and immutable input
+db --> worker : Durable work
+worker -> handler : Dispatch GeneratePortfolioSummaryCommand
+handler -> db : Verify target owner, existence, and admitted revision
+db --> handler : Current authorized state
+handler -> ext : Fetch only permitted bookmarked page [L2-021]
+ext --> handler : Title, description, main text; max 20,000 scalars
+alt empty, blocked, login, or inaccessible content
+handler -> db : Summary unavailable with reason; keep manual fields
+else accessible evidence
+handler -> ext : Summarize untrusted text; no tools or linked-page crawl
+ext --> handler : Grounded candidate summary and tags
+handler -> entity : Validate output and current source revision
+handler -> db : Publish suggestion + fetched URL/time, separate from notes
+end
+note over page : Preview replacement before explicit summary acceptance
+handler --> worker : Attempt outcome; release lease
+actor -> page : Inspect processing result
+page -> client : Read status
+client -> controller : GET owned job / item status
+controller -> status : Dispatch GetOperationQuery
+status -> db : Read persisted state
+db --> status : Job outcome and current item
+status --> controller : Typed status
+controller --> client : suggestion or Summary unavailable; manual editing works
+client --> page : Update state signals
+page --> actor : Labeled result and recovery action
+@enduml

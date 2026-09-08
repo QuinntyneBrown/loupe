@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Browse and edit saved references
+Person(owner, "Library owner", "Collects inspiration and practices photography")
+System(loupe, "Loupe", "Browse and edit saved references")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

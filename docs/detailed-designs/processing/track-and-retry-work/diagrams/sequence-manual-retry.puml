@@ -1,0 +1,52 @@
+@startuml
+title Manually retry the original operation snapshot
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+ BorderColor #344054
+ FontColor #101828
+}
+skinparam package {
+ BorderColor #667085
+ FontColor #101828
+ BackgroundColor #F9FAFB
+}
+actor "Library owner" as owner
+box "Frontend - Loupe application / api" #E0F2FE
+ participant "OperationStatusPanel" as panel
+ participant "OperationService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+ participant "OperationsController" as api
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+ participant "RetryOperationCommandHandler" as handler
+ participant "AdmitAnalysisCommandHandler" as admission
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+ database "Library and durable operations" as db
+end box
+owner -> panel : Retry failed operation
+panel -> client : Original operation ID + stable operation key
+client -> api : POST /api/operations/{id}/retry
+api -> handler : Dispatch RetryOperationCommand
+handler -> db : Resolve owned failed operation and current target
+db --> handler : Snapshot, retry-available time, revision, receipt
+alt unavailable target or disallowed retry
+ handler --> api : 404 / safe retry-time or configuration guidance
+else current input differs from captured snapshot
+ handler --> api : New current-input request required [L2-034]
+else permitted original snapshot
+ handler -> admission : Admit keyed original snapshot [L2-030, L2-035]
+ admission -> db : Reuse equivalent work or commit one new operation
+ db --> admission : Same/new job ID or quota rejection
+ admission --> handler : Admission outcome
+ handler --> api : Job ID/status; previous successful output preserved
+end
+api --> client : Typed outcome without provider wait
+client --> panel : Queued / retained failure
+panel --> owner : Original snapshot identified; current-input action distinct
+@enduml

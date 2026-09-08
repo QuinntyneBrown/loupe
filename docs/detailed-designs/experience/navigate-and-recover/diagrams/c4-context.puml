@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Navigate the library and recover unfinished edits
+Person(actor, "Library owner", "Completes private library workflows")
+System(system, "Loupe accessible workflows", "Navigate the library and recover unfinished edits")
+Rel(actor, system, "Uses / verifies")
+@enduml

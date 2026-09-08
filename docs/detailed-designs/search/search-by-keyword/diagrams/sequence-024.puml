@@ -1,0 +1,53 @@
+@startuml
+title L2-024 - Search saved library text by keyword
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "SearchResults" as page
+participant "SearchService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "SearchController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "KeywordSearchQueryHandler" as handler
+participant "SearchFilter" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "ILibrarySearchReader adapters" as ext
+end box
+actor -> page : Search saved library text by keyword
+page -> client : query?, tags?, boardIds?, type?, cursor?, pageSize?
+client -> controller : GET /api/search?mode=keyword
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch KeywordSearchQuery
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> entity : NFC + invariant case; split whitespace tokens [L2-024]
+handler -> ext : Owner-scoped live fields; every token matches some field
+ext --> handler : Stable page and count; pending AI and My Work excluded
+alt no matches
+handler --> controller : 200 empty results; edit query / clear filters
+else service failure
+handler --> controller : Retryable failure, not empty success
+end
+handler --> controller : 200 library results; blank query permits filtered browsing
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

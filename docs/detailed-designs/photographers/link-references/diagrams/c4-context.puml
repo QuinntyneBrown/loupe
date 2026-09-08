@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Link a reference to its photographer
+Person(owner, "Library owner", "Collects inspiration and practices photography")
+System(loupe, "Loupe", "Link a reference to its photographer")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

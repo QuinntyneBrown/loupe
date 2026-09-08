@@ -1,0 +1,51 @@
+@startuml
+title L2-041 - Protect credentials, image metadata, and AI boundaries
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "ProviderDisclosure" as page
+participant "PrivacyService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "PrivacyController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "BuildProviderInputCommandHandler" as handler
+participant "SanitizedImage" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IImageIngestor / IProviderInputBuilder adapters" as ext
+end box
+actor -> page : Protect credentials, image metadata, and AI boundaries
+page -> client : sanitized image, allowlisted EXIF, brief/source
+client -> controller : selected AI operation boundary
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch BuildProviderInputCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> ext : Strip GPS, serials, owner names from all retained copies [L2-041]
+ext --> handler : Sanitized image and permitted EXIF
+handler -> entity : Build minimal envelope; exclude notes and unrelated content
+note over page : Nearby provider/data disclosure; selected action authorizes request
+note over ext : Server secrets only; no tools; output validated as inert data
+handler -> db : Persist only validated result fields with encrypted storage
+handler --> controller : minimal private-safe provider input; no critique on save alone
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Save a photograph and its brief
+Person(owner, "Library owner", "Collects inspiration and practices photography")
+System(loupe, "Loupe", "Save a photograph and its brief")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

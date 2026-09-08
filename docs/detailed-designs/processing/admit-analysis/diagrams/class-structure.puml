@@ -1,0 +1,64 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Admit analysis fairly and reuse completed work
+class AnalysisFingerprint {
+  +OwnerId: string
+  +ItemId: Guid
+  +Kind: OperationKind
+  +Revision: long
+  +BriefHash: string
+  +Model: string
+  +PromptVersion: string
+  +Mode: ExecutionMode
+  +Equivalent(other: AnalysisFingerprint): bool
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class AdmitAnalysisCommand {
+  +OwnerId: string
+  +Payload: AdmitAnalysisInput
+}
+class AdmitAnalysisCommandHandler {
+  +Handle(request: AdmitAnalysisCommand, cancellation: CancellationToken): Task<Result>
+}
+AdmitAnalysisCommandHandler ..> AdmitAnalysisCommand : handles
+AdmitAnalysisCommandHandler --> AnalysisFingerprint : reads / applies
+AdmitAnalysisCommandHandler ..> ILibraryStore : persists / queries
+interface IProviderCallScheduler {
+  +Acquire(owner: string, ct: CancellationToken): Task<CallPermit>
+}
+AdmitAnalysisCommandHandler ..> IProviderCallScheduler : uses
+interface IAnalysisService {
+  +state: Signal<FeatureState>
+}
+class AnalysisService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+AnalysisService ..|> IAnalysisService
+class AnalysisRequestPanel {
+  -service: IAnalysisService
+}
+AnalysisRequestPanel ..> IAnalysisService : inject token
+@enduml

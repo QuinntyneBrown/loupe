@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Review suggestions and maintain active metadata
+Person(owner, "Library owner", "Collects inspiration and practices photography")
+System(loupe, "Loupe", "Review suggestions and maintain active metadata")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

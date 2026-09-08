@@ -1,0 +1,51 @@
+@startuml
+title L2-017 - Create and rename boards
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "BoardReferenceCollection" as page
+participant "BoardService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "BoardsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "CreateBoardCommandHandler" as handler
+participant "Board" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Create and rename boards
+page -> client : name, version on rename
+client -> controller : POST /api/boards; PUT /api/boards/{id}
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch CreateBoardCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> entity : Trim + NFC; validate 1-80 scalars [L2-017]
+handler -> db : Insert/rename with owner + normalized-name uniqueness
+alt duplicate or invalid name
+db --> handler : No change; name conflict / field error
+else valid available name
+db --> handler : Board ID and name; existing memberships unchanged
+end
+handler --> controller : 201 create / 200 rename; pickers show current name
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+title L2-052 - Apply the authoritative visual system consistently
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Owner / release reviewer" as actor
+box "Frontend - Independent design-system site" #E0F2FE
+participant "TokenReferencePage / visual review" as page
+participant "ComponentStateGallery" as entity
+participant "Bundled token catalog / examples" as client
+end box
+note over page, client : Static local content; no Loupe backend participates
+actor -> page : Start workflow / review
+page -> entity : Compare application controls with approved examples [L2-052]
+entity -> client : Render eight screen baselines at 375/768/1440
+client --> entity : Token-based states and untinted full-frame imagery
+entity --> page : Recorded match or reviewed deliberate baseline change
+page --> actor : observable visual consistency; source compliance by review
+@enduml

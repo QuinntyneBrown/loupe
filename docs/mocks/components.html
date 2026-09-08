@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components · Loupe</title>
+<meta name="description" content="Every reusable piece in the mocks, grouped by the Angular library that will own it: presentational, service-bound, and page. Tokens first.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<link rel="stylesheet" href="assets/mock.css">
+</head>
+<body class="lp-shell">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.1"/><circle cx="12" cy="12" r="1.1"/><circle cx="19" cy="12" r="1.1"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.5 1.5M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.5-1.5"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3zM12 10v4M12 17.5v.5"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L18 10l-4-4L4 16zM13 7l4 4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></symbol>
+  <symbol id="i-compare" viewBox="0 0 24 24"><rect x="3" y="5" width="8" height="14" rx="1.5"/><rect x="13" y="5" width="8" height="14" rx="1.5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8v.5"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17"/></symbol>
+</svg>
+
+<a class="lp-skip" href="#main">Skip to content</a>
+<header class="lp-topbar">
+  <a class="lp-wordmark" href="my-work.html" aria-label="Loupe">L<span class="lp-wordmark__o"></span>upe</a>
+  <nav class="lp-nav" aria-label="Primary">
+    <a href="my-work.html"><svg class="lp-icon"><use href="#i-image"/></svg><span>My Work</span></a>
+    <a href="inspiration.html"><svg class="lp-icon"><use href="#i-grid"/></svg><span>Inspiration</span></a>
+    <a href="photographers.html"><svg class="lp-icon"><use href="#i-user"/></svg><span>Photographers</span></a>
+    <a href="search.html"><svg class="lp-icon"><use href="#i-search"/></svg><span>Search</span></a>
+  </nav>
+  <div class="lp-topbar__end">
+    <span class="lp-topbar__hint"><span class="lp-kbd">/</span> to search</span>
+    <a class="lp-avatar" href="settings.html" aria-label="Settings">QB</a>
+  </div>
+</header>
+
+<main id="main" class="lp-main">
+  <div class="lp-page-header">
+    <div class="lp-page-header__text">
+      <h1 class="lp-title">Components</h1>
+      <p class="lp-page-header__sub">Every reusable piece in the mocks, grouped by the Angular library that will own it. Class names are the selectors the build will use. Tokens first; nothing below uses a literal value.</p>
+    </div>
+    <div class="lp-page-header__actions"><a class="lp-button lp-button--secondary" href="index.html">All screens</a></div>
+  </div>
+
+  <!-- ================= Tokens ================= -->
+  <section class="gallery" aria-labelledby="g-tokens">
+    <div class="gallery__head"><h2 class="lp-heading" id="g-tokens">Tokens</h2><p class="lp-small lp-muted">assets/tokens.css, the seed for design-system/. Prefix --lp-.</p></div>
+    <div class="gallery__grid">
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">Colour</span>
+        <div class="gallery__stage">
+          <div class="gallery__swatches">
+            <div class="gallery__swatch"><i style="background:var(--lp-color-bg)"></i>bg</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-surface-2)"></i>surface-2</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-surface-3)"></i>surface-3</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-border)"></i>border</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-border-strong)"></i>border-strong</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-text-3)"></i>text-3</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-text-2)"></i>text-2</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-text)"></i>text / ink</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-ai)"></i>ai</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-ai-bg)"></i>ai-bg</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-ai-border)"></i>ai-border</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-success)"></i>success</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-warning)"></i>warning</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-danger)"></i>danger</div>
+            <div class="gallery__swatch"><i style="background:var(--lp-color-image-fallback)"></i>image-fallback</div>
+          </div>
+        </div>
+      </div>
+      <div class="gallery__item">
+        <span class="gallery__label">Type scale · Instrument Sans for language, Spline Sans Mono for data</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="gallery__type">
+            <div><span>3xl</span><span style="font-size:var(--lp-text-3xl);letter-spacing:var(--lp-tracking-tight);line-height:var(--lp-leading-tight)">Shoreline</span></div>
+            <div><span>2xl</span><span class="lp-title">Page title</span></div>
+            <div><span>xl</span><span style="font-size:var(--lp-text-xl);font-weight:var(--lp-weight-medium);letter-spacing:var(--lp-tracking-tight)">Empty-state headline</span></div>
+            <div><span>lg</span><span class="lp-heading">Section heading</span></div>
+            <div><span>md</span><span>Body text at the default size.</span></div>
+            <div><span>sm</span><span class="lp-small">Secondary text, buttons, and hints.</span></div>
+            <div><span>xs</span><span style="font-size:var(--lp-text-xs)">Captions and counts.</span></div>
+            <div><span>kicker</span><span class="lp-kicker">Section label</span></div>
+            <div><span>mono</span><span class="lp-mono">f/8 · 1/250 s · ISO 100</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="gallery__item">
+        <span class="gallery__label">Space · 4px base</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="gallery__space">
+            <div><span>space-1</span><i style="width:var(--lp-space-1)"></i></div>
+            <div><span>space-2</span><i style="width:var(--lp-space-2)"></i></div>
+            <div><span>space-3</span><i style="width:var(--lp-space-3)"></i></div>
+            <div><span>space-4</span><i style="width:var(--lp-space-4)"></i></div>
+            <div><span>space-5</span><i style="width:var(--lp-space-5)"></i></div>
+            <div><span>space-6</span><i style="width:var(--lp-space-6)"></i></div>
+            <div><span>space-7</span><i style="width:var(--lp-space-7)"></i></div>
+            <div><span>space-8</span><i style="width:var(--lp-space-8)"></i></div>
+            <div><span>space-9</span><i style="width:var(--lp-space-9)"></i></div>
+            <div><span>space-10</span><i style="width:var(--lp-space-10)"></i></div>
+            <div><span>space-11</span><i style="width:var(--lp-space-11)"></i></div>
+            <div><span>space-12</span><i style="width:var(--lp-space-12)"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="gallery__item">
+        <span class="gallery__label">Radius and shadow</span>
+        <div class="gallery__stage">
+          <div class="gallery__box" style="border-radius:var(--lp-radius-sm)"></div>
+          <div class="gallery__box" style="border-radius:var(--lp-radius-md)"></div>
+          <div class="gallery__box" style="border-radius:var(--lp-radius-lg)"></div>
+          <div class="gallery__box" style="border-radius:var(--lp-radius-full)"></div>
+          <div class="gallery__box" style="border-radius:var(--lp-radius-md);box-shadow:var(--lp-shadow-sm)"></div>
+          <div class="gallery__box" style="border-radius:var(--lp-radius-md);box-shadow:var(--lp-shadow-md)"></div>
+          <div class="gallery__box" style="border-radius:var(--lp-radius-md);box-shadow:var(--lp-shadow-lg)"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Presentational ================= -->
+  <section class="gallery" aria-labelledby="g-components">
+    <div class="gallery__head"><h2 class="lp-heading" id="g-components">Presentational · frontend/projects/components</h2><p class="lp-small lp-muted">Takes an input, emits an output, injects nothing. Publishable on its own.</p></div>
+    <div class="gallery__grid">
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-button · primary, secondary, ghost, danger, small, busy, disabled</span>
+        <div class="gallery__stage">
+          <button class="lp-button lp-button--primary" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-plus"/></svg>Save reference</button>
+          <button class="lp-button lp-button--secondary" type="button">Cancel</button>
+          <button class="lp-button lp-button--ghost" type="button">Show</button>
+          <button class="lp-button lp-button--danger" type="button">Delete</button>
+          <button class="lp-button lp-button--secondary lp-button--sm" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Try again</button>
+          <button class="lp-button lp-button--primary is-busy" type="button" aria-disabled="true"><span class="lp-spinner"></span>Signing in…</button>
+          <button class="lp-button lp-button--primary" type="button" disabled>Import</button>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-icon-button · default, small, on image</span>
+        <div class="gallery__stage">
+          <button class="lp-icon-button" type="button" aria-label="More"><svg class="lp-icon"><use href="#i-more"/></svg></button>
+          <button class="lp-icon-button lp-icon-button--sm" type="button" aria-label="Close"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button>
+          <span class="gallery__stage gallery__stage--dark" style="padding:var(--lp-space-2);border:0"><button class="lp-icon-button lp-icon-button--on-image" type="button" aria-label="Add to boards"><svg class="lp-icon lp-icon--sm"><use href="#i-board"/></svg></button><button class="lp-icon-button lp-icon-button--on-image" type="button" aria-label="Source"><svg class="lp-icon lp-icon--sm"><use href="#i-external"/></svg></button></span>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-pill · default, outline, ai, success, warning, danger</span>
+        <div class="gallery__stage">
+          <span class="lp-pill">From the same boards</span>
+          <span class="lp-pill lp-pill--outline">Technical issue</span>
+          <span class="lp-pill lp-pill--ai">Matched by meaning</span>
+          <span class="lp-pill lp-pill--success">Connected</span>
+          <span class="lp-pill lp-pill--warning">Demo mode</span>
+          <span class="lp-pill lp-pill--danger">Failed</span>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-chip · filter toggle, pressed, with count, ghost</span>
+        <div class="gallery__stage">
+          <button class="lp-chip" type="button" aria-pressed="false">soft light</button>
+          <button class="lp-chip" type="button" aria-pressed="true">window light<svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button>
+          <button class="lp-chip" type="button" aria-pressed="false">Ready<span class="lp-chip__count">8</span></button>
+          <button class="lp-chip lp-chip--ghost" type="button">More tags</button>
+          <button class="lp-chip" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-filter"/></svg>Filter by tag</button>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-tag · yours (solid), plain, AI suggestion (dashed, accept or dismiss)</span>
+        <div class="gallery__stage">
+          <span class="lp-tag">window light<button class="lp-tag__action" type="button" aria-label="Remove"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span>
+          <span class="lp-tag lp-tag--plain">Portrait sittings</span>
+          <span class="lp-tag lp-tag--ai">backlight<button class="lp-tag__action" type="button" aria-label="Accept"><svg class="lp-icon lp-icon--sm"><use href="#i-check"/></svg></button><button class="lp-tag__action" type="button" aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span>
+        </div>
+      </div>
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-field · input, mono input, large input with icon, select, textarea, quiet textarea, invalid, checkbox</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-form">
+            <div class="lp-form__row">
+              <div class="lp-field"><label class="lp-field__label" for="g-title">Title</label><input class="lp-input" id="g-title" type="text" value="Morning by the window"><p class="lp-field__hint">Detected from the page. Edit it if it's wrong.</p></div>
+              <div class="lp-field"><label class="lp-field__label" for="g-url">Link</label><input class="lp-input lp-input--mono" id="g-url" type="url" placeholder="https://"></div>
+            </div>
+            <div class="lp-input-wrap lp-input-wrap--lg"><svg class="lp-icon"><use href="#i-search"/></svg><input class="lp-input lp-input--lg" type="search" placeholder="moody portraits with soft window light" aria-label="Search"></div>
+            <div class="lp-form__row">
+              <div class="lp-field"><label class="lp-field__label" for="g-genre">Genre</label><div class="lp-select-wrap"><select class="lp-select" id="g-genre"><option>Landscape</option><option>Portrait</option></select><svg class="lp-icon lp-icon--sm"><use href="#i-chevron-down"/></svg></div></div>
+              <div class="lp-field is-invalid"><label class="lp-field__label" for="g-email">Email</label><input class="lp-input" id="g-email" type="email" value="quinn@example" aria-invalid="true"><p class="lp-field__error"><svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>That doesn't look like an email address.</p></div>
+            </div>
+            <div class="lp-form__row">
+              <div class="lp-field"><label class="lp-field__label" for="g-intent">What were you trying to do? <span class="lp-field__optional">optional</span></label><textarea class="lp-textarea" id="g-intent" rows="2" placeholder="A quiet study of the rocks in first light."></textarea></div>
+              <div class="lp-field"><label class="lp-field__label" for="g-notes">Your notes</label><textarea class="lp-textarea lp-textarea--quiet" id="g-notes" rows="2">Quiet textarea for notes that autosave.</textarea></div>
+            </div>
+            <label class="lp-check"><input type="checkbox" checked><span class="lp-check__text"><span>Window light</span><span class="lp-check__hint">23 references</span></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-segmented · inline and block</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-segmented" role="radiogroup" aria-label="Type"><label class="lp-segmented__option"><input type="radio" name="g-type" checked><span class="lp-segmented__label">All</span></label><label class="lp-segmented__option"><input type="radio" name="g-type"><span class="lp-segmented__label">References</span></label><label class="lp-segmented__option"><input type="radio" name="g-type"><span class="lp-segmented__label">Photographers</span></label></div>
+          <div class="lp-segmented lp-segmented--block" role="radiogroup" aria-label="Source"><label class="lp-segmented__option"><input type="radio" name="g-source" checked><span class="lp-segmented__label"><svg class="lp-icon lp-icon--sm"><use href="#i-link"/></svg>From a link</span></label><label class="lp-segmented__option"><input type="radio" name="g-source"><span class="lp-segmented__label"><svg class="lp-icon lp-icon--sm"><use href="#i-upload"/></svg>Upload an image</span></label></div>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-status · queued, analyzing, ready, failed, on image</span>
+        <div class="gallery__stage">
+          <span class="lp-status lp-status--queued">Queued</span>
+          <span class="lp-status lp-status--analyzing">Analyzing</span>
+          <span class="lp-status lp-status--ready">Ready</span>
+          <span class="lp-status lp-status--failed">Failed</span>
+          <span class="gallery__stage gallery__stage--dark" style="padding:var(--lp-space-2);border:0"><span class="lp-status lp-status--ready lp-status--on-image">Ready</span></span>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-save-status · unsaved, saving, saved, failed (L2-004, L2-043: explicit Save, not autosave)</span>
+        <div class="gallery__stage">
+          <span class="lp-save-status lp-save-status--unsaved">Unsaved changes</span>
+          <span class="lp-save-status lp-save-status--saving">Saving</span>
+          <span class="lp-save-status lp-save-status--saved">Saved</span>
+          <span class="lp-save-status lp-save-status--failed">Couldn't save · <button class="lp-link" type="button">Retry</button></span>
+        </div>
+      </div>
+      <div class="gallery__item">
+        <span class="gallery__label">lp-block with data-save-editor · try it: type below, then Save</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-block" data-save-editor>
+            <div class="lp-block__head"><label class="lp-subheading" for="g-save-demo">Your notes</label><span class="lp-save-status lp-save-status--saved" data-save-status>Saved</span></div>
+            <textarea class="lp-textarea" id="g-save-demo" rows="2" data-save-input>Every note and description editor uses this pattern: explicit Save, never silent autosave.</textarea>
+            <div class="lp-block__foot"><button class="lp-button lp-button--secondary lp-button--sm" type="button" data-save-button disabled>Save</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-skeleton · text, title, control, circle, tile</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-skeleton lp-skeleton--title"></div>
+          <div class="lp-skeleton lp-skeleton--text" style="width:90%"></div>
+          <div class="lp-skeleton lp-skeleton--text" style="width:70%"></div>
+          <div class="lp-row"><div class="lp-skeleton lp-skeleton--control" style="width:140px"></div><div class="lp-skeleton lp-skeleton--circle"></div></div>
+          <div class="lp-skeleton lp-skeleton--tile" style="width:120px"></div>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-card · default, flat</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-card"><span class="lp-subheading">Card</span><p class="lp-small lp-muted">Bordered surface for grouped content.</p></div>
+          <div class="lp-card lp-card--flat"><span class="lp-subheading">Flat card</span><p class="lp-small lp-muted">Tinted surface with no border, for practice exercises and briefs.</p></div>
+        </div>
+      </div>
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-empty · one headline, one sentence, one action</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-empty lp-empty--compact" style="margin-block:var(--lp-space-4)">
+            <h3 class="lp-empty__title">Save the photographs that move you.</h3>
+            <p class="lp-empty__text">Upload an image or paste a link. Loupe keeps the source and suggests tags so you can find it again.</p>
+            <div class="lp-empty__action"><button class="lp-button lp-button--primary" type="button">Save reference</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-banner and lp-notice · demo banner; error, warning, info, ai notices</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-banner lp-banner--demo" style="border-radius:var(--lp-radius-md);border:0"><span class="lp-kicker">Demo mode</span><span>AI output on this page is sample text.</span><a href="settings.html">Connect a provider</a></div>
+          <div class="lp-notice lp-notice--error"><svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg><div class="lp-notice__body"><span class="lp-notice__title">The critique didn't complete.</span><span>Your photograph and brief are saved; nothing needs re-uploading.</span><div class="lp-notice__actions"><button class="lp-button lp-button--secondary lp-button--sm" type="button">Try again</button></div></div></div>
+          <div class="lp-notice lp-notice--warning"><svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg><div class="lp-notice__body"><span class="lp-notice__title">maralindqvist.com doesn't allow its images to be fetched.</span><span>Save the link anyway and add an image yourself.</span></div></div>
+          <div class="lp-notice lp-notice--info"><svg class="lp-icon lp-icon--sm"><use href="#i-info"/></svg><div class="lp-notice__body"><span class="lp-notice__title">You were signed out after a while away.</span><span>Sign in again to pick up where you left off.</span></div></div>
+        </div>
+      </div>
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-toast · plain, with link action, with undo</span>
+        <div class="gallery__stage">
+          <div class="lp-toast"><span class="lp-toast__text">Board renamed.</span><button class="lp-icon-button" type="button" aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+          <div class="lp-toast"><span class="lp-toast__text">Saved to your library.</span><a class="lp-toast__action" href="reference.html?state=ai-suggested">Review tags</a><button class="lp-icon-button" type="button" aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+          <div class="lp-toast"><span class="lp-toast__text">Removed from Window light.</span><button class="lp-toast__action" type="button">Undo</button><button class="lp-icon-button" type="button" aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+        </div>
+      </div>
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-dialog · native dialog; header, body, footer with privacy line; becomes a bottom sheet under 640px</span>
+        <div class="gallery__stage gallery__stage--block" style="justify-items:center">
+          <div class="lp-dialog" role="group" aria-label="Dialog example">
+            <div class="lp-dialog__panel">
+              <header class="lp-dialog__header"><div><h3 class="lp-dialog__title">Delete “Window light”?</h3><p class="lp-dialog__text">The 23 references on this board stay in your library. Only the board is removed.</p></div><button class="lp-icon-button" type="button" aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button></header>
+              <footer class="lp-dialog__footer"><span class="lp-dialog__privacy"><svg class="lp-icon lp-icon--sm"><use href="#i-lock"/></svg>Private. Only you can see this.</span><button class="lp-button lp-button--secondary" type="button">Cancel</button><button class="lp-button lp-button--danger" type="button">Delete board</button></footer>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-menu · overflow, native details</span>
+        <div class="gallery__stage" style="min-height:calc(var(--lp-space-12) + var(--lp-space-8));align-items:flex-start">
+          <details class="lp-menu" open>
+            <summary class="lp-icon-button" aria-label="More actions"><svg class="lp-icon"><use href="#i-more"/></svg></summary>
+            <div class="lp-menu__list" style="position:static;margin-top:var(--lp-space-2)">
+              <button class="lp-menu__item" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-edit"/></svg>Rename board</button>
+              <div class="lp-menu__sep"></div>
+              <button class="lp-menu__item lp-menu__item--danger" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg>Delete board</button>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-dropzone · default, compact</span>
+        <div class="gallery__stage gallery__stage--block">
+          <label class="lp-dropzone"><svg class="lp-icon"><use href="#i-upload"/></svg><span class="lp-dropzone__title">Drop a photograph here, or browse</span><span>JPEG, PNG, HEIC or WebP, up to 25 MB</span><input class="lp-visually-hidden" type="file"></label>
+          <label class="lp-dropzone lp-dropzone--compact"><svg class="lp-icon"><use href="#i-upload"/></svg><span>Add an image <span class="lp-faint">optional</span></span><input class="lp-visually-hidden" type="file"></label>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-progress · determinate, indeterminate, ai</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-progress-row"><div class="lp-progress"><div class="lp-progress__bar" style="width:64%"></div></div><div class="lp-progress-row__meta"><span>shoreline-first-light.jpg</span><span>4.2 of 6.6 MB</span></div></div>
+          <div class="lp-progress lp-progress--indeterminate"><div class="lp-progress__bar"></div></div>
+          <div class="lp-progress lp-progress--ai"><div class="lp-progress__bar" style="width:40%"></div></div>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-avatar, lp-thumb, lp-kbd, lp-meta</span>
+        <div class="gallery__stage">
+          <span class="lp-avatar">QB</span>
+          <img class="lp-thumb" src="https://picsum.photos/seed/lp-s10/96/96" width="48" height="48" alt="">
+          <img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s33/72/72" width="36" height="36" alt="">
+          <span class="lp-topbar__hint"><span class="lp-kbd">/</span> to search</span>
+          <dl class="lp-meta" style="width:100%"><dt>Genre</dt><dd>Landscape</dd><dt>Experience</dt><dd>Intermediate</dd></dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Service-bound ================= -->
+  <section class="gallery" aria-labelledby="g-domain">
+    <div class="gallery__head"><h2 class="lp-heading" id="g-domain">Service-bound · frontend/projects/domain</h2><p class="lp-small lp-muted">Injects an api contract through its token and renders what it returns.</p></div>
+    <div class="gallery__grid">
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-photo-grid and lp-tile · uniform 4:5, hover scrim with title and source, status pill, actions; placeholder tile</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-photo-grid">
+            <article class="lp-tile"><img src="https://picsum.photos/seed/lp-s10/480/600" width="480" height="600" alt="Morning by the window" loading="lazy"><a class="lp-tile__link" href="reference.html" aria-label="Open"></a><div class="lp-tile__scrim"><div class="lp-tile__title">Morning by the window</div><div class="lp-tile__meta">Mara Lindqvist</div></div><div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" aria-label="Add to boards"><svg class="lp-icon lp-icon--sm"><use href="#i-board"/></svg></button><a class="lp-icon-button lp-icon-button--on-image" href="https://example.com/" aria-label="Source"><svg class="lp-icon lp-icon--sm"><use href="#i-external"/></svg></a></div></article>
+            <article class="lp-tile"><img src="https://picsum.photos/seed/lp-s6/480/600" width="480" height="600" alt="Ridge line, morning" loading="lazy"><a class="lp-tile__link" href="critique.html" aria-label="Open"></a><span class="lp-status lp-status--analyzing lp-status--on-image lp-tile__status">Analyzing</span><div class="lp-tile__scrim"><div class="lp-tile__title">Ridge line, morning</div><div class="lp-tile__meta">7 Sep 2026</div></div></article>
+            <article class="lp-tile lp-tile--selected"><img src="https://picsum.photos/seed/lp-s3/480/600" width="480" height="600" alt="Shoreline" loading="lazy"><input class="lp-tile__check" type="checkbox" checked aria-label="Selected"></article>
+            <div class="lp-tile lp-tile--placeholder"><svg class="lp-icon"><use href="#i-link"/></svg></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-photographer-card · library card and search-result variant</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-photographer-grid">
+            <article class="lp-photographer-card"><a class="lp-photographer-card__link" href="photographer.html" aria-label="Open"></a><div class="lp-photographer-card__head"><h3 class="lp-photographer-card__name">Mara Lindqvist</h3><span class="lp-photographer-card__domain">maralindqvist.com</span></div><p class="lp-photographer-card__desc">Portraits in available light, mostly north-facing windows and long sittings. A restrained warm palette and almost no fill.</p><div class="lp-tags"><span class="lp-tag lp-tag--plain">window light</span><span class="lp-tag lp-tag--plain">portrait</span></div><div class="lp-photographer-card__foot"><div class="lp-photographer-card__thumbs"><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s10/72/72" width="36" height="36" alt=""><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s33/72/72" width="36" height="36" alt=""></div><span class="lp-photographer-card__count">6 references</span></div></article>
+            <article class="lp-photographer-card lp-photographer-card--result"><a class="lp-photographer-card__link" href="photographer.html" aria-label="Open"></a><span class="lp-result-type">Photographer</span><div class="lp-photographer-card__head"><h3 class="lp-photographer-card__name">Saoirse Quinn</h3><span class="lp-photographer-card__domain">saoirsequinn.ie</span></div><p class="lp-photographer-card__desc">Studio and home sittings lit by one window. Black and white, slow, and unhurried.</p><div class="lp-photographer-card__foot"><div class="lp-photographer-card__thumbs"><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s9/72/72" width="36" height="36" alt=""></div><span class="lp-photographer-card__count">9 references</span></div></article>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-board-list · sidebar on desktop, chip row under 1024px</span>
+        <div class="gallery__stage gallery__stage--block">
+          <nav class="lp-board-list" aria-label="Boards">
+            <a class="lp-board-list__item" href="inspiration.html" aria-current="page"><span class="lp-board-list__name">All references</span><span class="lp-board-list__count">142</span></a>
+            <a class="lp-board-list__item" href="inspiration.html?state=board"><span class="lp-board-list__name">Window light</span><span class="lp-board-list__count">23</span></a>
+            <a class="lp-board-list__item" href="inspiration.html?state=board"><span class="lp-board-list__name">Quiet architecture</span><span class="lp-board-list__count">31</span></a>
+            <button class="lp-board-list__item lp-board-list__new" type="button"><span class="lp-board-list__name">New board</span><svg class="lp-icon lp-icon--sm"><use href="#i-plus"/></svg></button>
+          </nav>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-picker · checkable list with thumbs, inline create row</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-picker">
+            <div class="lp-picker__list">
+              <label class="lp-picker__item"><input type="checkbox" checked><img class="lp-thumb" src="https://picsum.photos/seed/lp-s14/96/96" width="48" height="48" alt=""><span class="lp-picker__body"><span class="lp-picker__title">North-facing room</span><span class="lp-picker__meta">Saved 4 Sep 2026 · No photographer</span></span></label>
+              <label class="lp-picker__item"><input type="checkbox"><span class="lp-picker__body"><span class="lp-picker__title">Quiet architecture</span></span><span class="lp-picker__count">31</span></label>
+              <div class="lp-picker__new"><svg class="lp-icon lp-icon--sm"><use href="#i-plus"/></svg><input class="lp-input" type="text" placeholder="New board" aria-label="New board name"></div>
+            </div>
+            <p class="lp-picker__summary">1 selected.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-ai-block · ready, pending, failed (quiet), collapsed after review. The only place machine-made text appears.</span>
+        <div class="gallery__stage gallery__stage--block">
+          <section class="lp-ai-block"><div class="lp-ai-block__head"><div class="lp-row"><h3 class="lp-kicker lp-kicker--ai">AI suggestions</h3><span class="lp-pill lp-pill--ai">Demo output</span></div><span class="lp-ai-block__note">Nothing applies until you accept it.</span></div><p class="lp-ai-block__text">A woman in profile against a low sun, hair catching the light. Warm, hazy backlight with shallow depth of field.</p><div class="lp-ai-groups"><div class="lp-ai-group"><span class="lp-ai-group__label">Lighting</span><div class="lp-tags"><span class="lp-tag lp-tag--ai">backlight<button class="lp-tag__action" type="button" aria-label="Accept"><svg class="lp-icon lp-icon--sm"><use href="#i-check"/></svg></button><button class="lp-tag__action" type="button" aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span><span class="lp-tag lp-tag--ai">golden hour<button class="lp-tag__action" type="button" aria-label="Accept"><svg class="lp-icon lp-icon--sm"><use href="#i-check"/></svg></button><button class="lp-tag__action" type="button" aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span></div></div></div><div class="lp-ai-block__actions"><button class="lp-button lp-button--primary lp-button--sm" type="button">Accept all</button><button class="lp-button lp-button--ghost lp-button--sm" type="button">Dismiss all</button></div></section>
+          <section class="lp-ai-block"><div class="lp-ai-block__head"><h3 class="lp-kicker lp-kicker--ai">Summary</h3><span class="lp-ai-block__status"><span class="lp-spinner"></span>Reading the site…</span></div><div class="lp-stack lp-stack--sm"><div class="lp-skeleton lp-skeleton--text" style="width:95%"></div><div class="lp-skeleton lp-skeleton--text" style="width:70%"></div></div></section>
+          <section class="lp-ai-block lp-ai-block--quiet"><div class="lp-ai-block__head"><h3 class="lp-kicker lp-kicker--ai">AI suggestions</h3></div><p class="lp-ai-block__text lp-muted">Couldn't generate a description or tags for this image.</p><div class="lp-ai-block__actions"><button class="lp-button lp-button--secondary lp-button--sm" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Try again</button></div></section>
+          <section class="lp-ai-block lp-ai-block--quiet lp-ai-block--collapsed"><div class="lp-ai-block__head"><div class="lp-row"><h3 class="lp-kicker lp-kicker--ai">AI suggestions</h3><span class="lp-small lp-muted">Reviewed · 8 of 10 tags accepted</span></div><button class="lp-button lp-button--ghost lp-button--sm" type="button">Show</button></div></section>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-exif · strip, empty</span>
+        <div class="gallery__stage gallery__stage--block">
+          <dl class="lp-exif"><div class="lp-exif__item"><dt>Focal</dt><dd>24 mm</dd></div><div class="lp-exif__item"><dt>Aperture</dt><dd>f/8</dd></div><div class="lp-exif__item"><dt>Shutter</dt><dd>1/250 s</dd></div><div class="lp-exif__item"><dt>ISO</dt><dd>100</dd></div></dl>
+          <p class="lp-exif lp-exif--empty">No EXIF data in this file. The critique won't guess at settings.</p>
+        </div>
+      </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-chip-input · inline tag editing</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-chip-input"><span class="lp-tag">window light<button class="lp-tag__action" type="button" aria-label="Remove"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span><span class="lp-tag">portrait<button class="lp-tag__action" type="button" aria-label="Remove"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span><input type="text" placeholder="Add a tag" aria-label="Add a tag"></div>
+        </div>
+      </div>
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-observation with lp-evidence · the evidence loupe: a crop of the region the observation refers to; hovering dims the photograph everywhere else. Then lp-improvement, lp-exercise, lp-brief, lp-processing.</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-detail" style="column-gap:var(--lp-space-8)">
+            <div class="lp-detail__media" style="position:static">
+              <figure class="lp-photo-stage"><img src="https://picsum.photos/seed/lp-s3/1200/800" width="1200" height="800" alt="Shoreline at first light"><span class="lp-region" data-region="1" style="--x:28%;--y:72%;--size:22%"></span><span class="lp-region" data-region="2" style="--x:50%;--y:14%;--size:24%"></span></figure>
+            </div>
+            <div class="lp-detail__body" style="grid-row:1 / span 2">
+              <div class="lp-observations">
+                <div class="lp-observation" data-evidence="1" tabindex="0"><div class="lp-evidence" style="--x:28%;--y:72%;background-image:url('https://picsum.photos/seed/lp-s3/1200/800')" role="img" aria-label="Crop of the foreground rocks"></div><div class="lp-observation__body"><p class="lp-observation__text">The foreground rocks hold real texture. The low, raking light gives the frame its only hard edges.</p></div></div>
+                <div class="lp-observation" data-evidence="2" tabindex="0"><div class="lp-evidence" style="--x:50%;--y:14%;background-image:url('https://picsum.photos/seed/lp-s3/1200/800')" role="img" aria-label="Crop of the sky"></div><div class="lp-observation__body"><div class="lp-observation__labels"><span class="lp-pill lp-pill--outline">Technical issue</span><span class="lp-observation__uncertain">Uncertain, judged from the preview</span></div><p class="lp-observation__text">The sky is close to clipping. The top third has almost no tonal separation.</p></div></div>
+              </div>
+              <ol class="lp-improvements"><li class="lp-improvement"><span class="lp-improvement__n" aria-hidden="true">1</span><div class="lp-improvement__body"><p class="lp-improvement__title">Protect the highlights</p><p class="lp-improvement__text">Expose for the sky and bring the rocks up afterwards.</p><p class="lp-improvement__next"><span class="lp-kicker">Next shoot</span><span>Meter the sky, dial in −1 EV, check the histogram.</span></p></div></li></ol>
+              <section class="lp-exercise"><span class="lp-exercise__title">Practice exercise: the same shoreline, three exposures</span><p class="lp-exercise__text">Shoot the frame at −1, 0, and +1 EV, then edit each to the same final brightness.</p></section>
+              <div class="lp-brief"><div class="lp-block__head"><span class="lp-kicker">Your brief</span></div><blockquote class="lp-brief__quote">“A quiet study of the rocks in first light.”</blockquote></div>
+              <div class="lp-processing"><div class="lp-processing__title"><span class="lp-spinner"></span>Looking at the photograph</div><p class="lp-processing__text">Usually under a minute. You can leave this page.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-filters · chip row with desktop and mobile variants; active filters; lp-compare__slot</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-filters"><div class="lp-segmented" role="radiogroup" aria-label="Type"><label class="lp-segmented__option"><input type="radio" name="g-ft" checked><span class="lp-segmented__label">All</span></label><label class="lp-segmented__option"><input type="radio" name="g-ft"><span class="lp-segmented__label">References</span></label></div><button class="lp-chip" type="button" aria-pressed="true"><svg class="lp-icon lp-icon--sm"><use href="#i-filter"/></svg>1 board</button><span class="lp-filters__spacer"></span><div class="lp-filters--active"><span class="lp-tag lp-tag--plain lp-small">Window light<button class="lp-tag__action" type="button" aria-label="Remove"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span><button class="lp-link lp-small" type="button">Clear all</button></div></div>
+          <div class="lp-compare__slot" style="aspect-ratio:auto;padding:var(--lp-space-6)"><svg class="lp-icon"><use href="#i-compare"/></svg><span>Upload a later attempt to compare</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Page ================= -->
+  <section class="gallery" aria-labelledby="g-page">
+    <div class="gallery__head"><h2 class="lp-heading" id="g-page">Page · frontend/projects/loupe</h2><p class="lp-small lp-muted">Routed screens, composing the other two and owning routing, guards, and dialogs.</p></div>
+    <div class="gallery__grid">
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-topbar and lp-nav · text links above 640px, a fixed tab bar with icons below. See the top of this page. lp-page-header, lp-back, lp-section__head</span>
+        <div class="gallery__stage gallery__stage--block">
+          <a class="lp-back" href="inspiration.html" style="margin:0"><svg class="lp-icon lp-icon--sm"><use href="#i-chevron-left"/></svg>Inspiration</a>
+          <div class="lp-page-header" style="margin:0"><div class="lp-page-header__text"><div class="lp-page-header__title-row"><span class="lp-title">Window light</span><button class="lp-icon-button" type="button" aria-label="Board actions"><svg class="lp-icon"><use href="#i-more"/></svg></button></div><p class="lp-page-header__sub">23 references</p></div><div class="lp-page-header__actions"><button class="lp-button lp-button--primary" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-plus"/></svg>Save reference</button></div></div>
+          <div class="lp-section__head"><span class="lp-heading">Linked references</span><span class="lp-small lp-muted">6 references</span></div>
+        </div>
+      </div>
+      <div class="gallery__item">
+        <span class="gallery__label">lp-settings-row</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-settings-row" style="border-top:0;padding-top:0"><div class="lp-settings-row__text"><span class="lp-settings-row__title">Critiques, tags, summaries, and search by meaning</span><span class="lp-settings-row__hint">A provider is configured on the server.</span></div><span class="lp-pill lp-pill--success">Connected</span></div>
+        </div>
+      </div>
+      <div class="gallery__item">
+        <span class="gallery__label">lp-page-state · not found, error</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-page-state" style="margin:0"><span class="lp-kicker">Not found</span><span class="lp-title">That page isn't here.</span><p class="lp-muted lp-small">The link may be old, or the item was deleted.</p></div>
+        </div>
+      </div>
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-search-hero · the search field is the page</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-search-hero" style="margin:0 auto"><div class="lp-search-hero__intro"><span class="lp-title">Describe what you're looking for.</span><p class="lp-muted">The light, the subject, the mood, a technique. Or the tag you gave it.</p></div><div class="lp-input-wrap lp-input-wrap--lg"><svg class="lp-icon"><use href="#i-search"/></svg><input class="lp-input lp-input--lg" type="search" placeholder="moody portraits with soft window light" aria-label="Search"></div><div class="lp-search-hero__examples"><a class="lp-chip" href="search.html?state=results">“Minimalist architecture with strong shadows”</a></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="assets/mock.js"></script>
+</body>
+</html>

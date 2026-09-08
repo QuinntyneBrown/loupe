@@ -1,0 +1,71 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Generate a grounded portfolio summary
+class PortfolioSummarySuggestion {
+  +BookmarkId: Guid
+  +SourceRevision: long
+  +FetchedUrl: Uri
+  +FetchedAt: DateTimeOffset
+  +Summary: string
+  +Tags: List<SuggestedTag>
+  +Mode: ExecutionMode
+  +ValidateSource(revision: long): bool
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class GeneratePortfolioSummaryCommand {
+  +OwnerId: string
+  +Payload: GeneratePortfolioSummaryInput
+}
+class GeneratePortfolioSummaryCommandHandler {
+  +Handle(request: GeneratePortfolioSummaryCommand, cancellation: CancellationToken): Task<Result>
+}
+GeneratePortfolioSummaryCommandHandler ..> GeneratePortfolioSummaryCommand : handles
+GeneratePortfolioSummaryCommandHandler --> PortfolioSummarySuggestion : reads / applies
+GeneratePortfolioSummaryCommandHandler ..> ILibraryStore : persists / queries
+interface IRestrictedPageFetcher {
+  +Fetch(url: Uri, budget: FetchBudget, ct: CancellationToken): Task<FetchedContent>
+}
+GeneratePortfolioSummaryCommandHandler ..> IRestrictedPageFetcher : uses
+interface IPortfolioTextExtractor {
+  +Extract(page: FetchedPage, maxScalars: int): PortfolioText
+}
+GeneratePortfolioSummaryCommandHandler ..> IPortfolioTextExtractor : uses
+interface IPortfolioSummaryProvider {
+  +Summarize(text: PortfolioText, ct: CancellationToken): Task<PortfolioSummarySuggestion>
+}
+GeneratePortfolioSummaryCommandHandler ..> IPortfolioSummaryProvider : uses
+interface IPortfolioSummaryService {
+  +state: Signal<FeatureState>
+}
+class PortfolioSummaryService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+PortfolioSummaryService ..|> IPortfolioSummaryService
+class PortfolioSummaryPanel {
+  -service: IPortfolioSummaryService
+}
+PortfolioSummaryPanel ..> IPortfolioSummaryService : inject token
+@enduml

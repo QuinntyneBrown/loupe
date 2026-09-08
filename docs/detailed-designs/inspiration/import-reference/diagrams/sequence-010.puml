@@ -1,0 +1,63 @@
+@startuml
+title L2-010 - Import a reference from a source URL
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "ReferenceImportPanel" as page
+participant "ReferenceImportService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "ReferenceImportsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "ImportReferenceCommandHandler" as handler
+participant "GetOperationQueryHandler" as status
+participant "ReferenceImport" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IRestrictedPageFetcher / IPreviewSelector / IImageIngestor adapters" as ext
+participant "Durable work runner" as worker
+end box
+note over page, controller : Admission persists work before processing; status reads are owner-scoped
+worker -> db : Lease admitted job and immutable input
+db --> worker : Durable work
+worker -> handler : Dispatch ImportReferenceCommand
+handler -> db : Verify target owner, existence, and admitted revision
+db --> handler : Current authorized state
+handler -> ext : Restricted fetch; retain submitted and final URL [L2-010]
+ext --> handler : Direct image / HTML / bounded failure
+alt direct image
+handler -> ext : Validate and stage image + preview
+else HTML
+handler -> ext : First valid OG image; else first valid Twitter image
+ext --> handler : Valid preview and title/explicit author suggestions or none
+end
+handler -> db : Fill only untouched empty fields at current source/image revision
+db --> handler : Enriched same reference or preserved link-only fallback
+handler --> worker : Attempt outcome; release lease
+actor -> page : Inspect processing result
+page -> client : Read status
+client -> controller : GET owned job / item status
+controller -> status : Dispatch GetOperationQuery
+status -> db : Read persisted state
+db --> status : Job outcome and current item
+status --> controller : Typed status
+controller --> client : owned import status; manual edits preserved
+client --> page : Update state signals
+page --> actor : Labeled result and recovery action
+@enduml

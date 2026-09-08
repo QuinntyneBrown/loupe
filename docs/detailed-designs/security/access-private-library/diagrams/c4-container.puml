@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Sign in and access only the owned library
+Person(owner, "Library owner", "Uses this capability")
+System_Boundary(loupe, "Loupe") {
+Container(spa, "Loupe web", "Angular", "SignInPage")
+Container(api, "Loupe API", "ASP.NET Core", "SessionsController")
+ContainerDb(db, "Library store", "Relational storage; engine TO SUPPLY", "Owned records, versions, and durable work")
+}
+Rel(owner, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls via interface-bound HTTP adapter", "JSON or multipart / HTTPS")
+Rel(api, db, "Reads or commits owned state", "Infrastructure adapter")
+System_Ext(external, "Configured external services", "Providers or permitted source content")
+Rel(api, external, "Calls bounded adapters", "HTTPS")
+@enduml

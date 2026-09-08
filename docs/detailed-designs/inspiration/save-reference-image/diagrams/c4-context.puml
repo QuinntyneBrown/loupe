@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Save or replace a reference image
+Person(owner, "Library owner", "Collects inspiration and practices photography")
+System(loupe, "Loupe", "Save or replace a reference image")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

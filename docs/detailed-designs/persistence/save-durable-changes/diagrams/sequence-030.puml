@@ -1,0 +1,56 @@
+@startuml
+title L2-030 - Prevent duplicate submissions and lost edits
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "SaveStatus" as page
+participant "OperationService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "OperationsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "ResolveOperationCommandHandler" as handler
+participant "OperationReceipt" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IOperationReceiptStore adapters" as ext
+end box
+actor -> page : Prevent duplicate submissions and lost edits
+page -> client : operationKey, payloadHash, expectedRevision
+client -> controller : feature keyed mutation endpoints
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch ResolveOperationCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> ext : Resolve owner + operation + key for 24 hours [L2-030]
+ext --> handler : Matching receipt / different hash / new key
+alt matching receipt
+handler -> db : Verify result is not deleted
+db --> handler : Same result or unavailable
+else different hash or stale edit revision
+handler --> controller : 409; retain attempted text and offer Reload latest
+else new valid operation
+handler -> db : Commit result and receipt in one transaction
+db --> handler : One result across concurrent submissions
+end
+handler --> controller : same item/job on replay; no recreation after deletion
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

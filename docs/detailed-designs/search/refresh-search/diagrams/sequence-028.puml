@@ -1,0 +1,66 @@
+@startuml
+title L2-028 - Keep search consistent with library changes
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "SearchIndexStatus" as page
+participant "SearchIndexService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "SearchIndexController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "RefreshSearchDocumentCommandHandler" as handler
+participant "GetOperationQueryHandler" as status
+participant "SearchDocument" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IEmbeddingProvider / IVectorWriter adapters" as ext
+participant "Durable work runner" as worker
+end box
+note over page, controller : Admission persists work before processing; status reads are owner-scoped
+worker -> db : Lease admitted job and immutable input
+db --> worker : Durable work
+worker -> handler : Dispatch RefreshSearchDocumentCommand
+handler -> db : Verify target owner, existence, and admitted revision
+db --> handler : Current authorized state
+note over db : Source edit + revision bump + durable intent commit together [L2-028]
+handler -> db : Build active text; exclude suppressed drafts / rejected tags
+db --> handler : Current source revision + compatible target generation
+handler -> ext : Embed and stage replacement vector
+ext --> handler : Candidate vector / failure
+alt deleted, obsolete revision, or failed attempt
+handler -> db : Reject stale publication / record failed indexing
+else current revision and compatible generation
+handler -> db : Publish current revision conditionally
+db --> handler : Search current within 60 s when dependencies healthy
+end
+note over page : Processing description / Updating search / failed with Retry
+note over db : Model rebuild uses separate generation and atomic serving switch
+handler --> worker : Attempt outcome; release lease
+actor -> page : Inspect processing result
+page -> client : Read status
+client -> controller : GET owned job / item status
+controller -> status : Dispatch GetOperationQuery
+status -> db : Read persisted state
+db --> status : Job outcome and current item
+status --> controller : Typed status
+controller --> client : current/pending/failed status; keyword remains immediate
+client --> page : Update state signals
+page --> actor : Labeled result and recovery action
+@enduml

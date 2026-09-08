@@ -1,0 +1,58 @@
+@startuml
+title L2-027 - Show related references
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "MeaningSearchResults" as page
+participant "SearchService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "SearchController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "GetRelatedReferencesQueryHandler" as handler
+participant "SemanticCursor" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IEmbeddingProvider / IVectorSearchReader adapters" as ext
+end box
+actor -> page : Show related references
+page -> client : referenceId
+client -> controller : GET /api/references/{id}/related
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch GetRelatedReferencesQuery
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> db : Load current owned source vector metadata [L2-027]
+db --> handler : Current vector / pending source / missing record
+alt no current vector
+handler --> controller : Indexing; main detail remains usable
+else current vector
+handler -> ext : Top 6 current owned references; cosine >= 0.20
+ext --> handler : Similarity / ID order; exclude source and nonreferences
+alt service unavailable
+handler --> controller : Related temporarily unavailable
+else zero or fewer than six results
+handler --> controller : Exact available results; no filler
+end
+end
+handler --> controller : 200 related state/results independently of main detail
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

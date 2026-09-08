@@ -1,0 +1,57 @@
+@startuml
+title Save a source link and admit import
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+ BorderColor #344054
+ FontColor #101828
+}
+skinparam package {
+ BorderColor #667085
+ FontColor #101828
+ BackgroundColor #F9FAFB
+}
+actor "Library owner" as owner
+box "Frontend - Loupe application / api" #E0F2FE
+ participant "ReferenceImportPanel" as panel
+ participant "ReferenceImportService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+ participant "ReferenceImportsController" as api
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+ participant "SaveReferenceUrlCommandHandler" as save
+ participant "AdmitAnalysisCommandHandler" as admit
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+ database "Library / receipts / durable work" as db
+end box
+owner -> panel : Save source URL
+panel -> client : URL + operation key
+client -> api : POST /api/reference-imports
+api -> save : MediatR dispatch
+save -> save : Validate allowed URL; normalize identity [L2-010, L2-040]
+save -> db : Resolve owner-scoped key and normalized URL
+alt prior owned reference
+ db --> save : Same reference; Already saved
+else new allowed URL
+ save -> db : Commit link-only reference and receipt [L2-030]
+ db --> save : Durable saved reference
+ save -> admit : Request bounded import admission [L2-035]
+ admit -> db : Resolve active fingerprint and user capacity
+ alt quota available
+  admit -> db : Persist one durable import operation
+  db --> admit : Job ID / status location
+ else admission unavailable
+  db --> admit : No new job
+ end
+ admit --> save : Queued or Analysis not queued
+end
+save --> api : Saved reference plus explicit admission outcome
+api --> client : Usable reference / safe validation failure
+client --> panel : Update signals; retain manual values on error
+panel --> owner : Source saved, Already saved, or retryable input error
+@enduml

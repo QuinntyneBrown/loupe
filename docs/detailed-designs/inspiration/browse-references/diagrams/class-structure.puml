@@ -1,0 +1,59 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Browse and edit saved references
+class Reference {
+  +Id: Guid
+  +OwnerId: string
+  +Title: string
+  +SourceUrl: Uri?
+  +Attribution: string?
+  +Notes: string?
+  +Version: long
+  +Edit(input: ReferenceEdit): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class UpdateReferenceCommand {
+  +OwnerId: string
+  +Payload: UpdateReferenceInput
+}
+class UpdateReferenceCommandHandler {
+  +Handle(request: UpdateReferenceCommand, cancellation: CancellationToken): Task<Result>
+}
+UpdateReferenceCommandHandler ..> UpdateReferenceCommand : handles
+UpdateReferenceCommandHandler --> Reference : reads / applies
+UpdateReferenceCommandHandler ..> ILibraryStore : persists / queries
+interface IReferenceService {
+  +state: Signal<FeatureState>
+}
+class ReferenceService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+ReferenceService ..|> IReferenceService
+class ReferenceDetailPanel {
+  -service: IReferenceService
+}
+ReferenceDetailPanel ..> IReferenceService : inject token
+@enduml

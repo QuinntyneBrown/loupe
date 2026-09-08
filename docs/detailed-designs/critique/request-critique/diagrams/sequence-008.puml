@@ -1,0 +1,55 @@
+@startuml
+title L2-008 - Request and replace the current critique
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "CritiquePanel" as page
+participant "CritiqueService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "CritiquesController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "RequestCritiqueCommandHandler" as handler
+participant "CritiqueJob" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Request and replace the current critique
+page -> client : version, regenerate, requestKey
+client -> controller : POST /api/photographs/{id}/critique-jobs
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch RequestCritiqueCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> db : Find owner-scoped completed fingerprint / admitted request [L2-008]
+db --> handler : Prior result or no reusable work
+alt unchanged completed input and no explicit Regenerate
+handler --> controller : 200 reusable completed critique
+else new admitted request
+handler -> entity : Capture immutable brief, image, mode, model/prompt
+handler -> db : Commit one durable job and work intent
+db --> handler : Job ID and status URL / admission failure
+note over page : Upload persists even if subsequent admission fails
+note over entity : Current critique stays until validated publication
+end
+handler --> controller : 202 job or 200 reused result; no wait for AI
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

@@ -1,0 +1,55 @@
+@startuml
+title L2-001 - Upload and save personal photographs
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "PhotographUploadPanel" as page
+participant "PhotographService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "PhotographsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "UploadPhotographCommandHandler" as handler
+participant "Photograph" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IImageIngestor / IImageStore adapters" as ext
+end box
+actor -> page : Upload and save personal photographs
+page -> client : image, title?, brief?
+client -> controller : POST /api/photographs
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch UploadPhotographCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> ext : Validate and stage one still image + oriented preview [L2-001]
+ext --> handler : Immutable asset or 413/415/422/storage failure
+alt invalid image, fields, or storage failure
+handler -> ext : Remove staged objects / record abandoned cleanup
+handler --> controller : Failure; no photograph persisted
+else valid complete asset
+handler -> entity : Attach image and normalized brief; default title
+handler -> db : Commit owned photograph and asset references
+db --> handler : Saved photograph
+end
+handler --> controller : 201 saved photograph; retain brief on failure
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+title L2-007 - Ground critique in evidence and stated intent
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Named release reviewer" as actor
+box "Backend - Loupe Evaluation application" #D1FADF
+participant "CritiqueEvaluationRunner" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "EvaluateCritiqueCommandHandler" as handler
+participant "CritiqueResult" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Fixture manifest / evaluation results" as db
+participant "ICritiqueProvider adapters" as ext
+end box
+actor -> controller : Run configuration against fixed evidence manifest
+controller -> handler : Dispatch EvaluateCritiqueCommand
+handler -> db : Load 12 licensed/synthetic evidence fixtures [L2-007]
+db --> handler : Four groups of three; half omit EXIF; one conflict
+loop three runs per fixture
+handler -> ext : Run configured production model on fixture
+ext --> handler : Critique output
+handler -> entity : Check schema / prohibited claims / evidence checklist
+entity --> handler : Structured checks for named reviewer
+end
+handler -> db : Record 36 outputs, named review decisions, and reasons
+alt all 36 structural/factual checks + at least 33 full checks pass
+handler --> controller : Quality gate passes for recorded configuration
+else any threshold failure
+handler --> controller : Release gate fails; rerun after correction
+end
+handler --> controller : recorded release gate; repeat on model/prompt change
+controller --> actor : Recorded gate outcome
+@enduml

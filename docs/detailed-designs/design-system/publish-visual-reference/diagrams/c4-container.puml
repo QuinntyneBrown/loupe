@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Publish the visual reference and apply its tokens
+Person(actor, "Owner / reviewer", "Uses or verifies behavior")
+System_Boundary(system, "Design-system reference") {
+Container(site, "Design-system site", "Static HTML/CSS/JavaScript", "Local token reference and synthetic interactive examples")
+Container(build, "Design-system build", "Independent package scripts", "Bundles authoritative CSS and local navigation")
+}
+Rel(actor, site, "Browses", "HTTPS")
+Rel(build, site, "Produces static deployment output")
+@enduml

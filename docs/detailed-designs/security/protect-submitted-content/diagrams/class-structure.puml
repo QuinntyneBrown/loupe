@@ -1,0 +1,76 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Validate content and isolate AI data
+class SanitizedImage {
+  +StorageKey: string
+  +MediaType: string
+  +Width: int
+  +Height: int
+  +AllowedExif: ExifFacts
+  +StripPrivateMetadata(): void
+  +BuildProviderInput(brief: CritiqueBrief): ProviderInput
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class ValidateSubmittedContentCommand {
+  +OwnerId: string
+  +Payload: ValidateSubmittedContentInput
+}
+class ValidateSubmittedContentCommandHandler {
+  +Handle(request: ValidateSubmittedContentCommand, cancellation: CancellationToken): Task<Result>
+}
+ValidateSubmittedContentCommandHandler ..> ValidateSubmittedContentCommand : handles
+ValidateSubmittedContentCommandHandler --> SanitizedImage : reads / applies
+ValidateSubmittedContentCommandHandler ..> ILibraryStore : persists / queries
+class BuildProviderInputCommand {
+  +OwnerId: string
+  +Payload: BuildProviderInputInput
+}
+class BuildProviderInputCommandHandler {
+  +Handle(request: BuildProviderInputCommand, cancellation: CancellationToken): Task<Result>
+}
+BuildProviderInputCommandHandler ..> BuildProviderInputCommand : handles
+BuildProviderInputCommandHandler --> SanitizedImage : reads / applies
+BuildProviderInputCommandHandler ..> ILibraryStore : persists / queries
+interface IImageIngestor {
+  +Stage(input: ImageUpload, ct: CancellationToken): Task<StagedImage>
+}
+ValidateSubmittedContentCommandHandler ..> IImageIngestor : uses
+interface IProviderInputBuilder {
+  +Build(image: SanitizedImage, brief: CritiqueBrief): ProviderInput
+}
+ValidateSubmittedContentCommandHandler ..> IProviderInputBuilder : uses
+interface IPrivacyService {
+  +state: Signal<FeatureState>
+}
+class PrivacyService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+PrivacyService ..|> IPrivacyService
+class ProviderDisclosure {
+  -service: IPrivacyService
+}
+ProviderDisclosure ..> IPrivacyService : inject token
+@enduml

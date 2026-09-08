@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Diagnose failures and restore the private library
+Person(actor, "Designer / reviewer" , "Inspects reference and release evidence")
+System(system, "Release and recovery tooling", "Diagnose failures and restore the private library")
+Rel(actor, system, "Uses / verifies")
+System(loupe, "Loupe runtime", "API, workers, web, and durable stores")
+Rel(system, loupe, "Measures, configures, or restores")
+@enduml

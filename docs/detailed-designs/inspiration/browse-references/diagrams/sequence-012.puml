@@ -1,0 +1,53 @@
+@startuml
+title L2-012 - Browse, inspect, and edit references
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "ReferenceDetailPanel" as page
+participant "ReferenceService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "ReferencesController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "UpdateReferenceCommandHandler" as handler
+participant "Reference" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Browse, inspect, and edit references
+page -> client : title, sourceUrl?, attribution?, notes?, version
+client -> controller : GET /api/references[/{id}]; PUT /api/references/{id}
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch UpdateReferenceCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> db : Read full owned reference and relationships [L2-012]
+db --> handler : Full oriented image / named placeholder; status fields
+opt explicit edit save
+handler -> entity : Validate normalized editable fields
+handler -> db : Conditional field-only update; preserve memberships
+db --> handler : New version / unchanged conflict
+end
+note over page : External action: saved URL, noopener noreferrer, no-referrer
+note over page : Empty library, failed list, and missing detail are distinct
+handler --> controller : 200 grid/detail or saved reference
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

@@ -1,0 +1,75 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Find inspiration by meaning and related images
+class SemanticCursor {
+  +GenerationId: Guid
+  +ModelIdentity: string
+  +LastScore: double
+  +LastId: Guid
+  +FilterFingerprint: string
+  +ValidateGeneration(current: Guid): bool
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class MeaningSearchQuery {
+  +OwnerId: string
+  +Payload: MeaningSearchInput
+}
+class MeaningSearchQueryHandler {
+  +Handle(request: MeaningSearchQuery, cancellation: CancellationToken): Task<Result>
+}
+MeaningSearchQueryHandler ..> MeaningSearchQuery : handles
+MeaningSearchQueryHandler --> SemanticCursor : reads / applies
+MeaningSearchQueryHandler ..> ILibraryStore : persists / queries
+class GetRelatedReferencesQuery {
+  +OwnerId: string
+  +Payload: GetRelatedReferencesInput
+}
+class GetRelatedReferencesQueryHandler {
+  +Handle(request: GetRelatedReferencesQuery, cancellation: CancellationToken): Task<Result>
+}
+GetRelatedReferencesQueryHandler ..> GetRelatedReferencesQuery : handles
+GetRelatedReferencesQueryHandler --> SemanticCursor : reads / applies
+GetRelatedReferencesQueryHandler ..> ILibraryStore : persists / queries
+interface IEmbeddingProvider {
+  +Embed(text: string, model: string, ct: CancellationToken): Task<Vector>
+}
+MeaningSearchQueryHandler ..> IEmbeddingProvider : uses
+interface IVectorSearchReader {
+  +Rank(owner: string, vector: Vector, filter: SearchFilter): Task<RankedPage>
+}
+MeaningSearchQueryHandler ..> IVectorSearchReader : uses
+interface ISearchService {
+  +state: Signal<FeatureState>
+}
+class SearchService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+SearchService ..|> ISearchService
+class MeaningSearchResults {
+  -service: ISearchService
+}
+MeaningSearchResults ..> ISearchService : inject token
+@enduml

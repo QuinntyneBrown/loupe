@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · Loupe</title>
+<meta name="description" content="Sign in or create an account. Everything you upload is private to you.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<link rel="stylesheet" href="assets/mock.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3zM12 10v4M12 17.5v.5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8v.5"/></symbol>
+</svg>
+
+<main class="lp-auth" id="main">
+  <div class="lp-auth__card">
+    <div class="lp-auth__head">
+      <span class="lp-wordmark" aria-label="Loupe">L<span class="lp-wordmark__o"></span>upe</span>
+      <h1 class="lp-title" data-state="default error submitting session-expired">Sign in</h1>
+      <h1 class="lp-title" data-state="create-account">Create your account</h1>
+      <p class="lp-muted" data-state="create-account">A private place for your photographs, critiques, and references.</p>
+    </div>
+
+    <div class="lp-notice lp-notice--info" data-state="session-expired" role="status">
+      <svg class="lp-icon lp-icon--sm"><use href="#i-info"/></svg>
+      <div class="lp-notice__body"><span class="lp-notice__title">You were signed out after a while away.</span><span>Sign in again to pick up where you left off. Nothing was lost.</span></div>
+    </div>
+
+    <div class="lp-notice lp-notice--error" data-state="error" role="alert">
+      <svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>
+      <div class="lp-notice__body"><span class="lp-notice__title">That email and password don't match.</span><span>Check both and try again.</span></div>
+    </div>
+
+    <!-- Sign in -->
+    <form class="lp-form" action="my-work.html" data-state="default error submitting session-expired">
+      <div class="lp-field" data-state="default submitting session-expired">
+        <label class="lp-field__label" for="email">Email</label>
+        <input class="lp-input" id="email" type="email" autocomplete="email" value="quinn@example.com" autofocus>
+      </div>
+      <div class="lp-field is-invalid" data-state="error">
+        <label class="lp-field__label" for="email-error">Email</label>
+        <input class="lp-input" id="email-error" type="email" autocomplete="email" value="quinn@example.com" aria-invalid="true">
+      </div>
+      <div class="lp-field" data-state="default submitting session-expired">
+        <label class="lp-field__label" for="password">Password</label>
+        <input class="lp-input" id="password" type="password" autocomplete="current-password" value="correct horse battery">
+      </div>
+      <div class="lp-field is-invalid" data-state="error">
+        <label class="lp-field__label" for="password-error">Password</label>
+        <input class="lp-input" id="password-error" type="password" autocomplete="current-password" value="" aria-invalid="true" autofocus>
+      </div>
+      <button class="lp-button lp-button--primary lp-button--block" type="submit" data-state="default error session-expired">Sign in</button>
+      <button class="lp-button lp-button--primary lp-button--block is-busy" type="button" aria-disabled="true" data-state="submitting"><span class="lp-spinner"></span>Signing in…</button>
+    </form>
+
+    <!-- Create account -->
+    <form class="lp-form" action="my-work.html?state=empty" data-state="create-account">
+      <div class="lp-field">
+        <label class="lp-field__label" for="new-email">Email</label>
+        <input class="lp-input" id="new-email" type="email" autocomplete="email" placeholder="you@example.com" autofocus>
+      </div>
+      <div class="lp-field">
+        <label class="lp-field__label" for="new-password">Password</label>
+        <input class="lp-input" id="new-password" type="password" autocomplete="new-password">
+        <p class="lp-field__hint">At least 12 characters. A short sentence works well.</p>
+      </div>
+      <button class="lp-button lp-button--primary lp-button--block" type="submit">Create account</button>
+      <p class="lp-dialog__privacy" style="justify-content:center"><svg class="lp-icon lp-icon--sm"><use href="#i-lock"/></svg>Your uploads and critiques are private by default.</p>
+    </form>
+
+    <p class="lp-auth__foot" data-state="default error submitting session-expired">New here? <a class="lp-link" href="sign-in.html?state=create-account">Create an account</a></p>
+    <p class="lp-auth__foot" data-state="create-account">Already have an account? <a class="lp-link" href="sign-in.html">Sign in</a></p>
+  </div>
+</main>
+
+<script src="assets/mock.js"></script>
+</body>
+</html>

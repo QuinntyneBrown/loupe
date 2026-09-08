@@ -1,0 +1,64 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Generate visual metadata suggestions
+class SuggestionBatch {
+  +Id: Guid
+  +ReferenceId: Guid
+  +ImageRevision: long
+  +Description: string
+  +Tags: List<SuggestedTag>
+  +GeneratedAt: DateTimeOffset
+  +Mode: ExecutionMode
+  +Validate(): ValidationResult
+  +MarkNoncurrent(): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class GenerateVisualSuggestionsCommand {
+  +OwnerId: string
+  +Payload: GenerateVisualSuggestionsInput
+}
+class GenerateVisualSuggestionsCommandHandler {
+  +Handle(request: GenerateVisualSuggestionsCommand, cancellation: CancellationToken): Task<Result>
+}
+GenerateVisualSuggestionsCommandHandler ..> GenerateVisualSuggestionsCommand : handles
+GenerateVisualSuggestionsCommandHandler --> SuggestionBatch : reads / applies
+GenerateVisualSuggestionsCommandHandler ..> ILibraryStore : persists / queries
+interface IVisualMetadataProvider {
+  +Analyze(input: VisualInput, ct: CancellationToken): Task<SuggestionBatch>
+}
+GenerateVisualSuggestionsCommandHandler ..> IVisualMetadataProvider : uses
+interface IMetadataService {
+  +state: Signal<FeatureState>
+}
+class MetadataService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+MetadataService ..|> IMetadataService
+class MetadataSuggestionPanel {
+  -service: IMetadataService
+}
+MetadataSuggestionPanel ..> IMetadataService : inject token
+@enduml

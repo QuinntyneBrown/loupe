@@ -1,0 +1,52 @@
+@startuml
+title L2-004 - Keep personal notes on photographs
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "PhotographDetailPanel" as page
+participant "PhotographService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "PhotographsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "UpdatePhotographNotesCommandHandler" as handler
+participant "Photograph" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Keep personal notes on photographs
+page -> client : notes?, version
+client -> controller : PUT /api/photographs/{id}/notes
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch UpdatePhotographNotesCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> entity : Normalize notes; empty clears; enforce 10,000 [L2-004]
+handler -> db : Conditional notes-only update
+alt update accepted
+db --> handler : New version and saved notes
+else invalid or conflicting save
+db --> handler : No change
+note over page : Keep attempted text; show error and Retry
+end
+handler --> controller : 200 notes/version; saved state only after acknowledgment
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

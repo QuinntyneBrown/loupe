@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Work · Loupe</title>
+<meta name="description" content="Your own photographs, private by default, each with its critique status. Upload here and request a critique.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<link rel="stylesheet" href="assets/mock.css">
+</head>
+<body class="lp-shell">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3zM12 10v4M12 17.5v.5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+</svg>
+
+<a class="lp-skip" href="#main">Skip to content</a>
+<header class="lp-topbar">
+  <a class="lp-wordmark" href="my-work.html" aria-label="Loupe">L<span class="lp-wordmark__o"></span>upe</a>
+  <nav class="lp-nav" aria-label="Primary">
+    <a href="my-work.html" aria-current="page"><svg class="lp-icon"><use href="#i-image"/></svg><span>My Work</span></a>
+    <a href="inspiration.html"><svg class="lp-icon"><use href="#i-grid"/></svg><span>Inspiration</span></a>
+    <a href="photographers.html"><svg class="lp-icon"><use href="#i-user"/></svg><span>Photographers</span></a>
+    <a href="search.html"><svg class="lp-icon"><use href="#i-search"/></svg><span>Search</span></a>
+  </nav>
+  <div class="lp-topbar__end">
+    <span class="lp-topbar__hint"><span class="lp-kbd">/</span> to search</span>
+    <a class="lp-avatar" href="settings.html" aria-label="Settings">QB</a>
+  </div>
+</header>
+<div class="lp-banner lp-banner--demo" data-demo-only role="status">
+  <span class="lp-kicker">Demo mode</span>
+  <span>Critiques are sample text, not an analysis of your photographs.</span>
+  <a href="settings.html?demo=1">Connect a provider</a>
+</div>
+
+<main id="main" class="lp-main">
+
+  <div class="lp-page-header">
+    <div class="lp-page-header__text">
+      <h1 class="lp-title">My Work</h1>
+      <p class="lp-page-header__sub" data-state="default"><svg class="lp-icon lp-icon--sm" style="display:inline-block;vertical-align:-0.2em"><use href="#i-lock"/></svg> 12 photographs, private to you</p>
+      <p class="lp-page-header__sub" data-state="empty"><svg class="lp-icon lp-icon--sm" style="display:inline-block;vertical-align:-0.2em"><use href="#i-lock"/></svg> Private to you</p>
+    </div>
+    <div class="lp-page-header__actions">
+      <button class="lp-button lp-button--primary" type="button" data-open="upload:form"><svg class="lp-icon lp-icon--sm"><use href="#i-upload"/></svg>Upload photograph</button>
+    </div>
+  </div>
+
+  <div class="lp-content">
+
+    <div class="lp-filters" data-state="default">
+      <div class="lp-chips" role="group" aria-label="Filter by critique status">
+        <button class="lp-chip" type="button" aria-pressed="true">All<span class="lp-chip__count">12</span></button>
+        <button class="lp-chip" type="button" aria-pressed="false">Ready<span class="lp-chip__count">8</span></button>
+        <button class="lp-chip" type="button" aria-pressed="false">In progress<span class="lp-chip__count">2</span></button>
+        <button class="lp-chip" type="button" aria-pressed="false">Failed<span class="lp-chip__count">1</span></button>
+      </div>
+    </div>
+
+    <div class="lp-filters" data-state="loading" aria-hidden="true">
+      <span class="lp-skeleton" style="width:64px;height:var(--lp-control-height-sm);border-radius:var(--lp-radius-full)"></span>
+      <span class="lp-skeleton" style="width:84px;height:var(--lp-control-height-sm);border-radius:var(--lp-radius-full)"></span>
+      <span class="lp-skeleton" style="width:110px;height:var(--lp-control-height-sm);border-radius:var(--lp-radius-full)"></span>
+    </div>
+
+    <!-- Grid -->
+    <div class="lp-photo-grid" data-state="default">
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-s3/480/600" width="480" height="600" alt="Shoreline, first light" loading="lazy">
+        <a class="lp-tile__link" href="critique.html" aria-label="Open Shoreline, first light"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Ready</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Shoreline, first light</div><div class="lp-tile__meta">6 Sep 2026</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-photograph" aria-label="Delete photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-s6/480/600" width="480" height="600" alt="Ridge line, morning" loading="lazy">
+        <a class="lp-tile__link" href="critique.html?state=analyzing" aria-label="Open Ridge line, morning"></a>
+        <span class="lp-status lp-status--analyzing lp-status--on-image lp-tile__status">Analyzing</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Ridge line, morning</div><div class="lp-tile__meta">7 Sep 2026</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-photograph" aria-label="Delete photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-s7/480/600" width="480" height="600" alt="Fog in the pines" loading="lazy">
+        <a class="lp-tile__link" href="critique.html?state=queued" aria-label="Open Fog in the pines"></a>
+        <span class="lp-status lp-status--queued lp-status--on-image lp-tile__status">Queued</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Fog in the pines</div><div class="lp-tile__meta">7 Sep 2026</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-photograph" aria-label="Delete photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-s14/480/600" width="480" height="600" alt="Pier, low tide" loading="lazy">
+        <a class="lp-tile__link" href="critique.html?state=failed" aria-label="Open Pier, low tide"></a>
+        <span class="lp-status lp-status--failed lp-status--on-image lp-tile__status">Failed</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Pier, low tide</div><div class="lp-tile__meta">5 Sep 2026</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-photograph" aria-label="Delete photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-s17/480/600" width="480" height="600" alt="Forest light" loading="lazy">
+        <a class="lp-tile__link" href="critique.html?state=no-critique" aria-label="Open Forest light"></a>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Forest light</div><div class="lp-tile__meta">2 Sep 2026 · No critique yet</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-photograph" aria-label="Delete photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-s24/480/600" width="480" height="600" alt="Snowfield, birds" loading="lazy">
+        <a class="lp-tile__link" href="critique.html" aria-label="Open Snowfield, birds"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Ready</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Snowfield, birds</div><div class="lp-tile__meta">30 Aug 2026</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-photograph" aria-label="Delete photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-s27/480/600" width="480" height="600" alt="Fjord from above" loading="lazy">
+        <a class="lp-tile__link" href="critique.html" aria-label="Open Fjord from above"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Ready</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Fjord from above</div><div class="lp-tile__meta">28 Aug 2026</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-photograph" aria-label="Delete photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-s32/480/600" width="480" height="600" alt="Cyclist on the bridge" loading="lazy">
+        <a class="lp-tile__link" href="critique.html" aria-label="Open Cyclist on the bridge"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Ready</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Cyclist on the bridge</div><div class="lp-tile__meta">24 Aug 2026</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-photograph" aria-label="Delete photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-s36/480/600" width="480" height="600" alt="Wet street, old town" loading="lazy">
+        <a class="lp-tile__link" href="critique.html" aria-label="Open Wet street, old town"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Ready</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Wet street, old town</div><div class="lp-tile__meta">20 Aug 2026</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-photograph" aria-label="Delete photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-s39/480/600" width="480" height="600" alt="Cloud line" loading="lazy">
+        <a class="lp-tile__link" href="critique.html" aria-label="Open Cloud line"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Ready</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Cloud line</div><div class="lp-tile__meta">16 Aug 2026</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-photograph" aria-label="Delete photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-s46/480/600" width="480" height="600" alt="Pines" loading="lazy">
+        <a class="lp-tile__link" href="critique.html" aria-label="Open Pines"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Ready</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Pines</div><div class="lp-tile__meta">12 Aug 2026</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-photograph" aria-label="Delete photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-s47/480/600" width="480" height="600" alt="Boardwalk, chains" loading="lazy">
+        <a class="lp-tile__link" href="critique.html" aria-label="Open Boardwalk, chains"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Ready</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Boardwalk, chains</div><div class="lp-tile__meta">9 Aug 2026</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-photograph" aria-label="Delete photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+    </div>
+
+    <!-- Loading -->
+    <div class="lp-photo-grid" data-state="loading" aria-busy="true" aria-label="Loading photographs">
+      <div class="lp-skeleton lp-skeleton--tile"></div><div class="lp-skeleton lp-skeleton--tile"></div><div class="lp-skeleton lp-skeleton--tile"></div><div class="lp-skeleton lp-skeleton--tile"></div>
+      <div class="lp-skeleton lp-skeleton--tile"></div><div class="lp-skeleton lp-skeleton--tile"></div><div class="lp-skeleton lp-skeleton--tile"></div><div class="lp-skeleton lp-skeleton--tile"></div>
+    </div>
+
+    <!-- Empty -->
+    <div class="lp-empty" data-state="empty">
+      <h2 class="lp-empty__title">Your work stays private here.</h2>
+      <p class="lp-empty__text">Upload a photograph, say what you were after, and get a critique grounded in what's actually in the frame.</p>
+      <div class="lp-empty__action"><button class="lp-button lp-button--primary" type="button" data-open="upload:form">Upload photograph</button></div>
+    </div>
+
+    <!-- Error -->
+    <div class="lp-empty" data-state="error" role="alert">
+      <h2 class="lp-empty__title">Couldn't load your photographs.</h2>
+      <p class="lp-empty__text">Check your connection and try again. Nothing you uploaded is lost.</p>
+      <div class="lp-empty__action"><button class="lp-button lp-button--secondary" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Try again</button></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ============ Dialogs ============ -->
+
+<dialog class="lp-dialog" data-dialog="upload" aria-labelledby="upload-title">
+  <form method="dialog" class="lp-dialog__panel">
+
+    <section data-step="form">
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title" id="upload-title">Upload photograph</h2></div>
+        <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="lp-dialog__body">
+        <label class="lp-dropzone">
+          <svg class="lp-icon"><use href="#i-upload"/></svg>
+          <span class="lp-dropzone__title">Drop a photograph here, or browse</span>
+          <span>JPEG, PNG, HEIC or WebP, up to 25 MB. EXIF is read if it's there.</span>
+          <input class="lp-visually-hidden" type="file" accept="image/*" autofocus>
+        </label>
+        <fieldset class="lp-form">
+          <legend class="lp-form__legend">Tell the critic what you were after <span class="lp-field__optional">optional, but it makes the feedback sharper</span></legend>
+          <div class="lp-field">
+            <label class="lp-field__label" for="upload-intent">What were you trying to do?</label>
+            <textarea class="lp-textarea" id="upload-intent" rows="2" placeholder="A quiet study of the rocks in first light. I wanted the texture and not much else."></textarea>
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="upload-genre">Genre</label>
+              <div class="lp-select-wrap">
+                <select class="lp-select" id="upload-genre">
+                  <option>Landscape</option><option>Portrait</option><option>Street</option><option>Architecture</option><option>Documentary</option><option>Still life</option><option>Other</option>
+                </select>
+                <svg class="lp-icon lp-icon--sm"><use href="#i-chevron-down"/></svg>
+              </div>
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="upload-experience">Your experience</label>
+              <div class="lp-select-wrap">
+                <select class="lp-select" id="upload-experience">
+                  <option>Beginner</option><option selected>Intermediate</option><option>Advanced</option><option>Professional</option>
+                </select>
+                <svg class="lp-icon lp-icon--sm"><use href="#i-chevron-down"/></svg>
+              </div>
+            </div>
+          </div>
+          <fieldset>
+            <legend class="lp-form__legend">Feedback wanted</legend>
+            <div class="lp-chips" role="group">
+              <button class="lp-chip" type="button" aria-pressed="true">Technical</button>
+              <button class="lp-chip" type="button" aria-pressed="true">Composition</button>
+              <button class="lp-chip" type="button" aria-pressed="false">Colour and processing</button>
+              <button class="lp-chip" type="button" aria-pressed="false">Storytelling</button>
+            </div>
+          </fieldset>
+        </fieldset>
+      </div>
+      <footer class="lp-dialog__footer">
+        <span class="lp-dialog__privacy"><svg class="lp-icon lp-icon--sm"><use href="#i-lock"/></svg>Private. Only you can see this.</span>
+        <button class="lp-button lp-button--secondary" type="button" data-open="upload:progress">Upload only</button>
+        <button class="lp-button lp-button--primary" type="button" data-open="upload:progress">Upload and request critique</button>
+      </footer>
+    </section>
+
+    <section data-step="progress" hidden>
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title">Uploading…</h2><p class="lp-dialog__text">Keep this open until it finishes. The critique is requested as soon as the file is in.</p></div>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-progress-row" aria-live="polite">
+          <div class="lp-progress"><div class="lp-progress__bar" style="width:64%"></div></div>
+          <div class="lp-progress-row__meta"><span>shoreline-first-light.jpg</span><span>4.2 of 6.6 MB</span></div>
+        </div>
+      </div>
+      <footer class="lp-dialog__footer">
+        <button class="lp-button lp-button--secondary" type="button" data-close>Cancel upload</button>
+      </footer>
+    </section>
+
+    <section data-step="invalid" hidden>
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title">Couldn't upload this file</h2></div>
+        <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-notice lp-notice--error" role="alert">
+          <svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>
+          <div class="lp-notice__body">
+            <span class="lp-notice__title">shoreline-first-light.tif is 48 MB and a format Loupe can't read.</span>
+            <span>Use JPEG, PNG, HEIC or WebP up to 25 MB. RAW and TIFF aren't supported yet; export a JPEG at full size first.</span>
+          </div>
+        </div>
+        <label class="lp-dropzone lp-dropzone--compact">
+          <svg class="lp-icon"><use href="#i-upload"/></svg>
+          <span>Choose another file</span>
+          <input class="lp-visually-hidden" type="file" accept="image/*" autofocus>
+        </label>
+      </div>
+      <footer class="lp-dialog__footer">
+        <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+      </footer>
+    </section>
+
+  </form>
+</dialog>
+
+<dialog class="lp-dialog" data-dialog="delete-photograph" aria-labelledby="delete-photograph-title">
+  <form method="dialog" class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="delete-photograph-title">Delete “Shoreline, first light”?</h2>
+        <p class="lp-dialog__text">The photograph, its critique, your notes, and its search record are all removed. This can't be undone.</p>
+      </div>
+      <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+    </header>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" data-close autofocus>Cancel</button>
+      <button class="lp-button lp-button--danger" type="button" data-toast-open="deleted">Delete</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- ============ Toasts ============ -->
+<div class="lp-toast" data-toast="uploaded" role="status"><span class="lp-toast__text">Uploaded. Critique requested.</span><a class="lp-toast__action" href="critique.html?state=queued">View</a><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+<div class="lp-toast" data-toast="critique-ready" role="status"><span class="lp-toast__text">Critique ready for “Ridge line, morning”.</span><a class="lp-toast__action" href="critique.html">Read it</a><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+<div class="lp-toast" data-toast="upload-failed" role="alert"><span class="lp-toast__text">Upload failed. Nothing was saved.</span><button class="lp-toast__action" type="button" data-open="upload:form">Try again</button><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+<div class="lp-toast" data-toast="deleted" role="status"><span class="lp-toast__text">Photograph deleted.</span><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+
+<script src="assets/mock.js"></script>
+</body>
+</html>

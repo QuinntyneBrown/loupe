@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Configure, verify, and release Loupe reproducibly
+Person(actor, "Designer / reviewer" , "Inspects reference and release evidence")
+System(system, "Release and recovery tooling", "Configure, verify, and release Loupe reproducibly")
+Rel(actor, system, "Uses / verifies")
+System(loupe, "Loupe runtime", "API, workers, web, and durable stores")
+Rel(system, loupe, "Measures, configures, or restores")
+@enduml

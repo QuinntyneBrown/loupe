@@ -1,0 +1,76 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Track durable processing and retry failures
+class BackgroundOperation {
+  +Id: Guid
+  +OwnerId: string
+  +State: JobState
+  +Attempt: int
+  +NextAttemptAt: DateTimeOffset?
+  +LeaseToken: Guid?
+  +LastRenewedAt: DateTimeOffset?
+  +InputRevision: long
+  +AcquireLease(now: DateTimeOffset): Guid
+  +Complete(token: Guid): bool
+  +ScheduleRetry(at: DateTimeOffset): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class RunBackgroundOperationCommand {
+  +OwnerId: string
+  +Payload: RunBackgroundOperationInput
+}
+class RunBackgroundOperationCommandHandler {
+  +Handle(request: RunBackgroundOperationCommand, cancellation: CancellationToken): Task<Result>
+}
+RunBackgroundOperationCommandHandler ..> RunBackgroundOperationCommand : handles
+RunBackgroundOperationCommandHandler --> BackgroundOperation : reads / applies
+RunBackgroundOperationCommandHandler ..> ILibraryStore : persists / queries
+class ExecuteOperationAttemptCommand {
+  +OwnerId: string
+  +Payload: ExecuteOperationAttemptInput
+}
+class ExecuteOperationAttemptCommandHandler {
+  +Handle(request: ExecuteOperationAttemptCommand, cancellation: CancellationToken): Task<Result>
+}
+ExecuteOperationAttemptCommandHandler ..> ExecuteOperationAttemptCommand : handles
+ExecuteOperationAttemptCommandHandler --> BackgroundOperation : reads / applies
+ExecuteOperationAttemptCommandHandler ..> ILibraryStore : persists / queries
+interface IProviderInvoker {
+  +Invoke(input: ProviderInput, ct: CancellationToken): Task<ProviderResult>
+}
+RunBackgroundOperationCommandHandler ..> IProviderInvoker : uses
+interface IOperationService {
+  +state: Signal<FeatureState>
+}
+class OperationService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+OperationService ..|> IOperationService
+class OperationStatusPanel {
+  -service: IOperationService
+}
+OperationStatusPanel ..> IOperationService : inject token
+@enduml

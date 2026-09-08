@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compare · Loupe</title>
+<meta name="description" content="Two attempts at the same photograph side by side, with each critique's top improvements and a note on what changed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<link rel="stylesheet" href="assets/mock.css">
+</head>
+<body class="lp-shell">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-compare" viewBox="0 0 24 24"><rect x="3" y="5" width="8" height="14" rx="1.5"/><rect x="13" y="5" width="8" height="14" rx="1.5"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+</svg>
+
+<a class="lp-skip" href="#main">Skip to content</a>
+<header class="lp-topbar">
+  <a class="lp-wordmark" href="my-work.html" aria-label="Loupe">L<span class="lp-wordmark__o"></span>upe</a>
+  <nav class="lp-nav" aria-label="Primary">
+    <a href="my-work.html" aria-current="page"><svg class="lp-icon"><use href="#i-image"/></svg><span>My Work</span></a>
+    <a href="inspiration.html"><svg class="lp-icon"><use href="#i-grid"/></svg><span>Inspiration</span></a>
+    <a href="photographers.html"><svg class="lp-icon"><use href="#i-user"/></svg><span>Photographers</span></a>
+    <a href="search.html"><svg class="lp-icon"><use href="#i-search"/></svg><span>Search</span></a>
+  </nav>
+  <div class="lp-topbar__end">
+    <span class="lp-topbar__hint"><span class="lp-kbd">/</span> to search</span>
+    <a class="lp-avatar" href="settings.html" aria-label="Settings">QB</a>
+  </div>
+</header>
+<div class="lp-banner lp-banner--demo" data-demo-only role="status">
+  <span class="lp-kicker">Demo mode</span>
+  <span>Critiques are sample text, not an analysis of your photographs.</span>
+  <a href="settings.html?demo=1">Connect a provider</a>
+</div>
+
+<main id="main" class="lp-main">
+  <a class="lp-back" href="critique.html"><svg class="lp-icon lp-icon--sm"><use href="#i-chevron-left"/></svg>Shoreline, first light</a>
+
+  <div class="lp-page-header">
+    <div class="lp-page-header__text">
+      <h1 class="lp-title">Compare attempts</h1>
+      <p class="lp-page-header__sub" data-state="default">Shoreline, first light · 6 Sep and 12 Sep 2026</p>
+      <p class="lp-page-header__sub" data-state="insufficient">Shoreline, first light</p>
+    </div>
+    <div class="lp-page-header__actions" data-state="default loading">
+      <button class="lp-button lp-button--primary" type="button" data-open="compare-pick"><svg class="lp-icon lp-icon--sm"><use href="#i-compare"/></svg>Choose attempts</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="lp-compare" data-state="loading" aria-busy="true">
+    <div class="lp-compare__col"><div class="lp-skeleton lp-skeleton--text" style="width:40%"></div><div class="lp-skeleton lp-skeleton--image"></div><div class="lp-skeleton lp-skeleton--text" style="width:80%"></div><div class="lp-skeleton lp-skeleton--text" style="width:70%"></div></div>
+    <div class="lp-compare__col"><div class="lp-skeleton lp-skeleton--text" style="width:40%"></div><div class="lp-skeleton lp-skeleton--image"></div><div class="lp-skeleton lp-skeleton--text" style="width:80%"></div><div class="lp-skeleton lp-skeleton--text" style="width:70%"></div></div>
+  </div>
+
+  <!-- Error -->
+  <div class="lp-empty" data-state="error" role="alert">
+    <h2 class="lp-empty__title">Couldn't load these attempts.</h2>
+    <p class="lp-empty__text">One of them may have been deleted, or the connection dropped.</p>
+    <div class="lp-empty__action"><button class="lp-button lp-button--secondary" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Try again</button><a class="lp-button lp-button--ghost" href="critique.html">Back to the critique</a></div>
+  </div>
+
+  <!-- Insufficient: only one critiqued attempt exists -->
+  <div class="lp-empty" data-state="insufficient">
+    <h2 class="lp-empty__title">Nothing to compare yet.</h2>
+    <p class="lp-empty__text">Upload a later attempt and request a critique. Then you can put the two side by side and see what changed.</p>
+    <div class="lp-empty__action"><a class="lp-button lp-button--primary" href="my-work.html#dialog=upload:form"><svg class="lp-icon lp-icon--sm"><use href="#i-upload"/></svg>Upload photograph</a></div>
+  </div>
+
+  <!-- Default -->
+  <div class="lp-stack lp-stack--lg" data-state="default">
+    <div class="lp-compare">
+      <div class="lp-segmented lp-segmented--block lp-compare__toggle" role="radiogroup" aria-label="Show attempt">
+        <label class="lp-segmented__option"><input type="radio" name="compare-show" id="compare-show-earlier" checked><span class="lp-segmented__label">Earlier</span></label>
+        <label class="lp-segmented__option"><input type="radio" name="compare-show" id="compare-show-later"><span class="lp-segmented__label">Later</span></label>
+      </div>
+
+      <section class="lp-compare__col lp-compare__col--earlier" aria-labelledby="earlier-title">
+        <div class="lp-compare__head"><h2 class="lp-kicker" id="earlier-title">Earlier · 6 Sep 2026</h2><a class="lp-link lp-small" href="critique.html">Open critique</a></div>
+        <figure class="lp-photo-stage"><img src="https://picsum.photos/seed/lp-s3/1200/800" width="1200" height="800" alt="Shoreline, first light, first attempt"></figure>
+        <dl class="lp-exif"><div class="lp-exif__item"><dt>Focal</dt><dd>24 mm</dd></div><div class="lp-exif__item"><dt>Aperture</dt><dd>f/8</dd></div><div class="lp-exif__item"><dt>Shutter</dt><dd>1/250 s</dd></div><div class="lp-exif__item"><dt>ISO</dt><dd>100</dd></div></dl>
+        <div class="lp-critique-section">
+          <div class="lp-critique-section__head"><h3 class="lp-subheading">Top three improvements</h3><span class="lp-kicker lp-kicker--ai">AI</span></div>
+          <ol class="lp-improvements">
+            <li class="lp-improvement"><span class="lp-improvement__n" aria-hidden="true">1</span><div class="lp-improvement__body"><p class="lp-improvement__title">Protect the highlights</p><p class="lp-improvement__text">Expose for the sky and lift the rocks in the edit.</p></div></li>
+            <li class="lp-improvement"><span class="lp-improvement__n" aria-hidden="true">2</span><div class="lp-improvement__body"><p class="lp-improvement__title">Set focus for depth</p><p class="lp-improvement__text">Focus a third of the way in at f/8.</p></div></li>
+            <li class="lp-improvement"><span class="lp-improvement__n" aria-hidden="true">3</span><div class="lp-improvement__body"><p class="lp-improvement__title">Quieten the right edge</p><p class="lp-improvement__text">Crop or burn the bright patch.</p></div></li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="lp-compare__col lp-compare__col--later" aria-labelledby="later-title">
+        <div class="lp-compare__head"><h2 class="lp-kicker" id="later-title">Later · 12 Sep 2026</h2><a class="lp-link lp-small" href="critique.html">Open critique</a></div>
+        <figure class="lp-photo-stage"><img src="https://picsum.photos/seed/lp-s3/1200/900" width="1200" height="900" alt="Shoreline, first light, second attempt, framed tighter"></figure>
+        <dl class="lp-exif"><div class="lp-exif__item"><dt>Focal</dt><dd>24 mm</dd></div><div class="lp-exif__item"><dt>Aperture</dt><dd>f/8</dd></div><div class="lp-exif__item"><dt>Shutter</dt><dd>1/500 s</dd></div><div class="lp-exif__item"><dt>ISO</dt><dd>100</dd></div></dl>
+        <section class="lp-ai-block" aria-label="What changed, by AI">
+          <div class="lp-ai-block__head"><div class="lp-row"><h3 class="lp-kicker lp-kicker--ai">Since the earlier attempt</h3><span class="lp-pill lp-pill--ai" data-demo-only>Demo output</span></div></div>
+          <ul class="lp-stack lp-stack--sm lp-small">
+            <li class="lp-row" style="gap:var(--lp-space-2);flex-wrap:nowrap;align-items:flex-start"><svg class="lp-icon lp-icon--sm" style="color:var(--lp-color-success);margin-top:0.15em"><use href="#i-check"/></svg><span>Highlights held. The sky keeps its gradation at 1/500 s.</span></li>
+            <li class="lp-row" style="gap:var(--lp-space-2);flex-wrap:nowrap;align-items:flex-start"><svg class="lp-icon lp-icon--sm" style="color:var(--lp-color-success);margin-top:0.15em"><use href="#i-check"/></svg><span>Focus carries from the nearest rocks to the horizon.</span></li>
+            <li class="lp-row" style="gap:var(--lp-space-2);flex-wrap:nowrap;align-items:flex-start"><span class="lp-kicker" style="margin-top:0.2em">Still</span><span>The right edge is still the brightest thing in the frame.</span></li>
+          </ul>
+        </section>
+        <div class="lp-critique-section">
+          <div class="lp-critique-section__head"><h3 class="lp-subheading">Top three improvements</h3><span class="lp-kicker lp-kicker--ai">AI</span></div>
+          <ol class="lp-improvements">
+            <li class="lp-improvement"><span class="lp-improvement__n" aria-hidden="true">1</span><div class="lp-improvement__body"><p class="lp-improvement__title">Quieten the right edge</p><p class="lp-improvement__text">Now the only distraction left. Crop to the last textured rock.</p></div></li>
+            <li class="lp-improvement"><span class="lp-improvement__n" aria-hidden="true">2</span><div class="lp-improvement__body"><p class="lp-improvement__title">Wait for the wave</p><p class="lp-improvement__text">A little movement in the water would separate it from the sky.</p></div></li>
+            <li class="lp-improvement"><span class="lp-improvement__n" aria-hidden="true">3</span><div class="lp-improvement__body"><p class="lp-improvement__title">Lift the rock midtones</p><p class="lp-improvement__text">Half a stop in the edit brings back the texture the exposure protected.</p></div></li>
+          </ol>
+        </div>
+      </section>
+    </div>
+
+    <div class="lp-block" style="max-width:var(--lp-content-narrow)" data-save-editor>
+      <div class="lp-block__head">
+        <label class="lp-subheading" for="changed">What changed</label>
+        <span class="lp-save-status lp-save-status--saved" data-save-status>Saved</span>
+      </div>
+      <textarea class="lp-textarea" id="changed" rows="3" placeholder="What did you do differently, and did it work?" data-save-input>Bracketed at −1 and picked the darker frame. Focused on the third rock in. Forgot the edge again.</textarea>
+      <div class="lp-block__foot"><button class="lp-button lp-button--secondary lp-button--sm" type="button" data-save-button disabled>Save</button></div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ Dialogs ============ -->
+
+<dialog class="lp-dialog lp-dialog--wide" data-dialog="compare-pick" aria-labelledby="compare-pick-title">
+  <form method="dialog" class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div><h2 class="lp-dialog__title" id="compare-pick-title">Choose attempts</h2><p class="lp-dialog__text">Pick two critiqued photographs. Same scene works best, but any will do.</p></div>
+      <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+    </header>
+    <div class="lp-dialog__body">
+      <div class="lp-picker">
+        <div class="lp-picker__list" aria-label="Your photographs">
+          <label class="lp-picker__item"><input type="checkbox" checked autofocus><img class="lp-thumb" src="https://picsum.photos/seed/lp-s3/96/96" width="48" height="48" alt=""><span class="lp-picker__body"><span class="lp-picker__title">Shoreline, first light</span><span class="lp-picker__meta">6 Sep 2026 · Critique ready</span></span></label>
+          <label class="lp-picker__item"><input type="checkbox" checked><img class="lp-thumb" src="https://picsum.photos/seed/lp-s3/96/97" width="48" height="48" alt=""><span class="lp-picker__body"><span class="lp-picker__title">Shoreline, second attempt</span><span class="lp-picker__meta">12 Sep 2026 · Critique ready</span></span></label>
+          <label class="lp-picker__item"><input type="checkbox"><img class="lp-thumb" src="https://picsum.photos/seed/lp-s24/96/96" width="48" height="48" alt=""><span class="lp-picker__body"><span class="lp-picker__title">Snowfield, birds</span><span class="lp-picker__meta">30 Aug 2026 · Critique ready</span></span></label>
+          <label class="lp-picker__item"><input type="checkbox"><img class="lp-thumb" src="https://picsum.photos/seed/lp-s27/96/96" width="48" height="48" alt=""><span class="lp-picker__body"><span class="lp-picker__title">Fjord from above</span><span class="lp-picker__meta">28 Aug 2026 · Critique ready</span></span></label>
+          <label class="lp-picker__item"><input type="checkbox"><img class="lp-thumb" src="https://picsum.photos/seed/lp-s39/96/96" width="48" height="48" alt=""><span class="lp-picker__body"><span class="lp-picker__title">Cloud line</span><span class="lp-picker__meta">16 Aug 2026 · Critique ready</span></span></label>
+        </div>
+        <p class="lp-picker__summary">2 of 2 selected. Photographs without a critique aren't listed.</p>
+      </div>
+    </div>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+      <button class="lp-button lp-button--primary" type="button" data-close>Compare</button>
+    </footer>
+  </form>
+</dialog>
+
+<script src="assets/mock.js"></script>
+</body>
+</html>

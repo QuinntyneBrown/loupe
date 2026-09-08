@@ -1,0 +1,53 @@
+@startuml
+title L2-038 - Enforce ownership at every data boundary
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "SessionStatus" as page
+participant "SessionService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "SessionsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "GetOwnedResourceQueryHandler" as handler
+participant "ApplicationSession" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IIdentityProvider / ISessionStore adapters" as ext
+end box
+actor -> page : Enforce ownership at every data boundary
+page -> client : resourceId; server-derived owner
+client -> controller : all private API/media endpoints
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch GetOwnedResourceQuery
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> db : Constrain resource, relationships, rows and counts by owner [L2-038]
+alt absent, foreign, or deleted
+db --> handler : Indistinguishable 404; no bytes or counts
+else owned current content
+db --> handler : Authorized record or media key
+end
+note over controller : Private no-store responses; no public media URLs
+note over page : Sign-out/deletion evicts application-held private data
+handler --> controller : owned data only; unauthenticated API/media 401
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

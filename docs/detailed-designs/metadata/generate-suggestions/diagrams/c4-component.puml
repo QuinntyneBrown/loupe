@@ -1,0 +1,22 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Generate visual metadata suggestions
+Container(spa, "MetadataSuggestionPanel", "Angular domain", "Injects METADATA_SERVICE")
+Container_Boundary(api, "Loupe API and Application") {
+Component(ctrl, "MetadataController", "API controller", "Binds, dispatches, returns")
+Component(handler, "GenerateVisualSuggestionsCommandHandler", "Application / MediatR 12.5.0", "Validates, authorizes, coordinates slice")
+Component(entity, "SuggestionBatch", "Domain", "State and local invariants")
+Component(store, "ILibraryStore", "Application port", "Owner-scoped transactional reads and writes")
+}
+ContainerDb(db, "Library store", "Infrastructure adapter", "Authoritative data and durable work")
+Rel(spa, ctrl, "Calls through IMetadataService", "HTTPS")
+Rel(ctrl, handler, "Dispatches request", "MediatR")
+Rel(handler, entity, "Reads or applies behavior")
+Rel(handler, store, "Uses inward-defined port")
+Rel(store, db, "Implemented by Infrastructure")
+Container(worker, "Loupe worker", ".NET", "Processes durable admitted work")
+Rel(worker, handler, "Dispatches background command", "MediatR")
+Component(ports, "IVisualMetadataProvider", "Application ports", "Implemented by configured Infrastructure adapters")
+Rel(handler, ports, "Uses explicit capability")
+@enduml

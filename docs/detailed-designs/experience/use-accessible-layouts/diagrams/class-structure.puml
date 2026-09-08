@@ -1,0 +1,34 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+title Class structure - Use every workflow across viewports and assistive technology
+class LayoutProfile {
+  +Width: int
+  +ReducedMotion: bool
+  +TextScale: double
+  +GridKind: GridKind
+  +Columns(): int
+}
+class LibraryShell {
+  +Open(input: LayoutProfile): void
+}
+class AccessibleDialog {
+  +State: LayoutProfile
+  +Render(): void
+}
+LibraryShell ..> AccessibleDialog : composes / runs
+AccessibleDialog --> LayoutProfile : reads / evaluates
+@enduml

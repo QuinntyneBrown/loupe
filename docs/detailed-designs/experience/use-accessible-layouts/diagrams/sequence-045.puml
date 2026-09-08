@@ -1,0 +1,34 @@
+@startuml
+title L2-045 - Support keyboard and assistive technology
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Owner / release reviewer" as actor
+box "Frontend - Loupe application" #E0F2FE
+participant "LibraryShell" as page
+participant "LayoutProfile" as entity
+end box
+box "Frontend - Loupe components / api contracts" #E0F2FE
+participant "View / interface-bound service or test harness" as client
+end box
+note over page, client : Local interaction; feature services use their documented API slices
+actor -> page : Start workflow / review
+page -> entity : Named control activation with logical focus [L2-045]
+entity --> page : Focus management, field associations and live status
+page -> client : Open/close modal or complete task
+client --> page : Focus restored; no trap; accessible success/error
+note over entity : Manual + automated A/AA evidence; contrast and >= 24 px targets
+page --> actor : complete workflow without applicable A/AA issue
+@enduml

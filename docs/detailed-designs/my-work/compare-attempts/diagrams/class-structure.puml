@@ -1,0 +1,54 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Compare two saved attempts
+class ComparisonSelection {
+  +FirstId: Guid
+  +SecondId: Guid
+  +ValidateDistinct(): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class GetComparisonQuery {
+  +OwnerId: string
+  +Payload: GetComparisonInput
+}
+class GetComparisonQueryHandler {
+  +Handle(request: GetComparisonQuery, cancellation: CancellationToken): Task<Result>
+}
+GetComparisonQueryHandler ..> GetComparisonQuery : handles
+GetComparisonQueryHandler --> ComparisonSelection : reads / applies
+GetComparisonQueryHandler ..> ILibraryStore : persists / queries
+interface IComparisonService {
+  +state: Signal<FeatureState>
+}
+class ComparisonService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+ComparisonService ..|> IComparisonService
+class AttemptComparison {
+  -service: IComparisonService
+}
+AttemptComparison ..> IComparisonService : inject token
+@enduml

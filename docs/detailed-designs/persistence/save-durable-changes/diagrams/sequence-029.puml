@@ -1,0 +1,53 @@
+@startuml
+title L2-029 - Persist successful changes across sessions and restarts
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "SaveStatus" as page
+participant "OperationService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "OperationsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "CommitLibraryChangeCommandHandler" as handler
+participant "OperationReceipt" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IOperationReceiptStore adapters" as ext
+end box
+actor -> page : Persist successful changes across sessions and restarts
+page -> client : normalized mutation + durable state
+client -> controller : feature mutation endpoints
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch CommitLibraryChangeCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+note over handler : Media-bearing feature stages complete asset first [L2-029]
+handler -> db : Commit item, relations, receipt, and required work together
+alt commit succeeds
+db --> handler : Durable acknowledgment
+else dependency failure
+db --> handler : Rollback; no half-saved item
+end
+note over db : Restart reads durable state; incompatible schema blocks readiness
+handler --> controller : acknowledge only committed state
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

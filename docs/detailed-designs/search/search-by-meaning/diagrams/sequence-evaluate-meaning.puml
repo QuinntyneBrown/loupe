@@ -1,0 +1,44 @@
+@startuml
+title Evaluate live semantic relevance
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+ BorderColor #344054
+ FontColor #101828
+}
+skinparam package {
+ BorderColor #667085
+ FontColor #101828
+ BackgroundColor #F9FAFB
+}
+actor "Named release reviewer" as reviewer
+box "Backend - Loupe Evaluation application" #D1FADF
+ participant "SemanticEvaluationRunner" as runner
+end box
+box "Backend - Loupe Application" #ECFDF3
+ participant "MeaningSearchQueryHandler" as handler
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+ database "Frozen corpus and relevance labels" as corpus
+ participant "Live embedding / production vector adapters" as live
+end box
+reviewer -> runner : Run fixed corpus and configuration
+runner -> corpus : Load 60 references, 20 bookmarks, 12 labeled queries [L2-026]
+corpus --> runner : At least 5 relevant items/query; all 3 brief examples
+loop each query
+ runner -> handler : Execute real Meaning query against current generation
+ handler -> live : Embed and rank current compatible filtered vectors
+ live --> handler : Ranked results
+ handler --> runner : First five results
+ runner -> corpus : Record outputs, config, and relevance comparison
+end
+alt >= 4 relevant in top 5 for >= 10 queries AND >= 3 for every query
+ runner --> reviewer : Recorded semantic quality gate passes
+else threshold failure
+ runner --> reviewer : Gate fails with query-level evidence
+end
+note over runner : Deterministic frontend mocks do not replace this live release check
+@enduml

@@ -1,0 +1,55 @@
+@startuml
+title L2-025 - Combine tag, board, and type filters
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "SearchResults" as page
+participant "SearchService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "SearchController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "ValidateSearchFiltersQueryHandler" as handler
+participant "SearchFilter" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "ILibrarySearchReader adapters" as ext
+end box
+actor -> page : Combine tag, board, and type filters
+page -> client : tags[0..10], boardIds[0..10], type
+client -> controller : GET /api/search?mode={keyword|meaning}
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch ValidateSearchFiltersQuery
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> db : Validate selected board visibility before searching [L2-025]
+db --> handler : Owned boards or 404
+handler -> entity : Tags AND; boards OR; groups + type + query AND
+alt Photographers type and any board selected
+handler --> controller : Explained empty result; no filter ignored
+else valid compatible filters
+handler -> ext : Apply shared predicate before pagination
+ext --> handler : Filtered page without duplicate board matches
+end
+note over page : URL persists filters; Back/Forward/reload restore them
+handler --> controller : validated filter predicate used by both search handlers
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

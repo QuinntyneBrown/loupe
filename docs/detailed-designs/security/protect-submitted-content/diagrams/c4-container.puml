@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Validate content and isolate AI data
+Person(owner, "Library owner", "Uses this capability")
+System_Boundary(loupe, "Loupe") {
+Container(spa, "Loupe web", "Angular", "PhotographDetailPage")
+Container(api, "Loupe API", "ASP.NET Core", "PrivacyController")
+ContainerDb(db, "Library store", "Relational storage; engine TO SUPPLY", "Owned records, versions, and durable work")
+ContainerDb(images, "Private image store", "Immutable object storage; adapter TO SUPPLY", "Validated images and previews")
+}
+Rel(owner, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls via interface-bound HTTP adapter", "JSON or multipart / HTTPS")
+Rel(api, db, "Reads or commits owned state", "Infrastructure adapter")
+Rel(api, images, "Stages validated assets", "Image-store port")
+System_Ext(external, "Configured external services", "Providers or permitted source content")
+Rel(api, external, "Calls bounded adapters", "HTTPS")
+@enduml

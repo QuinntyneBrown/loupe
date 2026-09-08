@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Delete private content and finish cleanup
+Person(owner, "Library owner", "Uses this capability")
+System_Boundary(loupe, "Loupe") {
+Container(spa, "Loupe web", "Angular", "ReferenceDetailPage")
+Container(api, "Loupe API", "ASP.NET Core", "DeletionsController")
+ContainerDb(db, "Library store", "Relational storage; engine TO SUPPLY", "Owned records, versions, and durable work")
+Container(worker, "Loupe worker", ".NET hosted service", "Leases persisted work and dispatches Application handlers")
+ContainerDb(images, "Private image store", "Immutable object storage; adapter TO SUPPLY", "Validated images and previews")
+}
+Rel(owner, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls via interface-bound HTTP adapter", "JSON or multipart / HTTPS")
+Rel(api, db, "Reads or commits owned state", "Infrastructure adapter")
+Rel(worker, db, "Leases durable work and conditionally publishes", "Infrastructure adapter")
+Rel(worker, images, "Stages validated assets", "Image-store port")
+@enduml

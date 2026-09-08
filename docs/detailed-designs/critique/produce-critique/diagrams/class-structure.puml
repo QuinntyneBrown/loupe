@@ -1,0 +1,80 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Produce and evaluate an evidence-based critique
+class CritiqueResult {
+  +Strengths: List<EvidenceStatement>
+  +Technical: TechnicalObservations
+  +Composition: CompositionObservations
+  +Priorities: List<Improvement>
+  +Exercise: PracticeExercise
+  +GeneratedAt: DateTimeOffset
+  +BriefSnapshot: CritiqueBrief
+  +Mode: ExecutionMode
+  +ValidateStructure(): ValidationResult
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class GenerateCritiqueCommand {
+  +OwnerId: string
+  +Payload: GenerateCritiqueInput
+}
+class GenerateCritiqueCommandHandler {
+  +Handle(request: GenerateCritiqueCommand, cancellation: CancellationToken): Task<Result>
+}
+GenerateCritiqueCommandHandler ..> GenerateCritiqueCommand : handles
+GenerateCritiqueCommandHandler --> CritiqueResult : reads / applies
+GenerateCritiqueCommandHandler ..> ILibraryStore : persists / queries
+class EvaluateCritiqueCommand {
+  +OwnerId: string
+  +Payload: EvaluateCritiqueInput
+}
+class EvaluateCritiqueCommandHandler {
+  +Handle(request: EvaluateCritiqueCommand, cancellation: CancellationToken): Task<Result>
+}
+EvaluateCritiqueCommandHandler ..> EvaluateCritiqueCommand : handles
+EvaluateCritiqueCommandHandler --> CritiqueResult : reads / applies
+EvaluateCritiqueCommandHandler ..> ILibraryStore : persists / queries
+interface ICritiqueProvider {
+  +Analyze(input: CritiqueInput, ct: CancellationToken): Task<CritiqueResult>
+}
+GenerateCritiqueCommandHandler ..> ICritiqueProvider : uses
+interface ICritiqueService {
+  +state: Signal<FeatureState>
+}
+class CritiqueService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+CritiqueService ..|> ICritiqueService
+class CritiquePanel {
+  -service: ICritiqueService
+}
+CritiquePanel ..> ICritiqueService : inject token
+class Improvement {
+ +Observation: string
+ +Effect: string
+ +Action: string
+}
+CritiqueResult "1" *-- "3" Improvement : ordered priorities
+@enduml

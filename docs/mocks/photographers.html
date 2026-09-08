@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photographers · Loupe</title>
+<meta name="description" content="Bookmarked photographers and their websites, with your notes and tags, and the references linked to each.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<link rel="stylesheet" href="assets/mock.css">
+</head>
+<body class="lp-shell">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3zM12 10v4M12 17.5v.5"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17"/></symbol>
+</svg>
+
+<a class="lp-skip" href="#main">Skip to content</a>
+<header class="lp-topbar">
+  <a class="lp-wordmark" href="my-work.html" aria-label="Loupe">L<span class="lp-wordmark__o"></span>upe</a>
+  <nav class="lp-nav" aria-label="Primary">
+    <a href="my-work.html"><svg class="lp-icon"><use href="#i-image"/></svg><span>My Work</span></a>
+    <a href="inspiration.html"><svg class="lp-icon"><use href="#i-grid"/></svg><span>Inspiration</span></a>
+    <a href="photographers.html" aria-current="page"><svg class="lp-icon"><use href="#i-user"/></svg><span>Photographers</span></a>
+    <a href="search.html"><svg class="lp-icon"><use href="#i-search"/></svg><span>Search</span></a>
+  </nav>
+  <div class="lp-topbar__end">
+    <span class="lp-topbar__hint"><span class="lp-kbd">/</span> to search</span>
+    <a class="lp-avatar" href="settings.html" aria-label="Settings">QB</a>
+  </div>
+</header>
+<div class="lp-banner lp-banner--demo" data-demo-only role="status">
+  <span class="lp-kicker">Demo mode</span>
+  <span>Site summaries are sample text, not read from the photographers' pages.</span>
+  <a href="settings.html?demo=1">Connect a provider</a>
+</div>
+
+<main id="main" class="lp-main">
+
+  <div class="lp-page-header">
+    <div class="lp-page-header__text">
+      <h1 class="lp-title">Photographers</h1>
+      <p class="lp-page-header__sub" data-state="default">7 bookmarked</p>
+      <p class="lp-page-header__sub" data-state="empty">Portfolios you learn from</p>
+    </div>
+    <div class="lp-page-header__actions">
+      <button class="lp-button lp-button--primary" type="button" data-open="add-photographer:form"><svg class="lp-icon lp-icon--sm"><use href="#i-plus"/></svg>Add photographer</button>
+    </div>
+  </div>
+
+  <!-- Default -->
+  <div class="lp-photographer-grid" data-state="default">
+    <article class="lp-photographer-card">
+      <a class="lp-photographer-card__link" href="photographer.html" aria-label="Open Mara Lindqvist"></a>
+      <div class="lp-photographer-card__head"><h2 class="lp-photographer-card__name">Mara Lindqvist</h2><a class="lp-photographer-card__domain" href="https://maralindqvist.com" target="_blank" rel="noopener noreferrer" aria-label="Open maralindqvist.com">maralindqvist.com<svg class="lp-icon lp-icon--sm"><use href="#i-external"/></svg></a></div>
+      <p class="lp-photographer-card__desc">Portraits in available light, mostly north-facing windows and long sittings. A restrained warm palette and almost no fill.</p>
+      <div class="lp-tags"><span class="lp-tag lp-tag--plain">window light</span><span class="lp-tag lp-tag--plain">portrait</span><span class="lp-tag lp-tag--plain">warm</span></div>
+      <div class="lp-photographer-card__foot">
+        <div class="lp-photographer-card__thumbs"><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s10/72/72" width="36" height="36" alt=""><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s33/72/72" width="36" height="36" alt=""><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s12/72/72" width="36" height="36" alt=""></div>
+        <span class="lp-photographer-card__count">6 references</span>
+      </div>
+    </article>
+    <article class="lp-photographer-card">
+      <a class="lp-photographer-card__link" href="photographer.html" aria-label="Open Tomas Ferreira"></a>
+      <div class="lp-photographer-card__head"><h2 class="lp-photographer-card__name">Tomas Ferreira</h2><a class="lp-photographer-card__domain" href="https://tomasferreira.pt" target="_blank" rel="noopener noreferrer" aria-label="Open tomasferreira.pt">tomasferreira.pt<svg class="lp-icon lp-icon--sm"><use href="#i-external"/></svg></a></div>
+      <p class="lp-photographer-card__desc">Concrete, noon light, and hard shadow. Lisbon and Porto facades, mostly square, mostly empty of people.</p>
+      <div class="lp-tags"><span class="lp-tag lp-tag--plain">architecture</span><span class="lp-tag lp-tag--plain">high contrast</span><span class="lp-tag lp-tag--plain">minimal</span></div>
+      <div class="lp-photographer-card__foot">
+        <div class="lp-photographer-card__thumbs"><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s18/72/72" width="36" height="36" alt=""><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s30/72/72" width="36" height="36" alt=""></div>
+        <span class="lp-photographer-card__count">3 references</span>
+      </div>
+    </article>
+    <article class="lp-photographer-card">
+      <a class="lp-photographer-card__link" href="photographer.html" aria-label="Open Ines Okafor"></a>
+      <div class="lp-photographer-card__head"><h2 class="lp-photographer-card__name">Ines Okafor</h2><a class="lp-photographer-card__domain" href="https://inesokafor.com" target="_blank" rel="noopener noreferrer" aria-label="Open inesokafor.com">inesokafor.com<svg class="lp-icon lp-icon--sm"><use href="#i-external"/></svg></a></div>
+      <p class="lp-photographer-card__desc">Fog, haze, and backlight. Landscapes that are mostly atmosphere, with one small dark shape to hold them.</p>
+      <div class="lp-tags"><span class="lp-tag lp-tag--plain">landscape</span><span class="lp-tag lp-tag--plain">backlight</span><span class="lp-tag lp-tag--plain">muted palette</span></div>
+      <div class="lp-photographer-card__foot">
+        <div class="lp-photographer-card__thumbs"><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s42/72/72" width="36" height="36" alt=""><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s15/72/72" width="36" height="36" alt=""><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s16/72/72" width="36" height="36" alt=""></div>
+        <span class="lp-photographer-card__count">5 references</span>
+      </div>
+    </article>
+    <article class="lp-photographer-card">
+      <a class="lp-photographer-card__link" href="photographer.html" aria-label="Open Saoirse Quinn"></a>
+      <div class="lp-photographer-card__head"><h2 class="lp-photographer-card__name">Saoirse Quinn</h2><a class="lp-photographer-card__domain" href="https://saoirsequinn.ie" target="_blank" rel="noopener noreferrer" aria-label="Open saoirsequinn.ie">saoirsequinn.ie<svg class="lp-icon lp-icon--sm"><use href="#i-external"/></svg></a></div>
+      <p class="lp-photographer-card__desc">Studio and home sittings lit by one window. Black and white, slow, and unhurried.</p>
+      <div class="lp-tags"><span class="lp-tag lp-tag--plain">portrait</span><span class="lp-tag lp-tag--plain">black and white</span><span class="lp-tag lp-tag--plain">window light</span></div>
+      <div class="lp-photographer-card__foot">
+        <div class="lp-photographer-card__thumbs"><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s9/72/72" width="36" height="36" alt=""><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s12/72/72" width="36" height="36" alt=""><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s11/72/72" width="36" height="36" alt=""></div>
+        <span class="lp-photographer-card__count">9 references</span>
+      </div>
+    </article>
+    <article class="lp-photographer-card">
+      <a class="lp-photographer-card__link" href="photographer.html" aria-label="Open Kenji Arai"></a>
+      <div class="lp-photographer-card__head"><h2 class="lp-photographer-card__name">Kenji Arai</h2><a class="lp-photographer-card__domain" href="https://kenjiarai.jp" target="_blank" rel="noopener noreferrer" aria-label="Open kenjiarai.jp">kenjiarai.jp<svg class="lp-icon lp-icon--sm"><use href="#i-external"/></svg></a></div>
+      <p class="lp-photographer-card__desc">Cities after dark from high vantage points. Long exposures, sodium and neon, and a lot of negative space.</p>
+      <div class="lp-tags"><span class="lp-tag lp-tag--plain">night</span><span class="lp-tag lp-tag--plain">city</span><span class="lp-tag lp-tag--plain">negative space</span></div>
+      <div class="lp-photographer-card__foot">
+        <div class="lp-photographer-card__thumbs"><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s21/72/72" width="36" height="36" alt=""><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s37/72/72" width="36" height="36" alt=""></div>
+        <span class="lp-photographer-card__count">4 references</span>
+      </div>
+    </article>
+    <article class="lp-photographer-card">
+      <a class="lp-photographer-card__link" href="photographer.html" aria-label="Open Lea Brandt"></a>
+      <div class="lp-photographer-card__head"><h2 class="lp-photographer-card__name">Lea Brandt</h2><a class="lp-photographer-card__domain" href="https://leabrandt.de" target="_blank" rel="noopener noreferrer" aria-label="Open leabrandt.de">leabrandt.de<svg class="lp-icon lp-icon--sm"><use href="#i-external"/></svg></a></div>
+      <p class="lp-photographer-card__desc">Quiet interiors and the people in them. Film, mostly, and light that arrives sideways.</p>
+      <div class="lp-tags"><span class="lp-tag lp-tag--plain">interiors</span><span class="lp-tag lp-tag--plain">film</span><span class="lp-tag lp-tag--plain">soft light</span></div>
+      <div class="lp-photographer-card__foot">
+        <div class="lp-photographer-card__thumbs"><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s41/72/72" width="36" height="36" alt=""><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s11/72/72" width="36" height="36" alt=""><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s35/72/72" width="36" height="36" alt=""></div>
+        <span class="lp-photographer-card__count">4 references</span>
+      </div>
+    </article>
+    <article class="lp-photographer-card">
+      <a class="lp-photographer-card__link" href="photographer.html?state=no-references" aria-label="Open Reuben Hale"></a>
+      <div class="lp-photographer-card__head"><h2 class="lp-photographer-card__name">Reuben Hale</h2><a class="lp-photographer-card__domain" href="https://reubenhale.co.uk" target="_blank" rel="noopener noreferrer" aria-label="Open reubenhale.co.uk">reubenhale.co.uk<svg class="lp-icon lp-icon--sm"><use href="#i-external"/></svg></a></div>
+      <p class="lp-photographer-card__desc">Doorways, hallways, and the last hour of light. Colour held back to two or three tones.</p>
+      <div class="lp-tags"><span class="lp-tag lp-tag--plain">colour</span><span class="lp-tag lp-tag--plain">late light</span></div>
+      <div class="lp-photographer-card__foot">
+        <div class="lp-photographer-card__thumbs"></div>
+        <span class="lp-photographer-card__count">No references yet</span>
+      </div>
+    </article>
+  </div>
+
+  <!-- Loading -->
+  <div class="lp-photographer-grid" data-state="loading" aria-busy="true" aria-label="Loading photographers">
+    <div class="lp-skeleton lp-skeleton--card"></div><div class="lp-skeleton lp-skeleton--card"></div><div class="lp-skeleton lp-skeleton--card"></div>
+    <div class="lp-skeleton lp-skeleton--card"></div><div class="lp-skeleton lp-skeleton--card"></div><div class="lp-skeleton lp-skeleton--card"></div>
+  </div>
+
+  <!-- Empty -->
+  <div class="lp-empty" data-state="empty">
+    <h2 class="lp-empty__title">Bookmark the photographers you learn from.</h2>
+    <p class="lp-empty__text">Save a portfolio with a note on why it matters. Loupe summarises what it can read from the site and links your references to them.</p>
+    <div class="lp-empty__action"><button class="lp-button lp-button--primary" type="button" data-open="add-photographer:form">Add photographer</button></div>
+  </div>
+
+  <!-- Error -->
+  <div class="lp-empty" data-state="error" role="alert">
+    <h2 class="lp-empty__title">Couldn't load your photographers.</h2>
+    <p class="lp-empty__text">Check your connection and try again. Nothing you saved is lost.</p>
+    <div class="lp-empty__action"><button class="lp-button lp-button--secondary" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Try again</button></div>
+  </div>
+
+</main>
+
+<!-- ============ Dialogs ============ -->
+
+<dialog class="lp-dialog" data-dialog="add-photographer" aria-labelledby="add-photographer-title">
+  <form method="dialog" class="lp-dialog__panel">
+
+    <section data-step="form">
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title" id="add-photographer-title">Add photographer</h2><p class="lp-dialog__text">Loupe reads the page title and description. Nothing is crawled beyond the page you give it.</p></div>
+        <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-form">
+          <div class="lp-field">
+            <label class="lp-field__label" for="ap-url">Website</label>
+            <input class="lp-input lp-input--mono" id="ap-url" type="url" placeholder="https://" autofocus>
+          </div>
+          <div class="lp-field">
+            <label class="lp-field__label" for="ap-name">Name <span class="lp-field__optional">optional</span></label>
+            <input class="lp-input" id="ap-name" type="text" placeholder="Read from the page if you leave this empty">
+          </div>
+        </div>
+      </div>
+      <footer class="lp-dialog__footer">
+        <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+        <button class="lp-button lp-button--primary" type="button" data-open="add-photographer:fetching">Read the page</button>
+      </footer>
+    </section>
+
+    <section data-step="fetching" hidden>
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title">Reading the page…</h2><p class="lp-dialog__text">Fetching the title and description from leabrandt.de.</p></div>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-progress-row" aria-live="polite">
+          <div class="lp-progress lp-progress--indeterminate"><div class="lp-progress__bar"></div></div>
+          <div class="lp-progress-row__meta"><span>leabrandt.de</span><span>Reading metadata</span></div>
+        </div>
+      </div>
+      <footer class="lp-dialog__footer">
+        <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+      </footer>
+    </section>
+
+    <section data-step="preview" hidden>
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title">Add photographer</h2><p class="lp-dialog__text">Found on leabrandt.de. Edit anything that's off.</p></div>
+        <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-form">
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="ap-preview-name">Name</label>
+              <input class="lp-input" id="ap-preview-name" type="text" value="Lea Brandt">
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="ap-preview-url">Website</label>
+              <input class="lp-input lp-input--mono" id="ap-preview-url" type="url" value="https://leabrandt.de" readonly>
+            </div>
+          </div>
+          <div class="lp-field">
+            <label class="lp-field__label lp-field__label--row" for="ap-preview-desc"><span>Description</span><span class="lp-field__optional">from the page</span></label>
+            <textarea class="lp-textarea" id="ap-preview-desc" rows="2">Lea Brandt. Photographer, Leipzig. Interiors, portraits, and commissions on film.</textarea>
+          </div>
+          <div class="lp-field">
+            <label class="lp-field__label" for="ap-preview-tags">Tags <span class="lp-field__optional">optional</span></label>
+            <div class="lp-chip-input">
+              <span class="lp-tag">interiors<button class="lp-tag__action" type="button" aria-label="Remove tag interiors"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span>
+              <span class="lp-tag">film<button class="lp-tag__action" type="button" aria-label="Remove tag film"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span>
+              <input id="ap-preview-tags" type="text" placeholder="Add a tag">
+            </div>
+          </div>
+          <div class="lp-field">
+            <label class="lp-field__label" for="ap-preview-notes">Your notes <span class="lp-field__optional">optional</span></label>
+            <textarea class="lp-textarea" id="ap-preview-notes" rows="2" placeholder="Why does this work matter to you?"></textarea>
+          </div>
+        </div>
+        <p class="lp-field__hint">A summary of the site is generated after saving, from the pages Loupe can read.</p>
+      </div>
+      <footer class="lp-dialog__footer">
+        <button class="lp-button lp-button--secondary" type="button" data-open="add-photographer:form">Back</button>
+        <button class="lp-button lp-button--primary" type="button" data-toast-open="added">Add photographer</button>
+      </footer>
+    </section>
+
+    <section data-step="failed" hidden>
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title">Couldn't read that site</h2></div>
+        <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-notice lp-notice--warning" role="alert">
+          <svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>
+          <div class="lp-notice__body">
+            <span class="lp-notice__title">leabrandt.de blocks automated reading.</span>
+            <span>Add the details yourself. There will be no site summary, because Loupe only summarises what it can actually read.</span>
+          </div>
+        </div>
+        <div class="lp-form">
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="ap-failed-name">Name</label>
+              <input class="lp-input" id="ap-failed-name" type="text" placeholder="Lea Brandt" autofocus>
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="ap-failed-url">Website</label>
+              <input class="lp-input lp-input--mono" id="ap-failed-url" type="url" value="https://leabrandt.de">
+            </div>
+          </div>
+          <div class="lp-field">
+            <label class="lp-field__label" for="ap-failed-desc">Description <span class="lp-field__optional">optional</span></label>
+            <textarea class="lp-textarea" id="ap-failed-desc" rows="2" placeholder="What kind of work is it?"></textarea>
+          </div>
+          <div class="lp-field">
+            <label class="lp-field__label" for="ap-failed-notes">Your notes <span class="lp-field__optional">optional</span></label>
+            <textarea class="lp-textarea" id="ap-failed-notes" rows="2" placeholder="Why does this work matter to you?"></textarea>
+          </div>
+        </div>
+      </div>
+      <footer class="lp-dialog__footer">
+        <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+        <button class="lp-button lp-button--primary" type="button" data-toast-open="added">Add photographer</button>
+      </footer>
+    </section>
+
+    <section data-step="already-saved" hidden>
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title">Already bookmarked</h2><p class="lp-dialog__text">You've already bookmarked this website. Saving it again won't create a second entry.</p></div>
+        <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-photographer-card" style="border:none;padding:0">
+          <div class="lp-photographer-card__head"><h3 class="lp-photographer-card__name">Mara Lindqvist</h3><span class="lp-photographer-card__domain">maralindqvist.com</span></div>
+          <p class="lp-small lp-muted">Bookmarked 12 Aug 2026 · 6 references</p>
+        </div>
+      </div>
+      <footer class="lp-dialog__footer">
+        <button class="lp-button lp-button--secondary" type="button" data-close>Close</button>
+        <a class="lp-button lp-button--primary" href="photographer.html">View photographer</a>
+      </footer>
+    </section>
+
+  </form>
+</dialog>
+
+<dialog class="lp-dialog" data-dialog="delete-photographer" aria-labelledby="delete-photographer-title">
+  <form method="dialog" class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="delete-photographer-title">Delete Mara Lindqvist?</h2>
+        <p class="lp-dialog__text">The bookmark, its summary, your notes, and its search record are removed. The 6 linked references keep their attribution text and stay in your library and boards; they're just no longer linked to a photographer profile.</p>
+      </div>
+      <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+    </header>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" data-close autofocus>Cancel</button>
+      <button class="lp-button lp-button--danger" type="button" data-toast-open="deleted">Delete</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- ============ Toasts ============ -->
+<div class="lp-toast" data-toast="added" role="status"><span class="lp-toast__text">Lea Brandt added.</span><a class="lp-toast__action" href="photographer.html?state=summary-pending">Open</a><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+<div class="lp-toast" data-toast="deleted" role="status"><span class="lp-toast__text">Photographer deleted. Their references are still in your library.</span><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+
+<script src="assets/mock.js"></script>
+</body>
+</html>

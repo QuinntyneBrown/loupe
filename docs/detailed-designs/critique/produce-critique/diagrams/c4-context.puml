@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Produce and evaluate an evidence-based critique
+Person(owner, "Library owner", "Collects inspiration and practices photography")
+System(loupe, "Loupe", "Produce and evaluate an evidence-based critique")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+System_Ext(external, "Configured external services", "AI, embedding, or permitted source endpoints used by this slice")
+Rel(loupe, external, "Uses through bounded server adapters", "HTTPS")
+@enduml

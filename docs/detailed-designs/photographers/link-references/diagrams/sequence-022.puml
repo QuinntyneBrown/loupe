@@ -1,0 +1,54 @@
+@startuml
+title L2-022 - Link references to photographers
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "PhotographerReferencePicker" as page
+participant "PhotographerLinkService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "PhotographerLinksController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "LinkReferencePhotographerCommandHandler" as handler
+participant "Reference" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Link references to photographers
+page -> client : photographerId?, version
+client -> controller : PUT /api/references/{id}/photographer
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch LinkReferencePhotographerCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> db : Authorize both identifiers before mutation [L2-022]
+db --> handler : Owned reference + photographer or 404
+alt unavailable record
+handler --> controller : 404; no association changes
+else owned records
+handler -> entity : Set one optional link; copy name only if attribution absent
+handler -> db : Commit link + attribution + semantic invalidation atomically
+db --> handler : New reference version; source preserved
+end
+note over entity : Rename/unlink/delete never erases textual attribution
+handler --> controller : 200 single link; both detail screens reflect association
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

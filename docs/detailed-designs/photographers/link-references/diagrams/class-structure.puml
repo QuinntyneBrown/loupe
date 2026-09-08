@@ -1,0 +1,59 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Link a reference to its photographer
+class Reference {
+  +Id: Guid
+  +OwnerId: string
+  +PhotographerId: Guid?
+  +Attribution: string?
+  +SourceUrl: Uri?
+  +Version: long
+  +LinkPhotographer(id: Guid, name: string): void
+  +UnlinkPhotographer(): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class LinkReferencePhotographerCommand {
+  +OwnerId: string
+  +Payload: LinkReferencePhotographerInput
+}
+class LinkReferencePhotographerCommandHandler {
+  +Handle(request: LinkReferencePhotographerCommand, cancellation: CancellationToken): Task<Result>
+}
+LinkReferencePhotographerCommandHandler ..> LinkReferencePhotographerCommand : handles
+LinkReferencePhotographerCommandHandler --> Reference : reads / applies
+LinkReferencePhotographerCommandHandler ..> ILibraryStore : persists / queries
+interface IPhotographerLinkService {
+  +state: Signal<FeatureState>
+}
+class PhotographerLinkService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+PhotographerLinkService ..|> IPhotographerLinkService
+class PhotographerReferencePicker {
+  -service: IPhotographerLinkService
+}
+PhotographerReferencePicker ..> IPhotographerLinkService : inject token
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Publish the visual reference and apply its tokens
+Container_Boundary(surface, "Design-system reference") {
+Component(page, "TokenReferencePage", "Application / reference surface", "Owns navigation or review procedure")
+Component(view, "ComponentStateGallery", "View or harness", "Renders state or records measurements")
+Component(state, "TokenDefinition", "Local typed state", "Encodes feature-specific rules")
+Component(tokens, "TokenCatalog", "Authoritative CSS and catalog data", "Role values and synthetic examples")
+}
+Rel(page, view, "Displays examples")
+Rel(view, state, "Reads example state")
+Rel(view, tokens, "Reads bundled local tokens")
+@enduml

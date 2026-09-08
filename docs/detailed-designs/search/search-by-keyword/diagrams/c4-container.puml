@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Search library text with combined filters
+Person(owner, "Library owner", "Uses this capability")
+System_Boundary(loupe, "Loupe") {
+Container(spa, "Loupe web", "Angular", "SearchPage")
+Container(api, "Loupe API", "ASP.NET Core", "SearchController")
+ContainerDb(db, "Library store", "Relational storage; engine TO SUPPLY", "Owned records, versions, and durable work")
+}
+Rel(owner, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls via interface-bound HTTP adapter", "JSON or multipart / HTTPS")
+Rel(api, db, "Reads or commits owned state", "Infrastructure adapter")
+@enduml

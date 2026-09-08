@@ -1,0 +1,54 @@
+@startuml
+title L2-042 - Bound abuse and report safe security failures
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "RequestNotice" as page
+participant "CapabilityService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "CapabilitiesController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "ConsumeQuotaCommandHandler" as handler
+participant "QuotaWindow" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IQuotaStore / ISecurityAuditWriter adapters" as ext
+end box
+actor -> page : Bound abuse and report safe security failures
+page -> client : server owner/IP, request class, now
+client -> controller : API request middleware
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch ConsumeQuotaCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> ext : Atomic rolling 60 s window across instances [L2-042]
+ext --> handler : Permit or next capacity time
+alt exhausted class
+handler --> controller : 429 + computed Retry-After; no side effect
+else available capacity
+handler -> db : Continue authorized operation
+end
+note over ext : Audit redacted events; expire after 30 days
+note over controller : Safe code/message/correlation ID; no stack, SQL, paths or secrets
+handler --> controller : distributed quota decision and safe diagnostics
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+title Class structure - Publish the visual reference and apply its tokens
+class TokenDefinition {
+  +Name: string
+  +Value: string
+  +Role: string
+  +Category: TokenCategory
+  +RenderExample(): ExampleState
+}
+class TokenReferencePage {
+  +Open(input: TokenDefinition): void
+}
+class ComponentStateGallery {
+  +State: TokenDefinition
+  +Render(): void
+}
+TokenReferencePage ..> ComponentStateGallery : composes / runs
+ComponentStateGallery --> TokenDefinition : reads / evaluates
+class TokenCatalog {
+ +Definitions: List<TokenDefinition>
+ +Find(name: string): TokenDefinition
+}
+TokenCatalog "1" *-- "*" TokenDefinition : owns authoritative values
+ComponentStateGallery ..> TokenCatalog : uses local data
+@enduml

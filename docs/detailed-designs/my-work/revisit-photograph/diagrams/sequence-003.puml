@@ -1,0 +1,51 @@
+@startuml
+title L2-003 - Browse and revisit My Work
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "PhotographDetailPanel" as page
+participant "PhotographService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "PhotographsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "ListPhotographsQueryHandler" as handler
+participant "Photograph" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Browse and revisit My Work
+page -> client : cursor?, pageSize?
+client -> controller : GET /api/photographs; GET /api/photographs/{id}
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch ListPhotographsQuery
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> db : Read owned photographs only [L2-003]
+db --> handler : Stable page or detail with critique and separate job state
+alt unavailable detail
+handler --> controller : 404; no empty-library substitute
+else successful read
+handler --> controller : Images, brief, EXIF, notes, current critique
+end
+handler --> controller : 200 page/detail; no upload or AI request
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

@@ -1,0 +1,54 @@
+@startuml
+title L2-009 - Save an uploaded reference
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "ReferenceImagePanel" as page
+participant "ReferenceService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "ReferencesController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "UploadReferenceCommandHandler" as handler
+participant "Reference" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IImageIngestor / IImageStore adapters" as ext
+end box
+actor -> page : Save an uploaded reference
+page -> client : image, title?, sourceUrl?, attribution?, notes?
+client -> controller : POST /api/references/images
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch UploadReferenceCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> ext : Validate + stage image and browser preview [L2-009]
+ext --> handler : Asset or shared image error
+alt valid image and metadata
+handler -> entity : Preserve manual fields; unknown source stays absent
+handler -> db : Commit reference + asset + durable analysis intent
+db --> handler : Usable reference; no My Work record
+else invalid input or failed persistence
+handler -> ext : Cleanup staged asset; expose no partial record
+end
+handler --> controller : 201 usable reference before AI completion
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

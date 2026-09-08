@@ -1,0 +1,54 @@
+@startuml
+title L2-037 - Authenticate users and end sessions
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "SessionStatus" as page
+participant "SessionService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "SessionsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "CompleteSignInCommandHandler" as handler
+participant "ApplicationSession" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IIdentityProvider / ISessionStore adapters" as ext
+end box
+actor -> page : Authenticate users and end sessions
+page -> client : validated code exchange or sign-out
+client -> controller : OIDC callback; POST /api/session/sign-out
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch CompleteSignInCommand
+note over handler : Sign-in establishes identity; no preexisting owner session required
+handler -> ext : Validate issuer/audience/signature/expiry/state/nonce [L2-037]
+ext --> handler : Valid identity or rejected callback
+alt invalid callback
+handler --> controller : No session; safe sign-in retry
+else valid login
+handler -> db : Rotate and persist server session
+db --> handler : Opaque Secure HttpOnly cookie identity
+end
+note over entity : Reject at 30 min idle / 12 h absolute; sign-out revokes server state
+note over page : No browser token storage; clear private state on sign-out
+handler --> controller : validated local return / invalidated session
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

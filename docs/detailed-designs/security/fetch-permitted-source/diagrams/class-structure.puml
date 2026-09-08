@@ -1,0 +1,61 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Fetch only permitted public source content
+class FetchBudget {
+  +StartedAt: DateTimeOffset
+  +Redirects: int
+  +Remaining: TimeSpan
+  +Purpose: FetchPurpose
+  +ValidateDestination(uri: Uri, address: IPAddress): void
+  +ChargeResponse(bytes: long): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class FetchPermittedSourceCommand {
+  +OwnerId: string
+  +Payload: FetchPermittedSourceInput
+}
+class FetchPermittedSourceCommandHandler {
+  +Handle(request: FetchPermittedSourceCommand, cancellation: CancellationToken): Task<Result>
+}
+FetchPermittedSourceCommandHandler ..> FetchPermittedSourceCommand : handles
+FetchPermittedSourceCommandHandler --> FetchBudget : reads / applies
+FetchPermittedSourceCommandHandler ..> ILibraryStore : persists / queries
+interface IRestrictedPageFetcher {
+  +Fetch(url: Uri, budget: FetchBudget, ct: CancellationToken): Task<FetchedContent>
+}
+FetchPermittedSourceCommandHandler ..> IRestrictedPageFetcher : uses
+interface IReferenceImportService {
+  +state: Signal<FeatureState>
+}
+class ReferenceImportService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+ReferenceImportService ..|> IReferenceImportService
+class ReferenceImportPanel {
+  -service: IReferenceImportService
+}
+ReferenceImportPanel ..> IReferenceImportService : inject token
+@enduml

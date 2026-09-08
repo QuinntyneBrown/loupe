@@ -1,0 +1,37 @@
+@startuml
+title L2-049 - Diagnose failures and verify recovery
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Owner / release reviewer" as actor
+box "Backend - Loupe Evaluation / Operations application" #D1FADF
+participant "Documented release / restore runner" as page
+participant "RecoveryState" as entity
+end box
+box "Backend - Loupe Infrastructure and controlled runtime" #FFF4E5
+participant "Production stores / workload adapters" as client
+end box
+note over page : Browser measurements use the production frontend in a controlled harness
+actor -> page : Start workflow / review
+page -> entity : Start timed restore [L2-049]
+entity -> client : Restore database/media/work; replay newer deletions
+client --> entity : Compatible dependencies and replay completion
+alt required dependency/replay unavailable
+entity --> page : Not ready; diagnostics preserve safe IDs
+else all required checks pass
+entity --> page : Ready within 4 h; <= 1 h pre-incident loss
+end
+page --> actor : verified recovery and redacted operational evidence
+@enduml

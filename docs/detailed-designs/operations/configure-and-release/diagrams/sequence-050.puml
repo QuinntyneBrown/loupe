@@ -1,0 +1,37 @@
+@startuml
+title L2-050 - Deliver reproducible setup and operational guidance
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Owner / release reviewer" as actor
+box "Backend - Loupe Evaluation / Operations application" #D1FADF
+participant "Documented release / restore runner" as page
+participant "DeploymentConfiguration" as entity
+end box
+box "Backend - Loupe Infrastructure and controlled runtime" #FFF4E5
+participant "Production stores / workload adapters" as client
+end box
+note over page : Browser measurements use the production frontend in a controlled harness
+actor -> page : Start workflow / review
+page -> entity : Validate required Options and compatible schema [L2-050]
+alt invalid required configuration
+entity --> page : Exit with safe setting name and corrective guidance
+else valid required configuration
+entity -> client : Run Demo workflows + separately configured live checks
+client --> entity : Actual automated and manual outcomes
+entity --> page : Versioned manifest and deployment/restore guidance
+end
+page --> actor : reproducible setup and honest release evidence
+@enduml

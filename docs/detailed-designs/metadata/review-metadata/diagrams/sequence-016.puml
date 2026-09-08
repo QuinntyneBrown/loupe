@@ -1,0 +1,55 @@
+@startuml
+title L2-016 - Maintain manual metadata without losing user changes
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "MetadataEditor" as page
+participant "MetadataService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "MetadataController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "UpdateMetadataCommandHandler" as handler
+participant "MetadataState" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Maintain manual metadata without losing user changes
+page -> client : description/summary?, activeTags, version
+client -> controller : PUT /api/metadata/{kind}/{id}
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch UpdateMetadataCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> entity : Normalize manual values and categories [L2-016]
+opt description cleared
+handler -> entity : Suppress old machine draft; advance decision revision
+end
+handler -> db : Conditional active metadata update + source revision + work intent
+alt competing manual edit
+db --> handler : 409; existing values preserved
+else save accepted
+db --> handler : Immediate keyword/filter fields; semantic pending
+end
+note over entity : AI appends suggestions only; never restores cleared active values
+handler --> controller : 200 metadata/version or retained-input conflict
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

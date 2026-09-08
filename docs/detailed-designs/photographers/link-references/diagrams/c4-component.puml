@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Link a reference to its photographer
+Container(spa, "PhotographerReferencePicker", "Angular domain", "Injects PHOTOGRAPHER_LINK_SERVICE")
+Container_Boundary(api, "Loupe API and Application") {
+Component(ctrl, "PhotographerLinksController", "API controller", "Binds, dispatches, returns")
+Component(handler, "LinkReferencePhotographerCommandHandler", "Application / MediatR 12.5.0", "Validates, authorizes, coordinates slice")
+Component(entity, "Reference", "Domain", "State and local invariants")
+Component(store, "ILibraryStore", "Application port", "Owner-scoped transactional reads and writes")
+}
+ContainerDb(db, "Library store", "Infrastructure adapter", "Authoritative data and durable work")
+Rel(spa, ctrl, "Calls through IPhotographerLinkService", "HTTPS")
+Rel(ctrl, handler, "Dispatches request", "MediatR")
+Rel(handler, entity, "Reads or applies behavior")
+Rel(handler, store, "Uses inward-defined port")
+Rel(store, db, "Implemented by Infrastructure")
+@enduml

@@ -1,0 +1,56 @@
+@startuml
+title L2-035 - Reuse completed work and control admission
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "AnalysisRequestPanel" as page
+participant "AnalysisService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "AnalysisController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "AdmitAnalysisCommandHandler" as handler
+participant "AnalysisFingerprint" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IProviderCallScheduler adapters" as ext
+end box
+actor -> page : Reuse completed work and control admission
+page -> client : operationKey, input revision, regenerate
+client -> controller : POST /api/analysis/{kind}/{id}
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch AdmitAnalysisCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> db : Find equivalent active/completed fingerprint [L2-035]
+alt active equivalent / completed without Regenerate
+db --> handler : Return existing operation/result
+else incompatible active work
+handler --> controller : 409 wait for current operation
+else fifth slot already occupied
+handler --> controller : 429 Retry-After 30; no hidden requested job
+else permitted admission
+handler -> db : Commit one job; maintenance intents independent
+end
+note over ext : Shared permits: 2 calls/user, 4 deployment; round-robin owners
+handler --> controller : reused result / admitted job / explicit quota error
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

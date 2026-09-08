@@ -1,0 +1,20 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Save or replace a reference image
+Container(spa, "ReferenceImagePanel", "Angular domain", "Injects REFERENCE_SERVICE")
+Container_Boundary(api, "Loupe API and Application") {
+Component(ctrl, "ReferencesController", "API controller", "Binds, dispatches, returns")
+Component(handler, "UploadReferenceCommandHandler\nReplaceReferenceImageCommandHandler", "Application / MediatR 12.5.0", "Validates, authorizes, coordinates slice")
+Component(entity, "Reference", "Domain", "State and local invariants")
+Component(store, "ILibraryStore", "Application port", "Owner-scoped transactional reads and writes")
+}
+ContainerDb(db, "Library store", "Infrastructure adapter", "Authoritative data and durable work")
+Rel(spa, ctrl, "Calls through IReferenceService", "HTTPS")
+Rel(ctrl, handler, "Dispatches request", "MediatR")
+Rel(handler, entity, "Reads or applies behavior")
+Rel(handler, store, "Uses inward-defined port")
+Rel(store, db, "Implemented by Infrastructure")
+Component(ports, "IImageIngestor / IImageStore", "Application ports", "Implemented by configured Infrastructure adapters")
+Rel(handler, ports, "Uses explicit capability")
+@enduml

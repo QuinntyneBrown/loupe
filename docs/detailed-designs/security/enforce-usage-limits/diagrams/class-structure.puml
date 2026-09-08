@@ -1,0 +1,63 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Enforce shared quotas and return safe failures
+class QuotaWindow {
+  +Subject: string
+  +Class: RequestClass
+  +AcceptedAt: List<DateTimeOffset>
+  +TryConsume(now: DateTimeOffset, limit: int): QuotaDecision
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class ConsumeQuotaCommand {
+  +OwnerId: string
+  +Payload: ConsumeQuotaInput
+}
+class ConsumeQuotaCommandHandler {
+  +Handle(request: ConsumeQuotaCommand, cancellation: CancellationToken): Task<Result>
+}
+ConsumeQuotaCommandHandler ..> ConsumeQuotaCommand : handles
+ConsumeQuotaCommandHandler --> QuotaWindow : reads / applies
+ConsumeQuotaCommandHandler ..> ILibraryStore : persists / queries
+interface IQuotaStore {
+  +TryConsume(subject: string, kind: RequestClass, now: DateTimeOffset): Task<QuotaDecision>
+}
+ConsumeQuotaCommandHandler ..> IQuotaStore : uses
+interface ISecurityAuditWriter {
+  +Append(event: RedactedSecurityEvent): Task
+}
+ConsumeQuotaCommandHandler ..> ISecurityAuditWriter : uses
+interface ICapabilityService {
+  +state: Signal<FeatureState>
+}
+class CapabilityService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+CapabilityService ..|> ICapabilityService
+class RequestNotice {
+  -service: ICapabilityService
+}
+RequestNotice ..> ICapabilityService : inject token
+@enduml

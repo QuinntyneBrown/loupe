@@ -1,0 +1,50 @@
+@startuml
+title L2-031 - Delete saved content and its dependent data
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "DeletionStatus" as page
+participant "DeletionService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "DeletionsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "DeleteLibraryItemCommandHandler" as handler
+participant "DeletionOperation" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IImageStore / IVectorWriter / IDeletionLedger adapters" as ext
+end box
+actor -> page : Delete saved content and its dependent data
+page -> client : version
+client -> controller : DELETE /api/library/{kind}/{id}
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch DeleteLibraryItemCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+note over page : Name item and effects; cancel sends no mutation
+handler -> entity : Revoke item and dependent visibility [L2-031]
+handler -> db : Atomic tombstone + retained ledger + canceled jobs + unlink + cleanup
+db --> handler : One durable commit or rollback; no separate ledger write
+note over page : Cleanup pending is distinct from physically removed
+handler --> controller : 202 deletion operation / same retained outcome
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

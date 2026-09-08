@@ -1,0 +1,86 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Save a photograph and its brief
+class Photograph {
+  +Id: Guid
+  +OwnerId: string
+  +Title: string
+  +ImageRevision: long
+  +Image: ImageAsset
+  +Brief: CritiqueBrief
+  +Version: long
+  +ChangeBrief(brief: CritiqueBrief): void
+  +AttachImage(image: ImageAsset): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class UploadPhotographCommand {
+  +OwnerId: string
+  +Payload: UploadPhotographInput
+}
+class UploadPhotographCommandHandler {
+  +Handle(request: UploadPhotographCommand, cancellation: CancellationToken): Task<Result>
+}
+UploadPhotographCommandHandler ..> UploadPhotographCommand : handles
+UploadPhotographCommandHandler --> Photograph : reads / applies
+UploadPhotographCommandHandler ..> ILibraryStore : persists / queries
+class UpdatePhotographBriefCommand {
+  +OwnerId: string
+  +Payload: UpdatePhotographBriefInput
+}
+class UpdatePhotographBriefCommandHandler {
+  +Handle(request: UpdatePhotographBriefCommand, cancellation: CancellationToken): Task<Result>
+}
+UpdatePhotographBriefCommandHandler ..> UpdatePhotographBriefCommand : handles
+UpdatePhotographBriefCommandHandler --> Photograph : reads / applies
+UpdatePhotographBriefCommandHandler ..> ILibraryStore : persists / queries
+interface IImageIngestor {
+  +Stage(input: ImageUpload, ct: CancellationToken): Task<StagedImage>
+}
+UploadPhotographCommandHandler ..> IImageIngestor : uses
+interface IImageStore {
+  +OpenOwned(key: string, ct: CancellationToken): Task<Stream>
+  +DeleteUnreferenced(key: string): Task
+}
+UploadPhotographCommandHandler ..> IImageStore : uses
+interface IPhotographService {
+  +state: Signal<FeatureState>
+}
+class PhotographService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+PhotographService ..|> IPhotographService
+class PhotographUploadPanel {
+  -service: IPhotographService
+}
+PhotographUploadPanel ..> IPhotographService : inject token
+class CritiqueBrief {
+ +Intent: string?
+ +Genre: string?
+ +Experience: ExperienceLevel?
+ +RequestedFeedback: string?
+}
+Photograph "1" *-- "1" CritiqueBrief : current brief
+@enduml

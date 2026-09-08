@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Use explicit demo and live capabilities
+Person(owner, "Library owner", "Collects inspiration and practices photography")
+System(loupe, "Loupe", "Use explicit demo and live capabilities")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

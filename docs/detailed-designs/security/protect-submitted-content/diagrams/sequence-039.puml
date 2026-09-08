@@ -1,0 +1,51 @@
+@startuml
+title L2-039 - Validate files and untrusted input
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "ProviderDisclosure" as page
+participant "PrivacyService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "PrivacyController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "ValidateSubmittedContentCommandHandler" as handler
+participant "SanitizedImage" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IImageIngestor / IProviderInputBuilder adapters" as ext
+end box
+actor -> page : Validate files and untrusted input
+page -> client : untrusted body; antiforgery token
+client -> controller : all upload/write endpoints
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch ValidateSubmittedContentCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+note over controller : Origin + antiforgery checked before side effects [L2-039]
+handler -> ext : Decode actual image; enforce format, bytes, pixels, frames
+ext --> handler : Sanitized asset or bounded 413/415/422
+handler -> entity : Use generated storage key; normalize inert text
+handler -> db : Parameterized conditional mutation after complete validation
+db --> handler : Saved values or no partial mutation
+handler --> controller : safe validation; missing antiforgery returns 403
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

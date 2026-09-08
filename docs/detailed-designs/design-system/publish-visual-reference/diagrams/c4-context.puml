@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Publish the visual reference and apply its tokens
+Person(actor, "Designer / reviewer" , "Inspects reference and release evidence")
+System(system, "Design-system reference", "Publish the visual reference and apply its tokens")
+Rel(actor, system, "Uses / verifies")
+@enduml

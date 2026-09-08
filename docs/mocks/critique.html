@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Critique · Loupe</title>
+<meta name="description" content="One of your photographs with its structured AI critique. Every observation carries an evidence loupe: a crop of the region it refers to, which highlights on the image when hovered.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<link rel="stylesheet" href="assets/mock.css">
+</head>
+<body class="lp-shell">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.1"/><circle cx="12" cy="12" r="1.1"/><circle cx="19" cy="12" r="1.1"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3zM12 10v4M12 17.5v.5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-compare" viewBox="0 0 24 24"><rect x="3" y="5" width="8" height="14" rx="1.5"/><rect x="13" y="5" width="8" height="14" rx="1.5"/></symbol>
+  <symbol id="i-loupe" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><circle cx="10.5" cy="10.5" r="2.5"/><path d="M15 15l5.5 5.5"/></symbol>
+</svg>
+
+<a class="lp-skip" href="#main">Skip to content</a>
+<header class="lp-topbar">
+  <a class="lp-wordmark" href="my-work.html" aria-label="Loupe">L<span class="lp-wordmark__o"></span>upe</a>
+  <nav class="lp-nav" aria-label="Primary">
+    <a href="my-work.html" aria-current="page"><svg class="lp-icon"><use href="#i-image"/></svg><span>My Work</span></a>
+    <a href="inspiration.html"><svg class="lp-icon"><use href="#i-grid"/></svg><span>Inspiration</span></a>
+    <a href="photographers.html"><svg class="lp-icon"><use href="#i-user"/></svg><span>Photographers</span></a>
+    <a href="search.html"><svg class="lp-icon"><use href="#i-search"/></svg><span>Search</span></a>
+  </nav>
+  <div class="lp-topbar__end">
+    <span class="lp-topbar__hint"><span class="lp-kbd">/</span> to search</span>
+    <a class="lp-avatar" href="settings.html" aria-label="Settings">QB</a>
+  </div>
+</header>
+<div class="lp-banner lp-banner--demo" data-demo-only role="status">
+  <span class="lp-kicker">Demo mode</span>
+  <span>This critique is sample text. It is not an analysis of your photograph.</span>
+  <a href="settings.html?demo=1">Connect a provider</a>
+</div>
+
+<main id="main" class="lp-main">
+  <a class="lp-back" href="my-work.html"><svg class="lp-icon lp-icon--sm"><use href="#i-chevron-left"/></svg>My Work</a>
+
+  <!-- Loading -->
+  <div class="lp-detail" data-state="loading" aria-busy="true">
+    <div class="lp-detail__media"><div class="lp-skeleton lp-skeleton--image"></div><div class="lp-skeleton lp-skeleton--text" style="width:60%"></div></div>
+    <div class="lp-detail__body">
+      <div class="lp-stack lp-stack--sm"><div class="lp-skeleton lp-skeleton--title" style="width:55%"></div><div class="lp-skeleton lp-skeleton--text" style="width:30%"></div></div>
+      <div class="lp-skeleton lp-skeleton--control" style="width:220px"></div>
+      <div class="lp-stack lp-stack--sm"><div class="lp-skeleton lp-skeleton--text" style="width:90%"></div><div class="lp-skeleton lp-skeleton--text" style="width:75%"></div><div class="lp-skeleton lp-skeleton--text" style="width:60%"></div></div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="lp-empty" data-state="error" role="alert">
+    <h1 class="lp-empty__title">Couldn't load this photograph.</h1>
+    <p class="lp-empty__text">It may have been deleted, or the connection dropped. Try again, or go back to your work.</p>
+    <div class="lp-empty__action"><button class="lp-button lp-button--secondary" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Try again</button><a class="lp-button lp-button--ghost" href="my-work.html">Back to My Work</a></div>
+  </div>
+
+  <div class="lp-detail" data-state="default queued analyzing failed no-critique">
+
+    <div class="lp-detail__head">
+        <div class="lp-detail__title-row">
+          <h1 class="lp-title">Shoreline, first light</h1>
+          <details class="lp-menu">
+            <summary class="lp-icon-button" aria-label="More actions"><svg class="lp-icon"><use href="#i-more"/></svg></summary>
+            <div class="lp-menu__list">
+              <button class="lp-menu__item" type="button" data-open="request-critique"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Request a new critique</button>
+              <div class="lp-menu__sep"></div>
+              <button class="lp-menu__item lp-menu__item--danger" type="button" data-open="delete-photograph"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg>Delete photograph</button>
+            </div>
+          </details>
+        </div>
+        <div class="lp-detail__meta">
+          <span><svg class="lp-icon lp-icon--sm" style="display:inline-block;vertical-align:-0.2em"><use href="#i-lock"/></svg> Private</span>
+          <span>Uploaded 6 Sep 2026</span>
+          <span class="lp-status lp-status--ready" data-state="default">Critique ready</span>
+          <span class="lp-status lp-status--queued" data-state="queued">Queued</span>
+          <span class="lp-status lp-status--analyzing" data-state="analyzing">Analyzing</span>
+          <span class="lp-status lp-status--failed" data-state="failed">Critique failed</span>
+        </div>
+        <div class="lp-detail__actions" data-state="default">
+          <a class="lp-button lp-button--primary" href="compare.html"><svg class="lp-icon lp-icon--sm"><use href="#i-compare"/></svg>Compare with a later attempt</a>
+          <span class="lp-pill lp-pill--ai" data-demo-only>Demo critique</span>
+        </div>
+      </div>
+
+    <!-- ===== Media column ===== -->
+    <div class="lp-detail__media">
+      <figure class="lp-photo-stage">
+        <img src="https://picsum.photos/seed/lp-s3/1200/800" width="1200" height="800" alt="Shoreline at first light: dark rocks in the foreground, calm sea, pale sky">
+        <span class="lp-region" data-region="1" style="--x:28%;--y:72%;--size:22%"></span>
+        <span class="lp-region" data-region="2" style="--x:62%;--y:36%;--size:26%"></span>
+        <span class="lp-region" data-region="3" style="--x:50%;--y:14%;--size:24%"></span>
+        <span class="lp-region" data-region="4" style="--x:16%;--y:84%;--size:16%"></span>
+        <span class="lp-region" data-region="5" style="--x:90%;--y:52%;--size:16%"></span>
+        <span class="lp-region" data-region="6" style="--x:52%;--y:56%;--size:20%"></span>
+      </figure>
+      <dl class="lp-exif" data-state="default analyzing failed no-critique" aria-label="Camera settings">
+        <div class="lp-exif__item"><dt>Focal</dt><dd>24 mm</dd></div>
+        <div class="lp-exif__item"><dt>Aperture</dt><dd>f/8</dd></div>
+        <div class="lp-exif__item"><dt>Shutter</dt><dd>1/250 s</dd></div>
+        <div class="lp-exif__item"><dt>ISO</dt><dd>100</dd></div>
+        <div class="lp-exif__item"><dt>Taken</dt><dd>6 Sep 2026 07:12</dd></div>
+      </dl>
+      <p class="lp-exif lp-exif--empty" data-state="queued">No EXIF data in this file. The critique won't guess at settings.</p>
+
+      <div class="lp-brief" data-state="default queued analyzing failed">
+        <div class="lp-block__head"><h2 class="lp-kicker">Your brief</h2><button class="lp-button lp-button--ghost lp-button--sm" type="button" data-open="request-critique">Edit</button></div>
+        <blockquote class="lp-brief__quote">“A quiet study of the rocks in first light. I wanted the texture and not much else.”</blockquote>
+        <dl class="lp-meta">
+          <dt>Genre</dt><dd>Landscape</dd>
+          <dt>Experience</dt><dd>Intermediate</dd>
+          <dt>Feedback on</dt><dd>Technical, composition</dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- ===== Body column ===== -->
+    <div class="lp-detail__body">
+
+      <!-- Queued -->
+      <div class="lp-processing" data-state="queued" aria-live="polite">
+        <div class="lp-processing__title"><span class="lp-spinner"></span>Queued for critique</div>
+        <p class="lp-processing__text">Two photographs are ahead of yours. Usually under a minute each. You can leave this page; the critique will be here when you come back.</p>
+      </div>
+
+      <!-- Analyzing -->
+      <div class="lp-processing" data-state="analyzing" aria-live="polite">
+        <div class="lp-processing__title"><span class="lp-spinner"></span>Looking at the photograph</div>
+        <p class="lp-processing__text">Reading the frame, the EXIF, and your brief. Usually under a minute. You can leave this page; the critique will be here when you come back.</p>
+      </div>
+      <div class="lp-critique" data-state="analyzing" aria-hidden="true">
+        <section class="lp-critique-section">
+          <div class="lp-skeleton lp-skeleton--title" style="width:30%"></div>
+          <div class="lp-observation"><div class="lp-skeleton lp-skeleton--circle"></div><div class="lp-stack lp-stack--sm"><div class="lp-skeleton lp-skeleton--text" style="width:95%"></div><div class="lp-skeleton lp-skeleton--text" style="width:70%"></div></div></div>
+          <div class="lp-observation"><div class="lp-skeleton lp-skeleton--circle"></div><div class="lp-stack lp-stack--sm"><div class="lp-skeleton lp-skeleton--text" style="width:85%"></div><div class="lp-skeleton lp-skeleton--text" style="width:60%"></div></div></div>
+        </section>
+        <section class="lp-critique-section">
+          <div class="lp-skeleton lp-skeleton--title" style="width:25%"></div>
+          <div class="lp-observation"><div class="lp-skeleton lp-skeleton--circle"></div><div class="lp-stack lp-stack--sm"><div class="lp-skeleton lp-skeleton--text" style="width:90%"></div><div class="lp-skeleton lp-skeleton--text" style="width:65%"></div></div></div>
+        </section>
+      </div>
+
+      <!-- Failed -->
+      <div class="lp-notice lp-notice--error" data-state="failed" role="alert">
+        <svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>
+        <div class="lp-notice__body">
+          <span class="lp-notice__title">The critique didn't complete.</span>
+          <span>The AI provider stopped responding after two attempts. Your photograph and brief are saved; nothing needs re-uploading.</span>
+          <div class="lp-notice__actions">
+            <button class="lp-button lp-button--secondary lp-button--sm" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Try again</button>
+            <a class="lp-button lp-button--ghost lp-button--sm" href="settings.html">Check AI status</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- No critique yet -->
+      <div class="lp-empty lp-empty--compact" data-state="no-critique" style="justify-items:start;text-align:left;margin-inline:0">
+        <h2 class="lp-empty__title">Ready when you are.</h2>
+        <p class="lp-empty__text">Tell the critic what you were after, and it will ground the feedback in what's in the frame and in the EXIF above.</p>
+        <div class="lp-empty__action" style="justify-content:flex-start"><button class="lp-button lp-button--primary" type="button" data-open="request-critique">Request critique</button></div>
+      </div>
+
+      <!-- ===== The critique ===== -->
+      <div class="lp-critique" data-state="default">
+
+        <section class="lp-critique-section" aria-labelledby="works-title">
+          <div class="lp-critique-section__head"><h2 class="lp-heading" id="works-title">What works</h2><span class="lp-kicker lp-kicker--ai">AI</span></div>
+          <div class="lp-observations">
+            <div class="lp-observation" data-evidence="1" tabindex="0">
+              <div class="lp-evidence" style="--x:28%;--y:72%;background-image:url('https://picsum.photos/seed/lp-s3/1200/800')" role="img" aria-label="Crop of the foreground rocks"></div>
+              <div class="lp-observation__body">
+                <p class="lp-observation__text">The foreground rocks hold real texture. The low, raking light gives the frame its only hard edges, and that contrast against the flat water is what makes the study read.</p>
+              </div>
+            </div>
+            <div class="lp-observation" data-evidence="2" tabindex="0">
+              <div class="lp-evidence" style="--x:62%;--y:36%;background-image:url('https://picsum.photos/seed/lp-s3/1200/800')" role="img" aria-label="Crop of the horizon"></div>
+              <div class="lp-observation__body">
+                <p class="lp-observation__text">Keeping the horizon high leaves room for the rocks to lead the eye in from the bottom edge. The muted palette suits the quiet you asked for.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="lp-critique-section" aria-labelledby="technical-title">
+          <div class="lp-critique-section__head"><h2 class="lp-heading" id="technical-title">Technical</h2><span class="lp-kicker lp-kicker--ai">AI</span></div>
+          <div class="lp-observations">
+            <div class="lp-observation" data-evidence="3" tabindex="0">
+              <div class="lp-evidence" style="--x:50%;--y:14%;background-image:url('https://picsum.photos/seed/lp-s3/1200/800')" role="img" aria-label="Crop of the sky"></div>
+              <div class="lp-observation__body">
+                <div class="lp-observation__labels"><span class="lp-pill lp-pill--outline">Technical issue</span></div>
+                <p class="lp-observation__text">The sky is close to clipping. The top third has almost no tonal separation. At ISO 100 and 1/250 s there was room to expose a stop under and lift the rocks in the edit instead.</p>
+              </div>
+            </div>
+            <div class="lp-observation" data-evidence="4" tabindex="0">
+              <div class="lp-evidence" style="--x:16%;--y:84%;background-image:url('https://picsum.photos/seed/lp-s3/1200/800')" role="img" aria-label="Crop of the nearest rocks"></div>
+              <div class="lp-observation__body">
+                <div class="lp-observation__labels"><span class="lp-pill lp-pill--outline">Technical issue</span><span class="lp-observation__uncertain">Uncertain, judged from the preview</span></div>
+                <p class="lp-observation__text">Sharpness seems to fall off at the nearest rocks. At f/8 on 24 mm, focusing about a third of the way into the scene should carry focus from the foreground through to the horizon. Check the full-resolution file.</p>
+              </div>
+            </div>
+            <div class="lp-observation" data-evidence="6" tabindex="0">
+              <div class="lp-evidence" style="--x:52%;--y:56%;background-image:url('https://picsum.photos/seed/lp-s3/1200/800')" role="img" aria-label="Crop of the water"></div>
+              <div class="lp-observation__body">
+                <div class="lp-observation__labels"><span class="lp-pill lp-pill--outline">Stylistic choice</span></div>
+                <p class="lp-observation__text">The cool cast in the water reads as intentional and matches the rest of the palette. Leave it unless you want the rocks warmer; a global white-balance shift would pull both.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="lp-critique-section" aria-labelledby="composition-title">
+          <div class="lp-critique-section__head"><h2 class="lp-heading" id="composition-title">Composition and story</h2><span class="lp-kicker lp-kicker--ai">AI</span></div>
+          <div class="lp-observations">
+            <div class="lp-observation" data-evidence="5" tabindex="0">
+              <div class="lp-evidence" style="--x:90%;--y:52%;background-image:url('https://picsum.photos/seed/lp-s3/1200/800')" role="img" aria-label="Crop of the right edge"></div>
+              <div class="lp-observation__body">
+                <div class="lp-observation__labels"><span class="lp-pill lp-pill--outline">Technical issue</span></div>
+                <p class="lp-observation__text">The bright patch at the right edge pulls attention off the rocks. A slightly tighter crop, or half a stop off that edge in the edit, would settle it.</p>
+              </div>
+            </div>
+            <div class="lp-observation lp-observation--plain">
+              <div class="lp-observation__body">
+                <div class="lp-observation__labels"><span class="lp-pill lp-pill--outline">Stylistic choice</span></div>
+                <p class="lp-observation__text">There is no resting point after the rocks, so the frame reads as a study of texture rather than of a place. That fits your brief. If you want it to feel like somewhere, one element in the middle distance would anchor it.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="lp-critique-section" aria-labelledby="improvements-title">
+          <div class="lp-critique-section__head"><h2 class="lp-heading" id="improvements-title">Top three improvements</h2><span class="lp-kicker lp-kicker--ai">AI · in priority order</span></div>
+          <ol class="lp-improvements">
+            <li class="lp-improvement">
+              <span class="lp-improvement__n" aria-hidden="true">1</span>
+              <div class="lp-improvement__body">
+                <p class="lp-improvement__title">Protect the highlights</p>
+                <p class="lp-improvement__text">Expose for the sky and bring the rocks up afterwards. The sensor has far more latitude in the shadows than in the highlights.</p>
+                <p class="lp-improvement__next"><span class="lp-kicker">Next shoot</span><span>Meter the sky, dial in −1 EV, and check the histogram for a gap at the right edge before you move on.</span></p>
+              </div>
+            </li>
+            <li class="lp-improvement">
+              <span class="lp-improvement__n" aria-hidden="true">2</span>
+              <div class="lp-improvement__body">
+                <p class="lp-improvement__title">Set focus for depth</p>
+                <p class="lp-improvement__text">The nearest rocks are the subject, so they should be the sharpest thing in the frame.</p>
+                <p class="lp-improvement__next"><span class="lp-kicker">Next shoot</span><span>At f/8, focus on a rock about a third of the way in, then check the far edge at 100% on the back of the camera.</span></p>
+              </div>
+            </li>
+            <li class="lp-improvement">
+              <span class="lp-improvement__n" aria-hidden="true">3</span>
+              <div class="lp-improvement__body">
+                <p class="lp-improvement__title">Quieten the right edge</p>
+                <p class="lp-improvement__text">The bright patch competes with the rocks for attention and it is the easiest fix on this list.</p>
+                <p class="lp-improvement__next"><span class="lp-kicker">Next edit</span><span>Try a crop that ends at the last textured rock, or burn the right edge by half a stop.</span></p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section class="lp-exercise" aria-labelledby="exercise-title">
+          <div class="lp-critique-section__head"><h2 class="lp-exercise__title" id="exercise-title">Practice exercise: the same shoreline, three exposures</h2><span class="lp-kicker lp-kicker--ai">AI</span></div>
+          <p class="lp-exercise__text">Go back at the same hour. Shoot this frame at −1, 0, and +1 EV, then edit each to the same final brightness. Compare which one holds both the sky and the rock texture, and write down the setting that did. Upload the best one here and compare it with this attempt.</p>
+        </section>
+
+      </div>
+
+      <!-- Your notes -->
+      <div class="lp-block" data-state="default failed no-critique" data-save-editor>
+        <div class="lp-block__head">
+          <label class="lp-subheading" for="notes">Your notes</label>
+          <span class="lp-save-status lp-save-status--saved" data-save-status data-state="default no-critique">Saved</span>
+          <span class="lp-save-status lp-save-status--failed" data-state="failed">Couldn't save · <button class="lp-link" type="button">Retry</button></span>
+        </div>
+        <textarea class="lp-textarea" id="notes" rows="4" placeholder="What will you try next time?" data-state="default" data-save-input>Agree on the sky. I was chimping the rocks and never looked at the top of the frame. Next time: −1 EV and bracket. Not sure about the crop, the edge feels like part of the openness.</textarea>
+        <textarea class="lp-textarea" rows="4" placeholder="What will you try next time?" data-state="failed no-critique" aria-label="Your notes"></textarea>
+        <div class="lp-block__foot" data-state="default no-critique"><button class="lp-button lp-button--secondary lp-button--sm" type="button" data-save-button disabled>Save</button></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ============ Dialogs ============ -->
+
+<dialog class="lp-dialog" data-dialog="request-critique" aria-labelledby="request-critique-title">
+  <form method="dialog" class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div><h2 class="lp-dialog__title" id="request-critique-title">Request critique</h2><p class="lp-dialog__text">A new critique replaces the current one. Your notes are kept.</p></div>
+      <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+    </header>
+    <div class="lp-dialog__body">
+      <div class="lp-form">
+        <div class="lp-field">
+          <label class="lp-field__label" for="rc-intent">What were you trying to do?</label>
+          <textarea class="lp-textarea" id="rc-intent" rows="2" autofocus>A quiet study of the rocks in first light. I wanted the texture and not much else.</textarea>
+        </div>
+        <div class="lp-form__row">
+          <div class="lp-field">
+            <label class="lp-field__label" for="rc-genre">Genre</label>
+            <div class="lp-select-wrap">
+              <select class="lp-select" id="rc-genre"><option selected>Landscape</option><option>Portrait</option><option>Street</option><option>Architecture</option><option>Documentary</option><option>Still life</option><option>Other</option></select>
+              <svg class="lp-icon lp-icon--sm"><use href="#i-chevron-down"/></svg>
+            </div>
+          </div>
+          <div class="lp-field">
+            <label class="lp-field__label" for="rc-experience">Your experience</label>
+            <div class="lp-select-wrap">
+              <select class="lp-select" id="rc-experience"><option>Beginner</option><option selected>Intermediate</option><option>Advanced</option><option>Professional</option></select>
+              <svg class="lp-icon lp-icon--sm"><use href="#i-chevron-down"/></svg>
+            </div>
+          </div>
+        </div>
+        <fieldset>
+          <legend class="lp-form__legend">Feedback wanted</legend>
+          <div class="lp-chips" role="group">
+            <button class="lp-chip" type="button" aria-pressed="true">Technical</button>
+            <button class="lp-chip" type="button" aria-pressed="true">Composition</button>
+            <button class="lp-chip" type="button" aria-pressed="false">Colour and processing</button>
+            <button class="lp-chip" type="button" aria-pressed="false">Storytelling</button>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+      <button class="lp-button lp-button--primary" type="button" data-toast-open="critique-requested">Request critique</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog class="lp-dialog lp-dialog--wide" data-dialog="compare-pick" aria-labelledby="compare-pick-title">
+  <form method="dialog" class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div><h2 class="lp-dialog__title" id="compare-pick-title">Compare with</h2><p class="lp-dialog__text">Pick another critiqued photograph. Same scene works best, but any will do.</p></div>
+      <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+    </header>
+    <div class="lp-dialog__body">
+      <div class="lp-picker">
+        <div class="lp-picker__list" role="radiogroup" aria-label="Your photographs">
+          <label class="lp-picker__item"><input type="radio" name="compare" checked autofocus><img class="lp-thumb" src="https://picsum.photos/seed/lp-s3/96/96" width="48" height="48" alt=""><span class="lp-picker__body"><span class="lp-picker__title">Shoreline, second attempt</span><span class="lp-picker__meta">12 Sep 2026 · Critique ready</span></span></label>
+          <label class="lp-picker__item"><input type="radio" name="compare"><img class="lp-thumb" src="https://picsum.photos/seed/lp-s24/96/96" width="48" height="48" alt=""><span class="lp-picker__body"><span class="lp-picker__title">Snowfield, birds</span><span class="lp-picker__meta">30 Aug 2026 · Critique ready</span></span></label>
+          <label class="lp-picker__item"><input type="radio" name="compare"><img class="lp-thumb" src="https://picsum.photos/seed/lp-s27/96/96" width="48" height="48" alt=""><span class="lp-picker__body"><span class="lp-picker__title">Fjord from above</span><span class="lp-picker__meta">28 Aug 2026 · Critique ready</span></span></label>
+          <label class="lp-picker__item"><input type="radio" name="compare"><img class="lp-thumb" src="https://picsum.photos/seed/lp-s39/96/96" width="48" height="48" alt=""><span class="lp-picker__body"><span class="lp-picker__title">Cloud line</span><span class="lp-picker__meta">16 Aug 2026 · Critique ready</span></span></label>
+        </div>
+        <p class="lp-picker__summary">Photographs without a critique aren't listed.</p>
+      </div>
+    </div>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+      <a class="lp-button lp-button--primary" href="compare.html">Compare</a>
+    </footer>
+  </form>
+</dialog>
+
+<dialog class="lp-dialog" data-dialog="delete-photograph" aria-labelledby="delete-photograph-title">
+  <form method="dialog" class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="delete-photograph-title">Delete “Shoreline, first light”?</h2>
+        <p class="lp-dialog__text">The photograph, its critique, your notes, and its search record are all removed. This can't be undone.</p>
+      </div>
+      <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+    </header>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" data-close autofocus>Cancel</button>
+      <a class="lp-button lp-button--danger" href="my-work.html?toast=deleted">Delete</a>
+    </footer>
+  </form>
+</dialog>
+
+<!-- ============ Toasts ============ -->
+<div class="lp-toast" data-toast="critique-requested" role="status"><span class="lp-toast__text">Critique requested. Usually under a minute.</span><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+
+<script src="assets/mock.js"></script>
+</body>
+</html>

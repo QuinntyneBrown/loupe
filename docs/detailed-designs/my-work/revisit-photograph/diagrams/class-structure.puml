@@ -1,0 +1,67 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Revisit photographs and keep notes
+class Photograph {
+  +Id: Guid
+  +OwnerId: string
+  +Notes: string?
+  +CurrentCritique: CritiqueResult?
+  +Version: long
+  +SaveNotes(notes: string?): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class ListPhotographsQuery {
+  +OwnerId: string
+  +Payload: ListPhotographsInput
+}
+class ListPhotographsQueryHandler {
+  +Handle(request: ListPhotographsQuery, cancellation: CancellationToken): Task<Result>
+}
+ListPhotographsQueryHandler ..> ListPhotographsQuery : handles
+ListPhotographsQueryHandler --> Photograph : reads / applies
+ListPhotographsQueryHandler ..> ILibraryStore : persists / queries
+class UpdatePhotographNotesCommand {
+  +OwnerId: string
+  +Payload: UpdatePhotographNotesInput
+}
+class UpdatePhotographNotesCommandHandler {
+  +Handle(request: UpdatePhotographNotesCommand, cancellation: CancellationToken): Task<Result>
+}
+UpdatePhotographNotesCommandHandler ..> UpdatePhotographNotesCommand : handles
+UpdatePhotographNotesCommandHandler --> Photograph : reads / applies
+UpdatePhotographNotesCommandHandler ..> ILibraryStore : persists / queries
+interface IPhotographService {
+  +state: Signal<FeatureState>
+}
+class PhotographService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+PhotographService ..|> IPhotographService
+class PhotographDetailPanel {
+  -service: IPhotographService
+}
+PhotographDetailPanel ..> IPhotographService : inject token
+@enduml

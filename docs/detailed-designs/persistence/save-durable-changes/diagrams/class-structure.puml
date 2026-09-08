@@ -1,0 +1,73 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Save durable changes without duplicates or lost edits
+class OperationReceipt {
+  +OwnerId: string
+  +OperationType: string
+  +Key: Guid
+  +PayloadHash: string
+  +ResultId: Guid?
+  +ExpiresAt: DateTimeOffset
+  +State: ReceiptState
+  +Resolve(hash: string): ReceiptResult
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class CommitLibraryChangeCommand {
+  +OwnerId: string
+  +Payload: CommitLibraryChangeInput
+}
+class CommitLibraryChangeCommandHandler {
+  +Handle(request: CommitLibraryChangeCommand, cancellation: CancellationToken): Task<Result>
+}
+CommitLibraryChangeCommandHandler ..> CommitLibraryChangeCommand : handles
+CommitLibraryChangeCommandHandler --> OperationReceipt : reads / applies
+CommitLibraryChangeCommandHandler ..> ILibraryStore : persists / queries
+class ResolveOperationCommand {
+  +OwnerId: string
+  +Payload: ResolveOperationInput
+}
+class ResolveOperationCommandHandler {
+  +Handle(request: ResolveOperationCommand, cancellation: CancellationToken): Task<Result>
+}
+ResolveOperationCommandHandler ..> ResolveOperationCommand : handles
+ResolveOperationCommandHandler --> OperationReceipt : reads / applies
+ResolveOperationCommandHandler ..> ILibraryStore : persists / queries
+interface IOperationReceiptStore {
+  +Resolve(owner: string, kind: string, key: Guid, hash: string): Task<ReceiptResult>
+}
+CommitLibraryChangeCommandHandler ..> IOperationReceiptStore : uses
+interface IOperationService {
+  +state: Signal<FeatureState>
+}
+class OperationService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+OperationService ..|> IOperationService
+class SaveStatus {
+  -service: IOperationService
+}
+SaveStatus ..> IOperationService : inject token
+@enduml

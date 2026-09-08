@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Browse and process work within measurable budgets
+Person(actor, "Designer / reviewer" , "Inspects reference and release evidence")
+System(system, "Release and recovery tooling", "Browse and process work within measurable budgets")
+Rel(actor, system, "Uses / verifies")
+System(loupe, "Loupe runtime", "API, workers, web, and durable stores")
+Rel(system, loupe, "Measures, configures, or restores")
+@enduml

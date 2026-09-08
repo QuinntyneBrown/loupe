@@ -1,0 +1,53 @@
+@startuml
+title L2-036 - Separate demo and live integrations honestly
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "CapabilityNotice" as page
+participant "CapabilityService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "CapabilitiesController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "GetCapabilitiesQueryHandler" as handler
+participant "CapabilityState" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Separate demo and live integrations honestly
+page -> client : none
+client -> controller : GET /api/capabilities
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch GetCapabilitiesQuery
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> entity : Resolve explicit Demo or Live configuration [L2-036]
+alt Demo
+entity --> handler : Deterministic simulated adapters; no AI traffic
+else Live missing credentials
+entity --> handler : Integration not configured; manual actions available
+else configured Live
+entity --> handler : Real provider capabilities; no mock substitution
+end
+note over db : Saved output and vectors retain original mode
+handler --> controller : safe mode/disclosure; Demo output / Demo search labels
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

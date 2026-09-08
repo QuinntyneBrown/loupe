@@ -1,0 +1,53 @@
+@startuml
+title L2-015 - Review and edit AI suggestions
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "MetadataEditor" as page
+participant "MetadataService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "MetadataController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "ReviewSuggestionCommandHandler" as handler
+participant "MetadataState" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Review and edit AI suggestions
+page -> client : suggestionId, decision, editedValue?, version
+client -> controller : POST /api/metadata/{kind}/{id}/reviews
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch ReviewSuggestionCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> entity : Accept / edit-and-accept / reject [L2-015]
+alt distinct tag exceeds 50 active tags
+handler --> controller : 400; leave suggestion pending
+else valid decision
+entity --> handler : Provenance + deduplicated value / rejected-draft suppression
+handler -> db : Commit review and semantic invalidation; preserve notes
+db --> handler : Active metadata and new version / conflict
+end
+note over page : Failed save retains selected decision for retry
+handler --> controller : 200 reviewed state; duplicate tag keeps original spelling
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

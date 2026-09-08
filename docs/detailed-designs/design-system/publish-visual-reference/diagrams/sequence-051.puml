@@ -1,0 +1,32 @@
+@startuml
+title L2-051 - Publish an independent design-system reference site
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Owner / release reviewer" as actor
+box "Frontend - Independent design-system site" #E0F2FE
+participant "TokenReferencePage / visual review" as page
+participant "ComponentStateGallery" as entity
+participant "Bundled token catalog / examples" as client
+end box
+note over page, client : Static local content; no Loupe backend participates
+actor -> page : Start workflow / review
+page -> entity : Open local token/state reference [L2-051]
+entity -> client : Read bundled authoritative catalog and synthetic examples
+client --> entity : Names, values, roles, and interactive states
+entity --> page : Keyboard-usable static reference
+note over client : Application/API stopped; no personal data or runtime API calls
+page --> actor : independent reference site
+@enduml

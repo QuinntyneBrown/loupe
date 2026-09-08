@@ -1,0 +1,53 @@
+@startuml
+title Expire or end a private application session
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+ BorderColor #344054
+ FontColor #101828
+}
+skinparam package {
+ BorderColor #667085
+ FontColor #101828
+ BackgroundColor #F9FAFB
+}
+actor "Library owner" as owner
+box "Frontend - Loupe application / api" #E0F2FE
+ participant "LibraryShell / draft guard" as shell
+ participant "SessionService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+ participant "Session middleware / SessionsController" as api
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+ participant "ValidateSessionQueryHandler / SignOutCommandHandler" as handler
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+ database "Shared session store" as sessions
+end box
+owner -> shell : Continue editing or choose Sign out
+shell -> client : Authenticated request / protected sign-out
+client -> api : HTTPS with opaque session cookie
+api -> handler : Validate elapsed boundaries / dispatch sign-out
+handler -> sessions : Load current nonrevoked session
+sessions --> handler : Creation and last activity times
+alt idle >= 30 min or absolute age >= 12 h
+ handler --> api : 401 expired [L2-037]
+ api --> client : Safe reauthentication state
+ client --> shell : Suspend draft in current-tab memory [L2-043]
+ note over shell : Restore only after same owner signs in; different owner clears it
+else explicit Sign out
+ handler -> sessions : Revoke server session before acknowledgment
+ sessions --> handler : Revoked
+ handler --> api : Success and cookie removal
+ api --> client : Sign-out acknowledged
+ client --> shell : Clear drafts, signals, cached private objects, pending requests
+else still valid immediately before both boundaries
+ handler --> api : Valid session; authorize owned request
+ api --> client : Owned response with private no-store policy
+end
+shell --> owner : Library or sign-in; Back/replayed session cannot bypass revocation
+@enduml

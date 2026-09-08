@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Delete private content and finish cleanup
+Person(owner, "Library owner", "Collects inspiration and practices photography")
+System(loupe, "Loupe", "Delete private content and finish cleanup")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

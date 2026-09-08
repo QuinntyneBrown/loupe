@@ -1,0 +1,53 @@
+@startuml
+title L2-018 - Organize references across boards
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "BoardReferenceCollection" as page
+participant "BoardService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "BoardsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "SetReferenceBoardsCommandHandler" as handler
+participant "Board" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Organize references across boards
+page -> client : boardIds, membershipVersion
+client -> controller : PUT /api/references/{id}/boards
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch SetReferenceBoardsCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> db : Authorize reference and every selected board [L2-018]
+alt any unavailable identifier
+db --> handler : 404; no partial membership write
+else all owned
+handler -> entity : Diff membership set; repeated add/remove are no-ops
+handler -> db : Commit unique memberships atomically
+db --> handler : Same reference IDs; accurate board counts
+end
+note over handler : No reference duplication and no AI job
+handler --> controller : 200 memberships; paginated board view
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

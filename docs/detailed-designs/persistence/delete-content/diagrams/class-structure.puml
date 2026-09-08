@@ -1,0 +1,85 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Delete private content and finish cleanup
+class DeletionOperation {
+  +Id: Guid
+  +OwnerId: string
+  +ItemId: Guid
+  +ItemKind: ItemKind
+  +AcknowledgedAt: DateTimeOffset
+  +RetainUntil: DateTimeOffset
+  +CleanupState: CleanupState
+  +Revoke(): void
+  +RecordCleanupAttempt(result: CleanupResult): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class DeleteLibraryItemCommand {
+  +OwnerId: string
+  +Payload: DeleteLibraryItemInput
+}
+class DeleteLibraryItemCommandHandler {
+  +Handle(request: DeleteLibraryItemCommand, cancellation: CancellationToken): Task<Result>
+}
+DeleteLibraryItemCommandHandler ..> DeleteLibraryItemCommand : handles
+DeleteLibraryItemCommandHandler --> DeletionOperation : reads / applies
+DeleteLibraryItemCommandHandler ..> ILibraryStore : persists / queries
+class CleanDeletedContentCommand {
+  +OwnerId: string
+  +Payload: CleanDeletedContentInput
+}
+class CleanDeletedContentCommandHandler {
+  +Handle(request: CleanDeletedContentCommand, cancellation: CancellationToken): Task<Result>
+}
+CleanDeletedContentCommandHandler ..> CleanDeletedContentCommand : handles
+CleanDeletedContentCommandHandler --> DeletionOperation : reads / applies
+CleanDeletedContentCommandHandler ..> ILibraryStore : persists / queries
+interface IImageStore {
+  +OpenOwned(key: string, ct: CancellationToken): Task<Stream>
+  +DeleteUnreferenced(key: string): Task
+}
+DeleteLibraryItemCommandHandler ..> IImageStore : uses
+interface IVectorWriter {
+  +Stage(document: SearchDocument, vector: Vector): Task<VectorHandle>
+  +Delete(itemId: Guid): Task
+}
+DeleteLibraryItemCommandHandler ..> IVectorWriter : uses
+interface IDeletionLedger {
+  +Append(deletion: DeletionOperation): Task
+  +ReadRetained(): Task<List<DeletionOperation>>
+}
+DeleteLibraryItemCommandHandler ..> IDeletionLedger : uses
+interface IDeletionService {
+  +state: Signal<FeatureState>
+}
+class DeletionService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+DeletionService ..|> IDeletionService
+class DeletionStatus {
+  -service: IDeletionService
+}
+DeletionStatus ..> IDeletionService : inject token
+@enduml

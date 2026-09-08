@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Compare two saved attempts
+Person(owner, "Library owner", "Collects inspiration and practices photography")
+System(loupe, "Loupe", "Compare two saved attempts")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

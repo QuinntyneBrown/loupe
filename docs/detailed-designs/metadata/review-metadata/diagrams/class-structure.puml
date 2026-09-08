@@ -1,0 +1,76 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Review suggestions and maintain active metadata
+class MetadataState {
+  +ItemId: Guid
+  +Version: long
+  +ActiveDescription: MetadataValue?
+  +ActiveTags: List<ActiveTag>
+  +DraftSuppressed: bool
+  +Pending: List<Suggestion>
+  +Review(decision: ReviewDecision): void
+  +Edit(input: MetadataEdit): void
+  +ClearDescription(): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class ReviewSuggestionCommand {
+  +OwnerId: string
+  +Payload: ReviewSuggestionInput
+}
+class ReviewSuggestionCommandHandler {
+  +Handle(request: ReviewSuggestionCommand, cancellation: CancellationToken): Task<Result>
+}
+ReviewSuggestionCommandHandler ..> ReviewSuggestionCommand : handles
+ReviewSuggestionCommandHandler --> MetadataState : reads / applies
+ReviewSuggestionCommandHandler ..> ILibraryStore : persists / queries
+class UpdateMetadataCommand {
+  +OwnerId: string
+  +Payload: UpdateMetadataInput
+}
+class UpdateMetadataCommandHandler {
+  +Handle(request: UpdateMetadataCommand, cancellation: CancellationToken): Task<Result>
+}
+UpdateMetadataCommandHandler ..> UpdateMetadataCommand : handles
+UpdateMetadataCommandHandler --> MetadataState : reads / applies
+UpdateMetadataCommandHandler ..> ILibraryStore : persists / queries
+interface IMetadataService {
+  +state: Signal<FeatureState>
+}
+class MetadataService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+MetadataService ..|> IMetadataService
+class MetadataEditor {
+  -service: IMetadataService
+}
+MetadataEditor ..> IMetadataService : inject token
+class ActiveTag {
+ +Value: string
+ +NormalizedKey: string
+ +Provenance: MetadataProvenance
+}
+MetadataState "1" *-- "0..50" ActiveTag : owns
+@enduml

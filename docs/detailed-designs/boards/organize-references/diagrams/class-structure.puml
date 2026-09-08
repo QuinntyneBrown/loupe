@@ -1,0 +1,84 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Organize references with private boards
+class Board {
+  +Id: Guid
+  +OwnerId: string
+  +Name: string
+  +NormalizedName: string
+  +Version: long
+  +Rename(name: string): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class CreateBoardCommand {
+  +OwnerId: string
+  +Payload: CreateBoardInput
+}
+class CreateBoardCommandHandler {
+  +Handle(request: CreateBoardCommand, cancellation: CancellationToken): Task<Result>
+}
+CreateBoardCommandHandler ..> CreateBoardCommand : handles
+CreateBoardCommandHandler --> Board : reads / applies
+CreateBoardCommandHandler ..> ILibraryStore : persists / queries
+class SetReferenceBoardsCommand {
+  +OwnerId: string
+  +Payload: SetReferenceBoardsInput
+}
+class SetReferenceBoardsCommandHandler {
+  +Handle(request: SetReferenceBoardsCommand, cancellation: CancellationToken): Task<Result>
+}
+SetReferenceBoardsCommandHandler ..> SetReferenceBoardsCommand : handles
+SetReferenceBoardsCommandHandler --> Board : reads / applies
+SetReferenceBoardsCommandHandler ..> ILibraryStore : persists / queries
+class DeleteBoardCommand {
+  +OwnerId: string
+  +Payload: DeleteBoardInput
+}
+class DeleteBoardCommandHandler {
+  +Handle(request: DeleteBoardCommand, cancellation: CancellationToken): Task<Result>
+}
+DeleteBoardCommandHandler ..> DeleteBoardCommand : handles
+DeleteBoardCommandHandler --> Board : reads / applies
+DeleteBoardCommandHandler ..> ILibraryStore : persists / queries
+interface IBoardService {
+  +state: Signal<FeatureState>
+}
+class BoardService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+BoardService ..|> IBoardService
+class BoardReferenceCollection {
+  -service: IBoardService
+}
+BoardReferenceCollection ..> IBoardService : inject token
+class BoardMembership {
+ +BoardId: Guid
+ +ReferenceId: Guid
+}
+Board "1" *-- "0..*" BoardMembership : owns membership lifetime
+class Reference
+BoardMembership "0..*" --> "1" Reference : references
+@enduml

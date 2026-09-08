@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Navigate the library and recover unfinished edits
+Person(actor, "Owner / reviewer", "Uses or verifies behavior")
+System_Boundary(system, "Loupe accessible workflows") {
+Container(web, "Loupe web", "Angular", "Routing, dialogs, layout, focus and rendering")
+Container(api, "Loupe API", "ASP.NET Core", "Owned data and session contracts")
+}
+Rel(actor, web, "Uses with keyboard, touch or assistive technology")
+Rel(web, api, "Calls interface-bound adapters", "HTTPS")
+@enduml

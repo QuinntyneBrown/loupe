@@ -1,0 +1,34 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+title Class structure - Diagnose failures and restore the private library
+class RecoveryState {
+  +SchemaCompatible: bool
+  +DeletionReplayComplete: bool
+  +DependencyState: HealthState
+  +CorrelationId: string
+  +IsReady(): bool
+}
+class OperationsConsole {
+  +Open(input: RecoveryState): void
+}
+class HealthReport {
+  +State: RecoveryState
+  +Render(): void
+}
+OperationsConsole ..> HealthReport : composes / runs
+HealthReport --> RecoveryState : reads / evaluates
+@enduml

@@ -1,0 +1,81 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Import a source URL with manual fallback
+class ReferenceImport {
+  +ReferenceId: Guid
+  +SubmittedUrl: Uri
+  +FinalUrl: Uri?
+  +SourceRevision: long
+  +State: ImportState
+  +FailureReason: string?
+  +ApplyEmptyFields(result: ImportResult): void
+  +Fail(reason: string): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class ImportReferenceCommand {
+  +OwnerId: string
+  +Payload: ImportReferenceInput
+}
+class ImportReferenceCommandHandler {
+  +Handle(request: ImportReferenceCommand, cancellation: CancellationToken): Task<Result>
+}
+ImportReferenceCommandHandler ..> ImportReferenceCommand : handles
+ImportReferenceCommandHandler --> ReferenceImport : reads / applies
+ImportReferenceCommandHandler ..> ILibraryStore : persists / queries
+class RetryReferenceImportCommand {
+  +OwnerId: string
+  +Payload: RetryReferenceImportInput
+}
+class RetryReferenceImportCommandHandler {
+  +Handle(request: RetryReferenceImportCommand, cancellation: CancellationToken): Task<Result>
+}
+RetryReferenceImportCommandHandler ..> RetryReferenceImportCommand : handles
+RetryReferenceImportCommandHandler --> ReferenceImport : reads / applies
+RetryReferenceImportCommandHandler ..> ILibraryStore : persists / queries
+interface IRestrictedPageFetcher {
+  +Fetch(url: Uri, budget: FetchBudget, ct: CancellationToken): Task<FetchedContent>
+}
+ImportReferenceCommandHandler ..> IRestrictedPageFetcher : uses
+interface IPreviewSelector {
+  +Select(page: FetchedPage, budget: FetchBudget): Task<PreviewSelection>
+}
+ImportReferenceCommandHandler ..> IPreviewSelector : uses
+interface IImageIngestor {
+  +Stage(input: ImageUpload, ct: CancellationToken): Task<StagedImage>
+}
+ImportReferenceCommandHandler ..> IImageIngestor : uses
+interface IReferenceImportService {
+  +state: Signal<FeatureState>
+}
+class ReferenceImportService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+ReferenceImportService ..|> IReferenceImportService
+class ReferenceImportPanel {
+  -service: IReferenceImportService
+}
+ReferenceImportPanel ..> IReferenceImportService : inject token
+@enduml

@@ -1,0 +1,72 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Search library text with combined filters
+class SearchFilter {
+  +Query: string
+  +Tags: List<string>
+  +BoardIds: List<Guid>
+  +Type: LibraryItemType
+  +Cursor: string?
+  +PageSize: int
+  +Validate(): ValidationResult
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class KeywordSearchQuery {
+  +OwnerId: string
+  +Payload: KeywordSearchInput
+}
+class KeywordSearchQueryHandler {
+  +Handle(request: KeywordSearchQuery, cancellation: CancellationToken): Task<Result>
+}
+KeywordSearchQueryHandler ..> KeywordSearchQuery : handles
+KeywordSearchQueryHandler --> SearchFilter : reads / applies
+KeywordSearchQueryHandler ..> ILibraryStore : persists / queries
+class ValidateSearchFiltersQuery {
+  +OwnerId: string
+  +Payload: ValidateSearchFiltersInput
+}
+class ValidateSearchFiltersQueryHandler {
+  +Handle(request: ValidateSearchFiltersQuery, cancellation: CancellationToken): Task<Result>
+}
+ValidateSearchFiltersQueryHandler ..> ValidateSearchFiltersQuery : handles
+ValidateSearchFiltersQueryHandler --> SearchFilter : reads / applies
+ValidateSearchFiltersQueryHandler ..> ILibraryStore : persists / queries
+interface ILibrarySearchReader {
+  +Search(owner: string, filter: SearchFilter, cursor: string): Task<LibraryPage>
+}
+KeywordSearchQueryHandler ..> ILibrarySearchReader : uses
+interface ISearchService {
+  +state: Signal<FeatureState>
+}
+class SearchService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+SearchService ..|> ISearchService
+class SearchResults {
+  -service: ISearchService
+}
+SearchResults ..> ISearchService : inject token
+@enduml

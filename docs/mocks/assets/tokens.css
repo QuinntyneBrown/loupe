@@ -1,0 +1,129 @@
+/* Loupe design tokens.
+   Seed for design-system/. This is the only file under docs/mocks that may hold
+   literal colours, dimensions, or font stacks. Everything else reads var(--lp-*).
+   Breakpoints (media queries cannot read custom properties): sm 640px, md 1024px. */
+
+:root {
+  /* Colour: a neutral gallery wall. No warm cast, so photographs read true. */
+  --lp-color-bg: #ffffff;
+  --lp-color-surface: #ffffff;
+  --lp-color-surface-2: #f4f4f5;
+  --lp-color-surface-3: #e9e9ec;
+  --lp-color-border: #e4e4e7;
+  --lp-color-border-strong: #c9c9cf;
+  --lp-color-text: #18181b;
+  --lp-color-text-2: #55555e;
+  --lp-color-text-3: #8b8b95;
+  --lp-color-ink: #18181b;
+  --lp-color-ink-hover: #2e2e33;
+  --lp-color-on-ink: #ffffff;
+
+  /* AI: cyanotype blue. Machine-made content is always this colour and never the ink. */
+  --lp-color-ai: #2b5c8a;
+  --lp-color-ai-bg: #eef3f8;
+  --lp-color-ai-border: #c6d6e5;
+
+  --lp-color-success: #1f7a4d;
+  --lp-color-success-bg: #e9f5ee;
+  --lp-color-warning: #9a5a08;
+  --lp-color-warning-bg: #fbf2e4;
+  --lp-color-danger: #b42318;
+  --lp-color-danger-bg: #fcebea;
+  --lp-color-focus: #2b5c8a;
+  --lp-color-ring: rgba(43, 92, 138, 0.18);
+  --lp-color-overlay: rgba(24, 24, 27, 0.45);
+  --lp-color-on-image: rgba(255, 255, 255, 0.92);
+  --lp-color-on-image-bg: rgba(24, 24, 27, 0.55);
+  --lp-color-scrim: linear-gradient(to top, rgba(24, 24, 27, 0.72), rgba(24, 24, 27, 0) 62%);
+  --lp-color-image-fallback: #ececef;
+  --lp-color-skeleton: #efeff1;
+  --lp-color-skeleton-shine: #f9f9fa;
+
+  /* Space: 4px base. */
+  --lp-space-1: 4px;
+  --lp-space-2: 8px;
+  --lp-space-3: 12px;
+  --lp-space-4: 16px;
+  --lp-space-5: 20px;
+  --lp-space-6: 24px;
+  --lp-space-7: 32px;
+  --lp-space-8: 40px;
+  --lp-space-9: 48px;
+  --lp-space-10: 64px;
+  --lp-space-11: 96px;
+  --lp-space-12: 128px;
+
+  /* Type. Sans for human language, mono for data (EXIF, status, counts, labels). */
+  --lp-font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --lp-font-mono: "Spline Sans Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --lp-text-xs: 0.75rem;
+  --lp-text-sm: 0.8125rem;
+  --lp-text-md: 0.9375rem;
+  --lp-text-lg: 1.0625rem;
+  --lp-text-xl: 1.375rem;
+  --lp-text-2xl: 1.75rem;
+  --lp-text-3xl: 2.25rem;
+  --lp-leading-tight: 1.2;
+  --lp-leading-normal: 1.5;
+  --lp-leading-relaxed: 1.65;
+  --lp-weight-regular: 400;
+  --lp-weight-medium: 500;
+  --lp-weight-semibold: 600;
+  --lp-tracking-tight: -0.02em;
+  --lp-tracking-wide: 0.06em;
+  --lp-measure: 62ch;
+  --lp-measure-sm: 44ch;
+
+  /* Radius, stroke, shadow, motion. */
+  --lp-radius-sm: 4px;
+  --lp-radius-md: 8px;
+  --lp-radius-lg: 14px;
+  --lp-radius-full: 999px;
+  --lp-hairline: 1px;
+  --lp-stroke: 2px;
+  --lp-ring-width: 3px;
+  --lp-shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.06);
+  --lp-shadow-md: 0 4px 16px rgba(24, 24, 27, 0.1);
+  --lp-shadow-lg: 0 16px 48px rgba(24, 24, 27, 0.18);
+  --lp-duration-fast: 120ms;
+  --lp-duration-base: 200ms;
+  --lp-duration-slow: 320ms;
+  --lp-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Layout and component dimensions. */
+  --lp-content-max: 1280px;
+  --lp-content-narrow: 720px;
+  --lp-gutter: 24px;
+  --lp-topbar-height: 60px;
+  --lp-tabbar-height: 64px;
+  --lp-sidebar-width: 220px;
+  --lp-dialog-max: 560px;
+  --lp-dialog-max-wide: 760px;
+  --lp-toast-max: 480px;
+  --lp-search-max: 760px;
+  --lp-auth-max: 380px;
+  --lp-menu-min: 200px;
+  --lp-picker-max: 320px;
+  --lp-control-height: 40px;
+  --lp-control-height-sm: 32px;
+  --lp-control-height-xs: 28px;
+  --lp-icon-size: 20px;
+  --lp-icon-size-sm: 16px;
+  --lp-avatar-size: 32px;
+  --lp-thumb-size: 48px;
+  --lp-thumb-size-sm: 36px;
+  --lp-tile-min: 220px;
+  --lp-card-min: 300px;
+  --lp-loupe-size: 56px;
+  --lp-loupe-zoom: 320%;
+  --lp-z-topbar: 20;
+  --lp-z-menu: 30;
+  --lp-z-toast: 40;
+}
+
+@media (max-width: 639.98px) {
+  :root {
+    --lp-gutter: 16px;
+    --lp-tile-min: 150px;
+  }
+}

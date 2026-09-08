@@ -1,0 +1,63 @@
+@startuml
+title L2-032 - Complete file cleanup and prevent resurrection
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "DeletionStatus" as page
+participant "DeletionService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "DeletionsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "CleanDeletedContentCommandHandler" as handler
+participant "GetOperationQueryHandler" as status
+participant "DeletionOperation" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IImageStore / IVectorWriter / IDeletionLedger adapters" as ext
+participant "Durable work runner" as worker
+end box
+note over page, controller : Admission persists work before processing; status reads are owner-scoped
+worker -> db : Lease admitted job and immutable input
+db --> worker : Durable work
+worker -> handler : Dispatch CleanDeletedContentCommand
+handler -> db : Verify target owner, existence, and admitted revision
+db --> handler : Current authorized state
+handler -> db : Read tombstone and current media references [L2-032]
+db --> handler : Unreferenced/deleted targets
+handler -> ext : Idempotently remove media, vectors, and dependent data
+alt healthy dependencies
+ext --> handler : Removed within 24 hours
+handler -> db : Complete cleanup; retain minimal tombstone 35 days
+else unavailable storage
+handler -> db : Keep pending retry; alert when overdue
+end
+note over db : Restore replays retained deletion ledger before readiness; backups expire day 30
+handler --> worker : Attempt outcome; release lease
+actor -> page : Inspect processing result
+page -> client : Read status
+client -> controller : GET owned job / item status
+controller -> status : Dispatch GetOperationQuery
+status -> db : Read persisted state
+db --> status : Job outcome and current item
+status --> controller : Typed status
+controller --> client : pending/completed physical cleanup
+client --> page : Update state signals
+page --> actor : Labeled result and recovery action
+@enduml

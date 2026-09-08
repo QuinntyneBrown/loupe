@@ -1,0 +1,35 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+title Class structure - Browse and process work within measurable budgets
+class CapacityProfile {
+  +ApiVcpu: int
+  +WorkerVcpu: int
+  +DatabaseVcpu: int
+  +MemoryGiBPerTier: int
+  +DecodeConcurrency: int
+  +ValidateMeasurement(run: LoadRun): BudgetResult
+}
+class InspirationPage {
+  +Open(input: CapacityProfile): void
+}
+class ReferenceCollection {
+  +State: CapacityProfile
+  +Render(): void
+}
+InspirationPage ..> ReferenceCollection : composes / runs
+ReferenceCollection --> CapacityProfile : reads / evaluates
+@enduml

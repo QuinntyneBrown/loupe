@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Configure, verify, and release Loupe reproducibly
+Person(actor, "Owner / reviewer", "Uses or verifies behavior")
+System_Boundary(system, "Release and recovery tooling") {
+Container(runner, "Evaluation / operations runner", ".NET CLI and browser harness", "Executes documented checks and recovery")
+Container(web, "Loupe web", "Angular production build", "Measured primary workflows")
+Container(api, "Loupe API and workers", ".NET", "Production request, persistence, and work paths")
+ContainerDb(db, "Durable stores", "Configured Infrastructure adapters", "Library, media, queue, and recovery records")
+}
+Rel(actor, runner, "Runs recorded procedure")
+Rel(runner, web, "Measures browser workflows")
+Rel(runner, api, "Exercises or probes")
+Rel(api, db, "Uses production persistence")
+Rel(runner, db, "Seeds or restores controlled environment")
+@enduml

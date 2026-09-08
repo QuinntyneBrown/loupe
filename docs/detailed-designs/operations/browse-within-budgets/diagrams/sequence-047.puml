@@ -1,0 +1,33 @@
+@startuml
+title L2-047 - Meet measurable browsing and API budgets
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Owner / release reviewer" as actor
+box "Backend - Loupe Evaluation / Operations application" #D1FADF
+participant "Documented release / restore runner" as page
+participant "CapacityProfile" as entity
+end box
+box "Backend - Loupe Infrastructure and controlled runtime" #FFF4E5
+participant "Production stores / workload adapters" as client
+end box
+note over page : Browser measurements use the production frontend in a controlled harness
+actor -> page : Start workflow / review
+page -> entity : Execute fixed warmup + measured workload [L2-047]
+entity -> client : Collect HTTP, browser, semantic, and upload samples
+client --> entity : Per-category percentiles and loss/error counts
+entity --> page : Pass thresholds or recorded failures
+page --> actor : measured budget report; not a sizing claim
+@enduml

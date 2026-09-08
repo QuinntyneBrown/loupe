@@ -1,0 +1,45 @@
+@startuml
+title Rebuild and switch an embedding generation
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+ BorderColor #344054
+ FontColor #101828
+}
+skinparam package {
+ BorderColor #667085
+ FontColor #101828
+ BackgroundColor #F9FAFB
+}
+actor "Deployment operator" as operator
+box "Backend - Loupe Worker application" #D1FADF
+ participant "SearchGenerationCoordinator" as coordinator
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+ participant "RefreshSearchDocumentCommandHandler" as handler
+ participant "SearchGeneration" as generation
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+ database "Source revisions / serving pointer" as db
+ participant "Embedding and vector adapters" as vectors
+end box
+operator -> coordinator : Configure a new compatible model generation
+coordinator -> db : Create building generation; retain old serving pointer [L2-028]
+loop current owned library items and concurrent source-change intents
+ coordinator -> handler : Refresh target generation / current source revision
+ handler -> vectors : Embed input using target model
+ vectors --> handler : Compatible vector
+ handler -> db : Conditional publication at unchanged source revision
+ db --> handler : Current or discarded stale result
+end
+coordinator -> generation : Verify replacement generation ready
+generation --> coordinator : Complete compatible candidate
+coordinator -> db : Atomically change serving pointer
+db --> coordinator : New generation active
+note over db : Prior-generation cursor returns 409 Refresh required [L2-026]
+note over vectors : Old query model unavailable before switch => Meaning unavailable
+coordinator --> operator : Rebuild state and safe outcome
+@enduml

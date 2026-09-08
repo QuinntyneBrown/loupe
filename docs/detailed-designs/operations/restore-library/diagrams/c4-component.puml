@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Diagnose failures and restore the private library
+Container_Boundary(surface, "Release and recovery tooling") {
+Component(page, "OperationsConsole", "Application / reference surface", "Owns navigation or review procedure")
+Component(view, "HealthReport", "View or harness", "Renders state or records measurements")
+Component(state, "RecoveryState", "Local typed state", "Encodes feature-specific rules")
+Component(adapter, "Runtime / recovery adapters", "Infrastructure ports", "Production persistence, workload and diagnostic boundaries")
+}
+Rel(page, view, "Executes documented procedure")
+Rel(view, state, "Evaluates configured acceptance budgets")
+Rel(view, adapter, "Uses controlled runtime boundaries")
+@enduml

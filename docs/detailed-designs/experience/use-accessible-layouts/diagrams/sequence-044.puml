@@ -1,0 +1,33 @@
+@startuml
+title L2-044 - Adapt every workflow to viewport size
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Owner / release reviewer" as actor
+box "Frontend - Loupe application" #E0F2FE
+participant "LibraryShell" as page
+participant "LayoutProfile" as entity
+end box
+box "Frontend - Loupe components / api contracts" #E0F2FE
+participant "View / interface-bound service or test harness" as client
+end box
+note over page, client : Local interaction; feature services use their documented API slices
+actor -> page : Start workflow / review
+page -> entity : Select exact grid/detail/comparison breakpoint [L2-044]
+entity --> page : Columns and stacking for current width
+page -> client : Open compact navigation or scrollable dialog
+client --> page : All controls reachable; background inert; focus visible
+page --> actor : full-frame image and reachable controls
+@enduml

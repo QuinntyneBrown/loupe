@@ -1,0 +1,55 @@
+@startuml
+title L2-026 - Find inspiration by meaning
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "MeaningSearchResults" as page
+participant "SearchService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "SearchController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "MeaningSearchQueryHandler" as handler
+participant "SemanticCursor" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IEmbeddingProvider / IVectorSearchReader adapters" as ext
+end box
+actor -> page : Find inspiration by meaning
+page -> client : nonblank query, filters, cursor?, pageSize?
+client -> controller : GET /api/search?mode=meaning
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch MeaningSearchQuery
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+handler -> db : Load active generation and validate cursor [L2-026]
+db --> handler : Coherent model identity or refresh-required 409
+handler -> ext : Embed nonblank query using active generation model
+ext --> handler : Compatible query vector or service failure
+alt embedding or similarity unavailable
+handler --> controller : Meaning unavailable; offer explicit Keyword switch
+else live compatible vectors
+handler -> ext : Filter current owned candidates; cosine >= 0.20; then page
+ext --> handler : Score descending / ID ascending + generation cursor
+end
+handler --> controller : 200 labeled live results; no silent keyword/demo substitution
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

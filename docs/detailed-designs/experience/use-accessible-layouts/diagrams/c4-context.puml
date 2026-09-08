@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Use every workflow across viewports and assistive technology
+Person(actor, "Library owner", "Completes private library workflows")
+System(system, "Loupe accessible workflows", "Use every workflow across viewports and assistive technology")
+Rel(actor, system, "Uses / verifies")
+@enduml

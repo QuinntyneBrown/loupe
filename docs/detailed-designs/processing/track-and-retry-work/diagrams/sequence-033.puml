@@ -1,0 +1,63 @@
+@startuml
+title L2-033 - Run slow work durably in the background
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "OperationStatusPanel" as page
+participant "OperationService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "OperationsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "RunBackgroundOperationCommandHandler" as handler
+participant "GetOperationQueryHandler" as status
+participant "BackgroundOperation" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IProviderInvoker adapters" as ext
+participant "Durable work runner" as worker
+end box
+note over page, controller : Admission persists work before processing; status reads are owner-scoped
+worker -> db : Lease admitted job and immutable input
+db --> worker : Durable work
+worker -> handler : Dispatch RunBackgroundOperationCommand
+handler -> db : Verify target owner, existence, and admitted revision
+db --> handler : Current authorized state
+handler -> entity : Acquire/renew fenced lease; 60 s expiry [L2-033]
+alt deleted or obsolete input revision
+handler -> db : Persist Canceled; no publication
+else current valid lease
+handler -> db : Persist Running and safe timestamps
+handler -> ext : Execute admitted capability
+ext --> handler : Attempt result
+handler -> db : Conditional publication under current fencing token
+end
+note over page : Aggregate polling reflects persisted states within 5 s
+handler --> worker : Attempt outcome; release lease
+actor -> page : Inspect processing result
+page -> client : Read status
+client -> controller : GET owned job / item status
+controller -> status : Dispatch GetOperationQuery
+status -> db : Read persisted state
+db --> status : Job outcome and current item
+status --> controller : Typed status
+controller --> client : durable Queued/Running/Succeeded/Failed/Canceled
+client --> page : Update state signals
+page --> actor : Labeled result and recovery action
+@enduml

@@ -1,0 +1,34 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+title Class structure - Configure, verify, and release Loupe reproducibly
+class DeploymentConfiguration {
+  +SchemaVersion: string
+  +Mode: ExecutionMode
+  +IdentityAuthority: Uri
+  +Limits: DeploymentLimits
+  +Validate(): ConfigurationResult
+}
+class SetupGuide {
+  +Open(input: DeploymentConfiguration): void
+}
+class ConfigurationReport {
+  +State: DeploymentConfiguration
+  +Render(): void
+}
+SetupGuide ..> ConfigurationReport : composes / runs
+ConfigurationReport --> DeploymentConfiguration : reads / evaluates
+@enduml

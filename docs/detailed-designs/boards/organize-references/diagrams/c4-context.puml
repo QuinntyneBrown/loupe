@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Organize references with private boards
+Person(owner, "Library owner", "Collects inspiration and practices photography")
+System(loupe, "Loupe", "Organize references with private boards")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

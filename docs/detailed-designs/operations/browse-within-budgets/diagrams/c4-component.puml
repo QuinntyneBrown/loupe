@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Browse and process work within measurable budgets
+Container_Boundary(surface, "Release and recovery tooling") {
+Component(page, "InspirationPage", "Application / reference surface", "Owns navigation or review procedure")
+Component(view, "ReferenceCollection", "View or harness", "Renders state or records measurements")
+Component(state, "CapacityProfile", "Local typed state", "Encodes feature-specific rules")
+Component(adapter, "Runtime / recovery adapters", "Infrastructure ports", "Production persistence, workload and diagnostic boundaries")
+}
+Rel(page, view, "Executes documented procedure")
+Rel(view, state, "Evaluates configured acceptance budgets")
+Rel(view, adapter, "Uses controlled runtime boundaries")
+@enduml

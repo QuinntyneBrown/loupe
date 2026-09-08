@@ -1,0 +1,69 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Keep search current as the library changes
+class SearchDocument {
+  +ItemId: Guid
+  +OwnerId: string
+  +SourceRevision: long
+  +IndexedRevision: long?
+  +GenerationId: Guid
+  +State: IndexState
+  +Deleted: bool
+  +Invalidate(): void
+  +Publish(revision: long, generation: Guid): bool
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class RefreshSearchDocumentCommand {
+  +OwnerId: string
+  +Payload: RefreshSearchDocumentInput
+}
+class RefreshSearchDocumentCommandHandler {
+  +Handle(request: RefreshSearchDocumentCommand, cancellation: CancellationToken): Task<Result>
+}
+RefreshSearchDocumentCommandHandler ..> RefreshSearchDocumentCommand : handles
+RefreshSearchDocumentCommandHandler --> SearchDocument : reads / applies
+RefreshSearchDocumentCommandHandler ..> ILibraryStore : persists / queries
+interface IEmbeddingProvider {
+  +Embed(text: string, model: string, ct: CancellationToken): Task<Vector>
+}
+RefreshSearchDocumentCommandHandler ..> IEmbeddingProvider : uses
+interface IVectorWriter {
+  +Stage(document: SearchDocument, vector: Vector): Task<VectorHandle>
+  +Delete(itemId: Guid): Task
+}
+RefreshSearchDocumentCommandHandler ..> IVectorWriter : uses
+interface ISearchIndexService {
+  +state: Signal<FeatureState>
+}
+class SearchIndexService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+SearchIndexService ..|> ISearchIndexService
+class SearchIndexStatus {
+  -service: ISearchIndexService
+}
+SearchIndexStatus ..> ISearchIndexService : inject token
+@enduml

@@ -1,0 +1,37 @@
+@startuml
+title L2-043 - Provide clear navigation and recoverable states
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Owner / release reviewer" as actor
+box "Frontend - Loupe application" #E0F2FE
+participant "LibraryShell" as page
+participant "EditorDraft" as entity
+end box
+box "Frontend - Loupe components / api contracts" #E0F2FE
+participant "View / interface-bound service or test harness" as client
+end box
+note over page, client : Local interaction; feature services use their documented API slices
+actor -> page : Start workflow / review
+page -> entity : Request navigation with current draft [L2-043]
+alt unsaved edit
+entity --> page : Keep editing / Discard choice
+else permitted navigation
+page -> client : Load destination with retained filters
+client --> page : Loading / empty / populated / retryable failure
+end
+note over entity : Expiry preserves same-tab draft only for same returning owner
+page --> actor : accessible destination or retained draft
+@enduml

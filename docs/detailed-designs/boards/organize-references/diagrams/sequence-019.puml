@@ -1,0 +1,49 @@
+@startuml
+title L2-019 - Delete a board without deleting references
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "BoardReferenceCollection" as page
+participant "BoardService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "BoardsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "DeleteBoardCommandHandler" as handler
+participant "Board" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Delete a board without deleting references
+page -> client : version
+client -> controller : DELETE /api/boards/{id}
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch DeleteBoardCommand
+handler -> db : Load / validate owner-scoped state before side effects
+db --> handler : Owned state or unavailable result
+note over page : Named confirmation: references remain; cancel sends no request
+handler -> db : Delete board + memberships atomically [L2-019]
+db --> handler : References and other boards preserved
+note over page : Announce success; open board returns to Inspiration
+note over client : Saved deleted-board filter stays explicit until removed
+handler --> controller : 204; navigation and membership refresh
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

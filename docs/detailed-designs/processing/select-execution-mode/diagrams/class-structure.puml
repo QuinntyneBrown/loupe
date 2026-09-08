@@ -1,0 +1,56 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Use explicit demo and live capabilities
+class CapabilityState {
+  +Mode: ExecutionMode
+  +ProviderName: string?
+  +Configured: bool
+  +SafeReason: string?
+  +CanExecute(): bool
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class GetCapabilitiesQuery {
+  +OwnerId: string
+  +Payload: GetCapabilitiesInput
+}
+class GetCapabilitiesQueryHandler {
+  +Handle(request: GetCapabilitiesQuery, cancellation: CancellationToken): Task<Result>
+}
+GetCapabilitiesQueryHandler ..> GetCapabilitiesQuery : handles
+GetCapabilitiesQueryHandler --> CapabilityState : reads / applies
+GetCapabilitiesQueryHandler ..> ILibraryStore : persists / queries
+interface ICapabilityService {
+  +state: Signal<FeatureState>
+}
+class CapabilityService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+CapabilityService ..|> ICapabilityService
+class CapabilityNotice {
+  -service: ICapabilityService
+}
+CapabilityNotice ..> ICapabilityService : inject token
+@enduml

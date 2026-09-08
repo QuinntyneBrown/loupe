@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Navigate the library and recover unfinished edits
+Container_Boundary(surface, "Loupe accessible workflows") {
+Component(page, "LibraryShell", "Application / reference surface", "Owns navigation or review procedure")
+Component(view, "LibraryStatePanel", "View or harness", "Renders state or records measurements")
+Component(state, "EditorDraft", "Local typed state", "Encodes feature-specific rules")
+Component(client, "Interface-bound feature services", "Angular api library", "Signals and HTTP/session adaptation")
+}
+Rel(page, view, "Composes inputs and outputs")
+Rel(page, client, "Consumes services by contract tokens")
+Rel(view, state, "Applies rendering / focus state")
+@enduml

@@ -1,0 +1,72 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Save, edit, and browse photographer bookmarks
+class PhotographerBookmark {
+  +Id: Guid
+  +OwnerId: string
+  +Name: string
+  +PortfolioUrl: Uri
+  +NormalizedUrl: string
+  +SourceRevision: long
+  +Summary: MetadataValue?
+  +Notes: string?
+  +Version: long
+  +Edit(input: PhotographerEdit): void
+  +ChangePortfolio(url: Uri): void
+}
+interface ILibraryStore {
+  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
+  +Commit(expectedVersion: long): Task<CommitResult>
+}
+class SavePhotographerCommand {
+  +OwnerId: string
+  +Payload: SavePhotographerInput
+}
+class SavePhotographerCommandHandler {
+  +Handle(request: SavePhotographerCommand, cancellation: CancellationToken): Task<Result>
+}
+SavePhotographerCommandHandler ..> SavePhotographerCommand : handles
+SavePhotographerCommandHandler --> PhotographerBookmark : reads / applies
+SavePhotographerCommandHandler ..> ILibraryStore : persists / queries
+class ListPhotographersQuery {
+  +OwnerId: string
+  +Payload: ListPhotographersInput
+}
+class ListPhotographersQueryHandler {
+  +Handle(request: ListPhotographersQuery, cancellation: CancellationToken): Task<Result>
+}
+ListPhotographersQueryHandler ..> ListPhotographersQuery : handles
+ListPhotographersQueryHandler --> PhotographerBookmark : reads / applies
+ListPhotographersQueryHandler ..> ILibraryStore : persists / queries
+interface IPhotographerService {
+  +state: Signal<FeatureState>
+}
+class PhotographerService {
+  -http: HttpClient
+  +state: Signal<FeatureState>
+}
+PhotographerService ..|> IPhotographerService
+class PhotographerDetailPanel {
+  -service: IPhotographerService
+}
+PhotographerDetailPanel ..> IPhotographerService : inject token
+@enduml
