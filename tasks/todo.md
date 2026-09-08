@@ -31,7 +31,7 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 - [x] L2-005.1: Given two eligible photographs, when the user selects Compare and the second photograph, then both saved attempts and their current critiques appear with unambiguous labels and no new AI job is created.
 - [x] L2-005.2: Given fewer than two eligible photographs, when comparison is opened, then the UI explains that another critiqued photograph is needed and does not open an empty comparison.
 - [x] L2-005.3: Given the same identifier twice or a photograph without a successful critique, when comparison is requested, then a validation error is shown; given an unavailable/foreign identifier, then the shared 404 behavior applies.
-- [ ] L2-005.4: Given a comparison already displayed and one selected photograph subsequently deleted, when the screen refreshes, then the remaining attempt stays visible and the missing side offers selection of another eligible photograph.
+- [x] L2-005.4: Given a comparison already displayed and one selected photograph subsequently deleted, when the screen refreshes, then the remaining attempt stays visible and the missing side offers selection of another eligible photograph.
 - [ ] L2-005.5: Given comparison at widths below 768, when rendered, then attempts stack vertically; at widths of 768 or greater, then they appear in two labeled columns, with full-image fit and readable text under the shared accessibility rules.
 
 ## L2-006: Deliver a structured, actionable critique

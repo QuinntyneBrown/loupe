@@ -1,0 +1,12 @@
+<dialog
+  #dialog
+  aria-labelledby="replace-attempt-heading"
+  (cancel)="cancel($event)"
+  (keydown)="trapFocus($event)"
+>
+  <h2 id="replace-attempt-heading">Replace {{ context()?.side }} attempt</h2>
+  <button type="button" autofocus (click)="cancel()">Cancel</button>
+  @if (context(); as selection) {
+    <lp-attempt-picker [excludeId]="selection.excludeId" (chosen)="accept($event)" />
+  }
+</dialog>

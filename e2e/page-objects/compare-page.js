@@ -45,6 +45,20 @@ export class ComparePage {
   async focusLibraryLink() { await this.page.getByRole('link', { name: 'Back to My Work', exact: true }).focus(); }
   async expectLibraryLinkFocus() { await expect(this.page.getByRole('link', { name: 'Back to My Work', exact: true })).toBeFocused(); }
   async expectLoading() { await expect(this.page.getByRole('status')).toHaveText('Loading comparison…'); }
+  async refresh() { await this.page.getByRole('button', { name: 'Refresh comparison', exact: true }).click(); }
+  async expectMissing(label) {
+    await expect(this.side(label)).toContainText('This attempt is unavailable. Choose another saved attempt.');
+    await expect(this.side(label).getByRole('img')).toHaveCount(0);
+  }
+  async replace(label) { await this.side(label).getByRole('button', { name: 'Choose another attempt', exact: true }).click(); }
+  async expectReplacementDialog(label) {
+    const dialog = this.page.getByRole('dialog', { name: `Replace ${label.toLowerCase()}`, exact: true });
+    await expect(dialog).toBeVisible(); await expect(dialog.getByRole('button', { name: 'Cancel', exact: true })).toBeFocused();
+  }
+  async cancelReplacement() { await this.page.keyboard.press('Escape'); await expect(this.page.getByRole('dialog')).toHaveCount(0); }
+  async expectNoReplacement() { await expect(this.page.getByRole('dialog')).toHaveCount(0); }
+  async expectReplacementFocus(label) { await expect(this.side(label).getByRole('button', { name: 'Choose another attempt', exact: true })).toBeFocused(); }
+  async expectRecoveryFailure() { await expect(this.page.getByRole('alert')).toHaveText('Some attempts could not be refreshed. Previously loaded content is still shown where available.'); }
   async expectLayout(columns) {
     const first = await this.side('First attempt').boundingBox(), second = await this.side('Second attempt').boundingBox();
     if (columns === 2) { expect(Math.abs(first.y - second.y)).toBeLessThan(2); expect(second.x).toBeGreaterThan(first.x + first.width - 2); }

@@ -1,8 +1,24 @@
 import { Injectable } from '@angular/core';
-import { ComparisonResult, IComparisonService, PhotographPage, ServiceError } from 'api';
+import {
+  ComparisonAttempt,
+  ComparisonResult,
+  IComparisonService,
+  PhotographPage,
+  PhotographResult,
+  SavedCritique,
+  ServiceError,
+} from 'api';
 
 @Injectable()
 export class MockComparisonService implements IComparisonService {
+  async readAttempt(id: string): Promise<ComparisonAttempt> {
+    const [photograph, critique] = await Promise.all([
+      this.call('get', { id }),
+      this.call('getCritique', { id }),
+    ]);
+    if (!critique) throw new ServiceError('invalid_request');
+    return { photograph: photograph as PhotographResult, critique: critique as SavedCritique };
+  }
   async eligible(cursor?: string): Promise<PhotographPage> {
     return this.call('eligible', { cursor }) as Promise<PhotographPage>;
   }
