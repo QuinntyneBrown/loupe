@@ -16,6 +16,7 @@ export class InspirationPage {
   async loadMore() { await this.page.getByRole('button', { name: 'Load more references', exact: true }).click(); }
   async expectReferenceFocus(title) { await expect(this.page.getByRole('link', { name: title, exact: true })).toBeFocused(); }
   async expectEmpty() { await expect(this.page.getByRole('heading', { name: 'No references yet', exact: true })).toBeVisible(); }
+  async expectLoadingSkeleton(count) { await expect(this.page.locator('.lp-skeleton--tile')).toHaveCount(count); }
   async expectFailure() { await expect(this.page.getByRole('alert')).toHaveText('Inspiration could not be loaded. Try again.'); await expect(this.page.getByRole('heading', { name: 'No references yet', exact: true })).toHaveCount(0); }
   async retry() { await this.page.getByRole('button', { name: 'Retry loading references', exact: true }).click(); }
 }

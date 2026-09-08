@@ -1,7 +1,7 @@
-<main id="main" tabindex="-1">
-  <a routerLink="/my-work">Back to My Work</a>
-  <h1>Compare attempts</h1>
-  <p>Read your saved feedback together. Comparing does not run new analysis.</p>
+<main id="main" tabindex="-1" class="lp-main">
+  <a class="lp-back" routerLink="/my-work"><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-left" /></svg>Back to My Work</a>
+  <h1 class="lp-title">Compare attempts</h1>
+  <p class="lp-muted">Read your saved feedback together. Comparing does not run new analysis.</p>
   @if (firstId() && secondId()) {
     <lp-attempt-comparison
       [firstId]="firstId()"

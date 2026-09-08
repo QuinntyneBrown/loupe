@@ -2,31 +2,35 @@
   <p role="status">Loading reference…</p>
 }
 @if (error()) {
-  <h1 #heading tabindex="-1">Reference</h1>
+  <h1 #heading tabindex="-1" class="lp-title">Reference</h1>
   <p role="alert">{{ error() }}</p>
-  <button type="button" (click)="retry()">Retry loading reference</button>
+  <button type="button" class="lp-button lp-button--secondary" (click)="retry()">Retry loading reference</button>
 }
 @if (reference(); as item) {
-  <header>
-    <h1 #heading tabindex="-1">{{ item.title }}</h1>
-    <p>
-      Saved <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'mediumDate' }}</time>
-    </p>
-  </header>
-  <div class="detail">
-    <figure>
-      @if (item.imageUrl) {
-        <img
-          [src]="item.imageUrl"
-          [alt]="item.title"
-          [attr.width]="item.width"
-          [attr.height]="item.height"
-        />
-      } @else {
-        <p class="placeholder">Link-only reference</p>
-      }
-    </figure>
-    <div class="context">
+  <div class="lp-detail">
+    <div class="lp-detail__head">
+      <div class="lp-detail__title-row">
+        <h1 #heading tabindex="-1" class="lp-title">{{ item.title }}</h1>
+      </div>
+      <p class="lp-detail__meta">
+        Saved <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'mediumDate' }}</time>
+      </p>
+    </div>
+    <div class="lp-detail__media">
+      <figure>
+        @if (item.imageUrl) {
+          <img
+            [src]="item.imageUrl"
+            [alt]="item.title"
+            [attr.width]="item.width"
+            [attr.height]="item.height"
+          />
+        } @else {
+          <p class="placeholder">Link-only reference</p>
+        }
+      </figure>
+    </div>
+    <div class="lp-detail__body">
       <lp-reference-metadata-editor
         [reference]="item"
         (saved)="reference.set($event)"
@@ -38,9 +42,10 @@
         (refreshed)="reference.set($event)"
       />
       <section>
-        <h2>Source and attribution</h2>
+        <h2 class="lp-kicker">Source and attribution</h2>
         @if (item.sourceUrl) {
           <a
+            class="lp-link"
             [href]="item.sourceUrl"
             target="_blank"
             rel="noopener noreferrer"
@@ -53,7 +58,7 @@
         <p class="plain-text">{{ item.attribution || 'Attribution unknown' }}</p>
       </section>
       <section>
-        <h2>Notes</h2>
+        <h2 class="lp-kicker">Notes</h2>
         <p class="plain-text">{{ item.notes || 'No notes saved.' }}</p>
       </section>
     </div>

@@ -1,6 +1,6 @@
 @if (!editing()) {
   @let brief = photograph().brief;
-  <dl>
+  <dl class="lp-meta">
     @if (brief.intent) {
       <dt>Intent</dt>
       <dd>{{ brief.intent }}</dd>
@@ -21,63 +21,77 @@
   @if (!brief.intent && !brief.genre && !brief.experience && !brief.requestedFeedback) {
     <p>No brief added.</p>
   }
-  <button #editButton type="button" (click)="open()">Edit brief</button>
+  <button #editButton type="button" class="lp-button lp-button--ghost lp-button--sm" (click)="open()">
+    Edit brief
+  </button>
 } @else {
-  <form (ngSubmit)="save()" [attr.aria-busy]="busy()">
-    <label for="brief-intent">Intent</label>
-    <textarea
-      #firstField
-      id="brief-intent"
-      name="intent"
-      [ngModel]="draft().intent ?? ''"
-      (ngModelChange)="setText('intent', $event)"
-      [disabled]="busy()"
-      [attr.aria-invalid]="errors().intent"
-      [attr.aria-describedby]="errors().intent ? 'intent-error' : null"
-    ></textarea>
-    @if (errors().intent) {
-      <p id="intent-error" role="alert">Use 2,000 characters or fewer.</p>
-    }
-    <label for="brief-genre">Genre</label>
-    <input
-      id="brief-genre"
-      name="genre"
-      [ngModel]="draft().genre ?? ''"
-      (ngModelChange)="setText('genre', $event)"
-      [disabled]="busy()"
-      [attr.aria-invalid]="errors().genre"
-      [attr.aria-describedby]="errors().genre ? 'genre-error' : null"
-    />
-    @if (errors().genre) {
-      <p id="genre-error" role="alert">Use 100 characters or fewer.</p>
-    }
-    <label for="brief-experience">Experience</label>
-    <select
-      id="brief-experience"
-      name="experience"
-      [ngModel]="draft().experience ?? ''"
-      (ngModelChange)="setExperience($event)"
-      [disabled]="busy()"
-    >
-      <option value="">Not specified</option>
-      <option>Beginner</option>
-      <option>Intermediate</option>
-      <option>Advanced</option>
-      <option>Professional</option>
-    </select>
-    <label for="brief-feedback">Requested feedback</label>
-    <textarea
-      id="brief-feedback"
-      name="feedback"
-      [ngModel]="draft().requestedFeedback ?? ''"
-      (ngModelChange)="setText('requestedFeedback', $event)"
-      [disabled]="busy()"
-      [attr.aria-invalid]="errors().requestedFeedback"
-      [attr.aria-describedby]="errors().requestedFeedback ? 'feedback-error' : null"
-    ></textarea>
-    @if (errors().requestedFeedback) {
-      <p id="feedback-error" role="alert">Use 2,000 characters or fewer.</p>
-    }
+  <form class="lp-form" (ngSubmit)="save()" [attr.aria-busy]="busy()">
+    <div class="lp-field">
+      <label class="lp-field__label" for="brief-intent">Intent</label>
+      <textarea
+        #firstField
+        class="lp-textarea"
+        id="brief-intent"
+        name="intent"
+        [ngModel]="draft().intent ?? ''"
+        (ngModelChange)="setText('intent', $event)"
+        [disabled]="busy()"
+        [attr.aria-invalid]="errors().intent"
+        [attr.aria-describedby]="errors().intent ? 'intent-error' : null"
+      ></textarea>
+      @if (errors().intent) {
+        <p id="intent-error" class="lp-field__error" role="alert">Use 2,000 characters or fewer.</p>
+      }
+    </div>
+    <div class="lp-field">
+      <label class="lp-field__label" for="brief-genre">Genre</label>
+      <input
+        class="lp-input"
+        id="brief-genre"
+        name="genre"
+        [ngModel]="draft().genre ?? ''"
+        (ngModelChange)="setText('genre', $event)"
+        [disabled]="busy()"
+        [attr.aria-invalid]="errors().genre"
+        [attr.aria-describedby]="errors().genre ? 'genre-error' : null"
+      />
+      @if (errors().genre) {
+        <p id="genre-error" class="lp-field__error" role="alert">Use 100 characters or fewer.</p>
+      }
+    </div>
+    <div class="lp-field">
+      <label class="lp-field__label" for="brief-experience">Experience</label>
+      <select
+        class="lp-select"
+        id="brief-experience"
+        name="experience"
+        [ngModel]="draft().experience ?? ''"
+        (ngModelChange)="setExperience($event)"
+        [disabled]="busy()"
+      >
+        <option value="">Not specified</option>
+        <option>Beginner</option>
+        <option>Intermediate</option>
+        <option>Advanced</option>
+        <option>Professional</option>
+      </select>
+    </div>
+    <div class="lp-field">
+      <label class="lp-field__label" for="brief-feedback">Requested feedback</label>
+      <textarea
+        class="lp-textarea"
+        id="brief-feedback"
+        name="feedback"
+        [ngModel]="draft().requestedFeedback ?? ''"
+        (ngModelChange)="setText('requestedFeedback', $event)"
+        [disabled]="busy()"
+        [attr.aria-invalid]="errors().requestedFeedback"
+        [attr.aria-describedby]="errors().requestedFeedback ? 'feedback-error' : null"
+      ></textarea>
+      @if (errors().requestedFeedback) {
+        <p id="feedback-error" class="lp-field__error" role="alert">Use 2,000 characters or fewer.</p>
+      }
+    </div>
     @if (failed()) {
       <p role="alert">The brief could not be saved. Your changes are still here.</p>
     }
@@ -89,14 +103,14 @@
             : 'This photograph changed. Your brief has been kept.'
         }}
       </p>
-      <button type="button" [disabled]="busy()" (click)="reloadLatest()">
+      <button type="button" class="lp-button lp-button--secondary" [disabled]="busy()" (click)="reloadLatest()">
         Reload latest brief
       </button>
     }
     @if (latestBrief(); as latest) {
       <section aria-label="Latest saved brief">
-        <h3 #latestHeading tabindex="-1">Latest saved brief</h3>
-        <dl>
+        <h3 #latestHeading tabindex="-1" class="lp-kicker">Latest saved brief</h3>
+        <dl class="lp-meta">
           @for (field of fields; track field.key) {
             <dt>{{ field.label }}</dt>
             <dd>{{ latest[field.key] || 'Not specified' }}</dd>
@@ -106,10 +120,12 @@
       </section>
     }
     <div class="actions">
-      <button type="submit" [disabled]="busy() || conflicted() || invalid()">
+      <button type="submit" class="lp-button lp-button--primary" [disabled]="busy() || conflicted() || invalid()">
         {{ failed() ? 'Retry brief save' : 'Save brief' }}
       </button>
-      <button type="button" [disabled]="busy()" (click)="cancel()">Cancel brief edit</button>
+      <button type="button" class="lp-button lp-button--ghost" [disabled]="busy()" (click)="cancel()">
+        Cancel brief edit
+      </button>
     </div>
     @if (saving()) {
       <p role="status">Saving brief…</p>

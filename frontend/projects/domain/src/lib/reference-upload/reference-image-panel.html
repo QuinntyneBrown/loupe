@@ -1,50 +1,61 @@
-<form (ngSubmit)="save()" [attr.aria-busy]="saving()" novalidate>
-  <label for="reference-image">Reference image</label>
-  <input
-    #fileInput
-    id="reference-image"
-    type="file"
-    accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-    (change)="choose(fileInput.files)"
-    [disabled]="saving()"
-    [attr.aria-invalid]="!!fileError()"
-    [attr.aria-describedby]="fileError() ? 'reference-help reference-file-error' : 'reference-help'"
-  />
-  <p id="reference-help">One still JPEG, PNG, HEIC or WebP, up to 25 MB. Private to you.</p>
-  @if (fileError(); as error) {
-    <p id="reference-file-error" role="alert">{{ error }}</p>
-  }
+<form class="lp-form" (ngSubmit)="save()" [attr.aria-busy]="saving()" novalidate>
+  <div class="lp-field" [class.is-invalid]="!!fileError()">
+    <label class="lp-field__label" for="reference-image">Reference image</label>
+    <input
+      #fileInput
+      class="lp-input"
+      id="reference-image"
+      type="file"
+      accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+      (change)="choose(fileInput.files)"
+      [disabled]="saving()"
+      [attr.aria-invalid]="!!fileError()"
+      [attr.aria-describedby]="fileError() ? 'reference-help reference-file-error' : 'reference-help'"
+    />
+    <p class="lp-field__hint" id="reference-help">One still JPEG, PNG, HEIC or WebP, up to 25 MB. Private to you.</p>
+    @if (fileError(); as error) {
+      <p class="lp-field__error" id="reference-file-error" role="alert">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>{{ error }}
+      </p>
+    }
+  </div>
   @for (field of fields; track field.key) {
-    <label [for]="'reference-' + field.key">{{ field.label }}</label>
-    @if (field.key === 'notes') {
-      <textarea
-        [id]="'reference-' + field.key"
-        [name]="field.key"
-        [ngModel]="metadata()[field.key]"
-        (ngModelChange)="setField(field.key, $event)"
-        [disabled]="saving()"
-        [attr.aria-invalid]="!!errors()[field.key]"
-        [attr.aria-describedby]="errors()[field.key] ? 'reference-' + field.key + '-error' : null"
-      ></textarea>
-    } @else {
-      <input
-        [id]="'reference-' + field.key"
-        [name]="field.key"
-        [type]="field.key === 'sourceUrl' ? 'url' : 'text'"
-        [ngModel]="metadata()[field.key]"
-        (ngModelChange)="setField(field.key, $event)"
-        [disabled]="saving()"
-        [attr.aria-invalid]="!!errors()[field.key]"
-        [attr.aria-describedby]="errors()[field.key] ? 'reference-' + field.key + '-error' : null"
-      />
-    }
-    @if (errors()[field.key]; as error) {
-      <p [id]="'reference-' + field.key + '-error'" role="alert">{{ error }}</p>
-    }
+    <div class="lp-field" [class.is-invalid]="!!errors()[field.key]">
+      <label class="lp-field__label" [for]="'reference-' + field.key">{{ field.label }}</label>
+      @if (field.key === 'notes') {
+        <textarea
+          class="lp-textarea"
+          [id]="'reference-' + field.key"
+          [name]="field.key"
+          [ngModel]="metadata()[field.key]"
+          (ngModelChange)="setField(field.key, $event)"
+          [disabled]="saving()"
+          [attr.aria-invalid]="!!errors()[field.key]"
+          [attr.aria-describedby]="errors()[field.key] ? 'reference-' + field.key + '-error' : null"
+        ></textarea>
+      } @else {
+        <input
+          class="lp-input"
+          [id]="'reference-' + field.key"
+          [name]="field.key"
+          [type]="field.key === 'sourceUrl' ? 'url' : 'text'"
+          [ngModel]="metadata()[field.key]"
+          (ngModelChange)="setField(field.key, $event)"
+          [disabled]="saving()"
+          [attr.aria-invalid]="!!errors()[field.key]"
+          [attr.aria-describedby]="errors()[field.key] ? 'reference-' + field.key + '-error' : null"
+        />
+      }
+      @if (errors()[field.key]; as error) {
+        <p class="lp-field__error" [id]="'reference-' + field.key + '-error'" role="alert">
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>{{ error }}
+        </p>
+      }
+    </div>
   }
   @if (failure()) {
     <p role="alert">{{ failureMessage() }}</p>
-    <p>
+    <p class="lp-muted">
       {{
         image()
           ? 'The selected file is still available.'
@@ -52,8 +63,8 @@
       }}
     </p>
   }
-  <button type="submit" [disabled]="invalid() || saving()">
-    {{ failure() ? 'Retry upload' : 'Save reference' }}
+  <button class="lp-button lp-button--primary" type="submit" [class.is-busy]="saving()" [disabled]="invalid() || saving()">
+    <span class="lp-spinner" aria-hidden="true"></span>{{ failure() ? 'Retry upload' : 'Save reference' }}
   </button>
   @if (saving()) {
     @let transfer = progress();
@@ -62,7 +73,7 @@
       [attr.max]="transfer?.total || 1"
       [attr.value]="transfer?.total ? transfer?.transferred : null"
     ></progress>
-    <p role="status">
+    <p class="lp-muted" role="status">
       @if (transfer && transfer.total && transfer.transferred < transfer.total) {
         {{ transfer.transferred | number: '1.0-0' }} of {{ transfer.total | number: '1.0-0' }} bytes
         transferred.

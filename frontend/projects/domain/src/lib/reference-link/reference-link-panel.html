@@ -1,51 +1,58 @@
-<form (ngSubmit)="save()" [attr.aria-busy]="saving()" novalidate>
+<form class="lp-form" (ngSubmit)="save()" [attr.aria-busy]="saving()" novalidate>
   @for (field of fields; track field.key) {
-    <label [for]="'reference-' + field.key">{{ field.label }}</label>
-    @if (field.key === 'notes') {
-      <textarea
-        [id]="'reference-' + field.key"
-        [name]="field.key"
-        [ngModel]="metadata()[field.key]"
-        (ngModelChange)="setField(field.key, $event)"
-        [disabled]="saving()"
-        [readOnly]="!!duplicate()"
-        [attr.aria-invalid]="!!errors()[field.key]"
-        [attr.aria-describedby]="errors()[field.key] ? 'reference-' + field.key + '-error' : null"
-      ></textarea>
-    } @else {
-      <input
-        [id]="'reference-' + field.key"
-        [name]="field.key"
-        [type]="field.key === 'sourceUrl' ? 'url' : 'text'"
-        [ngModel]="metadata()[field.key]"
-        (ngModelChange)="setField(field.key, $event)"
-        [disabled]="saving()"
-        [readOnly]="!!duplicate()"
-        [attr.aria-invalid]="!!errors()[field.key]"
-        [attr.aria-describedby]="errors()[field.key] ? 'reference-' + field.key + '-error' : null"
-      />
-    }
-    @if (errors()[field.key]; as error) {
-      <p [id]="'reference-' + field.key + '-error'" role="alert">{{ error }}</p>
-    }
+    <div class="lp-field" [class.is-invalid]="!!errors()[field.key]">
+      <label class="lp-field__label" [for]="'reference-' + field.key">{{ field.label }}</label>
+      @if (field.key === 'notes') {
+        <textarea
+          class="lp-textarea"
+          [id]="'reference-' + field.key"
+          [name]="field.key"
+          [ngModel]="metadata()[field.key]"
+          (ngModelChange)="setField(field.key, $event)"
+          [disabled]="saving()"
+          [readOnly]="!!duplicate()"
+          [attr.aria-invalid]="!!errors()[field.key]"
+          [attr.aria-describedby]="errors()[field.key] ? 'reference-' + field.key + '-error' : null"
+        ></textarea>
+      } @else {
+        <input
+          class="lp-input"
+          [id]="'reference-' + field.key"
+          [name]="field.key"
+          [type]="field.key === 'sourceUrl' ? 'url' : 'text'"
+          [ngModel]="metadata()[field.key]"
+          (ngModelChange)="setField(field.key, $event)"
+          [disabled]="saving()"
+          [readOnly]="!!duplicate()"
+          [attr.aria-invalid]="!!errors()[field.key]"
+          [attr.aria-describedby]="errors()[field.key] ? 'reference-' + field.key + '-error' : null"
+        />
+      }
+      @if (errors()[field.key]; as error) {
+        <p class="lp-field__error" [id]="'reference-' + field.key + '-error'" role="alert">
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>{{ error }}
+        </p>
+      }
+    </div>
   }
   @if (failure()) {
     <p role="alert">{{ failureMessage() }}</p>
   }
-  <button type="submit" [disabled]="invalid() || saving() || !!duplicate()">
-    {{ failure() ? 'Retry save' : 'Save link' }}
+  <button class="lp-button lp-button--primary" type="submit" [class.is-busy]="saving()" [disabled]="invalid() || saving() || !!duplicate()">
+    <span class="lp-spinner" aria-hidden="true"></span>{{ failure() ? 'Retry save' : 'Save link' }}
   </button>
   @if (saving()) {
-    <p role="status">Saving link…</p>
+    <p class="lp-muted" role="status">Saving link…</p>
   }
 </form>
 @if (duplicate(); as reference) {
   <section aria-labelledby="duplicate-heading">
-    <h2 #duplicateHeading id="duplicate-heading" tabindex="-1">Already saved</h2>
-    <p>
+    <h2 #duplicateHeading id="duplicate-heading" tabindex="-1" class="lp-title">Already saved</h2>
+    <p class="lp-muted">
       Your existing reference and its metadata are unchanged. Your submitted fields remain above.
     </p>
     <a
+      class="lp-link"
       [href]="'/inspiration/' + reference.id"
       (click)="$event.preventDefault(); openExisting(reference)"
       >Open saved reference</a

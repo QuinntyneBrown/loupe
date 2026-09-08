@@ -1,21 +1,23 @@
-<article>
-  <a #link [routerLink]="destination()" [attr.aria-label]="title()">
-    @if (previewUrl()) {
-      <img
-        [src]="previewUrl()"
-        alt=""
-        [attr.width]="width()"
-        [attr.height]="height()"
-        loading="lazy"
-        decoding="async"
-      />
-    } @else {
-      <span class="placeholder">Link-only reference</span>
-    }
-    <h2>{{ title() }}</h2>
-  </a>
-  <div>
-    <time [attr.datetime]="createdAt()">{{ createdAt() | date: 'mediumDate' }}</time>
-    <p>{{ status() }}</p>
+<article class="lp-tile">
+  @if (previewUrl()) {
+    <img
+      [src]="previewUrl()"
+      alt=""
+      [attr.width]="width()"
+      [attr.height]="height()"
+      loading="lazy"
+      decoding="async"
+    />
+  }
+  @if (statusKind(); as kind) {
+    <span class="lp-status lp-status--on-image" [class]="'lp-status--' + kind" aria-hidden="true">{{ kind }}</span>
+  }
+  <a #link class="lp-tile__link" [routerLink]="destination()" [attr.aria-label]="title()"></a>
+  <div class="lp-tile__scrim">
+    <h2 class="lp-tile__title">{{ title() }}</h2>
+    <div class="lp-tile__meta">
+      <time [attr.datetime]="createdAt()">{{ createdAt() | date: 'mediumDate' }}</time>
+      &middot; <span>{{ status() }}</span>
+    </div>
   </div>
 </article>

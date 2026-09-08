@@ -1,10 +1,10 @@
 <section [attr.aria-labelledby]="'critique-status-' + id()">
-  <h2 #heading [id]="'critique-status-' + id()" tabindex="-1">Critique status</h2>
+  <h2 #heading [id]="'critique-status-' + id()" tabindex="-1" class="lp-kicker">Critique status</h2>
   @if (operation(); as item) {
     <p role="status">
       <strong>{{ item.status }}</strong> · {{ item.message }}
     </p>
-    <p>{{ item.mode === 'Demo' ? 'Demo · illustrative sample' : 'AI image analysis' }}</p>
+    <p><span class="lp-pill lp-pill--ai">{{ item.mode === 'Demo' ? 'Demo · illustrative sample' : 'AI image analysis' }}</span></p>
     <p class="timestamp">
       Updated <time [attr.datetime]="item.updatedAt">{{ item.updatedAt | date: 'medium' }}</time>
     </p>
@@ -57,6 +57,6 @@
         Critique status could not be updated. Your saved content is still available.
       </p>
     }
-    <button type="button" (click)="check()">Check critique status</button>
+    <button type="button" class="lp-button lp-button--secondary" (click)="check()">Check critique status</button>
   }
 </section>

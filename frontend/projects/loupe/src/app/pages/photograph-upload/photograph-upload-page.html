@@ -1,8 +1,8 @@
-<main id="main" tabindex="-1">
-  <a routerLink="/my-work">My Work</a>
+<main id="main" tabindex="-1" class="lp-main">
+  <a class="lp-back" routerLink="/my-work"><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-left" /></svg>My Work</a>
   @if (savedPhotograph(); as photo) {
-    <h1 #heading tabindex="-1">Photograph saved</h1>
-    <p>“{{ photo.title }}” is in My Work. You can leave this page and return to it there.</p>
+    <h1 #heading tabindex="-1" class="lp-title">Photograph saved</h1>
+    <p class="lp-muted">“{{ photo.title }}” is in My Work. You can leave this page and return to it there.</p>
     @if (request.error() === 'integration_not_configured') {
       <p>Critique was not queued. Your photograph is saved.</p>
     }
@@ -14,9 +14,9 @@
       (reviewed)="savedPhotograph.set($event)"
       (admitted)="admitted($event)"
     />
-    <a [routerLink]="['/my-work', photo.id]">View saved photograph</a>
+    <a class="lp-button lp-button--secondary" [routerLink]="['/my-work', photo.id]">View saved photograph</a>
   } @else {
-    <h1>Upload photograph</h1>
+    <h1 class="lp-title">Upload photograph</h1>
     <lp-photograph-upload (saved)="saved($event)" />
   }
 </main>

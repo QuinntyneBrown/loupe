@@ -1,7 +1,22 @@
-<main id="main" tabindex="-1">
-  <h1>My Work</h1>
-  <p>Private to you</p>
-  <a routerLink="/my-work/upload">Upload photograph</a>
-  <a routerLink="/compare">Compare attempts</a>
+<main id="main" tabindex="-1" class="lp-main">
+  <div class="lp-page-header">
+    <div class="lp-page-header__text">
+      <h1 class="lp-title">My Work</h1>
+      <p class="lp-page-header__sub">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>
+        Private to you
+      </p>
+    </div>
+    <div class="lp-page-header__actions">
+      <a class="lp-button lp-button--secondary" routerLink="/compare">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-compare" /></svg>
+        Compare attempts
+      </a>
+      <a class="lp-button lp-button--primary" routerLink="/my-work/upload">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-upload" /></svg>
+        Upload photograph
+      </a>
+    </div>
+  </div>
   <lp-photograph-collection detailBase="/my-work" />
 </main>

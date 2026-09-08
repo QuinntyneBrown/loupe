@@ -18,9 +18,6 @@ export class UnsavedChanges {
   readonly dirty = input.required<() => boolean>();
   readonly warning = input<string | null>(null);
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('discardDialog');
-  private readonly keepButton = viewChild.required<ElementRef<HTMLButtonElement>>('keepButton');
-  private readonly discardButton =
-    viewChild.required<ElementRef<HTMLButtonElement>>('discardButton');
   private readonly session = inject(SESSION_SERVICE);
   private readonly document = inject(DOCUMENT);
   private pendingChoice: Promise<boolean> | null = null;
@@ -64,8 +61,14 @@ export class UnsavedChanges {
   }
   trapDiscardFocus(event: KeyboardEvent): void {
     if (event.key !== 'Tab') return;
-    const first = this.keepButton().nativeElement;
-    const last = this.discardButton().nativeElement;
+    const controls =
+      this.dialog().nativeElement.querySelectorAll<HTMLButtonElement>('button:not([disabled])');
+    const first = controls[0];
+    const last = controls[controls.length - 1];
+    if (!first) {
+      event.preventDefault();
+      return;
+    }
     if (event.shiftKey ? event.target === first : event.target === last) {
       event.preventDefault();
       (event.shiftKey ? last : first).focus();

@@ -1,12 +1,26 @@
 <dialog
   #dialog
+  class="lp-dialog lp-dialog--wide"
   aria-labelledby="replace-attempt-heading"
   (cancel)="cancel($event)"
   (keydown)="trapFocus($event)"
 >
-  <h2 id="replace-attempt-heading">Replace {{ context()?.side }} attempt</h2>
-  <button type="button" autofocus (click)="cancel()">Cancel</button>
-  @if (context(); as selection) {
-    <lp-attempt-picker [excludeId]="selection.excludeId" (chosen)="accept($event)" />
-  }
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="replace-attempt-heading">Replace {{ context()?.side }} attempt</h2>
+      </div>
+      <button class="lp-icon-button" type="button" aria-label="Close" (click)="cancel()">
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body" tabindex="0">
+      @if (context(); as selection) {
+        <lp-attempt-picker [excludeId]="selection.excludeId" (chosen)="accept($event)" />
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" autofocus (click)="cancel()">Cancel</button>
+    </footer>
+  </div>
 </dialog>

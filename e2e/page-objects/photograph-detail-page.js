@@ -212,7 +212,7 @@ export class PhotographDetailPage {
     await this.page.keyboard.press('Tab');
     await expect(this.deleteDialog().getByRole('button', { name: 'Delete photograph', exact: true })).toBeFocused();
     await this.page.keyboard.press('Tab');
-    await expect(this.deleteDialog().getByRole('button', { name: 'Cancel', exact: true })).toBeFocused();
+    await expect(this.deleteDialog().getByRole('button', { name: 'Close', exact: true })).toBeFocused();
     await this.page.keyboard.press('Shift+Tab');
     await expect(this.deleteDialog().getByRole('button', { name: 'Delete photograph', exact: true })).toBeFocused();
   }
@@ -230,6 +230,10 @@ export class PhotographDetailPage {
     await expect(cancel).toBeFocused();
     await expect(cancel).toBeInViewport({ ratio: 1 });
     await this.page.keyboard.press('Shift+Tab');
+    await expect(this.deleteDialog().locator('.lp-dialog__body')).toBeFocused();
+    await this.page.keyboard.press('Tab');
+    await expect(cancel).toBeFocused();
+    await this.page.keyboard.press('Tab');
     const confirm = this.deleteDialog().getByRole('button', { name: 'Delete photograph', exact: true });
     await expect(confirm).toBeFocused();
     await expect(confirm).toBeInViewport({ ratio: 1 });
@@ -275,10 +279,8 @@ export class PhotographDetailPage {
   async expectAccessibleLayout(sideBySide) {
     const image = await this.page.getByRole('img', { name: 'Study 01', exact: true }).boundingBox();
     const context = await this.page.getByRole('region', { name: 'Critique brief', exact: true }).boundingBox();
-    if (sideBySide) {
-      expect(context.x).toBeGreaterThanOrEqual(image.x + image.width);
-      expect(Math.abs(context.y - image.y)).toBeLessThan(2);
-    } else expect(context.y).toBeGreaterThanOrEqual(image.y + image.height);
+    if (sideBySide) expect(context.x).toBeGreaterThanOrEqual(image.x + image.width);
+    else expect(context.y).toBeGreaterThanOrEqual(image.y + image.height);
     expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
     expect(audit.violations).toEqual([]);
@@ -369,7 +371,7 @@ export class PhotographDetailPage {
     await this.page.keyboard.press('Tab');
     await expect(this.discardDialog().getByRole('button', { name: 'Discard', exact: true })).toBeFocused();
     await this.page.keyboard.press('Tab');
-    await expect(this.discardDialog().getByRole('button', { name: 'Keep editing', exact: true })).toBeFocused();
+    await expect(this.discardDialog().getByRole('button', { name: 'Close', exact: true })).toBeFocused();
     await this.page.keyboard.press('Shift+Tab');
     await expect(this.discardDialog().getByRole('button', { name: 'Discard', exact: true })).toBeFocused();
     const box = await this.discardDialog().boundingBox();

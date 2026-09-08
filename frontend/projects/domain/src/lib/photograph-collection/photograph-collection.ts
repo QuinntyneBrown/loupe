@@ -27,6 +27,7 @@ export class PhotographCollection implements OnInit {
   readonly failed = signal(false);
   readonly loaded = signal(false);
   readonly nextCursor = signal<string | null>(null);
+  readonly skeletonTiles = Array.from({ length: 8 }, (_, index) => index);
 
   ngOnInit(): void {
     void this.load();
@@ -41,6 +42,16 @@ export class PhotographCollection implements OnInit {
       Canceled: 'Critique canceled',
     }[item.critiqueStatus];
     return label + (item.hasCritique ? ' · Previous critique available' : '');
+  }
+  statusKindFor(item: PhotographSummary): 'queued' | 'analyzing' | 'ready' | 'failed' | null {
+    if (!item.critiqueStatus) return null;
+    return {
+      Queued: 'queued' as const,
+      Running: 'analyzing' as const,
+      Succeeded: 'ready' as const,
+      Failed: 'failed' as const,
+      Canceled: 'failed' as const,
+    }[item.critiqueStatus];
   }
 
   async load(): Promise<void> {

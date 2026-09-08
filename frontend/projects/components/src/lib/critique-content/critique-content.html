@@ -1,27 +1,39 @@
 @let item = content();
-<p class="provenance">
+<p class="provenance lp-small lp-muted">
   <strong>{{ item.demo ? 'Demo · illustrative sample' : 'AI-generated critique' }}</strong>
-  · <time [attr.datetime]="item.generatedAt">{{ item.generatedAt | date: 'medium' }}</time>
+  &middot; <time [attr.datetime]="item.generatedAt">{{ item.generatedAt | date: 'medium' }}</time>
 </p>
 @if (item.demo) {
-  <p>Sample guidance; no image analysis was performed.</p>
+  <p class="lp-small lp-muted">Sample guidance; no image analysis was performed.</p>
 }
-<p class="provenance">{{ item.model }} · {{ item.promptVersion }}</p>
-<h3>Strengths</h3>
-@for (strength of item.strengths; track $index) {
-  <p>{{ strength.explanation }}</p>
-  <ng-container
-    [ngTemplateOutlet]="evidence"
-    [ngTemplateOutletContext]="{ $implicit: strength.evidence }"
-  />
-}
-<h3>Three priorities</h3>
+<p class="provenance lp-mono">{{ item.model }} &middot; {{ item.promptVersion }}</p>
+
+<div class="lp-critique-section__head">
+  <h3 class="lp-heading">Strengths</h3>
+  <span class="lp-kicker lp-kicker--ai">AI</span>
+</div>
+<div class="observations">
+  @for (strength of item.strengths; track $index) {
+    <section>
+      <p class="lp-observation__text">{{ strength.explanation }}</p>
+      <ng-container
+        [ngTemplateOutlet]="evidence"
+        [ngTemplateOutletContext]="{ $implicit: strength.evidence }"
+      />
+    </section>
+  }
+</div>
+
+<div class="lp-critique-section__head">
+  <h3 class="lp-heading">Three priorities</h3>
+  <span class="lp-kicker lp-kicker--ai">AI</span>
+</div>
 <ol class="priorities">
   @for (priority of item.priorities; track $index) {
     <li>
-      <p><strong>Observation</strong> {{ priority.observation }}</p>
-      <p><strong>Effect</strong> {{ priority.effect }}</p>
-      <p><strong>Action</strong> {{ priority.action }}</p>
+      <p class="lp-observation__text"><strong>Observation</strong> {{ priority.observation }}</p>
+      <p class="lp-observation__text"><strong>Effect</strong> {{ priority.effect }}</p>
+      <p class="lp-observation__text"><strong>Action</strong> {{ priority.action }}</p>
       <ng-container
         [ngTemplateOutlet]="evidence"
         [ngTemplateOutletContext]="{ $implicit: priority.evidence }"
@@ -29,16 +41,24 @@
     </li>
   }
 </ol>
-<h3>Practice exercise</h3>
-<p>{{ item.exercise.action }}</p>
-<p><strong>Compare</strong> {{ item.exercise.comparison }}</p>
+
+<div class="lp-critique-section__head">
+  <h3 class="lp-heading">Practice exercise</h3>
+  <span class="lp-kicker lp-kicker--ai">AI</span>
+</div>
+<p class="lp-observation__text">{{ item.exercise.action }}</p>
+<p class="lp-observation__text"><strong>Compare</strong> {{ item.exercise.comparison }}</p>
+
 @for (group of item.groups; track group.label) {
-  <h3>{{ group.label }}</h3>
+  <div class="lp-critique-section__head">
+    <h3 class="lp-heading">{{ group.label }}</h3>
+    <span class="lp-kicker lp-kicker--ai">AI</span>
+  </div>
   <div class="observations">
     @for (observation of group.observations; track observation.label) {
       <section>
         <h4>{{ observation.label }}</h4>
-        <p>{{ observation.explanation }}</p>
+        <p class="lp-observation__text">{{ observation.explanation }}</p>
         @if (observation.uncertainty) {
           <p class="uncertainty"><strong>Cannot assess:</strong> {{ observation.uncertainty }}</p>
         }
@@ -50,16 +70,18 @@
     }
   </div>
 }
-<h3>Brief used for this critique</h3>
+
+<h3 class="lp-heading">Brief used for this critique</h3>
 @if (!item.brief.length) {
-  <p>No brief supplied.</p>
+  <p class="lp-muted">No brief supplied.</p>
 }
-<dl>
+<dl class="lp-meta">
   @for (field of item.brief; track field.label) {
     <dt>{{ field.label }}</dt>
     <dd>{{ field.value }}</dd>
   }
 </dl>
+
 <ng-template #evidence let-statements>
   @if (statements.length) {
     <ul class="evidence">

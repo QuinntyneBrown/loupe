@@ -23,7 +23,7 @@ completing each operation.
 ## Videos
 
 ### `loupe.webm` — the real Angular application
-- **Duration / dimensions / size:** 78.8s, 1280×720, 3.53 MB
+- **Duration / dimensions / size:** 68.3s, 1280×720, 3.04 MB
 - **Poster:** [loupe-poster.png](loupe-poster.png)
 - Real `Loupe.Api` + `Loupe.Worker` (in containers) + PostgreSQL + the demo
   identity provider, driven through the Angular dev server proxied same-origin
@@ -35,16 +35,16 @@ Approximate chapters (verified against playback; a few seconds either way):
 | Time | Chapter |
 | --- | --- |
 | 0:00 | Opening — the real app against the real backend |
-| 0:04 | Sign in — real OpenID Connect authorization-code + PKCE redirect |
-| 0:10 | Upload a photograph with a critique brief |
-| 0:20 | Personal notes, saved separately from AI text |
-| 0:23 | Request an AI critique — real `Loupe.Worker` lease + completion |
-| 0:33 | Save a second attempt, to enable comparison |
-| 0:45 | Compare two attempts side by side |
-| 0:50 | Save a reference by direct image upload |
-| 0:55 | Save a reference by URL, request its import (admission only — see limitations) |
-| 0:65 | Delete a photograph — real worker cleanup to `Completed` |
-| 0:74 | Closing |
+| 0:03 | Sign in — real OpenID Connect authorization-code + PKCE redirect |
+| 0:09 | Upload a photograph with a critique brief |
+| 0:16 | Personal notes, saved separately from AI text |
+| 0:20 | Request an AI critique — real `Loupe.Worker` lease + completion |
+| 0:27 | Save a second attempt, to enable comparison |
+| 0:34 | Compare two attempts side by side |
+| 0:41 | Save a reference by direct image upload |
+| 0:46 | Save a reference by URL, request its import (admission only — see limitations) |
+| 0:53 | Delete a photograph — real worker cleanup to `Completed` |
+| 0:64 | Closing |
 
 ### `loupe-api.webm` — the real API and worker
 - **Duration / dimensions / size:** 63.5s, 1280×720, 5.53 MB

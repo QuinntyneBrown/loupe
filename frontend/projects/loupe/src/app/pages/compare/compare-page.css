@@ -1,11 +1,3 @@
 :host {
   display: block;
-  max-width: var(--lp-content-max);
-  margin: auto;
-  padding: var(--lp-space-8) var(--lp-gutter);
-}
-a {
-  color: var(--lp-color-text-2);
-  display: inline-block;
-  padding: var(--lp-space-2) var(--lp-zero);
 }

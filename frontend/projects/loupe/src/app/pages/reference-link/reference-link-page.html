@@ -1,6 +1,6 @@
-<main id="main" tabindex="-1">
-  <a routerLink="/inspiration">Back to Inspiration</a>
-  <h1>Save link</h1>
+<main id="main" tabindex="-1" class="lp-main">
+  <a class="lp-back" routerLink="/inspiration"><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-left" /></svg>Back to Inspiration</a>
+  <h1 class="lp-title">Save link</h1>
   <lp-reference-link-panel (saved)="saved($event)" (existing)="saved($event)" />
 </main>
 <lp-unsaved-changes

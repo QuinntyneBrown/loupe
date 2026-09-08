@@ -11,6 +11,17 @@ async function setup(page, count) {
   return { inspiration, detail: new ReferenceDetailPage(page), signIn };
 }
 
+test('initial load shows skeleton placeholders until the first page arrives', async ({ page }) => {
+  const { inspiration } = await setup(page, 4);
+  inspiration.library.pause('list');
+  await inspiration.open();
+  await inspiration.expectLoadingSkeleton(8);
+  await inspiration.expectReferences(0);
+  inspiration.library.release('list');
+  await inspiration.expectLoadingSkeleton(0);
+  await inspiration.expectReferences(4);
+});
+
 // Given saved inspiration references, when browsed and opened, then complete
 // content and supplied source context remain private and distinct from My Work.
 test('L2-009.1/L2-012.1/3/4: page references and reopen a full image with a safe source link', async ({ page }) => {

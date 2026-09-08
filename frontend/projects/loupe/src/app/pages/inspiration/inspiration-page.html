@@ -1,7 +1,22 @@
-<main id="main" tabindex="-1">
-  <h1>Inspiration</h1>
-  <p>Private to you</p>
-  <a routerLink="/inspiration/upload">Upload reference</a>
-  <a routerLink="/inspiration/link">Save link</a>
+<main id="main" tabindex="-1" class="lp-main">
+  <div class="lp-page-header">
+    <div class="lp-page-header__text">
+      <h1 class="lp-title">Inspiration</h1>
+      <p class="lp-page-header__sub">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>
+        Private to you
+      </p>
+    </div>
+    <div class="lp-page-header__actions">
+      <a class="lp-button lp-button--secondary" routerLink="/inspiration/link">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-link" /></svg>
+        Save link
+      </a>
+      <a class="lp-button lp-button--primary" routerLink="/inspiration/upload">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-upload" /></svg>
+        Upload reference
+      </a>
+    </div>
+  </div>
   <lp-reference-collection />
 </main>

@@ -1,70 +1,82 @@
 <dialog
   #dialog
+  class="lp-dialog"
   tabindex="-1"
   aria-labelledby="delete-title"
   aria-describedby="delete-effects"
   (cancel)="cancel($event)"
   (keydown)="trapFocus($event)"
 >
-  <h2 id="delete-title">Delete “{{ photograph()?.title }}”?</h2>
-  <p id="delete-effects">
-    This removes the photograph from My Work and schedules its images, critique, notes, and capture
-    settings for removal. Any running critique will be canceled. Any unsaved changes will be
-    discarded.
-  </p>
-  @if (busy()) {
-    <p role="status">Deleting photograph…</p>
-  }
-  @if (failed()) {
-    <p role="alert">Deletion was not confirmed. Retry to check its status.</p>
-  }
-  @if (unavailable()) {
-    <p role="alert">
-      This photograph is no longer available. Close this dialog to return to your library or keep
-      your unsaved text.
-    </p>
-  } @else if (conflicted()) {
-    <p role="alert">
-      This photograph changed. Review its latest saved details before deleting.
-      @if (reviewFailed()) {
-        Latest details could not be loaded. Your unsaved changes are still here.
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="delete-title">Delete “{{ photograph()?.title }}”?</h2>
+        <p class="lp-dialog__text" id="delete-effects">
+          This removes the photograph from My Work and schedules its images, critique, notes, and capture
+          settings for removal. Any running critique will be canceled. Any unsaved changes will be
+          discarded.
+        </p>
+      </div>
+      <button class="lp-icon-button" type="button" aria-label="Close" [disabled]="busy() || reviewing()" (click)="cancel()">
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body" tabindex="0">
+      @if (busy()) {
+        <p role="status">Deleting photograph…</p>
       }
-    </p>
-  }
-  @if (reviewing()) {
-    <p role="status">Loading latest details…</p>
-  }
-  @if (reviewed() && photograph(); as latest) {
-    <section aria-labelledby="delete-latest">
-      <h3 #latestHeading id="delete-latest" tabindex="-1">Latest saved details</h3>
-      <dl>
-        <dt>Intent</dt>
-        <dd>{{ latest.brief.intent || 'Not provided' }}</dd>
-        <dt>Genre</dt>
-        <dd>{{ latest.brief.genre || 'Not provided' }}</dd>
-        <dt>Experience</dt>
-        <dd>{{ latest.brief.experience || 'Not provided' }}</dd>
-        <dt>Requested feedback</dt>
-        <dd>{{ latest.brief.requestedFeedback || 'Not provided' }}</dd>
-        <dt>Notes</dt>
-        <dd>{{ latest.notes || 'No notes saved' }}</dd>
-      </dl>
-    </section>
-  }
-  <div class="actions">
-    <button type="button" autofocus [disabled]="busy() || reviewing()" (click)="cancel()">
-      Cancel
-    </button>
-    @if (!unavailable()) {
-      @if (conflicted()) {
-        <button type="button" [disabled]="reviewing()" (click)="review()">
-          Review latest photograph
-        </button>
-      } @else {
-        <button type="button" class="danger" [disabled]="busy()" (click)="confirm()">
-          {{ failed() ? 'Retry deletion' : 'Delete photograph' }}
-        </button>
+      @if (failed()) {
+        <p role="alert">Deletion was not confirmed. Retry to check its status.</p>
       }
-    }
+      @if (unavailable()) {
+        <p role="alert">
+          This photograph is no longer available. Close this dialog to return to your library or keep
+          your unsaved text.
+        </p>
+      } @else if (conflicted()) {
+        <p role="alert">
+          This photograph changed. Review its latest saved details before deleting.
+          @if (reviewFailed()) {
+            Latest details could not be loaded. Your unsaved changes are still here.
+          }
+        </p>
+      }
+      @if (reviewing()) {
+        <p role="status">Loading latest details…</p>
+      }
+      @if (reviewed() && photograph(); as latest) {
+        <section aria-labelledby="delete-latest">
+          <h3 #latestHeading id="delete-latest" tabindex="-1">Latest saved details</h3>
+          <dl class="lp-meta">
+            <dt>Intent</dt>
+            <dd>{{ latest.brief.intent || 'Not provided' }}</dd>
+            <dt>Genre</dt>
+            <dd>{{ latest.brief.genre || 'Not provided' }}</dd>
+            <dt>Experience</dt>
+            <dd>{{ latest.brief.experience || 'Not provided' }}</dd>
+            <dt>Requested feedback</dt>
+            <dd>{{ latest.brief.requestedFeedback || 'Not provided' }}</dd>
+            <dt>Notes</dt>
+            <dd>{{ latest.notes || 'No notes saved' }}</dd>
+          </dl>
+        </section>
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" autofocus [disabled]="busy() || reviewing()" (click)="cancel()">
+        Cancel
+      </button>
+      @if (!unavailable()) {
+        @if (conflicted()) {
+          <button class="lp-button lp-button--primary" type="button" [disabled]="reviewing()" (click)="review()">
+            Review latest photograph
+          </button>
+        } @else {
+          <button class="lp-button lp-button--danger" [class.is-busy]="busy()" type="button" [disabled]="busy()" (click)="confirm()">
+            <span class="lp-spinner" aria-hidden="true"></span>{{ failed() ? 'Retry deletion' : 'Delete photograph' }}
+          </button>
+        }
+      }
+    </footer>
   </div>
 </dialog>

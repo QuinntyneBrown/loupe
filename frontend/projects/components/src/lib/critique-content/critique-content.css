@@ -61,3 +61,59 @@ dt {
 dd {
   margin: var(--lp-space-1) var(--lp-zero) var(--lp-zero);
 }
+
+/* Design-system typography roles (mocks: docs/mocks/assets/mocks.css) */
+.lp-small {
+  font-size: var(--lp-text-sm);
+}
+.lp-muted {
+  color: var(--lp-color-text-2);
+}
+.lp-mono {
+  font-family: var(--lp-font-mono);
+  font-size: var(--lp-text-sm);
+}
+.lp-heading {
+  font-size: var(--lp-text-lg);
+  font-weight: var(--lp-weight-semibold);
+  letter-spacing: var(--lp-tracking-tight);
+  line-height: var(--lp-leading-tight);
+}
+.lp-kicker {
+  font-family: var(--lp-font-mono);
+  font-size: var(--lp-text-xs);
+  font-weight: var(--lp-weight-medium);
+  letter-spacing: var(--lp-tracking-wide);
+  text-transform: uppercase;
+  color: var(--lp-color-text-2);
+}
+.lp-kicker--ai {
+  color: var(--lp-color-ai);
+}
+.lp-critique-section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--lp-space-3);
+  margin-top: var(--lp-space-7);
+}
+.lp-critique-section__head .lp-heading {
+  margin-top: var(--lp-zero);
+}
+.lp-observation__text {
+  line-height: var(--lp-leading-relaxed);
+}
+.lp-meta {
+  display: grid;
+  grid-template-columns: max-content minmax(var(--lp-zero), 1fr);
+  gap: var(--lp-space-2) var(--lp-space-5);
+  font-size: var(--lp-text-sm);
+  margin-top: var(--lp-space-3);
+}
+.lp-meta dt {
+  margin-top: var(--lp-zero);
+}
+.lp-meta dd {
+  min-width: var(--lp-zero);
+  overflow-wrap: anywhere;
+}

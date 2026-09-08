@@ -14,6 +14,20 @@ test('L2-003.1: browse all photographs through explicit pagination', async ({ pa
   await work.expectEnd();
 });
 
+test('initial load shows skeleton placeholders until the first page arrives', async ({ page }) => {
+  const work = new MyWorkPage(page);
+  await work.configureCollection(4);
+  work.library.pause('list');
+  const signIn = new SignInPage(page);
+  await signIn.openPrivateDestination();
+  await signIn.continue();
+  await work.expectLoadingSkeleton(8);
+  await work.expectPhotographs(0);
+  work.library.release('list');
+  await work.expectLoadingSkeleton(0);
+  await work.expectPhotographs(4);
+});
+
 test('L2-003.4: an empty successful collection has an honest empty state', async ({ page }) => {
   const work = new MyWorkPage(page);
   await work.configureCollection(0);

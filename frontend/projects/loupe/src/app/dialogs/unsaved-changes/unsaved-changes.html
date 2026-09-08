@@ -1,19 +1,29 @@
 <dialog
   #discardDialog
+  class="lp-dialog"
   aria-labelledby="discard-heading"
   aria-describedby="discard-description"
   (cancel)="cancelDiscard($event)"
   (keydown)="trapDiscardFocus($event)"
 >
-  <h2 id="discard-heading">Discard unsaved changes?</h2>
-  <p id="discard-description">
-    Keep editing to save your changes, or discard this unfinished edit.
-    @if (warning(); as message) {
-      {{ message }}
-    }
-  </p>
-  <div class="actions">
-    <button #keepButton type="button" autofocus (click)="finishDiscard(false)">Keep editing</button>
-    <button #discardButton type="button" (click)="finishDiscard(true)">Discard</button>
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="discard-heading">Discard unsaved changes?</h2>
+        <p class="lp-dialog__text" id="discard-description">
+          Keep editing to save your changes, or discard this unfinished edit.
+          @if (warning(); as message) {
+            {{ message }}
+          }
+        </p>
+      </div>
+      <button class="lp-icon-button" type="button" aria-label="Close" (click)="finishDiscard(false)">
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" autofocus (click)="finishDiscard(false)">Keep editing</button>
+      <button class="lp-button lp-button--danger" type="button" (click)="finishDiscard(true)">Discard</button>
+    </footer>
   </div>
 </dialog>

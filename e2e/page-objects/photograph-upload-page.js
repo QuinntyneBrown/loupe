@@ -104,7 +104,7 @@ export class PhotographUploadPage {
     await this.page.keyboard.press('Tab');
     await expect(this.discardDialog().getByRole('button', { name: 'Discard', exact: true })).toBeFocused();
     await this.page.keyboard.press('Tab');
-    await expect(this.discardDialog().getByRole('button', { name: 'Keep editing', exact: true })).toBeFocused();
+    await expect(this.discardDialog().getByRole('button', { name: 'Close', exact: true })).toBeFocused();
     await this.page.keyboard.press('Shift+Tab');
     await expect(this.discardDialog().getByRole('button', { name: 'Discard', exact: true })).toBeFocused();
     const box = await this.discardDialog().boundingBox();

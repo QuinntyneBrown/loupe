@@ -35,6 +35,7 @@ export class MyWorkPage {
   async loadMore() { await this.page.getByRole('button', { name: 'Load more photographs', exact: true }).click(); }
   async expectEnd() { await expect(this.page.getByRole('button', { name: 'Load more photographs', exact: true })).toHaveCount(0); }
   async expectEmpty() { await expect(this.page.getByRole('heading', { name: 'No photographs yet', exact: true })).toBeVisible(); }
+  async expectLoadingSkeleton(count) { await expect(this.page.locator('.lp-skeleton--tile')).toHaveCount(count); }
   async expectFailure() {
     await expect(this.page.getByRole('alert')).toHaveText('My Work could not be loaded. Try again.');
     await expect(this.page.getByRole('heading', { name: 'No photographs yet', exact: true })).toHaveCount(0);

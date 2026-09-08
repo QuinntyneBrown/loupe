@@ -1,108 +1,145 @@
-<form (ngSubmit)="save()" [attr.aria-busy]="saving()">
-  <label for="upload-image">Photograph</label>
-  <input
-    #fileInput
-    id="upload-image"
-    type="file"
-    accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-    (change)="choose(fileInput.files)"
-    [disabled]="saving()"
-    [attr.aria-invalid]="!!fileError()"
-    [attr.aria-describedby]="fileError() ? 'upload-help upload-file-error' : 'upload-help'"
-  />
-  <p id="upload-help">One still JPEG, PNG, HEIC or WebP, up to 25 MB. Private to you.</p>
-  @if (fileError(); as error) {
-    <p id="upload-file-error" role="alert">{{ error }}</p>
-  }
-  <label for="upload-title">Title (optional)</label>
-  <input
-    id="upload-title"
-    name="title"
-    [ngModel]="title()"
-    (ngModelChange)="setTitle($event)"
-    [disabled]="saving()"
-    [attr.aria-invalid]="errors().title"
-    [attr.aria-describedby]="errors().title ? 'upload-title-error' : null"
-  />
-  @if (errors().title) {
-    <p id="upload-title-error" role="alert">Use 200 characters or fewer.</p>
-  }
-  <h2>Critique brief</h2>
-  <p>Add context for critique. Choose below whether to request one after saving.</p>
-  <label for="upload-intent">Intent (optional)</label>
-  <textarea
-    id="upload-intent"
-    name="intent"
-    [ngModel]="brief().intent ?? ''"
-    (ngModelChange)="setBrief('intent', $event)"
-    [disabled]="saving()"
-    [attr.aria-invalid]="errors().intent"
-    [attr.aria-describedby]="errors().intent ? 'upload-intent-error' : null"
-  ></textarea>
-  @if (errors().intent) {
-    <p id="upload-intent-error" role="alert">Use 2,000 characters or fewer.</p>
-  }
-  <label for="upload-genre">Genre (optional)</label>
-  <input
-    id="upload-genre"
-    name="genre"
-    [ngModel]="brief().genre ?? ''"
-    (ngModelChange)="setBrief('genre', $event)"
-    [disabled]="saving()"
-    [attr.aria-invalid]="errors().genre"
-    [attr.aria-describedby]="errors().genre ? 'upload-genre-error' : null"
-  />
-  @if (errors().genre) {
-    <p id="upload-genre-error" role="alert">Use 100 characters or fewer.</p>
-  }
-  <label for="upload-experience">Experience (optional)</label>
-  <select
-    id="upload-experience"
-    name="experience"
-    [ngModel]="brief().experience ?? ''"
-    (ngModelChange)="setBrief('experience', $event)"
-    [disabled]="saving()"
-  >
-    <option value="">Not specified</option>
-    <option>Beginner</option>
-    <option>Intermediate</option>
-    <option>Advanced</option>
-    <option>Professional</option>
-  </select>
-  <label for="upload-feedback">Requested feedback (optional)</label>
-  <textarea
-    id="upload-feedback"
-    name="feedback"
-    [ngModel]="brief().requestedFeedback ?? ''"
-    (ngModelChange)="setBrief('requestedFeedback', $event)"
-    [disabled]="saving()"
-    [attr.aria-invalid]="errors().requestedFeedback"
-    [attr.aria-describedby]="errors().requestedFeedback ? 'upload-feedback-error' : null"
-  ></textarea>
-  @if (errors().requestedFeedback) {
-    <p id="upload-feedback-error" role="alert">Use 2,000 characters or fewer.</p>
-  }
+<form class="lp-form" (ngSubmit)="save()" [attr.aria-busy]="saving()">
+  <div class="lp-field" [class.is-invalid]="!!fileError()">
+    <label class="lp-field__label" for="upload-image">Photograph</label>
+    <input
+      #fileInput
+      class="lp-input"
+      id="upload-image"
+      type="file"
+      accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+      (change)="choose(fileInput.files)"
+      [disabled]="saving()"
+      [attr.aria-invalid]="!!fileError()"
+      [attr.aria-describedby]="fileError() ? 'upload-help upload-file-error' : 'upload-help'"
+    />
+    <p class="lp-field__hint" id="upload-help">One still JPEG, PNG, HEIC or WebP, up to 25 MB. Private to you.</p>
+    @if (fileError(); as error) {
+      <p class="lp-field__error" id="upload-file-error" role="alert">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>{{ error }}
+      </p>
+    }
+  </div>
+  <div class="lp-field" [class.is-invalid]="errors().title">
+    <label class="lp-field__label" for="upload-title">Title (optional)</label>
+    <input
+      class="lp-input"
+      id="upload-title"
+      name="title"
+      [ngModel]="title()"
+      (ngModelChange)="setTitle($event)"
+      [disabled]="saving()"
+      [attr.aria-invalid]="errors().title"
+      [attr.aria-describedby]="errors().title ? 'upload-title-error' : null"
+    />
+    @if (errors().title) {
+      <p class="lp-field__error" id="upload-title-error" role="alert">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>Use 200 characters or fewer.
+      </p>
+    }
+  </div>
+  <h2 class="lp-title">Critique brief</h2>
+  <p class="lp-muted">Add context for critique. Choose below whether to request one after saving.</p>
+  <div class="lp-field" [class.is-invalid]="errors().intent">
+    <label class="lp-field__label" for="upload-intent">Intent (optional)</label>
+    <textarea
+      class="lp-textarea"
+      id="upload-intent"
+      name="intent"
+      [ngModel]="brief().intent ?? ''"
+      (ngModelChange)="setBrief('intent', $event)"
+      [disabled]="saving()"
+      [attr.aria-invalid]="errors().intent"
+      [attr.aria-describedby]="errors().intent ? 'upload-intent-error' : null"
+    ></textarea>
+    @if (errors().intent) {
+      <p class="lp-field__error" id="upload-intent-error" role="alert">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>Use 2,000 characters or fewer.
+      </p>
+    }
+  </div>
+  <div class="lp-field" [class.is-invalid]="errors().genre">
+    <label class="lp-field__label" for="upload-genre">Genre (optional)</label>
+    <input
+      class="lp-input"
+      id="upload-genre"
+      name="genre"
+      [ngModel]="brief().genre ?? ''"
+      (ngModelChange)="setBrief('genre', $event)"
+      [disabled]="saving()"
+      [attr.aria-invalid]="errors().genre"
+      [attr.aria-describedby]="errors().genre ? 'upload-genre-error' : null"
+    />
+    @if (errors().genre) {
+      <p class="lp-field__error" id="upload-genre-error" role="alert">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>Use 100 characters or fewer.
+      </p>
+    }
+  </div>
+  <div class="lp-field">
+    <label class="lp-field__label" for="upload-experience">Experience (optional)</label>
+    <div class="lp-select-wrap">
+      <select
+        class="lp-select"
+        id="upload-experience"
+        name="experience"
+        [ngModel]="brief().experience ?? ''"
+        (ngModelChange)="setBrief('experience', $event)"
+        [disabled]="saving()"
+      >
+        <option value="">Not specified</option>
+        <option>Beginner</option>
+        <option>Intermediate</option>
+        <option>Advanced</option>
+        <option>Professional</option>
+      </select>
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-down" /></svg>
+    </div>
+  </div>
+  <div class="lp-field" [class.is-invalid]="errors().requestedFeedback">
+    <label class="lp-field__label" for="upload-feedback">Requested feedback (optional)</label>
+    <textarea
+      class="lp-textarea"
+      id="upload-feedback"
+      name="feedback"
+      [ngModel]="brief().requestedFeedback ?? ''"
+      (ngModelChange)="setBrief('requestedFeedback', $event)"
+      [disabled]="saving()"
+      [attr.aria-invalid]="errors().requestedFeedback"
+      [attr.aria-describedby]="errors().requestedFeedback ? 'upload-feedback-error' : null"
+    ></textarea>
+    @if (errors().requestedFeedback) {
+      <p class="lp-field__error" id="upload-feedback-error" role="alert">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>Use 2,000 characters or fewer.
+      </p>
+    }
+  </div>
   @if (failed()) {
     <p role="alert">{{ failureMessage() }}</p>
-    <p>
+    <p class="lp-muted">
       {{
         image() ? 'The selected file is still available.' : 'Select the photograph again to retry.'
       }}
     </p>
   }
-  <label for="upload-next">After saving</label>
-  <select
-    id="upload-next"
-    name="next"
-    [ngModel]="requestCritique()"
-    (ngModelChange)="requestCritique.set($event)"
-    [disabled]="saving()"
-  >
-    <option [ngValue]="false">Save only</option>
-    <option [ngValue]="true">Request critique</option>
-  </select>
-  <button type="submit" [disabled]="invalid() || saving()">
-    {{ failed() ? 'Retry upload' : 'Save photograph' }}
+  <div class="lp-field">
+    <label class="lp-field__label" for="upload-next">After saving</label>
+    <div class="lp-select-wrap">
+      <select
+        class="lp-select"
+        id="upload-next"
+        name="next"
+        [ngModel]="requestCritique()"
+        (ngModelChange)="requestCritique.set($event)"
+        [disabled]="saving()"
+      >
+        <option [ngValue]="false">Save only</option>
+        <option [ngValue]="true">Request critique</option>
+      </select>
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-down" /></svg>
+    </div>
+  </div>
+  <button class="lp-button lp-button--primary" type="submit" [class.is-busy]="saving()" [disabled]="invalid() || saving()">
+    <span class="lp-spinner" aria-hidden="true"></span>{{ failed() ? 'Retry upload' : 'Save photograph' }}
   </button>
   @if (saving()) {
     @let transfer = progress();
@@ -111,7 +148,7 @@
       [attr.max]="transfer?.total || 1"
       [attr.value]="transfer?.total ? transfer?.transferred : null"
     ></progress>
-    <p role="status">
+    <p class="lp-muted" role="status">
       @if (transfer && transfer.total && transfer.transferred < transfer.total) {
         {{ transfer.transferred | number: '1.0-0' }} of {{ transfer.total | number: '1.0-0' }} bytes
         transferred.

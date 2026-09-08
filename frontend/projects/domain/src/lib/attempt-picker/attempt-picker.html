@@ -1,6 +1,8 @@
 @if (error()) {
   <p role="alert">Eligible attempts could not be loaded. Try again.</p>
-  <button type="button" (click)="load()" [disabled]="loading()">Retry loading attempts</button>
+  <button type="button" class="lp-button lp-button--secondary" (click)="load()" [disabled]="loading()">
+    Retry loading attempts
+  </button>
 }
 @if (loading()) {
   <p role="status">Loading eligible attempts…</p>
@@ -39,5 +41,7 @@
   </ul>
 }
 @if (nextCursor() && !error()) {
-  <button type="button" (click)="load()" [disabled]="loading()">Load more attempts</button>
+  <button type="button" class="lp-button lp-button--secondary" (click)="load()" [disabled]="loading()">
+    Load more attempts
+  </button>
 }

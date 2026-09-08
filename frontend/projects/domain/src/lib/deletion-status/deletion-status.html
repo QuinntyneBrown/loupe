@@ -1,7 +1,7 @@
 @if (loading()) {
   <p role="status">Loading cleanup status…</p>
 } @else if (error() === 'item_unavailable') {
-  <h2>Deletion record unavailable</h2>
+  <h2 class="lp-title">Deletion record unavailable</h2>
   <p>This record is unavailable in your library.</p>
 } @else {
   @if (error()) {
@@ -12,5 +12,5 @@
   } @else if (result()?.status === 'Completed') {
     <p role="status">Cleanup completed. The item’s active files have been removed.</p>
   }
-  <button type="button" (click)="retry()">Check cleanup status</button>
+  <button type="button" class="lp-button lp-button--secondary" (click)="retry()">Check cleanup status</button>
 }

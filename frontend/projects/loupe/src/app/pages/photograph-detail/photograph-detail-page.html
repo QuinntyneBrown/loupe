@@ -1,8 +1,8 @@
-<main id="main" tabindex="-1">
-  <a routerLink="/my-work">My Work</a>
+<main id="main" tabindex="-1" class="lp-main">
+  <a class="lp-back" routerLink="/my-work"><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-left" /></svg>My Work</a>
   @if (deletion(); as removed) {
-    <h1>Photograph deleted</h1>
-    <a [routerLink]="['/deletions', removed.id]">View cleanup status</a>
+    <h1 class="lp-title">Photograph deleted</h1>
+    <a class="lp-link" [routerLink]="['/deletions', removed.id]">View cleanup status</a>
   } @else {
     <lp-photograph-detail
       [id]="id()"

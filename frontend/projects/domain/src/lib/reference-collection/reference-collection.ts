@@ -31,6 +31,7 @@ export class ReferenceCollection implements OnInit {
   readonly failed = signal(false);
   readonly loaded = signal(false);
   readonly nextCursor = signal<string | null>(null);
+  readonly skeletonTiles = Array.from({ length: 8 }, (_, index) => index);
   ngOnInit(): void {
     void this.load();
   }

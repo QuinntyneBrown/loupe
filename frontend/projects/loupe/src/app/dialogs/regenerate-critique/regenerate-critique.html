@@ -1,21 +1,35 @@
 <dialog
   #dialog
+  class="lp-dialog"
   aria-labelledby="regenerate-title"
   tabindex="-1"
   (cancel)="cancel($event)"
   (keydown)="trapFocus($event)"
 >
-  <h2 id="regenerate-title">Regenerate “{{ photograph()?.title }}”?</h2>
-  <p>A successful result replaces the current critique. Your personal notes stay unchanged.</p>
-  <p>The current critique stays available while analysis runs or if it fails.</p>
-  @if (photograph(); as photo) {
-    <lp-request-critique
-      [photograph]="photo"
-      [regenerate]="true"
-      (started)="focus()"
-      (admitted)="accept($event)"
-      (reviewed)="review($event)"
-    />
-  }
-  <button type="button" autofocus [disabled]="busy()" (click)="cancel()">Cancel</button>
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="regenerate-title">Regenerate “{{ photograph()?.title }}”?</h2>
+        <p class="lp-dialog__text">A successful result replaces the current critique. Your personal notes stay unchanged.</p>
+      </div>
+      <button class="lp-icon-button" type="button" aria-label="Close" [disabled]="busy()" (click)="cancel()">
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body" tabindex="0">
+      <p>The current critique stays available while analysis runs or if it fails.</p>
+      @if (photograph(); as photo) {
+        <lp-request-critique
+          [photograph]="photo"
+          [regenerate]="true"
+          (started)="focus()"
+          (admitted)="accept($event)"
+          (reviewed)="review($event)"
+        />
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" autofocus [disabled]="busy()" (click)="cancel()">Cancel</button>
+    </footer>
+  </div>
 </dialog>

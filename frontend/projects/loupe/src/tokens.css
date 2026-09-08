@@ -26,7 +26,7 @@
   --lp-color-border-strong: #c9c9cf;
   --lp-color-text: #18181b;
   --lp-color-text-2: #55555e;
-  --lp-color-text-3: #65656f;
+  --lp-color-text-3: #8b8b95;
   --lp-color-ink: #18181b;
   --lp-color-ink-hover: #2e2e33;
   --lp-color-on-ink: #ffffff;
@@ -134,7 +134,7 @@
   --lp-z-toast: 40;
 }
 
-@media (width < 576px) {
+@media (width < 640px) {
   :root {
     --lp-gutter: 16px;
     --lp-tile-min: 150px;

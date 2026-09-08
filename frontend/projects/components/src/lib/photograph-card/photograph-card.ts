@@ -16,6 +16,7 @@ export class PhotographCard {
   }
   readonly title = input.required<string>();
   readonly status = input.required<string>();
+  readonly statusKind = input<'queued' | 'analyzing' | 'ready' | 'failed' | null>(null);
   readonly previewUrl = input.required<string | null>();
   readonly createdAt = input.required<string>();
   readonly width = input.required<number | null>();

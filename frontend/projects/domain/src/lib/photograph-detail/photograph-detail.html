@@ -1,71 +1,84 @@
 @if (loading()) {
   <p role="status">Loading photograph…</p>
 } @else if (photo(); as item) {
-  <header>
-    <h1>{{ item.title }}</h1>
-    <p>
-      Saved <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'medium' }}</time> ·
-      Private to you
-    </p>
-  </header>
-  <div class="detail">
-    <figure>
-      <img [src]="item.imageUrl" [alt]="item.title" [width]="item.width" [height]="item.height" />
-    </figure>
-    <div class="context">
+  <div class="lp-detail">
+    <div class="lp-detail__head">
+      <div class="lp-detail__title-row">
+        <h1 class="lp-title">{{ item.title }}</h1>
+      </div>
+      <div class="lp-detail__meta">
+        <span>
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>
+          Private
+        </span>
+        <span
+          >Saved
+          <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'medium' }}</time></span
+        >
+      </div>
+    </div>
+    <div class="lp-detail__media">
+      <figure>
+        <img [src]="item.imageUrl" [alt]="item.title" [width]="item.width" [height]="item.height" />
+      </figure>
+      <section aria-labelledby="capture-heading">
+        <h2 id="capture-heading" class="lp-kicker">Capture settings</h2>
+        @if (!hasCaptureSettings()) {
+          <p class="lp-exif lp-exif--empty">No capture settings available.</p>
+        }
+        <dl class="lp-exif" aria-label="Camera settings">
+          @for (field of captureFields; track field.key) {
+            @if (item.exif[field.key]) {
+              <div class="lp-exif__item">
+                <dt>{{ field.label }}</dt>
+                <dd>{{ item.exif[field.key] }}</dd>
+              </div>
+            }
+          }
+        </dl>
+      </section>
+    </div>
+    <div class="lp-detail__body">
       <section aria-labelledby="brief-heading">
-        <h2 id="brief-heading">Critique brief</h2>
+        <h2 id="brief-heading" class="lp-kicker">Critique brief</h2>
         <lp-photograph-brief
           [photograph]="item"
           (saved)="photo.set($event)"
           (discardRequested)="discardRequested.emit($event)"
         />
       </section>
-      <section aria-labelledby="capture-heading">
-        <h2 id="capture-heading">Capture settings</h2>
-        @if (!hasCaptureSettings()) {
-          <p>No capture settings available.</p>
-        }
-        <dl>
-          @for (field of captureFields; track field.key) {
-            @if (item.exif[field.key]) {
-              <dt>{{ field.label }}</dt>
-              <dd>{{ item.exif[field.key] }}</dd>
-            }
-          }
-        </dl>
-      </section>
+      <lp-critique-status
+        [photograph]="item"
+        [briefDirty]="briefDirty()"
+        (completed)="completedCritiqueId.set($event)"
+        (reviewed)="photo.set($event)"
+      />
+      <lp-photograph-critique
+        [id]="item.id"
+        [operationId]="completedCritiqueId()"
+        [regenerationBlocked]="regenerationBlocked()"
+        (regenerationRequested)="regenerateRequested.emit(item)"
+      />
       <section aria-labelledby="notes-heading">
-        <h2 id="notes-heading">Personal notes</h2>
+        <h2 id="notes-heading" class="lp-kicker">Personal notes</h2>
         <lp-photograph-notes [photograph]="item" (saved)="photo.set($event)" />
       </section>
+      <button
+        #deleteButton
+        type="button"
+        class="lp-button lp-button--secondary"
+        (click)="deleteButton.focus(); deleteRequested.emit(item)"
+      >
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-trash" /></svg>
+        Delete photograph
+      </button>
     </div>
   </div>
-  <lp-critique-status
-    [photograph]="item"
-    [briefDirty]="briefDirty()"
-    (completed)="completedCritiqueId.set($event)"
-    (reviewed)="photo.set($event)"
-  />
-  <lp-photograph-critique
-    [id]="item.id"
-    [operationId]="completedCritiqueId()"
-    [regenerationBlocked]="regenerationBlocked()"
-    (regenerationRequested)="regenerateRequested.emit(item)"
-  />
-  <button
-    #deleteButton
-    type="button"
-    class="delete"
-    (click)="deleteButton.focus(); deleteRequested.emit(item)"
-  >
-    Delete photograph
-  </button>
 } @else if (error() === 'item_unavailable') {
-  <h1>Photograph unavailable</h1>
+  <h1 class="lp-title">Photograph unavailable</h1>
   <p>This photograph is unavailable in your library.</p>
 } @else {
-  <h1>Photograph</h1>
+  <h1 class="lp-title">Photograph</h1>
   <p role="alert">This photograph could not be loaded. Try again.</p>
-  <button type="button" (click)="retry()">Try again</button>
+  <button type="button" class="lp-button lp-button--secondary" (click)="retry()">Try again</button>
 }

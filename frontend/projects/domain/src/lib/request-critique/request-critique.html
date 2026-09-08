@@ -17,9 +17,9 @@
 }
 @if (latest(); as photo) {
   <section aria-labelledby="latest-critique-brief">
-    <h3 id="latest-critique-brief">Latest brief for critique</h3>
+    <h3 id="latest-critique-brief" class="lp-kicker">Latest brief for critique</h3>
     <p role="status">Latest saved brief loaded. Review it before requesting.</p>
-    <dl>
+    <dl class="lp-meta">
       @for (field of fields; track field.key) {
         <dt>{{ field.label }}</dt>
         <dd>{{ photo.brief[field.key] || 'None supplied' }}</dd>
@@ -28,19 +28,19 @@
     @if (briefDirty()) {
       <p>Save or cancel your brief edits before requesting a critique.</p>
     }
-    <button type="button" [disabled]="busy() || briefDirty()" (click)="requestLatest()">
-      {{ reviewedAction() }} with this saved brief
+    <button type="button" class="lp-button lp-button--primary" [class.is-busy]="busy()" [disabled]="busy() || briefDirty()" (click)="requestLatest()">
+      <span class="lp-spinner" aria-hidden="true"></span>{{ reviewedAction() }} with this saved brief
     </button>
   </section>
 } @else if (needsReview()) {
   @if (reviewing()) {
     <p role="status">Loading latest saved brief…</p>
   }
-  <button type="button" [disabled]="reviewing()" (click)="review()">
+  <button type="button" class="lp-button lp-button--secondary" [disabled]="reviewing()" (click)="review()">
     Review latest saved brief
   </button>
 } @else if (!cannotRetry()) {
-  <button type="button" [disabled]="blocked()" (click)="request()">
-    {{ error() ? 'Retry critique request' : action() }}
+  <button type="button" class="lp-button lp-button--primary" [class.is-busy]="busy()" [disabled]="blocked()" (click)="request()">
+    <span class="lp-spinner" aria-hidden="true"></span>{{ error() ? 'Retry critique request' : action() }}
   </button>
 }

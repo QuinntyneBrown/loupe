@@ -1,18 +1,31 @@
-<main id="main" tabindex="-1">
-  <a class="wordmark" href="/">Loupe</a>
-  <p class="eyebrow">LOOK CLOSER. KEEP LEARNING.</p>
-  <h1>A private space for your photography</h1>
-  @if (error() === 'authentication_failed') {
-    <p role="alert">Sign-in could not be completed. Please try again.</p>
-  }
-  <p>
-    Develop your eye through thoughtful photo critiques and a library of work that inspires you.
-  </p>
-  @if (error() === 'session_unavailable') {
-    <p role="alert">Your session could not be checked. Please try again.</p>
-    <button type="button" (click)="retry()">Try again</button>
-  } @else {
-    <button type="button" (click)="continue()">Continue to sign in</button>
-  }
-  <p class="privacy">Your photographs, references, and notes are private to you.</p>
+<main class="lp-auth" id="main" tabindex="-1">
+  <div class="lp-auth__card">
+    <div class="lp-auth__head">
+      <span class="lp-wordmark" aria-label="Loupe">L<span class="lp-wordmark__o"></span>upe</span>
+      <p class="eyebrow">LOOK CLOSER. KEEP LEARNING.</p>
+      <h1 class="lp-title">A private space for your photography</h1>
+      <p class="lp-muted">
+        Develop your eye through thoughtful photo critiques and a library of work that inspires you.
+      </p>
+    </div>
+    @if (error() === 'authentication_failed') {
+      <div class="lp-notice lp-notice--error" role="alert">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>
+        Sign-in could not be completed. Please try again.
+      </div>
+    }
+    @if (error() === 'session_unavailable') {
+      <div class="lp-notice lp-notice--error" role="alert">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>
+        Your session could not be checked. Please try again.
+      </div>
+      <button class="lp-button lp-button--primary lp-button--block" type="button" (click)="retry()">Try again</button>
+    } @else {
+      <button class="lp-button lp-button--primary lp-button--block" type="button" (click)="continue()">Continue to sign in</button>
+    }
+    <p class="lp-auth__foot privacy">
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>
+      Your photographs, references, and notes are private to you.
+    </p>
+  </div>
 </main>

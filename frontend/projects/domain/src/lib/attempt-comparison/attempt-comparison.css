@@ -19,9 +19,6 @@ h3 {
   font-size: var(--lp-text-xl);
   margin-top: var(--lp-space-7);
 }
-.label {
-  font-weight: var(--lp-weight-semibold);
-}
 img {
   display: block;
   width: var(--lp-full);
@@ -33,14 +30,6 @@ p,
 dd {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-}
-dt {
-  color: var(--lp-color-text-2);
-  font-size: var(--lp-text-sm);
-  margin-top: var(--lp-space-4);
-}
-dd {
-  margin: var(--lp-space-1) var(--lp-zero) var(--lp-zero);
 }
 lp-critique-content {
   --lp-detail-columns: var(--lp-fraction);

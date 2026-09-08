@@ -1,38 +1,44 @@
 @if (!editing()) {
-  <button #editButton type="button" (click)="open()">Edit metadata</button>
+  <button #editButton type="button" class="lp-button lp-button--ghost lp-button--sm" (click)="open()">
+    Edit metadata
+  </button>
 } @else {
-  <form (ngSubmit)="save()" [attr.aria-busy]="busy()" novalidate>
-    <h2>Edit metadata</h2>
+  <form class="lp-form" (ngSubmit)="save()" [attr.aria-busy]="busy()" novalidate>
+    <h2 class="lp-kicker">Edit metadata</h2>
     @for (field of fields; track field.key) {
-      <label [for]="'metadata-' + field.key">{{
-        field.key === 'title' ? 'Title' : field.label
-      }}</label>
-      @if (field.key === 'notes') {
-        <textarea
-          [id]="'metadata-' + field.key"
-          [name]="field.key"
-          [ngModel]="draft()[field.key] ?? ''"
-          (ngModelChange)="setField(field.key, $event)"
-          [disabled]="busy()"
-          [attr.aria-invalid]="!!errors()[field.key]"
-          [attr.aria-describedby]="errors()[field.key] ? 'metadata-' + field.key + '-error' : null"
-        ></textarea>
-      } @else {
-        <input
-          #firstField
-          [id]="'metadata-' + field.key"
-          [name]="field.key"
-          [type]="field.key === 'sourceUrl' ? 'url' : 'text'"
-          [ngModel]="draft()[field.key] ?? ''"
-          (ngModelChange)="setField(field.key, $event)"
-          [disabled]="busy()"
-          [attr.aria-invalid]="!!errors()[field.key]"
-          [attr.aria-describedby]="errors()[field.key] ? 'metadata-' + field.key + '-error' : null"
-        />
-      }
-      @if (errors()[field.key]; as error) {
-        <p [id]="'metadata-' + field.key + '-error'" role="alert">{{ error }}</p>
-      }
+      <div class="lp-field">
+        <label class="lp-field__label" [for]="'metadata-' + field.key">{{
+          field.key === 'title' ? 'Title' : field.label
+        }}</label>
+        @if (field.key === 'notes') {
+          <textarea
+            class="lp-textarea"
+            [id]="'metadata-' + field.key"
+            [name]="field.key"
+            [ngModel]="draft()[field.key] ?? ''"
+            (ngModelChange)="setField(field.key, $event)"
+            [disabled]="busy()"
+            [attr.aria-invalid]="!!errors()[field.key]"
+            [attr.aria-describedby]="errors()[field.key] ? 'metadata-' + field.key + '-error' : null"
+          ></textarea>
+        } @else {
+          <input
+            #firstField
+            class="lp-input"
+            [id]="'metadata-' + field.key"
+            [name]="field.key"
+            [type]="field.key === 'sourceUrl' ? 'url' : 'text'"
+            [ngModel]="draft()[field.key] ?? ''"
+            (ngModelChange)="setField(field.key, $event)"
+            [disabled]="busy()"
+            [attr.aria-invalid]="!!errors()[field.key]"
+            [attr.aria-describedby]="errors()[field.key] ? 'metadata-' + field.key + '-error' : null"
+          />
+        }
+        @if (errors()[field.key]; as error) {
+          <p [id]="'metadata-' + field.key + '-error'" class="lp-field__error" role="alert">{{ error }}</p>
+        }
+      </div>
     }
     @if (unavailable()) {
       <p role="alert">Reference unavailable. Your metadata draft has been kept.</p>
@@ -44,7 +50,7 @@
             : 'This reference changed. Your metadata draft has been kept.'
         }}
       </p>
-      <button type="button" [disabled]="busy()" (click)="reloadLatest()">
+      <button type="button" class="lp-button lp-button--secondary" [disabled]="busy()" (click)="reloadLatest()">
         Reload latest metadata
       </button>
     } @else if (failed()) {
@@ -52,8 +58,8 @@
     }
     @if (latest(); as metadata) {
       <section aria-label="Latest saved metadata">
-        <h3 #latestHeading tabindex="-1">Latest saved metadata</h3>
-        <dl>
+        <h3 #latestHeading tabindex="-1" class="lp-kicker">Latest saved metadata</h3>
+        <dl class="lp-meta">
           @for (field of fields; track field.key) {
             <dt>{{ field.key === 'title' ? 'Title' : field.label }}</dt>
             <dd>{{ metadata[field.key] || 'Not specified' }}</dd>
@@ -65,11 +71,15 @@
     <div class="actions">
       <button
         type="submit"
+        class="lp-button lp-button--primary"
+        [class.is-busy]="saving()"
         [disabled]="busy() || conflicted() || unavailable() || invalid() || !dirty()"
       >
-        {{ failed() ? 'Retry metadata save' : 'Save metadata' }}
+        <span class="lp-spinner" aria-hidden="true"></span>{{ failed() ? 'Retry metadata save' : 'Save metadata' }}
       </button>
-      <button type="button" [disabled]="busy()" (click)="cancel()">Cancel metadata edit</button>
+      <button type="button" class="lp-button lp-button--ghost" [disabled]="busy()" (click)="cancel()">
+        Cancel metadata edit
+      </button>
     </div>
     @if (saving()) {
       <p role="status">Saving metadata…</p>
