@@ -36,6 +36,7 @@ public static class PersistenceSetup
         services.AddScoped<IBackgroundOperationStore, BackgroundOperationStore>();
         services.AddSingleton<ICritiqueConfiguration, CritiqueConfiguration>();
         services.AddScoped<ICritiqueWorkStore, CritiqueWorkStore>();
+        services.AddScoped<IOperationLeaseStore, OperationLeaseStore>();
         services.AddSingleton<DemoCritiqueProvider>();
         services.AddScoped<OpenAiCritiqueProvider>();
         services.AddScoped<ICritiqueProvider>(provider => provider.GetRequiredService<IOptions<AiOptions>>().Value.Mode == "Demo"
