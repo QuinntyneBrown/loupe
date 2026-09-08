@@ -7,6 +7,21 @@ namespace Loupe.Infrastructure.Persistence;
 
 public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
 {
+    public async Task<Reference> UpdateAsync(Guid id, string ownerId, long revision, ReferenceMetadata metadata, CancellationToken cancellationToken)
+    {
+        var reference = await database.References.SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken)
+            ?? throw new ResourceNotFoundException();
+        if (reference.Revision != revision) throw new RevisionConflictException();
+        reference.Title = metadata.Title;
+        reference.SourceUrl = metadata.SourceUrl;
+        reference.Attribution = metadata.Attribution;
+        reference.Notes = metadata.Notes;
+        reference.Revision++;
+        try { await database.SaveChangesAsync(cancellationToken); }
+        catch (DbUpdateConcurrencyException) { throw new RevisionConflictException(); }
+        return reference;
+    }
+
     public async Task<IReadOnlyList<ReferenceSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, CancellationToken cancellationToken)
     {
         var query = database.References.AsNoTracking().Where(reference => reference.OwnerId == ownerId);

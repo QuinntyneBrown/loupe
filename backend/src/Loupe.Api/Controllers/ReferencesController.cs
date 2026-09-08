@@ -30,6 +30,10 @@ public sealed class ReferencesController(ISender sender) : ControllerBase
     [HttpGet("{id:guid}")]
     public Task<ReferenceResult> Get(Guid id, CancellationToken cancellationToken) => sender.Send(new GetReferenceQuery(id), cancellationToken);
 
+    [HttpPut("{id:guid}")]
+    public Task<ReferenceResult> Update(Guid id, UpdateReferenceRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new UpdateReferenceCommand(id, request.Revision, request.Title, request.SourceUrl, request.Attribution, request.Notes), cancellationToken);
+
     [HttpGet("{id:guid}/image")]
     public async Task<IActionResult> Image(Guid id, CancellationToken cancellationToken)
     {

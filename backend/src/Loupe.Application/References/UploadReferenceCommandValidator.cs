@@ -14,12 +14,6 @@ public static class UploadReferenceCommandValidator
     {
         var title = TextField.Normalize(request.Title, 200, "title")
             ?? TextField.Default(Path.GetFileNameWithoutExtension(request.Image.Filename.Replace('\\', '/')), 200, "Untitled reference");
-        var source = TextField.Normalize(request.SourceUrl, 2048, "sourceUrl");
-        if (source is not null && (source.Contains('\\') || source.Any(char.IsWhiteSpace)
-            || !Uri.TryCreate(source, UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https")
-            || !uri.IsDefaultPort || !string.IsNullOrEmpty(uri.UserInfo)))
-            throw new RequestValidationException("sourceUrl", "Use an absolute HTTP or HTTPS URL on its standard port, without credentials.");
-        return new ReferenceMetadata(title, source, TextField.Normalize(request.Attribution, 200, "attribution"),
-            TextField.Normalize(request.Notes, 10000, "notes"));
+        return ReferenceMetadataValidator.Normalize(title, request.SourceUrl, request.Attribution, request.Notes);
     }
 }
