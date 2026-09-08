@@ -32,6 +32,7 @@ public sealed class DeletedContentCleaner(LibraryDbContext database, IImageStore
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 if (await database.Photographs.AnyAsync(photo => photo.ImageKey == key || photo.PreviewKey == key, cancellationToken)) continue;
+                if (await database.References.AnyAsync(reference => reference.ImageKey == key || reference.PreviewKey == key, cancellationToken)) continue;
                 try
                 {
                     images.Delete(key);

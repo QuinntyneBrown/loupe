@@ -640,3 +640,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 
 - Expanded the existing full-image, labeled-column, no-overflow and accessibility assertions from four widths to all 14 specified viewports. The earlier controls remain included unchanged.
 - All 42 checks passed across Chromium, Firefox and WebKit (1.4m). This is additional coverage of UI-35/37 behavior, with no production change. Diff review passed. L2-005.5 is covered; named manual assistive-technology/device release checks remain separate gates.
+
+## API-50: save uploaded inspiration references
+
+- Red: all 13 reference-upload checks failed at the missing endpoint. Green: all 13 targeted checks and all 263 container API tests passed (full regression 1m52s).
+- POST /api/references/images validates normalized title/source/attribution/notes and one-image/request-key constraints, then reuses sanitized image ingestion and transactional receipt handling. Source syntax is validated without fetching it. Missing source/attribution/notes remain absent; filename-derived titles use the inspiration fallback. References are separate records and do not queue analysis or appear in My Work.
+- Owner-scoped detail/full-image/preview reads preserve metadata after another API instance starts. Tests cover normalized metadata, unknown fields, overlong input, unsafe URL forms, request replay/conflicting reuse, owner/anonymous media access, and live files surviving abandoned cleanup. The new table is introduced by 20260908050812_SavedReferences; both cleanup paths recognize live reference keys.
+- Independent review ended with no Required findings after confirming that media writes use fresh non-overwriting GUID keys, so journal cleanup cannot collide with a future upload through supported behavior. C# format verification and diff checks passed. Paginated browsing, editing, import, replacement, and AI metadata follow as separate slices.

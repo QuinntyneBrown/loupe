@@ -5,6 +5,7 @@ using Loupe.Application.Operations;
 using Loupe.Application.Deletions;
 using Loupe.Application.Maintenance;
 using Loupe.Application.Critiques;
+using Loupe.Application.References;
 using Loupe.Infrastructure.Ai;
 using Loupe.Infrastructure.Images;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ public static class PersistenceSetup
             options.UseNpgsql(provider.GetRequiredService<IOptions<DatabaseOptions>>().Value.Library));
         services.AddScoped<ISessionStore, SessionStore>();
         services.AddScoped<IPhotographStore, PhotographStore>();
+        services.AddScoped<IReferenceStore, ReferenceStore>();
         services.AddScoped<IOperationReceiptStore, OperationReceiptStore>();
         services.AddScoped<IBackgroundOperationStore, BackgroundOperationStore>();
         services.AddSingleton<ICritiqueConfiguration, CritiqueConfiguration>();

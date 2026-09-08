@@ -2,6 +2,7 @@ using Loupe.Domain.Sessions;
 using Loupe.Domain.Photographs;
 using Loupe.Domain.Operations;
 using Loupe.Domain.Deletions;
+using Loupe.Domain.References;
 using Microsoft.EntityFrameworkCore;
 
 namespace Loupe.Infrastructure.Persistence;
@@ -10,12 +11,16 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
 {
     public DbSet<ApplicationSession> Sessions => Set<ApplicationSession>();
     public DbSet<Photograph> Photographs => Set<Photograph>();
+    public DbSet<Reference> References => Set<Reference>();
     public DbSet<OperationReceipt> OperationReceipts => Set<OperationReceipt>();
     public DbSet<DeletionOperation> Deletions => Set<DeletionOperation>();
     public DbSet<BackgroundOperation> BackgroundOperations => Set<BackgroundOperation>();
     public DbSet<AnalysisDispatchCursor> AnalysisDispatchCursors => Set<AnalysisDispatchCursor>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Reference>().ToTable("references").HasKey(reference => reference.Id);
+        modelBuilder.Entity<Reference>().HasIndex(reference => new { reference.OwnerId, reference.CreatedAt, reference.Id });
+        modelBuilder.Entity<Reference>().Property(reference => reference.Revision).HasDefaultValue(1L).IsConcurrencyToken();
         modelBuilder.Entity<AnalysisDispatchCursor>().ToTable("analysis_dispatch_cursor").HasKey(cursor => cursor.Id);
         modelBuilder.Entity<AnalysisDispatchCursor>().Property(cursor => cursor.OwnerId).HasMaxLength(64);
         modelBuilder.Entity<AnalysisDispatchCursor>().HasData(new AnalysisDispatchCursor());
