@@ -5,6 +5,7 @@
   --lp-fraction: 1fr;
   --lp-image-columns: 1;
   --lp-detail-columns: minmax(0, 1fr);
+  --lp-comparison-columns: minmax(0, 1fr);
   --lp-full: 100%;
   --lp-heading-fluid: 5vw;
   --lp-heading-max: 4rem;
@@ -141,6 +142,6 @@
 }
 
 @media (width >= 576px) { :root { --lp-image-columns: 2; } }
-@media (width >= 768px) { :root { --lp-image-columns: 3; } }
+@media (width >= 768px) { :root { --lp-image-columns: 3; --lp-comparison-columns: repeat(2, minmax(0, 1fr)); } }
 @media (width >= 992px) { :root { --lp-image-columns: 4; --lp-detail-columns: minmax(0, 2fr) minmax(0, 1fr); } }
 @media (width >= 1200px) { :root { --lp-image-columns: 5; } }

@@ -1,0 +1,42 @@
+<h2 #heading tabindex="-1">Saved attempts</h2>
+@if (loading()) {
+  <p role="status">Loading comparison…</p>
+} @else if (error() === 'invalid_request') {
+  <p role="alert">Choose two different photographs with saved critiques.</p>
+} @else if (error() === 'item_unavailable') {
+  <p role="alert">Comparison unavailable. A photograph may have been removed.</p>
+} @else if (error()) {
+  <p role="alert">The comparison could not be loaded. Try again.</p>
+  <button type="button" (click)="retry()">Retry comparison</button>
+} @else {
+  <div class="attempts">
+    @for (side of sides(); track side.label) {
+      <section [attr.aria-label]="side.label">
+        <p class="label">{{ side.label }}</p>
+        <h2>{{ side.photograph.title }}</h2>
+        <p>
+          Saved
+          <time [attr.datetime]="side.photograph.createdAt">{{
+            side.photograph.createdAt | date: 'medium'
+          }}</time>
+        </p>
+        <img
+          [src]="side.photograph.imageUrl"
+          [alt]="side.photograph.title"
+          [width]="side.photograph.width"
+          [height]="side.photograph.height"
+        />
+        <h3>Current brief</h3>
+        <dl>
+          @for (field of briefFields; track field.key) {
+            <dt>{{ field.label }}</dt>
+            <dd>{{ side.photograph.brief[field.key] || 'None supplied' }}</dd>
+          }
+        </dl>
+        <h3>Personal notes</h3>
+        <p>{{ side.photograph.notes || 'No personal notes saved.' }}</p>
+        <lp-critique-content [content]="side.content" />
+      </section>
+    }
+  </div>
+}

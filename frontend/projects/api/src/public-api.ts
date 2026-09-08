@@ -20,3 +20,6 @@ export * from './lib/critique/critique-retry';
 export * from './lib/critique/critique.service.contract';
 export * from './lib/critique/critique.service';
 export * from './lib/operation/operation-result';
+export * from './lib/comparison/comparison-result';
+export * from './lib/comparison/comparison.service.contract';
+export * from './lib/comparison/comparison.service';

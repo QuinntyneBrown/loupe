@@ -7,8 +7,15 @@ import { photographUnsavedGuard } from './photograph-unsaved.guard';
 import { PhotographUploadPage } from './pages/photograph-upload/photograph-upload-page';
 import { photographUploadUnsavedGuard } from './photograph-upload-unsaved.guard';
 import { DeletionPage } from './pages/deletion/deletion-page';
+import { ComparePage } from './pages/compare/compare-page';
 
 export const routes: Routes = [
+  {
+    path: 'compare',
+    component: ComparePage,
+    canActivate: [sessionGuard],
+    title: 'Compare attempts · Loupe',
+  },
   { path: '', pathMatch: 'full', redirectTo: 'my-work' },
   { path: 'sign-in', component: SignIn, title: 'Sign in · Loupe' },
   { path: 'my-work', component: MyWork, canActivate: [sessionGuard], title: 'My Work · Loupe' },

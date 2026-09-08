@@ -92,6 +92,15 @@ export class PhotographLibrary {
         if (this.lostCritiqueRetryResponses > 0) { this.lostCritiqueRetryResponses--; return { error: 'request_failed' }; }
         return { data: result };
       }
+      if (operation === 'compare') {
+        if (!input.firstId || !input.secondId || input.firstId === input.secondId) return { error: 'invalid_request' };
+        const first = this.photos.find(photo => photo.id === input.firstId);
+        const second = this.photos.find(photo => photo.id === input.secondId);
+        if (!first || !second) return { error: 'item_unavailable' };
+        if (!this.critiques.has(first.id) || !this.critiques.has(second.id)) return { error: 'invalid_request' };
+        return { data: { first: { photograph: first, critique: this.critiques.get(first.id) },
+          second: { photograph: second, critique: this.critiques.get(second.id) } } };
+      }
       if (operation === 'deletePhotograph') {
         const previous = [...this.deletions.values()].find(deletion => deletion.resourceId === input.id);
         if (previous) return { data: previous };
