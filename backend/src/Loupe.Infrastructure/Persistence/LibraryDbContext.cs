@@ -13,8 +13,12 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
     public DbSet<OperationReceipt> OperationReceipts => Set<OperationReceipt>();
     public DbSet<DeletionOperation> Deletions => Set<DeletionOperation>();
     public DbSet<BackgroundOperation> BackgroundOperations => Set<BackgroundOperation>();
+    public DbSet<AnalysisDispatchCursor> AnalysisDispatchCursors => Set<AnalysisDispatchCursor>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AnalysisDispatchCursor>().ToTable("analysis_dispatch_cursor").HasKey(cursor => cursor.Id);
+        modelBuilder.Entity<AnalysisDispatchCursor>().Property(cursor => cursor.OwnerId).HasMaxLength(64);
+        modelBuilder.Entity<AnalysisDispatchCursor>().HasData(new AnalysisDispatchCursor());
         modelBuilder.Entity<ApplicationSession>().ToTable("sessions").HasKey(session => session.Id);
         modelBuilder.Entity<Photograph>().ToTable("photographs").HasKey(photograph => photograph.Id);
         modelBuilder.Entity<Photograph>().HasIndex(photograph => new { photograph.OwnerId, photograph.CreatedAt, photograph.Id });

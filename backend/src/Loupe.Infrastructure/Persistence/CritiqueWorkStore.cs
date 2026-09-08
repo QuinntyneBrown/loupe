@@ -12,16 +12,25 @@ public sealed class CritiqueWorkStore(LibraryDbContext database, TimeProvider cl
     public async Task<BackgroundOperation?> ClaimAsync(ExecutionMode mode, CancellationToken cancellationToken)
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
+        var cursor = await database.AnalysisDispatchCursors.FromSqlRaw("SELECT * FROM analysis_dispatch_cursor WHERE \"Id\" = 1 FOR UPDATE")
+            .AsNoTracking().SingleAsync(cancellationToken);
         var now = clock.GetUtcNow();
+        if (await database.BackgroundOperations.CountAsync(item => item.Status == OperationStatus.Running && item.LeaseExpiresAt > now, cancellationToken) >= 4)
+            return null;
         var operation = await database.BackgroundOperations.FromSqlInterpolated($"""
-            SELECT * FROM background_operations
-            WHERE "Type" = 'Critique' AND "Mode" = {mode.ToString()}
-              AND (("Status" = 'Queued' AND ("NextAttemptAt" IS NULL OR "NextAttemptAt" <= {now}))
-                OR ("Status" = 'Running' AND "LeaseExpiresAt" <= {now}))
-            ORDER BY "CreatedAt", "Id" LIMIT 1 FOR UPDATE SKIP LOCKED
+            SELECT candidate.* FROM background_operations candidate
+            WHERE candidate."Type" = 'Critique' AND candidate."Mode" = {mode.ToString()}
+              AND ((candidate."Status" = 'Queued' AND (candidate."NextAttemptAt" IS NULL OR candidate."NextAttemptAt" <= {now}))
+                OR (candidate."Status" = 'Running' AND candidate."LeaseExpiresAt" <= {now}))
+              AND (SELECT COUNT(*) FROM background_operations active
+                   WHERE active."OwnerId" = candidate."OwnerId" AND active."Status" = 'Running' AND active."LeaseExpiresAt" > {now}) < 2
+            ORDER BY (candidate."OwnerId" > {cursor.OwnerId}) DESC, candidate."OwnerId", candidate."CreatedAt", candidate."Id"
+            LIMIT 1 FOR UPDATE OF candidate SKIP LOCKED
             """)
             .SingleOrDefaultAsync(cancellationToken);
         if (operation is null) return null;
+        await database.AnalysisDispatchCursors.Where(item => item.Id == 1)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.OwnerId, operation.OwnerId), cancellationToken);
         if (operation.Status == OperationStatus.Running)
         {
             if (operation.RecoveryCount >= 1 || operation.AttemptCount >= 3)
