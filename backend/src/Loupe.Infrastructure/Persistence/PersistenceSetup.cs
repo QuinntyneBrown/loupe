@@ -35,7 +35,11 @@ public static class PersistenceSetup
         services.AddSingleton<IDnsResolver, DnsResolver>();
         services.AddSingleton<ISourceConnector, SocketSourceConnector>();
         services.AddScoped<IRestrictedPageFetcher, RestrictedPageFetcher>();
-        services.AddHttpClient("sourceFetch", client => client.Timeout = Timeout.InfiniteTimeSpan)
+        services.AddHttpClient("sourceFetch", client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Loupe/1.0");
+            })
             .ConfigurePrimaryHttpMessageHandler(provider => new SocketsHttpHandler
             {
                 AllowAutoRedirect = false,

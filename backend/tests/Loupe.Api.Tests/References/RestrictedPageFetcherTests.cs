@@ -140,4 +140,18 @@ public sealed class RestrictedPageFetcherTests(PostgreSqlFixture database) : ICl
         Assert.Equal(Public, attempt.Address);
         Assert.Equal(80, attempt.Port);
     }
+
+    [Fact]
+    public async Task L2_040_5_The_request_identifies_the_importer_and_carries_no_ambient_credentials()
+    {
+        var (factory, dns, connector) = Build();
+        await using var _ = factory;
+        dns.Map("plain.example", Public);
+        var fetcher = await FetcherAsync(factory);
+        using var response = await fetcher.FetchAsync(new Uri("http://plain.example/"), default);
+        var request = Assert.Single(connector.Attempts).RequestText;
+        Assert.Contains("User-Agent: Loupe/1.0", request);
+        Assert.DoesNotContain("Cookie:", request, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Authorization:", request, StringComparison.OrdinalIgnoreCase);
+    }
 }
