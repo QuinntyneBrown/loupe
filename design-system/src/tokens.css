@@ -1,5 +1,51 @@
 /* Authoritative Loupe visual tokens. Frontend consumes a build-time mirror. */
 
+/* Self-hosted (not Google Fonts CDN): the design-system site must make zero
+   external requests, and the app shares this same-origin posture. Files are
+   vendored under public/fonts/ (Latin subset, woff2, from the MIT-licensed
+   @fontsource/instrument-sans and @fontsource/spline-sans-mono packages) and
+   served from /fonts/ by both Vite and the Angular build, so this file stays
+   a plain copy-mirrored source of truth for both. Explicit @font-face rules,
+   not @import of the npm package CSS: Angular's esbuild CSS pipeline does not
+   resolve bare package-specifier @imports the way Vite does. Only the three
+   weights every consumer requests (--lp-weight-regular/medium/semibold) are
+   included. */
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/instrument-sans-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/instrument-sans-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("/fonts/instrument-sans-latin-600-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Spline Sans Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/spline-sans-mono-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Spline Sans Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/spline-sans-mono-latin-500-normal.woff2") format("woff2");
+}
+
 :root {
   --lp-zero: 0;
   --lp-fraction: 1fr;

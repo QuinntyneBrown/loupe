@@ -40,4 +40,14 @@ export class SignInPage {
     await expect(this.page.getByRole('button', { name: 'Try again', exact: true })).toBeEnabled();
   }
   async retrySession() { await this.page.getByRole('button', { name: 'Try again', exact: true }).click(); }
+  async expectFontsLoaded() {
+    // document.fonts.check() is unreliable here — Chromium reports it true even for a
+    // font name with no @font-face and no matching system font at all. document.fonts.load()
+    // genuinely distinguishes "a matching @font-face exists and loaded" from "it doesn't".
+    await this.page.evaluate(() => document.fonts.ready);
+    for (const font of ['400 16px "Instrument Sans"', '600 16px "Instrument Sans"', '400 16px "Spline Sans Mono"']) {
+      const loaded = await this.page.evaluate((f) => document.fonts.load(f).then((list) => list.length), font);
+      expect(loaded, `expected a loaded @font-face for ${font}`).toBeGreaterThan(0);
+    }
+  }
 }

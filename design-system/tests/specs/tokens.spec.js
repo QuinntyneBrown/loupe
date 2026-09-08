@@ -12,6 +12,7 @@ test('L2-051.2/.5: browse every token category without external requests or runt
   await reference.open();
   await reference.browseTokens();
   await reference.expectNoAccessibilityViolations();
+  await reference.expectFontsLoaded();
   expect(external).toEqual([]);
   expect(errors).toEqual([]);
 });

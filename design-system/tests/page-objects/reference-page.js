@@ -31,6 +31,16 @@ export class ReferencePage {
     const { default: AxeBuilder } = await import('@axe-core/playwright');
     expect((await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]);
   }
+  async expectFontsLoaded() {
+    // document.fonts.check() is unreliable here — Chromium reports it true even for a
+    // font name with no @font-face and no matching system font at all. document.fonts.load()
+    // genuinely distinguishes "a matching @font-face exists and loaded" from "it doesn't".
+    await this.page.evaluate(() => document.fonts.ready);
+    for (const font of ['400 16px "Instrument Sans"', '600 16px "Instrument Sans"', '400 16px "Spline Sans Mono"']) {
+      const loaded = await this.page.evaluate((f) => document.fonts.load(f).then((list) => list.length), font);
+      expect(loaded, `expected a loaded @font-face for ${font}`).toBeGreaterThan(0);
+    }
+  }
   async openEditor() { await this.page.getByRole('button', { name: 'Try editor dialog' }).click(); }
   async expectEditorFocus() { await expect(this.page.getByRole('textbox', { name: 'Example title' })).toBeFocused(); }
   async saveEditor(title) {
