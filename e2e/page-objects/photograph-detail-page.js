@@ -3,6 +3,36 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographDetailPage {
   constructor(page) { this.page = page; }
+  critique() { return this.page.getByRole('region', { name: 'Photo critique', exact: true }); }
+  async expectCritique(mode = 'Live') {
+    const critique = this.critique();
+    await expect(critique.getByRole('heading', { name: 'Strengths', exact: true })).toBeVisible();
+    await expect(critique).toContainText('The shape communicates the intended quiet mood.');
+    for (const heading of ['Exposure', 'Focus', 'Depth of field', 'Motion', 'Lighting', 'Color', 'Processing', 'Framing', 'Subject separation', 'Balance', 'Visual hierarchy', 'Mood'])
+      await expect(critique.getByRole('heading', { name: heading, exact: true })).toBeVisible();
+    await expect(critique).toContainText('The preview cannot establish focus with confidence.');
+    for (const label of ['Visible observation', 'EXIF fact', 'Hypothesis', 'Stylistic preference'])
+      await expect(critique.getByText(label, { exact: true }).first()).toBeVisible();
+    for (const number of [1, 2, 3]) {
+      await expect(critique).toContainText(`Observed edge ${number}`);
+      await expect(critique).toContainText(`Attention effect ${number}`);
+      await expect(critique).toContainText(`Try framing change ${number}`);
+    }
+    await expect(critique).toContainText('Make two frames with different subject positions.');
+    await expect(critique).toContainText('Compare which silhouette is easier to distinguish.');
+    await expect(critique.locator('time')).toHaveAttribute('datetime', '2026-09-07T13:00:00Z');
+    await expect(critique).toContainText(mode === 'Demo' ? 'Demo · illustrative sample' : 'AI-generated critique');
+    await expect(critique).toContainText(mode === 'Demo' ? 'loupe-demo-critique-v1' : 'gpt-5.4-mini-2026-03-17');
+    await expect(critique).toContainText('critique-v1');
+    await expect(critique).toContainText('Make deliberate silhouettes');
+    await expect(critique).toContainText('Preserve the strong shapes');
+    await expect(critique).not.toContainText('Explore quiet morning light');
+  }
+  async expectNoCritique() { await expect(this.critique()).toContainText('No critique saved yet.'); }
+  async expectCritiqueLoading() { await expect(this.critique().getByRole('status')).toHaveText('Loading critique…'); }
+  async expectCritiqueFailure() { await expect(this.critique().getByRole('alert')).toHaveText('The saved critique could not be loaded. Try again.'); }
+  async retryCritique() { await this.critique().getByRole('button', { name: 'Retry loading critique', exact: true }).click(); }
+  async expectCritiqueFocus() { await expect(this.critique().getByRole('heading', { name: 'Photo critique', exact: true })).toBeFocused(); }
   deleteDialog() { return this.page.getByRole('dialog', { name: 'Delete “Study 01”?', exact: true }); }
   async deletePhotograph() { await this.page.getByRole('button', { name: 'Delete photograph', exact: true }).click(); }
   async expectDeleteConfirmation() {

@@ -14,3 +14,6 @@ export * from './lib/common/upload-progress';
 export * from './lib/deletion/deletion-result';
 export * from './lib/deletion/deletion.service.contract';
 export * from './lib/deletion/deletion.service';
+export * from './lib/critique/critique-result';
+export * from './lib/critique/critique.service.contract';
+export * from './lib/critique/critique.service';

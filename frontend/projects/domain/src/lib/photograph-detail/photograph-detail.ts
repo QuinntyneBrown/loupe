@@ -12,10 +12,11 @@ import { DatePipe } from '@angular/common';
 import { PHOTOGRAPH_SERVICE, PhotographResult, ServiceError } from 'api';
 import { PhotographNotes } from '../photograph-notes/photograph-notes';
 import { PhotographBrief } from '../photograph-brief/photograph-brief';
+import { PhotographCritique } from '../photograph-critique/photograph-critique';
 
 @Component({
   selector: 'lp-photograph-detail',
-  imports: [DatePipe, PhotographNotes, PhotographBrief],
+  imports: [DatePipe, PhotographNotes, PhotographBrief, PhotographCritique],
   templateUrl: './photograph-detail.html',
   styleUrl: './photograph-detail.css',
 })
