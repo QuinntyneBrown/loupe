@@ -501,3 +501,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Green: all 206 container API checks passed; format, builds and diff checks passed. One host fills four slots, two hosts share four slots, and two hosts obey a lower three-slot configuration. All nine admitted jobs drain to saved results, with no owner exceeding two simultaneous calls.
 - The host runs one scoped processing loop per configured slot, awaits every loop on shutdown, and contains per-job failures. Ai:MaxConcurrentCalls defaults to four, validates 1–64, and controls shared claims as well as local pumps. Every deployment instance must use the same value; coordinated restart is required when lowering it.
 - Independent read-only gpt-5.6-sol review found no Critical or Required findings. Configuration is fixed at startup. This controlled-provider evidence does not establish real-service latency or resource capacity; those release gates remain outstanding.
+
+## API-44: snapshot the prepared private analysis image
+
+- Red: new and legacy queued jobs supplied no prepared analysis image to the provider boundary.
+- Green: all 208 container API checks passed; format, builds and diff checks passed. Both workflows supply the exact authenticated preview bytes, bounded to 1600 pixels on the longest edge and stripped of EXIF. New snapshots include the immutable preview key alongside the original-image identity; retry and equivalence use the same representation.
+- The data migration backfills only matching owner/resource/original-image records, including completed cache inputs, and rollback restores the earlier JSON shape. Deletion continues to redact the whole input. Independent read-only gpt-5.6-sol review found no Critical or Required findings.
+- Unmatched legacy inputs cannot be safely reconstructed and must fail safely at the Live boundary. Current My Work has no image replacement, and deletion already removes input snapshots. Real-provider assessment quality at the prepared resolution remains an evaluation gate.

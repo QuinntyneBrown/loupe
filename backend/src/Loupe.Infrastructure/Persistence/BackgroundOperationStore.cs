@@ -18,7 +18,7 @@ public sealed class BackgroundOperationStore(LibraryDbContext database, TimeProv
         var photograph = await database.Photographs.FromSqlInterpolated($"SELECT * FROM photographs WHERE \"Id\" = {photographId} AND \"OwnerId\" = {ownerId} FOR UPDATE")
             .SingleOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException();
         if (photograph.Revision != revision) throw new RevisionConflictException();
-        var inputJson = JsonSerializer.Serialize(new CritiqueInput(photograph.ImageKey, photograph.Brief, photograph.Exif));
+        var inputJson = JsonSerializer.Serialize(new CritiqueInput(photograph.ImageKey, photograph.Brief, photograph.Exif, photograph.PreviewKey));
         var active = database.BackgroundOperations.Where(operation => operation.OwnerId == ownerId
             && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running));
         var existing = await active.SingleOrDefaultAsync(operation => operation.Type == OperationType.Critique

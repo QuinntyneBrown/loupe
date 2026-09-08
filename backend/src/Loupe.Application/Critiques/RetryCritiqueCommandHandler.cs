@@ -30,7 +30,7 @@ public sealed class RetryCritiqueCommandHandler(ICurrentOwner owner, IPhotograph
             if (photograph.Revision != request.Revision) throw new RevisionConflictException();
             var identity = configuration.GetIdentity();
             var original = source.InputJson is null ? null : JsonSerializer.Deserialize<CritiqueInput>(source.InputJson);
-            var current = new CritiqueInput(photograph.ImageKey, photograph.Brief, photograph.Exif);
+            var current = new CritiqueInput(photograph.ImageKey, photograph.Brief, photograph.Exif, photograph.PreviewKey);
             if (identity.Mode != source.Mode || identity.Model != source.Model || identity.PromptVersion != source.PromptVersion
                 || original is null || JsonSerializer.Serialize(original) != JsonSerializer.Serialize(current)) throw new AnalysisInputsChangedException();
             return await operations.AdmitCritiqueAsync(source.ResourceId, owner.Id, request.Revision, true, identity, token);
