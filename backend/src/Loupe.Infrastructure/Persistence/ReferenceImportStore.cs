@@ -23,7 +23,12 @@ public sealed class ReferenceImportStore(LibraryDbContext database, TimeProvider
         if (existing is not null)
         {
             var input = JsonSerializer.Deserialize<ReferenceImportInput>(existing.InputJson!);
-            if (existing.Mode == mode && input?.NormalizedSource == normalizedSource && input.ImageKey == reference.ImageKey) return existing.Id;
+            if (existing.Mode == mode && input?.NormalizedSource == normalizedSource && input.ImageKey == reference.ImageKey)
+            {
+                reference.CurrentImportOperationId = existing.Id;
+                await database.SaveChangesAsync(cancellationToken);
+                return existing.Id;
+            }
             throw new AnalysisActiveException();
         }
         if (await active.CountAsync(cancellationToken) >= 5) throw new AnalysisLimitException();
@@ -41,6 +46,7 @@ public sealed class ReferenceImportStore(LibraryDbContext database, TimeProvider
             UpdatedAt = now
         };
         database.BackgroundOperations.Add(operation);
+        reference.CurrentImportOperationId = operation.Id;
         await database.SaveChangesAsync(cancellationToken);
         return operation.Id;
     }

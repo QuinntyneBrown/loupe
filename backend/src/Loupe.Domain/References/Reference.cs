@@ -13,5 +13,6 @@ public sealed class Reference
     public string? PreviewKey { get; set; }
     public int? Width { get; set; }
     public int? Height { get; set; }
+    public Guid? CurrentImportOperationId { get; set; }
     public long Revision { get; set; } = 1;
 }

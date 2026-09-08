@@ -11,6 +11,13 @@ namespace Loupe.Api.Controllers;
 [Route("api/references/{id:guid}/imports")]
 public sealed class ReferenceImportsController(ISender sender) : ControllerBase
 {
+    [HttpGet("operation")]
+    public async Task<ActionResult<OperationResult>> GetOperation(Guid id, CancellationToken cancellationToken)
+    {
+        var operation = await sender.Send(new GetCurrentReferenceImportQuery(id), cancellationToken);
+        return operation is null ? NoContent() : Ok(operation);
+    }
+
     [HttpPost]
     public async Task<ActionResult<OperationResult>> Create(Guid id, RequestReferenceImportRequest request,
         [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken)
