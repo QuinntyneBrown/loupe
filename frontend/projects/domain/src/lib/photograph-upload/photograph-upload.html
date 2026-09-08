@@ -1,6 +1,6 @@
 <form (ngSubmit)="save()" [attr.aria-busy]="saving()">
   <div class="lp-dialog__body">
-    <div class="lp-field">
+    <div class="lp-field" [hidden]="saving()">
       @if (fileError(); as error) { <p class="lp-notice" id="upload-file-error" role="alert">{{ error }}</p> }
       <label class="lp-dropzone" [class.lp-dropzone--compact]="!!fileError()" [class.is-dragover]="dragging()"
         (dragover)="dragOver($event)" (dragleave)="dragging.set(false)" (drop)="drop($event)">
@@ -14,7 +14,7 @@
           [attr.aria-describedby]="fileError() ? 'upload-help upload-file-error' : 'upload-help'" />
       </label>
     </div>
-    <fieldset class="lp-form" [hidden]="!!fileError()" [disabled]="saving()">
+    <fieldset class="lp-form" [hidden]="!!fileError() || saving()" [disabled]="saving()">
       <legend class="lp-form__legend">Tell the critic what you were after <span class="lp-field__optional">optional, but it makes the feedback sharper</span></legend>
       <div class="lp-field" [class.is-invalid]="errors().intent">
         <label class="lp-field__label" for="upload-intent">What were you trying to do?</label>
@@ -85,6 +85,8 @@
     }
     @if (saving()) {
       @let transfer = progress();
+      <p class="lp-muted">Keep this open until it finishes. {{ requestCritique() ? 'The critique is requested as soon as the file is saved.' : 'Your photograph will be saved without requesting a critique.' }}</p>
+      <p>{{ image()?.name }}</p>
       <progress aria-label="Upload progress" [attr.max]="transfer?.total || 1" [attr.value]="transfer?.total ? transfer?.transferred : null"></progress>
       <p class="lp-muted" role="status">
         @if (transfer && transfer.total && transfer.transferred < transfer.total) {
@@ -96,12 +98,14 @@
     }
   </div>
   <footer class="lp-dialog__footer">
-    <span class="lp-dialog__privacy"><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>Private. Only you can see this.</span>
-    @if (fileError()) {
+    @if (saving()) {
+      <button class="lp-button lp-button--secondary" type="button" (click)="closeRequested.emit()">Cancel upload</button>
+    } @else if (fileError()) {
       <button class="lp-button lp-button--secondary" type="button" (click)="closeRequested.emit()">Cancel</button>
     } @else if (failed()) {
       <button class="lp-button lp-button--primary" type="submit" [disabled]="invalid() || saving()">Retry upload</button>
     } @else {
+      <span class="lp-dialog__privacy"><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>Private. Only you can see this.</span>
       <button class="lp-button lp-button--secondary" type="button" [disabled]="invalid() || saving()" (click)="submit(false)">Upload only</button>
       <button class="lp-button lp-button--primary" type="button" [disabled]="invalid() || saving()" (click)="submit(true)">Upload and request critique</button>
     }

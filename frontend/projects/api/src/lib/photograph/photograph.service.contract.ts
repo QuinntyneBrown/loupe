@@ -9,6 +9,7 @@ export interface IPhotographService {
   upload(
     input: PhotographUpload,
     onProgress?: (progress: UploadProgress) => void,
+    signal?: AbortSignal,
   ): Promise<PhotographResult>;
   list(cursor?: string): Promise<PhotographPage>;
   get(id: string): Promise<PhotographResult>;

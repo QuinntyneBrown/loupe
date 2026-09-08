@@ -33,6 +33,7 @@ export class PhotographLibrary {
   async attach(page) {
     await page.exposeFunction('loupePhotographs', async (operation, input) => {
       this.calls.push(operation);
+      if (operation === 'abortUpload') return { data: null };
       await this.gates[operation]?.promise;
       const error = this.errors[operation]?.shift();
       if (error) return { error };

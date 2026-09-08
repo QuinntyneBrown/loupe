@@ -30,6 +30,9 @@ export class PhotographCollection implements OnInit {
   readonly loaded = signal(false);
   readonly nextCursor = signal<string | null>(null);
   readonly skeletonTiles = Array.from({ length: 8 }, (_, index) => index);
+  private loadVersion = 0;
+  private refreshPending = false;
+  refresh(): Promise<void> { this.refreshPending = true; return this.load(true); }
 
   ngOnInit(): void {
     void this.load();
@@ -56,22 +59,26 @@ export class PhotographCollection implements OnInit {
     }[item.critiqueStatus];
   }
 
-  async load(): Promise<void> {
-    if (this.loading()) return;
+  async load(refresh = this.refreshPending): Promise<void> {
+    if (this.loading() && !refresh) return;
+    const version = ++this.loadVersion;
     this.loading.set(true);
     this.failed.set(false);
     const previousCount = this.items().length;
     try {
-      const page = await this.service.list(this.nextCursor() ?? undefined);
-      this.items.update((items) => [...items, ...page.items]);
+      const page = await this.service.list(refresh ? undefined : this.nextCursor() ?? undefined);
+      if (version !== this.loadVersion) return;
+      this.items.update((items) => refresh ? page.items : [...items, ...page.items.filter(item => !items.some(existing => existing.id === item.id))]);
+      this.refreshPending = false;
       this.nextCursor.set(page.nextCursor);
       this.loaded.set(true);
-      if (previousCount > 0 && page.items.length)
+      if (!refresh && previousCount > 0 && page.items.length)
         afterNextRender(() => this.cards()[previousCount]?.focus(), { injector: this.injector });
     } catch {
+      if (version !== this.loadVersion) return;
       this.failed.set(true);
     } finally {
-      this.loading.set(false);
+      if (version === this.loadVersion) this.loading.set(false);
     }
   }
 }

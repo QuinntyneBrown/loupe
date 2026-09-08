@@ -14,7 +14,9 @@ export class MockPhotographService implements IPhotographService {
   async upload(
     input: PhotographUpload,
     onProgress?: (progress: UploadProgress) => void,
+    signal?: AbortSignal,
   ): Promise<PhotographResult> {
+    if (signal?.aborted) throw new ServiceError('upload_canceled');
     let bytes: ArrayBuffer;
     try {
       bytes = await input.image.arrayBuffer();
@@ -26,19 +28,29 @@ export class MockPhotographService implements IPhotographService {
       value.toString(16).padStart(2, '0'),
     ).join('');
     const report = (event: Event) => {
-      if (event instanceof CustomEvent) onProgress?.(event.detail as UploadProgress);
+      if (!signal?.aborted && event instanceof CustomEvent) onProgress?.(event.detail as UploadProgress);
     };
+    if (signal?.aborted) throw new ServiceError('upload_canceled');
+    let abort: (() => void) | undefined;
+    const canceled = new Promise<never>((_, reject) => {
+      abort = () => {
+        void this.callback?.('abortUpload', { operationKey: input.operationKey });
+        reject(new ServiceError('upload_canceled'));
+      };
+      signal?.addEventListener('abort', abort, { once: true });
+    });
     window.addEventListener('loupe-upload-progress', report);
     try {
-      return await this.request<PhotographResult>('upload', {
+      return await Promise.race([canceled, this.request<PhotographResult>('upload', {
         filename: input.image.name,
         title: input.title,
         brief: input.brief,
         operationKey: input.operationKey,
         hash,
         contentType: input.image.type,
-      });
+      })]);
     } finally {
+      if (abort) signal?.removeEventListener('abort', abort);
       window.removeEventListener('loupe-upload-progress', report);
     }
   }

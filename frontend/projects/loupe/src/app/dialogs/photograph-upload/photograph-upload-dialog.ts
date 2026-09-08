@@ -1,4 +1,4 @@
-import { afterNextRender, Component, DestroyRef, ElementRef, inject, output, signal, viewChild } from '@angular/core';
+import { afterNextRender, Component, DestroyRef, ElementRef, inject, Injector, output, signal, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { PhotographUpload, RequestCritique } from 'domain';
 import { OperationResult, PhotographResult } from 'api';
@@ -12,6 +12,12 @@ import { UnsavedChanges } from '../unsaved-changes/unsaved-changes';
 })
 export class PhotographUploadDialog {
   readonly closed = output<void>();
+  readonly canceledTransfer = output<void>();
+  private readonly injector = inject(Injector);
+  private readonly progressHeading = viewChild.required<ElementRef<HTMLElement>>('progressHeading');
+  focusProgress(): void {
+    afterNextRender(() => this.progressHeading().nativeElement.focus(), { injector: this.injector });
+  }
   private readonly modal = viewChild.required<ElementRef<HTMLDialogElement>>('modal');
   private readonly destroy = inject(DestroyRef);
   constructor() {
@@ -45,8 +51,13 @@ export class PhotographUploadDialog {
   private readonly dialog = viewChild.required(UnsavedChanges);
   private readonly router = inject(Router);
   readonly dirty = () => this.form()?.dirty() ?? false;
-  canLeave(): boolean | Promise<boolean> {
-    return this.dialog().canLeave(this.form()?.dirty() ?? false);
+  async canLeave(): Promise<boolean> {
+    const leave = await this.dialog().canLeave(this.form()?.dirty() ?? false);
+    if (leave && !this.destroy.destroyed && this.form()?.saving()) {
+      this.form()?.cancelUpload();
+      this.canceledTransfer.emit();
+    }
+    return leave;
   }
   saved(photo: PhotographResult): void {
     if (this.form()?.requestCritique()) {

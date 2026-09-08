@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
-import { filter, firstValueFrom, map, tap } from 'rxjs';
+import { filter, firstValueFrom, fromEvent, map, NEVER, takeUntil, tap } from 'rxjs';
 import { IPhotographService } from './photograph.service.contract';
 import { PhotographPage } from './photograph-page';
 import { PhotographResult } from './photograph-result';
@@ -17,13 +17,16 @@ export class PhotographService implements IPhotographService {
   async upload(
     input: PhotographUpload,
     onProgress?: (progress: UploadProgress) => void,
+    signal?: AbortSignal,
   ): Promise<PhotographResult> {
+    if (signal?.aborted) throw new ServiceError('upload_canceled');
     try {
       await input.image.slice(0, 1).arrayBuffer();
     } catch {
       throw new ServiceError('file_unavailable');
     }
     const token = await this.session.getRequestToken();
+    if (signal?.aborted) throw new ServiceError('upload_canceled');
     const body = new FormData();
     body.append('image', input.image, input.image.name);
     body.append('title', input.title);
@@ -39,6 +42,7 @@ export class PhotographService implements IPhotographService {
             observe: 'events',
           })
           .pipe(
+            takeUntil(signal ? fromEvent(signal, 'abort') : NEVER),
             tap((event) => {
               if (event.type === HttpEventType.UploadProgress)
                 onProgress?.({ transferred: event.loaded, total: event.total ?? null });
@@ -53,6 +57,7 @@ export class PhotographService implements IPhotographService {
           ),
       );
     } catch (error) {
+      if (signal?.aborted) throw new ServiceError('upload_canceled');
       throw new ServiceError(
         error instanceof HttpErrorResponse && typeof error.error?.code === 'string'
           ? error.error.code

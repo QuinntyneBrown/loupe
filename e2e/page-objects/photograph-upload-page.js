@@ -3,6 +3,16 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographUploadPage {
   constructor(page) { this.page = page; }
+  async expectProgressState() {
+    await expect(this.modal().getByRole('heading', { name: 'Uploading…', exact: true })).toBeVisible();
+    await expect(this.modal().getByLabel('What were you trying to do?', { exact: true })).toBeHidden();
+    await expect(this.modal().getByRole('button', { name: 'Cancel upload', exact: true })).toBeVisible();
+  }
+  async cancelTransfer() { await this.modal().getByRole('button', { name: 'Cancel upload', exact: true }).click(); }
+  async expectCanceledNotice() {
+    await expect(this.modal()).toHaveCount(0);
+    await expect(this.page.getByRole('status')).toContainText('Transfer stopped. The photograph may already have been saved. Check My Work before uploading again.');
+  }
   async expectMockForm() {
     await expect(this.modal().getByText('Drop a photograph here, or browse', { exact: true })).toBeVisible();
     await expect(this.modal().getByRole('button', { name: 'Upload only', exact: true })).toBeDisabled();
@@ -61,8 +71,8 @@ export class PhotographUploadPage {
   async expectUncertainCritique() { await expect(this.page.getByRole('alert')).toHaveText('Critique admission was not confirmed. Retry to check the same request.'); }
   async retryCritique() { await this.page.getByRole('button', { name: 'Retry critique request', exact: true }).click(); }
   async viewSavedPhotograph() { await this.page.getByRole('link', { name: 'View saved photograph', exact: true }).click(); }
-  async open() { await this.openFrom('header'); }
-  async expectOpen() { await expect(this.page.getByRole('heading', { name: 'Upload photograph', exact: true })).toBeVisible(); }
+  async open() { this.critiqueAfterSaving = false; await this.openFrom('header'); }
+  async expectOpen() { await expect(this.modal()).toBeVisible(); }
   async chooseImage(name = 'Morning.png') {
     await this.page.getByLabel('Photograph', { exact: true }).setInputFiles({ name, mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64') });
   }
@@ -96,7 +106,7 @@ export class PhotographUploadPage {
   async expectSaveDisabled() {
     const buttons = this.modal().getByRole('button', { name: /^(Upload only|Upload and request critique|Retry upload)$/ });
     for (const button of await buttons.all()) await expect(button).toBeDisabled();
-    if (await buttons.count() === 0) await expect(this.modal().getByRole('button', { name: 'Cancel', exact: true })).toBeVisible();
+    if (await buttons.count() === 0) await expect(this.modal().getByRole('button', { name: /^Cancel( upload)?$/ })).toBeVisible();
   }
   async expectFailure(message = 'The upload was not confirmed. Your fields are still here. Retry to check whether it was saved.') {
     await expect(this.page.getByRole('alert')).toHaveText(message);
@@ -127,7 +137,10 @@ export class PhotographUploadPage {
     await expect(this.page.getByRole('status')).toHaveText(transferred === null ? 'Saving photograph…' : `${transferred.toLocaleString('en-US')} bytes transferred. Total size unavailable.`);
   }
   async expectNoProgress() { await expect(this.page.getByRole('progressbar', { name: 'Upload progress', exact: true })).toHaveCount(0); }
-  async returnToLibrary() { await this.closeDialog(); }
+  async returnToLibrary() {
+    const cancel = this.modal().getByRole('button', { name: 'Cancel upload', exact: true });
+    if (await cancel.isVisible()) await cancel.click(); else await this.closeDialog();
+  }
   discardDialog() { return this.page.getByRole('dialog', { name: 'Discard unsaved changes?', exact: true }); }
   async expectDiscardChoice() {
     await expect(this.discardDialog()).toBeVisible();

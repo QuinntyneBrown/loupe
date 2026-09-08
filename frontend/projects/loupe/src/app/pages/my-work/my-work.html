@@ -19,7 +19,8 @@
     </div>
   </div>
   <lp-photograph-collection detailBase="/my-work" (uploadRequested)="uploading.set(true)" />
+  @if (notice()) { <p role="status">{{ notice() }}</p> }
 </main>
 @if (uploading()) {
-  <lp-photograph-upload-dialog (closed)="uploading.set(false)" />
+  <lp-photograph-upload-dialog (closed)="uploading.set(false)" (canceledTransfer)="canceledTransfer()" />
 }

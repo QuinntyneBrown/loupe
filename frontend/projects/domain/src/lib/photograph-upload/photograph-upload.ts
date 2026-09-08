@@ -27,6 +27,10 @@ import { DecimalPipe } from '@angular/common';
 export class PhotographUpload {
   readonly saved = output<PhotographResult>();
   readonly closeRequested = output<void>();
+  readonly started = output<void>();
+  private transfer: AbortController | null = null;
+  constructor() { this.destroy.onDestroy(() => this.transfer?.abort()); }
+  cancelUpload(): void { this.transfer?.abort(); }
   readonly dragging = signal(false);
   readonly genres = ['Landscape', 'Portrait', 'Street', 'Architecture', 'Documentary', 'Still life', 'Other'];
   readonly genreChoice = signal('');
@@ -133,7 +137,10 @@ export class PhotographUpload {
   async save(): Promise<void> {
     const image = this.image();
     if (!image || this.saving() || this.invalid()) return;
+    const transfer = new AbortController();
+    this.transfer = transfer;
     this.saving.set(true);
+    this.started.emit();
     this.attempted.set(true);
     this.progress.set(null);
     this.failure.set(null);
@@ -146,15 +153,16 @@ export class PhotographUpload {
           operationKey: this.operationKey,
         },
         (progress) => {
-          if (!this.destroy.destroyed) this.progress.set(progress);
+          if (!this.destroy.destroyed && !transfer.signal.aborted) this.progress.set(progress);
         },
+        transfer.signal,
       );
-      if (!this.destroy.destroyed) {
+      if (!this.destroy.destroyed && !transfer.signal.aborted) {
         this.acknowledged.set(true);
         this.saved.emit(photo);
       }
     } catch (error) {
-      if (!this.destroy.destroyed) {
+      if (!this.destroy.destroyed && !transfer.signal.aborted) {
         const code = error instanceof ServiceError ? error.code : 'request_failed';
         this.failure.set(code);
         if (code === 'file_unavailable') {
@@ -163,6 +171,7 @@ export class PhotographUpload {
         }
       }
     } finally {
+      if (this.transfer === transfer) this.transfer = null;
       if (!this.destroy.destroyed) this.saving.set(false);
     }
   }
