@@ -4,6 +4,11 @@ import { PhotographLibrary } from '../fixtures/photograph-library.js';
 
 export class MyWorkPage {
   constructor(page) { this.page = page; }
+  async expectCritiqueLabel(title, status) {
+    const card = this.page.getByRole('article').filter({ has: this.page.getByRole('heading', { name: title, exact: true }) });
+    await expect(card.getByText(status, { exact: true })).toBeVisible();
+    await expect(card.getByRole('link', { name: title, exact: true })).toBeVisible();
+  }
   async expectOpen() {
     await expect(this.page).toHaveURL(/\/my-work$/);
     await expect(this.page.getByRole('heading', { name: 'My Work', exact: true })).toBeVisible();

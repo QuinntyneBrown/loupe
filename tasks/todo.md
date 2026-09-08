@@ -17,7 +17,7 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 
 ## L2-003: Browse and revisit My Work
 - [ ] L2-003.1: Given 25 photographs and a reference owned by the user, when My Work is opened and advanced through its results, then all 25 photographs appear once in the shared order and the reference never appears.
-- [ ] L2-003.2: Given photographs without a critique, with queued/running jobs, with successful critiques, and with failed replacements, when the list and detail are opened, then each status is accurate and failed replacements retain the previous successful critique.
+- [x] L2-003.2: Given photographs without a critique, with queued/running jobs, with successful critiques, and with failed replacements, when the list and detail are opened, then each status is accurate and failed replacements retain the previous successful critique.
 - [ ] L2-003.3: Given a saved detail URL, when the owner opens it in a later authenticated session, then the saved content loads without a new upload or AI call.
 - [ ] L2-003.4: Given an absent/deleted photograph or a failed list request, when opened, then the UI distinguishes unavailable detail from a retryable list failure and never represents either as an empty successful library.
 

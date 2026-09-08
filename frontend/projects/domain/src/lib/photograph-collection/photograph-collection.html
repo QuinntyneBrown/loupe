@@ -4,6 +4,7 @@
       <lp-photograph-card
         [destination]="detailBase() + '/' + item.id"
         [title]="item.title"
+        [status]="critiqueLabel(item)"
         [previewUrl]="item.previewUrl"
         [createdAt]="item.createdAt"
         [width]="item.width"

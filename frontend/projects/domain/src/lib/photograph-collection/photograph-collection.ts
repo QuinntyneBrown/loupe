@@ -31,6 +31,17 @@ export class PhotographCollection implements OnInit {
   ngOnInit(): void {
     void this.load();
   }
+  critiqueLabel(item: PhotographSummary): string {
+    if (!item.critiqueStatus || item.critiqueStatus === 'Succeeded')
+      return item.hasCritique ? 'Critique ready' : 'No critique yet';
+    const label = {
+      Queued: 'Critique queued',
+      Running: 'Critique running',
+      Failed: 'Critique failed',
+      Canceled: 'Critique canceled',
+    }[item.critiqueStatus];
+    return label + (item.hasCritique ? ' · Previous critique available' : '');
+  }
 
   async load(): Promise<void> {
     if (this.loading()) return;

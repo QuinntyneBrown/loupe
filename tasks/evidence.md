@@ -584,3 +584,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Both targeted tests and all 237 container API tests passed (full regression 1m44s). C# format verification and independent read-only review passed with no Critical or Required findings.
 - The owner-filtered, ordered, bounded list projection reads saved-result availability independently from the current-operation status in one database statement. The operation lookup follows the explicit pointer and also matches owner, resource, and type. No per-card HTTP reads, provider input, or critique payload are added to summaries.
 - Tests cover absent/queued/running/succeeded state, queued and failed replacement preserving an earlier result, completed-cache reuse of an older pointer, failure without a saved result, and owner isolation. No schema change is needed. Card rendering follows as the next slice.
+
+## UI-33: show critique state on My Work cards
+
+- Red: three Chromium workflows failed at missing card labels. Green: those three and all 87 affected library/detail/upload checks passed across Chromium, Firefox and WebKit (1.8m), including the 14-viewport library matrix.
+- List contracts carry saved-result availability and current job status; the detail contract explicitly omits those list-only fields. The domain collection derives the labels, and presentational cards accept plain text. Status stays outside the photograph link, retaining its existing accessible name. No per-card reads are made.
+- Tests cover ten state/result combinations, current failure after returning from detail, an earlier saved critique remaining available, and state on the second page. Independent review found no Critical or Required findings. Mixed-state grids at 375/1440px were visually inspected and passed accessibility/column checks. Status refreshes when the library is reopened; the five-second live-update requirement remains implemented on detail screens.
+- Production libraries/application built successfully (418.01 kB raw / 104.50 kB estimated transfer); formatting and diff checks passed. The backend remains at 237 passing API checks from API-47.

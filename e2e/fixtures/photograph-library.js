@@ -43,7 +43,9 @@ export class PhotographLibrary {
       if (operation === 'list') {
         const start = Number(input.cursor ?? 0);
         const end = Math.min(this.photos.length, start + 24);
-        return { data: { items: this.photos.slice(start, end), nextCursor: end < this.photos.length ? String(end) : null } };
+        const items = this.photos.slice(start, end).map(photo => ({ ...photo,
+          hasCritique: this.critiques.has(photo.id), critiqueStatus: this.critiqueOperations.get(photo.id)?.status ?? null }));
+        return { data: { items, nextCursor: end < this.photos.length ? String(end) : null } };
       }
       if (operation === 'get') {
         const photo = this.photos.find(photo => photo.id === input.id);

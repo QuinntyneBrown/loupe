@@ -1,3 +1,5 @@
+import { OperationResult } from '../operation/operation-result';
+
 export interface PhotographSummary {
   id: string;
   title: string;
@@ -5,4 +7,6 @@ export interface PhotographSummary {
   width: number;
   height: number;
   previewUrl: string;
+  hasCritique: boolean;
+  critiqueStatus: OperationResult['status'] | null;
 }

@@ -42,3 +42,9 @@ time {
   font-size: var(--lp-text-xs);
   color: var(--lp-color-text-2);
 }
+p {
+  margin: var(--lp-space-2) var(--lp-zero) var(--lp-zero);
+  font-size: var(--lp-text-sm);
+  color: var(--lp-color-text-2);
+  overflow-wrap: anywhere;
+}

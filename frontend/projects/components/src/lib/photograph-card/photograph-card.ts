@@ -15,6 +15,7 @@ export class PhotographCard {
     this.link()?.nativeElement.focus();
   }
   readonly title = input.required<string>();
+  readonly status = input.required<string>();
   readonly previewUrl = input.required<string>();
   readonly createdAt = input.required<string>();
   readonly width = input.required<number>();
