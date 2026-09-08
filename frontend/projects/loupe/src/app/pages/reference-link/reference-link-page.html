@@ -1,0 +1,13 @@
+<main id="main" tabindex="-1">
+  <a routerLink="/inspiration">Back to Inspiration</a>
+  <h1>Save link</h1>
+  <lp-reference-link-panel (saved)="saved($event)" (existing)="saved($event)" />
+</main>
+<lp-unsaved-changes
+  [dirty]="dirty"
+  [warning]="
+    form()?.saving()
+      ? 'This save may finish after you leave. Check Inspiration before saving it again.'
+      : null
+  "
+/>

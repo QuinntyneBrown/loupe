@@ -28,3 +28,4 @@ export * from './lib/reference/reference.service.contract';
 export * from './lib/reference/reference.service';
 export * from './lib/reference/reference-upload';
 export * from './lib/reference/reference-metadata';
+export * from './lib/reference/reference-link';

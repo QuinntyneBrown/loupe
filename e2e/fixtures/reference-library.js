@@ -7,6 +7,7 @@ export class ReferenceLibrary {
       width: 800, height: 600, imageUrl, previewUrl: imageUrl, revision: 1,
       sourceUrl: 'https://source.example/photo', attribution: 'Supplied photographer', notes: 'Study the separation.\nKeep the source context.',
     }));
+    this.linkReceipts=new Map(); this.lostLinkResponses=0;
     this.updates = []; this.lostUpdateResponses = 0;
     this.uploadReceipts = new Map(); this.lostUploadResponses = 0;
     this.calls = []; this.failures = {}; this.errors = {}; this.gates = {};
@@ -16,6 +17,19 @@ export class ReferenceLibrary {
       this.calls.push(operation); await this.gates[operation]?.promise;
       const error = this.errors[operation]?.shift(); if (error) return { error };
       if (this.failures[operation] > 0) { this.failures[operation]--; return { error: 'request_failed' }; }
+      if(operation==='saveLink') {
+        const clean=value=>value?.replace(/\r\n?/g,'\n').trim()||null;
+        const metadata={title:clean(input.title)||new URL(input.sourceUrl.trim()).hostname,sourceUrl:clean(input.sourceUrl),attribution:clean(input.attribution),notes:clean(input.notes)};
+        const fingerprint=JSON.stringify(metadata),receipt=this.linkReceipts.get(input.operationKey);
+        if(receipt&&receipt.fingerprint!==fingerprint) return {error:'operation_conflict'};
+        const normalized=value=>{const url=new URL(value);url.hash='';return url.href;};
+        let item=receipt?this.items.find(item=>item.id===receipt.id):this.items.find(item=>item.sourceUrl&&normalized(item.sourceUrl)===normalized(metadata.sourceUrl));
+        const alreadySaved=!!item;
+        if(!item) {item={...new ReferenceLibrary(1).items[0],...metadata,id:crypto.randomUUID(),imageUrl:null,previewUrl:null,width:null,height:null};this.items.unshift(item);}
+        this.linkReceipts.set(input.operationKey,{fingerprint,id:item.id});
+        if(this.lostLinkResponses>0) {this.lostLinkResponses--;return {error:'request_failed'};}
+        return {data:{reference:item,alreadySaved}};
+      }
       if (operation === 'update') {
         this.updates.push(input);
         const item=this.items.find(item=>item.id===input.id);

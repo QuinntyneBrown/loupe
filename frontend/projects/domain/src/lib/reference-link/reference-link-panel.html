@@ -1,0 +1,54 @@
+<form (ngSubmit)="save()" [attr.aria-busy]="saving()" novalidate>
+  @for (field of fields; track field.key) {
+    <label [for]="'reference-' + field.key">{{ field.label }}</label>
+    @if (field.key === 'notes') {
+      <textarea
+        [id]="'reference-' + field.key"
+        [name]="field.key"
+        [ngModel]="metadata()[field.key]"
+        (ngModelChange)="setField(field.key, $event)"
+        [disabled]="saving()"
+        [readOnly]="!!duplicate()"
+        [attr.aria-invalid]="!!errors()[field.key]"
+        [attr.aria-describedby]="errors()[field.key] ? 'reference-' + field.key + '-error' : null"
+      ></textarea>
+    } @else {
+      <input
+        [id]="'reference-' + field.key"
+        [name]="field.key"
+        [type]="field.key === 'sourceUrl' ? 'url' : 'text'"
+        [ngModel]="metadata()[field.key]"
+        (ngModelChange)="setField(field.key, $event)"
+        [disabled]="saving()"
+        [readOnly]="!!duplicate()"
+        [attr.aria-invalid]="!!errors()[field.key]"
+        [attr.aria-describedby]="errors()[field.key] ? 'reference-' + field.key + '-error' : null"
+      />
+    }
+    @if (errors()[field.key]; as error) {
+      <p [id]="'reference-' + field.key + '-error'" role="alert">{{ error }}</p>
+    }
+  }
+  @if (failure()) {
+    <p role="alert">{{ failureMessage() }}</p>
+  }
+  <button type="submit" [disabled]="invalid() || saving() || !!duplicate()">
+    {{ failure() ? 'Retry save' : 'Save link' }}
+  </button>
+  @if (saving()) {
+    <p role="status">Saving link…</p>
+  }
+</form>
+@if (duplicate(); as reference) {
+  <section aria-labelledby="duplicate-heading">
+    <h2 #duplicateHeading id="duplicate-heading" tabindex="-1">Already saved</h2>
+    <p>
+      Your existing reference and its metadata are unchanged. Your submitted fields remain above.
+    </p>
+    <a
+      [href]="'/inspiration/' + reference.id"
+      (click)="$event.preventDefault(); openExisting(reference)"
+      >Open saved reference</a
+    >
+  </section>
+}

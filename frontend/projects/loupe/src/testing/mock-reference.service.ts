@@ -1,10 +1,13 @@
-import { ReferenceMetadata } from 'api';
+import { ReferenceMetadata, ReferenceLink, ReferenceLinkResult } from 'api';
 import { ReferenceUpload, UploadProgress } from 'api';
 import { Injectable } from '@angular/core';
 import { IReferenceService, ReferencePage, ReferenceResult, ServiceError } from 'api';
 
 @Injectable()
 export class MockReferenceService implements IReferenceService {
+  saveLink(input: ReferenceLink): Promise<ReferenceLinkResult> {
+    return this.call('saveLink', input);
+  }
   async upload(
     input: ReferenceUpload,
     onProgress?: (progress: UploadProgress) => void,

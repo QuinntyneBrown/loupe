@@ -64,7 +64,7 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 - [ ] L2-010.1: Given an allowed direct-image URL, when saved and imported, then the record retains its source, gains a stored validated image and preview, and reports import success.
 - [ ] L2-010.2: Given an accessible HTML fixture containing the supported preview metadata, page title, and explicit author metadata, when imported, then the selected image, suggested title, and suggested attribution reflect those fields; the user can inspect and correct the metadata.
 - [ ] L2-010.3: Given an HTML page with several candidate images, when imported, then selection follows the stated order; given no valid candidate, then the record stays link-only with the L2-011 fallback.
-- [ ] L2-010.4: Given the same normalized source already saved by this user, when submitted again, then the existing reference is returned with an Already saved message; another user's match is never disclosed. Normalization lowercases scheme/host, removes a default port and fragment, and preserves path and query without dropping tracking parameters.
+- [x] L2-010.4: Given the same normalized source already saved by this user, when submitted again, then the existing reference is returned with an Already saved message; another user's match is never disclosed. Normalization lowercases scheme/host, removes a default port and fragment, and preserves path and query without dropping tracking parameters.
 - [ ] L2-010.5: Given an import finishing after manual edits, when applying its result, then it fills only still-empty fields and never overwrites a user-edited title, attribution, notes, or image.
 
 ## L2-011: Respect source restrictions and preserve a fallback

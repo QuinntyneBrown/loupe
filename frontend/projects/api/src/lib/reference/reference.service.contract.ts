@@ -1,3 +1,4 @@
+import { ReferenceLink, ReferenceLinkResult } from './reference-link';
 import { ReferenceMetadata } from './reference-metadata';
 import { ReferenceUpload } from './reference-upload';
 import { UploadProgress } from '../common/upload-progress';
@@ -5,6 +6,7 @@ import { InjectionToken } from '@angular/core';
 import { ReferencePage, ReferenceResult } from './reference-result';
 
 export interface IReferenceService {
+  saveLink(input: ReferenceLink): Promise<ReferenceLinkResult>;
   upload(
     input: ReferenceUpload,
     onProgress?: (progress: UploadProgress) => void,

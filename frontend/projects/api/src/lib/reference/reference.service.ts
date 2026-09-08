@@ -1,3 +1,4 @@
+import { ReferenceLink, ReferenceLinkResult } from './reference-link';
 import { ReferenceMetadata } from './reference-metadata';
 import { SESSION_SERVICE } from '../session/session.service.contract';
 import { UploadProgress } from '../common/upload-progress';
@@ -13,6 +14,24 @@ import { ServiceError } from '../common/service-error';
 export class ReferenceService implements IReferenceService {
   private readonly http = inject(HttpClient);
   private readonly session = inject(SESSION_SERVICE);
+  async saveLink(input: ReferenceLink): Promise<ReferenceLinkResult> {
+    const token = await this.session.getRequestToken();
+    const { operationKey, ...metadata } = input;
+    try {
+      return await firstValueFrom(
+        this.http.post<ReferenceLinkResult>('/api/references/links', metadata, {
+          headers: { 'X-CSRF-Token': token, 'Idempotency-Key': operationKey },
+          timeout: 15000,
+        }),
+      );
+    } catch (error) {
+      throw new ServiceError(
+        error instanceof HttpErrorResponse && typeof error.error?.code === 'string'
+          ? error.error.code
+          : 'request_failed',
+      );
+    }
+  }
   async upload(
     input: ReferenceUpload,
     onProgress?: (progress: UploadProgress) => void,
