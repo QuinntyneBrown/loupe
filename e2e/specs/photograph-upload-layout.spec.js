@@ -49,6 +49,7 @@ for (const viewport of viewports) {
     await upload.expectDraft(draft);
     await upload.expectAccessibleUpload();
     await upload.retry();
-    await new PhotographDetailPage(page).expectImage('Morning light');
+    await upload.viewCompletedPhotograph();
+  await new PhotographDetailPage(page).expectImage('Morning light');
   });
 }

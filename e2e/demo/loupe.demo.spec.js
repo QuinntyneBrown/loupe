@@ -62,6 +62,7 @@ test('loupe demo: the real application against the real backend', async ({ page 
   });
   await page.waitForTimeout(1500);
   await upload.save();
+  await upload.viewCompletedPhotograph();
   await detail.expectImage('Harbor at blue hour');
   await page.waitForTimeout(1500);
 
@@ -92,6 +93,7 @@ test('loupe demo: the real application against the real backend', async ({ page 
   await page.getByLabel('Photograph', { exact: true }).setInputFiles({ name: 'sunrise.jpg', mimeType: 'image/jpeg', buffer: fixture('sunrise.jpg') });
   await upload.fill({ title: 'Harbor at sunrise', intent: 'Same harbor, warm light instead of blue hour', genre: 'landscape', experience: 'Intermediate' });
   await upload.save();
+  await upload.viewCompletedPhotograph();
   await detail.expectImage('Harbor at sunrise');
   await detail.requestCritique();
   await expect(detail.critique().getByRole('heading', { name: 'Strengths', exact: true })).toBeVisible({ timeout: 20_000 });

@@ -3,6 +3,16 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographUploadPage {
   constructor(page) { this.page = page; }
+  async expectCompleted(critique = this.critiqueAfterSaving ?? false) {
+    await expect(this.modal()).toHaveCount(0);
+    await expect(this.page).toHaveURL(/\/my-work$/);
+    await expect(this.page.getByRole('status')).toContainText(critique ? 'Uploaded. Critique requested.' : 'Photograph uploaded.');
+    await expect(this.page.getByRole('link', { name: 'View', exact: true })).toBeVisible();
+  }
+  async viewCompletedPhotograph() {
+    await this.expectCompleted();
+    await this.page.getByRole('link', { name: 'View', exact: true }).click();
+  }
   async expectProgressState() {
     await expect(this.modal().getByRole('heading', { name: 'Uploading…', exact: true })).toBeVisible();
     await expect(this.modal().getByLabel('What were you trying to do?', { exact: true })).toBeHidden();

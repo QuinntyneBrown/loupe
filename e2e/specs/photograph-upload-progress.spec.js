@@ -26,6 +26,7 @@ test('L2-001.5: transfer progress updates and completion still waits for persist
   await upload.expectSaving();
   expect(work.library.photos).toHaveLength(0);
   work.library.release('upload');
+  await upload.viewCompletedPhotograph();
   await new PhotographDetailPage(page).expectImage('Morning');
 });
 
@@ -45,6 +46,7 @@ test('L2-001.5: a missing total does not invent a percentage', async ({ page }) 
   await work.library.reportUploadProgress(page, { transferred: 1000, total: null });
   await upload.expectIndeterminate(1000);
   work.library.release('upload');
+  await upload.viewCompletedPhotograph();
   await new PhotographDetailPage(page).expectImage('Morning');
 });
 
@@ -71,5 +73,6 @@ test('L2-001.4/.5: retry clears the failed transfer progress', async ({ page }) 
   await expect.poll(() => work.library.calls.filter(call => call === 'upload').length).toBe(2);
   await upload.expectIndeterminate();
   work.library.release('upload');
+  await upload.viewCompletedPhotograph();
   await new PhotographDetailPage(page).expectImage('Morning');
 });

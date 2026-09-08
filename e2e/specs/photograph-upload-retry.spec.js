@@ -27,7 +27,8 @@ for (const lostResponse of [false, true]) {
     expect(work.library.photos).toHaveLength(lostResponse ? 1 : 0);
     await upload.chooseImage();
     await upload.retry();
-    await new PhotographDetailPage(page).expectImage('Morning light');
+    await upload.viewCompletedPhotograph();
+  await new PhotographDetailPage(page).expectImage('Morning light');
     expect(work.library.photos).toHaveLength(1);
     expect(work.library.uploadReceipts.size).toBe(1);
   });
@@ -50,6 +51,7 @@ test('L2-001.4: an unreadable selected file requires reselection and retains the
   expect(work.library.photos).toHaveLength(0);
   await upload.chooseImage();
   await upload.retry();
+  await upload.viewCompletedPhotograph();
   await new PhotographDetailPage(page).expectBriefValues({ intent: 'Keep my brief' });
 });
 
@@ -74,7 +76,8 @@ for (const [code, message] of [
     await upload.expectDraft({ intent: 'Keep my brief' });
     await upload.chooseImage('Corrected.png');
     await upload.retry();
-    await new PhotographDetailPage(page).expectImage('Corrected');
+    await upload.viewCompletedPhotograph();
+  await new PhotographDetailPage(page).expectImage('Corrected');
   });
 }
 
@@ -100,6 +103,7 @@ test(`L2-030.2: changed ${changed} conflicts and restoring the original resolves
   if (changed === 'title') await upload.fill({ title: 'Original' });
   else await upload.chooseImage();
   await upload.retry();
+  await upload.viewCompletedPhotograph();
   await new PhotographDetailPage(page).expectImage('Original');
 });
 }

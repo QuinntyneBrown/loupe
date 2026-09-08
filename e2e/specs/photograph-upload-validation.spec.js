@@ -22,7 +22,8 @@ for (const [field, maximum] of [['title', 200], ['intent', 2000], ['genre', 100]
     expect(work.library.calls).not.toContain('upload');
     await upload.fill({ [field]: '  ' + boundary + '  ' });
     await upload.save();
-    const detail = new PhotographDetailPage(page);
+    await upload.viewCompletedPhotograph();
+  const detail = new PhotographDetailPage(page);
     await detail.expectImage(field === 'title' ? boundary : 'Morning');
     if (field !== 'title') await detail.expectBriefValues({ [field]: boundary });
   });
@@ -43,7 +44,8 @@ for (const [size, message] of [[0, 'Choose an image that is not empty.'], [25000
     expect(work.library.calls).not.toContain('upload');
     await upload.chooseImage();
     await upload.save();
-    await new PhotographDetailPage(page).expectBriefValues({ intent: 'Keep my brief' });
+    await upload.viewCompletedPhotograph();
+  await new PhotographDetailPage(page).expectBriefValues({ intent: 'Keep my brief' });
   });
 }
 
@@ -57,6 +59,7 @@ test('L2-001.2: the 25 MB boundary can be submitted', async ({ page }) => {
   await upload.open();
   await upload.chooseFile({ size: 25000000 });
   await upload.save();
+  await upload.viewCompletedPhotograph();
   await new PhotographDetailPage(page).expectImage('Morning');
 });
 
@@ -74,5 +77,6 @@ test('L2-039.1: unsupported declared file types are explained without losing the
   expect(work.library.calls).not.toContain('upload');
   await upload.chooseImage();
   await upload.save();
+  await upload.viewCompletedPhotograph();
   await new PhotographDetailPage(page).expectBriefValues({ intent: 'Keep my brief' });
 });

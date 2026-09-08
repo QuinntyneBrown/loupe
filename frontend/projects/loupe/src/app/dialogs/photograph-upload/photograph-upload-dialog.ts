@@ -1,8 +1,9 @@
 import { afterNextRender, Component, DestroyRef, ElementRef, inject, Injector, output, signal, viewChild } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { PhotographUpload, RequestCritique } from 'domain';
 import { OperationResult, PhotographResult } from 'api';
 import { UnsavedChanges } from '../unsaved-changes/unsaved-changes';
+import { UploadCompletion } from './upload-completion';
 
 @Component({
   selector: 'lp-photograph-upload-dialog',
@@ -12,6 +13,7 @@ import { UnsavedChanges } from '../unsaved-changes/unsaved-changes';
 })
 export class PhotographUploadDialog {
   readonly closed = output<void>();
+  readonly completed = output<UploadCompletion>();
   readonly canceledTransfer = output<void>();
   private readonly injector = inject(Injector);
   private readonly progressHeading = viewChild.required<ElementRef<HTMLElement>>('progressHeading');
@@ -28,6 +30,8 @@ export class PhotographUploadDialog {
     event?.preventDefault();
     if (await this.canLeave()) {
       if (this.destroy.destroyed) return;
+      const photo = this.savedPhotograph();
+      if (photo) { this.finish(photo, 'unconfirmed'); return; }
       this.modal().nativeElement.close();
       this.closed.emit();
     }
@@ -49,7 +53,6 @@ export class PhotographUploadDialog {
   readonly savedPhotograph = signal<PhotographResult | null>(null);
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
   private readonly dialog = viewChild.required(UnsavedChanges);
-  private readonly router = inject(Router);
   readonly dirty = () => this.form()?.dirty() ?? false;
   async canLeave(): Promise<boolean> {
     const leave = await this.dialog().canLeave(this.form()?.dirty() ?? false);
@@ -60,15 +63,20 @@ export class PhotographUploadDialog {
     return leave;
   }
   saved(photo: PhotographResult): void {
+    this.dialog().finishDiscard(false);
     if (this.form()?.requestCritique()) {
       this.savedPhotograph.set(photo);
       return;
     }
-    void this.router.navigate(['/my-work', photo.id]);
+    this.finish(photo, 'not-requested');
   }
   admitted(operation: OperationResult): void {
-    if (operation.resourceId === this.savedPhotograph()?.id)
-      void this.router.navigate(['/my-work', operation.resourceId]);
+    const photo = this.savedPhotograph();
+    if (photo && operation.resourceId === photo.id) this.finish(photo, 'requested');
+  }
+  private finish(photograph: PhotographResult, critique: UploadCompletion['critique']): void {
+    this.modal().nativeElement.close();
+    this.completed.emit({ photograph, critique });
   }
   focusSaved(): void {
     this.heading()?.nativeElement.focus();

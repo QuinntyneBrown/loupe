@@ -54,6 +54,7 @@ test('L2-043.5: upload unload protection ends after acknowledgment', async ({ pa
   await upload.chooseImage();
   await upload.expectUnloadProtection(true);
   await upload.save();
+  await upload.viewCompletedPhotograph();
   await new PhotographDetailPage(page).expectImage('Morning');
   await upload.expectUnloadProtection(false);
 });
@@ -69,6 +70,7 @@ test('L2-043.5: keeping a pending upload waits for its saved result', async ({ p
   await upload.expectPendingWarning();
   await upload.keepEditing();
   work.library.release('upload');
+  await upload.viewCompletedPhotograph();
   await new PhotographDetailPage(page).expectImage('Morning');
   await upload.expectNoDiscardChoice();
 });
@@ -89,7 +91,7 @@ test('L2-043.5: leaving an in-flight upload does not navigate back when it compl
   await work.expectOpen();
 });
 
-test('L2-043.5: acknowledgment during a discard prompt opens the saved detail', async ({ page }) => {
+test('L2-043.5: acknowledgment during a discard prompt completes on My Work', async ({ page }) => {
   const { work, upload } = await openUpload(page);
   work.library.pause('upload');
   await upload.chooseImage();
@@ -98,14 +100,16 @@ test('L2-043.5: acknowledgment during a discard prompt opens the saved detail', 
   await upload.returnToLibrary();
   await upload.expectDiscardChoice();
   work.library.release('upload');
+  await upload.viewCompletedPhotograph();
   await new PhotographDetailPage(page).expectImage('Morning');
   await upload.expectNoDiscardChoice();
 });
 
-test('L2-037/L2-043: explicit sign-out clears the upload draft', async ({ page }) => {
+test('L2-037/L2-043: discarding the modal allows sign-out and a clean upload after sign-in', async ({ page }) => {
   const { work, signIn, upload } = await openUpload(page);
   await upload.chooseImage();
   await upload.fill({ intent: 'Private unfinished intention' });
+  await upload.closeDialog(); await upload.discardChanges();
   await work.signOut();
   await signIn.expectSignedOut();
   await signIn.continue();

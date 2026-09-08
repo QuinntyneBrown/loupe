@@ -16,6 +16,7 @@ test('L2-001.1/.3: upload without optional fields uses the filename and survives
   await upload.open();
   await upload.chooseImage();
   await upload.save();
+  await upload.viewCompletedPhotograph();
   const detail = new PhotographDetailPage(page);
   await detail.expectImage('Morning');
   await detail.expectAbsentContext();
@@ -37,6 +38,7 @@ test('L2-001.1/L2-002.1: title and complete brief are normalized and saved', asy
   await upload.chooseImage();
   await upload.fill({ title: '  Morning light  ', intent: '  Explore shadows  ', genre: ' Street ', experience: 'Intermediate', requestedFeedback: '  Look at the edges  ' });
   await upload.save();
+  await upload.viewCompletedPhotograph();
   const detail = new PhotographDetailPage(page);
   await detail.expectImage('Morning light');
   await detail.expectBriefValues({ intent: 'Explore shadows', genre: 'Street', experience: 'Intermediate', requestedFeedback: 'Look at the edges' });
@@ -61,6 +63,7 @@ test('L2-043: upload waits for acknowledgment and blocks duplicate submission', 
   expect(work.library.photos).toHaveLength(0);
   expect(work.library.calls.filter(call => call === 'upload')).toHaveLength(1);
   work.library.release('upload');
+  await upload.viewCompletedPhotograph();
   await new PhotographDetailPage(page).expectImage('Morning');
   expect(work.library.photos).toHaveLength(1);
 });

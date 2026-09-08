@@ -8,8 +8,8 @@
   </header>
   @if (savedPhotograph(); as photo) {
    <div class="lp-dialog__body">
-    <h1 #heading tabindex="-1" class="lp-title">Photograph saved</h1>
-    <p class="lp-muted">“{{ photo.title }}” is in My Work. You can leave this page and return to it there.</p>
+    <h2 #heading tabindex="-1" class="lp-dialog__title">Photograph saved</h2>
+    <p class="lp-muted">“{{ photo.title }}” is in My Work. You can close this dialog and return to it there.</p>
     @if (request.error() === 'integration_not_configured') {
       <p>Critique was not queued. Your photograph is saved.</p>
     }
