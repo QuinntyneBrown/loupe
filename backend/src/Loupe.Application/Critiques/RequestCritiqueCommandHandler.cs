@@ -18,7 +18,7 @@ public sealed class RequestCritiqueCommandHandler(ICurrentOwner owner, IPhotogra
         _ = await photographs.FindOwnedAsync(request.PhotographId, owner.Id, cancellationToken) ?? throw new ResourceNotFoundException();
         var fingerprint = Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { request.PhotographId, request.Revision, request.Regenerate })));
         var id = await receipts.ExecuteAsync(owner.Id, "critique", key, fingerprint,
-            token => operations.AdmitCritiqueAsync(request.PhotographId, owner.Id, request.Revision, configuration.GetIdentity(), token), cancellationToken);
+            token => operations.AdmitCritiqueAsync(request.PhotographId, owner.Id, request.Revision, request.Regenerate, configuration.GetIdentity(), token), cancellationToken);
         return OperationResult.From(await operations.FindOwnedAsync(id, owner.Id, cancellationToken) ?? throw new ResourceNotFoundException());
     }
 }

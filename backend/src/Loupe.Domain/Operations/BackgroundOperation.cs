@@ -10,6 +10,7 @@ public sealed class BackgroundOperation
     public required string Model { get; init; }
     public required string PromptVersion { get; init; }
     public required string? InputJson { get; set; }
+    public string? OutputJson { get; set; }
     public OperationStatus Status { get; set; } = OperationStatus.Queued;
     public required DateTimeOffset CreatedAt { get; init; }
     public required DateTimeOffset UpdatedAt { get; set; }

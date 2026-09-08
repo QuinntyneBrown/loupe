@@ -38,6 +38,7 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<BackgroundOperation>().Property(operation => operation.Mode).HasConversion<string>().HasMaxLength(16);
         modelBuilder.Entity<BackgroundOperation>().Property(operation => operation.Status).HasConversion<string>().HasMaxLength(16);
         modelBuilder.Entity<BackgroundOperation>().Property(operation => operation.InputJson).HasColumnType("jsonb");
+        modelBuilder.Entity<BackgroundOperation>().Property(operation => operation.OutputJson).HasColumnType("jsonb");
         modelBuilder.Entity<BackgroundOperation>().HasIndex(operation => new { operation.OwnerId, operation.Type, operation.ResourceId });
         modelBuilder.Entity<BackgroundOperation>().HasIndex(operation => new { operation.Status, operation.CreatedAt });
     }

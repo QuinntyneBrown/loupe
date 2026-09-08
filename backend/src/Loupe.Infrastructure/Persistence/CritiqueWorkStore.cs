@@ -51,16 +51,18 @@ public sealed class CritiqueWorkStore(LibraryDbContext database, TimeProvider cl
             .SingleOrDefaultAsync(cancellationToken);
         if (photograph is null) return;
         var now = clock.GetUtcNow();
+        var input = JsonSerializer.Deserialize<CritiqueInput>(operation.InputJson!)!;
+        var outputJson = JsonSerializer.Serialize(new SavedCritique(operation.Id, now, operation.Mode,
+            operation.Model, operation.PromptVersion, input.Brief, result));
         var changed = await database.BackgroundOperations.Where(item => item.Id == operation.Id && item.LeaseToken == operation.LeaseToken
             && item.Status == OperationStatus.Running && item.LeaseExpiresAt > now)
             .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.Status, OperationStatus.Succeeded)
                 .SetProperty(item => item.CompletedAt, now).SetProperty(item => item.UpdatedAt, now)
                 .SetProperty(item => item.LeaseToken, (Guid?)null).SetProperty(item => item.LeaseExpiresAt, (DateTimeOffset?)null)
+                .SetProperty(item => item.OutputJson, outputJson)
                 .SetProperty(item => item.Message, "Critique saved."), cancellationToken);
         if (changed == 0) return;
-        var input = JsonSerializer.Deserialize<CritiqueInput>(operation.InputJson!)!;
-        photograph.CritiqueJson = JsonSerializer.Serialize(new SavedCritique(operation.Id, now, operation.Mode,
-            operation.Model, operation.PromptVersion, input.Brief, result));
+        photograph.CritiqueJson = outputJson;
         photograph.Revision++;
         await database.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
