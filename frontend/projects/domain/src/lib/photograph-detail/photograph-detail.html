@@ -45,6 +45,7 @@
     [photograph]="item"
     [briefDirty]="briefDirty()"
     (completed)="completedCritiqueId.set($event)"
+    (reviewed)="photo.set($event)"
   />
   <lp-photograph-critique [id]="item.id" [operationId]="completedCritiqueId()" />
   <button

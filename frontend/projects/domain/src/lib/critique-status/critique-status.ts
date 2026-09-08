@@ -25,6 +25,7 @@ export class CritiqueStatus {
   readonly id = computed(() => this.photograph().id);
   readonly admitted = signal<OperationResult | null>(null);
   readonly completed = output<string>();
+  readonly reviewed = output<PhotographResult>();
   readonly operation = signal<OperationResult | null>(null);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);

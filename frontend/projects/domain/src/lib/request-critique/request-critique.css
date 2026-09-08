@@ -2,6 +2,18 @@ p {
   max-width: var(--lp-measure);
   overflow-wrap: anywhere;
 }
+dl {
+  max-width: var(--lp-measure);
+}
+dt {
+  margin-top: var(--lp-space-4);
+  font-weight: var(--lp-weight-semibold);
+}
+dd {
+  margin: var(--lp-space-1) var(--lp-zero) var(--lp-zero);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 [role='alert'] {
   color: var(--lp-color-danger);
 }

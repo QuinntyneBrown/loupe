@@ -36,6 +36,7 @@
     [photograph]="photograph()"
     [briefDirty]="briefDirty()"
     (started)="focus()"
+    (reviewed)="reviewed.emit($event)"
     (admitted)="admitted.set($event)"
   />
   @if (error() === 'item_unavailable') {

@@ -5,15 +5,35 @@
 @if (busy()) {
   <p role="status">Requesting critique…</p>
 }
-@if (error()) {
-  <p role="alert">
-    {{
-      error() === 'integration_not_configured'
-        ? 'AI critique is not configured. Your photograph is saved and you can keep editing it.'
-        : 'Critique admission was not confirmed. Retry to check the same request.'
-    }}
-  </p>
+@if (error() || reviewFailed()) {
+  <p role="alert">{{ message() }}</p>
 }
-<button type="button" [disabled]="blocked()" (click)="request()">
-  {{ error() ? 'Retry critique request' : 'Request critique' }}
-</button>
+@if (latest(); as photo) {
+  <section aria-labelledby="latest-critique-brief">
+    <h3 id="latest-critique-brief">Latest brief for critique</h3>
+    <p role="status">Latest saved brief loaded. Review it before requesting.</p>
+    <dl>
+      @for (field of fields; track field.key) {
+        <dt>{{ field.label }}</dt>
+        <dd>{{ photo.brief[field.key] || 'None supplied' }}</dd>
+      }
+    </dl>
+    @if (briefDirty()) {
+      <p>Save or cancel your brief edits before requesting a critique.</p>
+    }
+    <button type="button" [disabled]="busy() || briefDirty()" (click)="requestLatest()">
+      Request critique with this saved brief
+    </button>
+  </section>
+} @else if (error() === 'revision_conflict') {
+  @if (reviewing()) {
+    <p role="status">Loading latest saved brief…</p>
+  }
+  <button type="button" [disabled]="reviewing()" (click)="review()">
+    Review latest saved brief
+  </button>
+} @else if (!cannotRetry()) {
+  <button type="button" [disabled]="blocked()" (click)="request()">
+    {{ error() ? 'Retry critique request' : 'Request critique' }}
+  </button>
+}

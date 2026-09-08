@@ -18,6 +18,10 @@ export class PhotographDetailPage {
   }
   async expectCritiqueRequestFailure(message = 'Critique admission was not confirmed. Retry to check the same request.') { await expect(this.critiqueStatus().getByRole('alert')).toHaveText(message); }
   async retryCritiqueRequest() { await this.critiqueStatus().getByRole('button', { name: 'Retry critique request', exact: true }).click(); }
+  async reviewCritiqueRequest() { await this.critiqueStatus().getByRole('button', { name: 'Review latest saved brief', exact: true }).click(); }
+  async expectLatestCritiqueBrief(value) { await expect(this.critiqueStatus().getByRole('region', { name: 'Latest brief for critique', exact: true })).toContainText(value); }
+  async requestLatestCritique() { await this.critiqueStatus().getByRole('button', { name: 'Request critique with this saved brief', exact: true }).click(); }
+  async expectNoCritiqueRetry() { await expect(this.critiqueStatus().getByRole('button', { name: 'Retry critique request', exact: true })).toHaveCount(0); }
   async expectCritiqueRequestBlocked() {
     await expect(this.critiqueStatus()).toContainText('Save or cancel your brief edits before requesting a critique.');
     await expect(this.critiqueStatus().getByRole('button', { name: 'Request critique', exact: true })).toBeDisabled();
