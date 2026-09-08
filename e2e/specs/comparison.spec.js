@@ -39,12 +39,14 @@ test('L2-005/L2-030: a failed comparison read can be retried with focus restored
   await compare.expectAttempt('First attempt', library.photos[0], library.critiques.get(library.photos[0].id)); await compare.expectFocus();
 });
 
-for (const width of [320, 767, 768, 1440]) test(`L2-005.5: full images and labeled attempts fit ${width}px`, async ({ page }) => {
-  await page.setViewportSize({ width, height: 900 });
+const viewports = [320, 375, 575, 576, 767, 768, 991, 992, 1199, 1200, 1440, 1920]
+  .map(width => ({ width, height: 900 })).concat([{ width: 375, height: 667 }, { width: 844, height: 390 }]);
+for (const viewport of viewports) test(`L2-005.5: full images and labeled attempts fit ${viewport.width}x${viewport.height}`, async ({ page }) => {
+  await page.setViewportSize(viewport);
   const { library, compare, signIn } = await setup(page);
   await signIn.openWithDestination(compare.destination(library.photos[0].id, library.photos[1].id)); await signIn.continue();
   await compare.expectAttempt('Second attempt', library.photos[1], library.critiques.get(library.photos[1].id));
-  await compare.expectLayout(width < 768 ? 1 : 2);
+  await compare.expectLayout(viewport.width < 768 ? 1 : 2);
 });
 
 test('L2-005/L2-043: history navigation after a retry does not steal focus when the next pair loads', async ({ page }) => {

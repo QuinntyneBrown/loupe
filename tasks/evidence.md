@@ -635,3 +635,8 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - The application owns a native replacement dialog, reuses eligible paging, excludes the other selected ID, and restores focus on cancellation. Both deleted attempts can be replaced one at a time. Phone (320px) and desktop (1440px) screenshots, accessibility scans, Tab/Shift+Tab cycling, Escape, and returned trigger focus passed.
 - Review found that browser history could leave a replacement dialog bound to an old pair. A regression reproduced the still-open dialog; the routed page now closes/reset it whenever either ID changes, destroying and fencing pending picker reads. Independent follow-up confirmed resolution. All 39 selection/recovery checks then passed across three engines (1.1m).
 - Production libraries/application built successfully at 434.11 kB raw / 107.35 kB estimated transfer. Formatting/diff checks passed; L2-005.4 is covered by API-48 and these recovery workflows.
+
+## UI-38: complete the comparison viewport matrix
+
+- Expanded the existing full-image, labeled-column, no-overflow and accessibility assertions from four widths to all 14 specified viewports. The earlier controls remain included unchanged.
+- All 42 checks passed across Chromium, Firefox and WebKit (1.4m). This is additional coverage of UI-35/37 behavior, with no production change. Diff review passed. L2-005.5 is covered; named manual assistive-technology/device release checks remain separate gates.
