@@ -17,7 +17,9 @@ skinparam package {
 
 actor "Library owner" as actor
 box "Frontend - Loupe application / domain / api" #E0F2FE
-participant "PhotographUploadPanel" as page
+participant "MyWork" as work
+participant "PhotographUploadDialog" as dialog
+participant "PhotographUpload" as page
 participant "PhotographService" as client
 end box
 box "Backend - Loupe API application" #D1FADF
@@ -31,7 +33,10 @@ box "Backend - Loupe Infrastructure" #FFF4E5
 database "Library store" as db
 participant "IImageIngestor / IImageStore adapters" as ext
 end box
-actor -> page : Upload and save personal photographs
+actor -> work : Upload photograph [L2-001.6]
+work -> dialog : showModal; retain collection and URL
+dialog -> page : Create fresh draft
+actor -> page : Browse/drop one image; select upload action
 page -> client : image, title?, brief?
 client -> controller : POST /api/photographs
 note over controller : API middleware authenticates; controller binds only
@@ -51,5 +56,14 @@ end
 handler --> controller : 201 saved photograph; retain brief on failure
 controller --> client : Typed HTTP response / ProblemDetails
 client --> page : Update state signals
-page --> actor : Saved / loaded state or retained-input error
+alt acknowledged photograph
+page -> dialog : saved(photograph)
+opt Upload and request critique
+dialog -> dialog : Admit critique; retain recovery on failure
+end
+dialog -> work : Close; announce success and refresh collection [L2-001.8]
+work --> actor : My Work notification and View link
+else unconfirmed upload
+page --> actor : Retain draft and retry identity
+end
 @enduml

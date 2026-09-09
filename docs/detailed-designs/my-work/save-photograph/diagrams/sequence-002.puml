@@ -17,7 +17,7 @@ skinparam package {
 
 actor "Library owner" as actor
 box "Frontend - Loupe application / domain / api" #E0F2FE
-participant "PhotographUploadPanel" as page
+participant "PhotographDetailPage / PhotographBrief" as page
 participant "PhotographService" as client
 end box
 box "Backend - Loupe API application" #D1FADF

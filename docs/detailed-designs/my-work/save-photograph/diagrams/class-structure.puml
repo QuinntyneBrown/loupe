@@ -65,17 +65,37 @@ interface IImageStore {
 }
 UploadPhotographCommandHandler ..> IImageStore : uses
 interface IPhotographService {
-  +state: Signal<FeatureState>
+  +upload(input: PhotographUpload, onProgress?: callback, signal?: AbortSignal): Promise<PhotographResult>
+  +list(cursor?: string): Promise<PhotographPage>
 }
 class PhotographService {
   -http: HttpClient
-  +state: Signal<FeatureState>
 }
 PhotographService ..|> IPhotographService
-class PhotographUploadPanel {
+class PhotographUpload {
   -service: IPhotographService
+  +saving: Signal<boolean>
+  +dirty: Signal<boolean>
+  +save(): Promise<void>
+  +cancelUpload(): void
 }
-PhotographUploadPanel ..> IPhotographService : inject token
+PhotographUpload ..> IPhotographService : inject token
+class MyWork {
+  +uploading: Signal<boolean>
+  +canLeave(): boolean | Promise<boolean>
+}
+class PhotographUploadDialog {
+  +canLeave(): boolean | Promise<boolean>
+  +cancel(): Promise<void>
+}
+class PhotographCollection {
+  +refresh(): Promise<void>
+}
+MyWork *-- PhotographUploadDialog : owns modal lifetime
+MyWork *-- PhotographCollection : preserves underlying collection
+PhotographUploadDialog *-- PhotographUpload : owns draft
+PhotographUploadDialog ..> UnsavedChanges : confirms discard
+PhotographUploadDialog ..> RequestCritique : admission after persistence
 class CritiqueBrief {
  +Intent: string?
  +Genre: string?

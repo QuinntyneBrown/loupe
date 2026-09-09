@@ -4,7 +4,7 @@
 
 The **library shell** — application navigation and route host for My Work, Inspiration, Photographers, and Search — keeps workflows addressable. An **editor draft** — unsaved text held in current-tab memory — survives recoverable request failures without being mistaken for saved content.
 
-This is a proposed design for the defined requirements. Existing files are illustrative HTML mockups; the repository contains no corresponding production implementation.
+The HTML mockups provide visual references. Photograph-upload navigation uses the implemented modal and route guard described below; the remaining sections record the capability's design contracts.
 
 ## Description
 
@@ -15,6 +15,10 @@ This slice composes existing vertical API contracts through application routing 
 Each feature adapter retains loaded content during retryable failures and preserves route filters on retry. Submitting marks only the relevant action pending and reuses the operation key on accidental duplicate activation. Unrelated navigation remains usable. Editors expose Save and acknowledgment-driven saved state.
 
 `UnsavedChangesGuard` consumes `IEditorDraftService` through `EDITOR_DRAFT_SERVICE`, declared in `editor-draft.service.contract.ts`; its in-memory implementation lives separately in `api` without HTTP. Application dialogs offer Keep editing or Discard on in-app navigation and editor close. Browser unload uses its native available protection without requiring custom text.
+
+Photograph upload uses `PhotographUploadDialog` over the retained `MyWork` collection. `photographUploadUnsavedGuard` delegates route departure to that modal's `canLeave()`. Close, Escape and backdrop dismissal use the same `UnsavedChanges` confirmation. Confirmed transfer cancellation aborts the client request and announces uncertain server completion. The old `/my-work/upload` route redirects to `/my-work`. Successful upload stays on My Work with a View notification; [save-photograph](../../my-work/save-photograph/README.md) defines this lifecycle.
+
+Router configuration uses `canceledNavigationResolution: 'computed'`. Canceling browser Back restores the original history position, preserving the destination for a later Back attempt. This follows Angular's [router configuration contract](https://angular.dev/api/router/RouterConfigOptions#canceledNavigationResolution).
 
 Expiry suspends drafts in current-tab memory with the previous owner's identity and requests sign-in. The session service restores only after the same authenticated owner returns. A different owner, explicit sign-out, or tab close clears them. Drafts never enter local/session storage or a shared cache. The `LibraryShellPage` and each routed screen page object own their selectors and interactions; tests state navigation and recovery intent.
 

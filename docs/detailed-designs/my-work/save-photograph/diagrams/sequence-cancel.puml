@@ -1,0 +1,52 @@
+@startuml
+title L2-001.9 - Cancel an in-flight photograph upload
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "MyWork" as work
+participant "PhotographUploadDialog" as dialog
+participant "UnsavedChanges" as confirm
+participant "PhotographUpload" as upload
+participant "PhotographService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "PhotographsController" as api
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "UploadPhotographCommandHandler" as handler
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+upload -> client : upload(input, progress, AbortSignal)
+client -> api : POST /api/photographs
+api -> handler : MediatR dispatch
+actor -> dialog : Cancel upload
+dialog -> confirm : Confirm discard [L2-043.7]
+alt Keep editing
+confirm --> dialog : false; retain draft and transfer
+else Confirm discard before acknowledgment
+confirm --> dialog : true
+dialog -> upload : cancelUpload()
+upload -> client : Abort signal
+client -> client : Unsubscribe; stop client transfer
+dialog -> work : Close; refresh collection; announce uncertainty
+note over api, db
+Client abort does not prove rollback.
+Server persistence may race cancellation.
+end note
+opt Server commit completes after the first refresh
+handler -> db : Commit photograph
+db --> handler : Saved
+end
+actor -> work : Refresh My Work
+work -> client : list()
+client -> api : GET /api/photographs
+api --> client : Current owned collection
+client --> work : Refresh cards
+end
+@enduml

@@ -4,9 +4,11 @@
 
 A **critique job** — durable request to analyze a saved photograph and a snapshot of its brief — separates slow AI work from interaction. A replacement becomes current only after its entire result passes validation. The existing critique and personal notes remain available while replacement work runs.
 
-This is a proposed design for the defined requirements. Existing files are illustrative HTML mockups; the repository contains no corresponding production implementation.
+The HTML mockups provide visual references. The photograph-upload integration described below is implemented; the remaining sections record the capability's design contracts.
 
 ## Description
+
+After an upload, `PhotographUploadDialog` composes the existing `RequestCritique` component with immediate admission enabled. Admission success closes the modal on My Work and announces that critique was requested. Failure leaves a saved-photograph recovery state with retry and View actions. No admission retry repeats the upload. The [save-photograph design](../../my-work/save-photograph/README.md) defines the modal lifetime and cancellation boundary.
 
 `PhotographDetailPage` lives in `frontend/projects/loupe` and owns routing and dialogs. `CritiquePanel` lives in `frontend/projects/domain` and consumes `ICritiqueService` through `CRITIQUE_SERVICE`. The contract and token share `critique.service.contract.ts` in `frontend/projects/api`. `CritiqueService` is the separate production HTTP adapter. Composition substitutes a mock implementation under Playwright. State uses signals, and HTTP and observable conversion stay inside the adapter. Presentational controls in `components` consume inputs and emit outputs. Component class, template, and styles occupy separate files.
 

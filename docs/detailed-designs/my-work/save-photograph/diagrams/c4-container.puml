@@ -4,7 +4,7 @@ LAYOUT_WITH_LEGEND()
 title Container - Save a photograph and its brief
 Person(owner, "Library owner", "Uses this capability")
 System_Boundary(loupe, "Loupe") {
-Container(spa, "Loupe web", "Angular", "MyWorkPage")
+Container(spa, "Loupe web", "Angular", "MyWork and native PhotographUploadDialog")
 Container(api, "Loupe API", "ASP.NET Core", "PhotographsController")
 ContainerDb(db, "Library store", "Relational storage; engine TO SUPPLY", "Owned records, versions, and durable work")
 ContainerDb(images, "Private image store", "Immutable object storage; adapter TO SUPPLY", "Validated images and previews")

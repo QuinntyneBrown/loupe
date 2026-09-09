@@ -2,7 +2,13 @@
 !include <C4/C4_Component>
 LAYOUT_WITH_LEGEND()
 title Component - Save a photograph and its brief
-Container(spa, "PhotographUploadPanel", "Angular domain", "Injects PHOTOGRAPH_SERVICE")
+Container_Boundary(web, "Loupe Angular client") {
+Component(work, "MyWork", "Application", "Retains collection and owns dialog lifetime")
+Component(dialog, "PhotographUploadDialog", "Application", "Native modal, focus, dismissal and critique admission")
+Component(spa, "PhotographUpload", "Domain", "Signal draft, validation and upload through PHOTOGRAPH_SERVICE")
+Rel(work, dialog, "Opens from header or empty state")
+Rel(dialog, spa, "Composes")
+}
 Container_Boundary(api, "Loupe API and Application") {
 Component(ctrl, "PhotographsController", "API controller", "Binds, dispatches, returns")
 Component(handler, "UploadPhotographCommandHandler\nUpdatePhotographBriefCommandHandler", "Application / MediatR 12.5.0", "Validates, authorizes, coordinates slice")
