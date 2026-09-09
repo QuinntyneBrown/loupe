@@ -3,10 +3,31 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographUploadPage {
   constructor(page) { this.page = page; }
+  async refreshCanceledUpload() { await this.page.getByRole('button', { name: 'Refresh My Work', exact: true }).click(); }
+  async capture(path) { await this.page.screenshot({ path, fullPage: false }); }
+  async escapeDialog() { await this.page.keyboard.press('Escape'); }
+  async clickBackdrop() { await this.page.mouse.click(2, 2); }
+  async back() { await this.page.evaluate(() => history.back()); }
+  async expectDialogFits() {
+    const bounds = await this.modal().boundingBox();
+    const viewport = this.page.viewportSize();
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.y).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width + 1);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height + 1);
+    if (viewport.width < 640) {
+      expect(bounds.width).toBe(viewport.width);
+      expect(Math.abs(bounds.y + bounds.height - viewport.height)).toBeLessThanOrEqual(1);
+      expect(bounds.height).toBeLessThanOrEqual(viewport.height * 0.9 + 1);
+    } else {
+      expect(bounds.width).toBeLessThanOrEqual(560);
+      expect(Math.abs(bounds.x + bounds.width / 2 - viewport.width / 2)).toBeLessThanOrEqual(1);
+    }
+  }
   async expectCompleted(critique = this.critiqueAfterSaving ?? false) {
     await expect(this.modal()).toHaveCount(0);
     await expect(this.page).toHaveURL(/\/my-work$/);
-    await expect(this.page.getByRole('status')).toContainText(critique ? 'Uploaded. Critique requested.' : 'Photograph uploaded.');
+    await expect(this.page.getByRole('status').filter({ has: this.page.getByRole('link', { name: 'View', exact: true }) })).toContainText(critique ? 'Uploaded. Critique requested.' : 'Photograph uploaded.');
     await expect(this.page.getByRole('link', { name: 'View', exact: true })).toBeVisible();
   }
   async viewCompletedPhotograph() {
@@ -170,12 +191,16 @@ export class PhotographUploadPage {
     await this.expectSaveDisabled();
   }
   async expectAccessibleUpload() {
+    await this.expectDialogFits();
     expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
     expect(audit.violations).toEqual([]);
-    for (const label of ['Photograph', 'Title (optional)', 'What were you trying to do?', 'Custom genre (optional)', 'Your experience', 'Custom feedback (optional)']) {
-      const control = this.page.getByLabel(label, { exact: true });
-      const box = await control.boundingBox();
+    const boxes = await this.modal().locator('input, select, textarea, button, summary').evaluateAll(controls =>
+      controls.filter(control => control.checkVisibility()).map(control => {
+        const { width, height } = control.getBoundingClientRect();
+        return { width, height };
+      }));
+    for (const box of boxes) {
       expect(box.width).toBeGreaterThanOrEqual(24);
       expect(box.height).toBeGreaterThanOrEqual(24);
     }

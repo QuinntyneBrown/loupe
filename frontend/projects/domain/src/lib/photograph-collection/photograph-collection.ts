@@ -32,7 +32,10 @@ export class PhotographCollection implements OnInit {
   readonly skeletonTiles = Array.from({ length: 8 }, (_, index) => index);
   private loadVersion = 0;
   private refreshPending = false;
-  refresh(): Promise<void> { this.refreshPending = true; return this.load(true); }
+  refresh(): Promise<void> {
+    this.refreshPending = true;
+    return this.load(true);
+  }
 
   ngOnInit(): void {
     void this.load();
@@ -66,9 +69,16 @@ export class PhotographCollection implements OnInit {
     this.failed.set(false);
     const previousCount = this.items().length;
     try {
-      const page = await this.service.list(refresh ? undefined : this.nextCursor() ?? undefined);
+      const page = await this.service.list(refresh ? undefined : (this.nextCursor() ?? undefined));
       if (version !== this.loadVersion) return;
-      this.items.update((items) => refresh ? page.items : [...items, ...page.items.filter(item => !items.some(existing => existing.id === item.id))]);
+      this.items.update((items) =>
+        refresh
+          ? page.items
+          : [
+              ...items,
+              ...page.items.filter((item) => !items.some((existing) => existing.id === item.id)),
+            ],
+      );
       this.refreshPending = false;
       this.nextCursor.set(page.nextCursor);
       this.loaded.set(true);

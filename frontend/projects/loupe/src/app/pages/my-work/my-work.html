@@ -12,7 +12,12 @@
         <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-compare" /></svg>
         Compare attempts
       </a>
-      <button #uploadButton class="lp-button lp-button--primary" type="button" (click)="uploading.set(true)">
+      <button
+        #uploadButton
+        class="lp-button lp-button--primary"
+        type="button"
+        (click)="uploadButton.focus(); uploading.set(true)"
+      >
         <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-upload" /></svg>
         Upload photograph
       </button>
@@ -22,11 +27,28 @@
   @if (notice()) {
     <div class="upload-notice" role="status">
       <span>{{ notice() }}</span>
-      @if (savedId(); as id) { <a [routerLink]="['/my-work', id]">View</a> }
-      <button class="lp-icon-button" type="button" aria-label="Dismiss notification" (click)="dismissNotice()"><svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg></button>
+      @if (savedId(); as id) {
+        <a [routerLink]="['/my-work', id]">View</a>
+      } @else {
+        <button class="refresh-notice" type="button" (click)="refreshCollection()">
+          Refresh My Work
+        </button>
+      }
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Dismiss notification"
+        (click)="dismissNotice()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
     </div>
   }
 </main>
 @if (uploading()) {
-  <lp-photograph-upload-dialog (closed)="uploading.set(false)" (canceledTransfer)="canceledTransfer()" (completed)="completed($event)" />
+  <lp-photograph-upload-dialog
+    (closed)="uploading.set(false)"
+    (canceledTransfer)="canceledTransfer()"
+    (completed)="completed($event)"
+  />
 }

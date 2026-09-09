@@ -28,7 +28,8 @@ export class MockPhotographService implements IPhotographService {
       value.toString(16).padStart(2, '0'),
     ).join('');
     const report = (event: Event) => {
-      if (!signal?.aborted && event instanceof CustomEvent) onProgress?.(event.detail as UploadProgress);
+      if (!signal?.aborted && event instanceof CustomEvent)
+        onProgress?.(event.detail as UploadProgress);
     };
     if (signal?.aborted) throw new ServiceError('upload_canceled');
     let abort: (() => void) | undefined;
@@ -41,14 +42,17 @@ export class MockPhotographService implements IPhotographService {
     });
     window.addEventListener('loupe-upload-progress', report);
     try {
-      return await Promise.race([canceled, this.request<PhotographResult>('upload', {
-        filename: input.image.name,
-        title: input.title,
-        brief: input.brief,
-        operationKey: input.operationKey,
-        hash,
-        contentType: input.image.type,
-      })]);
+      return await Promise.race([
+        canceled,
+        this.request<PhotographResult>('upload', {
+          filename: input.image.name,
+          title: input.title,
+          brief: input.brief,
+          operationKey: input.operationKey,
+          hash,
+          contentType: input.image.type,
+        }),
+      ]);
     } finally {
       if (abort) signal?.removeEventListener('abort', abort);
       window.removeEventListener('loupe-upload-progress', report);
@@ -79,8 +83,12 @@ export class MockPhotographService implements IPhotographService {
   }
   private async request<T>(operation: string, input: object): Promise<T> {
     if (!this.callback) throw new ServiceError('item_unavailable');
-    const response = await this.callback(operation, input);
-    if (response.error) throw new ServiceError(response.error);
-    return response.data as T;
+    try {
+      const response = await this.callback(operation, input);
+      if (response.error) throw new ServiceError(response.error);
+      return response.data as T;
+    } finally {
+      if (operation === 'list') window.dispatchEvent(new Event('loupe-list-settled'));
+    }
   }
 }

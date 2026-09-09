@@ -1,32 +1,57 @@
-<dialog #modal class="lp-dialog" aria-label="Upload photograph" (cancel)="cancel($event)" (click)="backdrop($event)" (keydown)="trapFocus($event)">
- <div class="lp-dialog__panel">
-  <header class="lp-dialog__header">
-    <h2 #progressHeading tabindex="-1" class="lp-dialog__title" id="photograph-upload-heading">{{ form()?.saving() ? 'Uploading…' : form()?.fileError() ? "Couldn't upload this file" : 'Upload photograph' }}</h2>
-    @if (!form()?.saving()) {
-    <button class="lp-icon-button" type="button" aria-label="Close" (click)="cancel()"><svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg></button>
+<dialog
+  #modal
+  class="lp-dialog"
+  aria-label="Upload photograph"
+  (cancel)="cancel($event)"
+  (click)="backdrop($event)"
+  (keydown)="trapFocus($event)"
+>
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <h2 #progressHeading tabindex="-1" class="lp-dialog__title" id="photograph-upload-heading">
+        {{
+          form()?.saving()
+            ? 'Uploading…'
+            : form()?.fileError()
+              ? "Couldn't upload this file"
+              : 'Upload photograph'
+        }}
+      </h2>
+      @if (!form()?.saving()) {
+        <button class="lp-icon-button" type="button" aria-label="Close" (click)="cancel()">
+          <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+        </button>
+      }
+    </header>
+    @if (savedPhotograph(); as photo) {
+      <div class="lp-dialog__body">
+        <h2 #heading tabindex="-1" class="lp-dialog__title">Photograph saved</h2>
+        <p class="lp-muted">
+          “{{ photo.title }}” is in My Work. You can close this dialog and return to it there.
+        </p>
+        @if (request.error() === 'integration_not_configured') {
+          <p>Critique was not queued. Your photograph is saved.</p>
+        }
+        <lp-request-critique
+          #request
+          [photograph]="photo"
+          [requestImmediately]="true"
+          (started)="focusSaved()"
+          (reviewed)="savedPhotograph.set($event)"
+          (admitted)="admitted($event)"
+        />
+        <a class="lp-button lp-button--secondary" [routerLink]="['/my-work', photo.id]"
+          >View saved photograph</a
+        >
+      </div>
+    } @else {
+      <lp-photograph-upload
+        (saved)="saved($event)"
+        (closeRequested)="cancel()"
+        (started)="focusProgress()"
+      />
     }
-  </header>
-  @if (savedPhotograph(); as photo) {
-   <div class="lp-dialog__body">
-    <h2 #heading tabindex="-1" class="lp-dialog__title">Photograph saved</h2>
-    <p class="lp-muted">“{{ photo.title }}” is in My Work. You can close this dialog and return to it there.</p>
-    @if (request.error() === 'integration_not_configured') {
-      <p>Critique was not queued. Your photograph is saved.</p>
-    }
-    <lp-request-critique
-      #request
-      [photograph]="photo"
-      [requestImmediately]="true"
-      (started)="focusSaved()"
-      (reviewed)="savedPhotograph.set($event)"
-      (admitted)="admitted($event)"
-    />
-    <a class="lp-button lp-button--secondary" [routerLink]="['/my-work', photo.id]">View saved photograph</a>
-   </div>
-  } @else {
-    <lp-photograph-upload (saved)="saved($event)" (closeRequested)="cancel()" (started)="focusProgress()" />
-  }
- </div>
+  </div>
 </dialog>
 <lp-unsaved-changes
   [dirty]="dirty"

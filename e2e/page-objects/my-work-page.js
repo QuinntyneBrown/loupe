@@ -4,6 +4,28 @@ import { PhotographLibrary } from '../fixtures/photograph-library.js';
 
 export class MyWorkPage {
   constructor(page) { this.page = page; }
+  async visitInspirationThenReturn() {
+    await this.page.getByRole('navigation', { name: 'Library' }).getByRole('link', { name: 'Inspiration', exact: true }).click();
+    await expect(this.page).toHaveURL(/\/inspiration$/);
+    await this.page.getByRole('navigation', { name: 'Library' }).getByRole('link', { name: 'My Work', exact: true }).click();
+    await this.expectOpen();
+  }
+  async expectInspiration() { await expect(this.page).toHaveURL(/\/inspiration$/); }
+  async observeListCompletion() {
+    this.runtimeErrors = [];
+    this.page.on('pageerror', error => this.runtimeErrors.push(error.message));
+    await this.page.addInitScript(() => {
+      window.loupeSettledLists = 0;
+      window.addEventListener('loupe-list-settled', () => window.loupeSettledLists++);
+    });
+  }
+  async expectListSettled(count) {
+    await expect.poll(() => this.page.evaluate(() => window.loupeSettledLists)).toBe(count);
+    // Flush the Angular render following the settled service promise.
+    await this.page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  }
+  expectNoRuntimeErrors() { expect(this.runtimeErrors).toEqual([]); }
+  async expectPhotographCard(title) { await expect(this.page.getByRole('article').getByRole('heading', { name: title, exact: true })).toBeVisible(); }
   async expectCritiqueLabel(title, status) {
     const card = this.page.getByRole('article').filter({ has: this.page.getByRole('heading', { name: title, exact: true }) });
     await expect(card.getByText(status, { exact: true })).toBeVisible();

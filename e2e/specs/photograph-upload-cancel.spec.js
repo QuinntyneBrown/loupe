@@ -19,6 +19,8 @@ test('confirmed cancellation aborts the client and ignores a late server acknowl
   await expect.poll(() => work.library.calls.filter(call => call === 'abortUpload').length).toBe(1);
   work.library.release('upload');
   await expect.poll(() => work.library.photos.length).toBe(1);
+  await upload.refreshCanceledUpload();
+  await work.expectPhotographCard('Morning');
   await work.expectOpen();
   expect(work.library.calls).not.toContain('requestCritique');
   await upload.open(); await upload.expectEmptyDraft();

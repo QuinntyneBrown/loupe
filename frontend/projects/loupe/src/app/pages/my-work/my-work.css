@@ -19,7 +19,23 @@
   font-size: var(--lp-text-sm);
   box-shadow: var(--lp-shadow-lg);
 }
-.upload-notice span { overflow-wrap: anywhere; }
-.upload-notice a, .upload-notice button { color: inherit; }
-.upload-notice a { flex-shrink: var(--lp-zero); }
-.upload-notice button { flex-shrink: var(--lp-zero); padding: var(--lp-zero); }
+.upload-notice span {
+  overflow-wrap: anywhere;
+}
+.upload-notice a,
+.upload-notice button {
+  color: inherit;
+}
+.upload-notice a {
+  flex-shrink: var(--lp-zero);
+}
+.upload-notice button {
+  flex-shrink: var(--lp-zero);
+  padding: var(--lp-zero);
+}
+.upload-notice .refresh-notice {
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  flex-shrink: 1;
+}

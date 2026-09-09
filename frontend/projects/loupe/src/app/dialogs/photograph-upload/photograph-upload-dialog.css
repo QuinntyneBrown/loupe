@@ -4,3 +4,6 @@
 p {
   overflow-wrap: anywhere;
 }
+.lp-dialog__title {
+  margin: var(--lp-zero);
+}

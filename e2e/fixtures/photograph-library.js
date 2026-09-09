@@ -34,6 +34,7 @@ export class PhotographLibrary {
     await page.exposeFunction('loupePhotographs', async (operation, input) => {
       this.calls.push(operation);
       if (operation === 'abortUpload') return { data: null };
+      const snapshot = this.gates[operation]?.snapshot;
       await this.gates[operation]?.promise;
       const error = this.errors[operation]?.shift();
       if (error) return { error };
@@ -42,11 +43,12 @@ export class PhotographLibrary {
         return { error: 'request_failed' };
       }
       if (operation === 'list') {
+        const photos = snapshot ?? this.photos;
         const start = Number(input.cursor ?? 0);
-        const end = Math.min(this.photos.length, start + 24);
-        const items = this.photos.slice(start, end).map(photo => ({ ...photo,
+        const end = Math.min(photos.length, start + 24);
+        const items = photos.slice(start, end).map(photo => ({ ...photo,
           hasCritique: this.critiques.has(photo.id), critiqueStatus: this.critiqueOperations.get(photo.id)?.status ?? null }));
-        return { data: { items, nextCursor: end < this.photos.length ? String(end) : null } };
+        return { data: { items, nextCursor: end < photos.length ? String(end) : null } };
       }
       if (operation === 'get') {
         const photo = this.photos.find(photo => photo.id === input.id);

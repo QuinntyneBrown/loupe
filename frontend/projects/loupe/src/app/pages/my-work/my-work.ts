@@ -19,19 +19,38 @@ export class MyWork {
   completed(result: UploadCompletion): void {
     this.uploading.set(false);
     this.savedId.set(result.photograph.id);
-    this.notice.set(result.critique === 'requested' ? 'Uploaded. Critique requested.' : result.critique === 'unconfirmed' ? 'Photograph uploaded. Critique admission was not confirmed.' : 'Photograph uploaded.');
+    this.notice.set(
+      result.critique === 'requested'
+        ? 'Uploaded. Critique requested.'
+        : result.critique === 'unconfirmed'
+          ? 'Photograph uploaded. Critique admission was not confirmed.'
+          : 'Photograph uploaded.',
+    );
     const trigger = this.document.activeElement;
-    void this.collection().refresh().then(() => {
-      if (!trigger?.isConnected) this.uploadButton().nativeElement.focus();
-    });
+    void this.collection()
+      .refresh()
+      .then(() => {
+        if (!trigger?.isConnected) this.uploadButton().nativeElement.focus();
+      });
   }
-  dismissNotice(): void { this.notice.set(''); this.savedId.set(null); this.uploadButton().nativeElement.focus(); }
+  dismissNotice(): void {
+    this.notice.set('');
+    this.savedId.set(null);
+    this.uploadButton().nativeElement.focus();
+  }
   private readonly collection = viewChild.required(PhotographCollection);
+  refreshCollection(): void {
+    void this.collection().refresh();
+  }
   canceledTransfer(): void {
     this.savedId.set(null);
-    this.notice.set('Transfer stopped. The photograph may already have been saved. Check My Work before uploading again.');
+    this.notice.set(
+      'Transfer stopped. The photograph may already have been saved. Check My Work before uploading again.',
+    );
     void this.collection().refresh();
   }
   private readonly upload = viewChild(PhotographUploadDialog);
-  canLeave(): boolean | Promise<boolean> { return this.upload()?.canLeave() ?? true; }
+  canLeave(): boolean | Promise<boolean> {
+    return this.upload()?.canLeave() ?? true;
+  }
 }

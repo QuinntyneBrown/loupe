@@ -51,7 +51,13 @@ export const routes: Routes = [
   },
   { path: '', pathMatch: 'full', redirectTo: 'my-work' },
   { path: 'sign-in', component: SignIn, title: 'Sign in · Loupe' },
-  { path: 'my-work', component: MyWork, canActivate: [sessionGuard], canDeactivate: [photographUploadUnsavedGuard], title: 'My Work · Loupe' },
+  {
+    path: 'my-work',
+    component: MyWork,
+    canActivate: [sessionGuard],
+    canDeactivate: [photographUploadUnsavedGuard],
+    title: 'My Work · Loupe',
+  },
   {
     path: 'deletions/:id',
     component: DeletionPage,

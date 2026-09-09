@@ -1,36 +1,80 @@
 <form (ngSubmit)="save()" [attr.aria-busy]="saving()">
-  <div class="lp-dialog__body">
+  <div class="lp-dialog__body" tabindex="0">
     <div class="lp-field" [hidden]="saving()">
-      @if (fileError(); as error) { <p class="lp-notice" id="upload-file-error" role="alert">{{ error }}</p> }
-      <label class="lp-dropzone" [class.lp-dropzone--compact]="!!fileError()" [class.is-dragover]="dragging()"
-        (dragover)="dragOver($event)" (dragleave)="dragging.set(false)" (drop)="drop($event)">
+      @if (fileError(); as error) {
+        <p class="lp-notice" id="upload-file-error" role="alert">{{ error }}</p>
+      }
+      <label
+        class="lp-dropzone"
+        [class.lp-dropzone--compact]="!!fileError()"
+        [class.is-dragover]="dragging()"
+        (dragover)="dragOver($event)"
+        (dragleave)="dragging.set(false)"
+        (drop)="drop($event)"
+      >
         <svg class="lp-icon" aria-hidden="true"><use href="#i-upload" /></svg>
-        <span class="lp-dropzone__title">{{ fileError() ? 'Choose another file' : 'Drop a photograph here, or browse' }}</span>
-        <span id="upload-help">JPEG, PNG, HEIC or WebP, up to 25 MB. EXIF is read if it's there.</span>
-        @if (image(); as file) { <span class="lp-field__hint">{{ file.name }}</span> }
-        <input #fileInput type="file" class="file-input" aria-label="Photograph" autofocus
+        <span class="lp-dropzone__title">{{
+          fileError() ? 'Choose another file' : 'Drop a photograph here, or browse'
+        }}</span>
+        <span id="upload-help"
+          >JPEG, PNG, HEIC or WebP, up to 25 MB. EXIF is read if it's there.</span
+        >
+        @if (image(); as file) {
+          <span class="lp-field__hint">{{ file.name }}</span>
+        }
+        <input
+          #fileInput
+          type="file"
+          class="file-input"
+          aria-label="Photograph"
+          autofocus
           accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-          (change)="choose(fileInput.files)" [disabled]="saving()" [attr.aria-invalid]="!!fileError()"
-          [attr.aria-describedby]="fileError() ? 'upload-help upload-file-error' : 'upload-help'" />
+          (change)="choose(fileInput.files)"
+          [disabled]="saving()"
+          [attr.aria-invalid]="!!fileError()"
+          [attr.aria-describedby]="fileError() ? 'upload-help upload-file-error' : 'upload-help'"
+        />
       </label>
     </div>
     <fieldset class="lp-form" [hidden]="!!fileError() || saving()" [disabled]="saving()">
-      <legend class="lp-form__legend">Tell the critic what you were after <span class="lp-field__optional">optional, but it makes the feedback sharper</span></legend>
+      <legend class="lp-form__legend">
+        Tell the critic what you were after
+        <span class="lp-field__optional">optional, but it makes the feedback sharper</span>
+      </legend>
       <div class="lp-field" [class.is-invalid]="errors().intent">
         <label class="lp-field__label" for="upload-intent">What were you trying to do?</label>
-        <textarea class="lp-textarea" id="upload-intent" name="intent" rows="2"
+        <textarea
+          class="lp-textarea"
+          id="upload-intent"
+          name="intent"
+          rows="2"
           placeholder="A quiet study of the rocks in first light. I wanted the texture and not much else."
-          [ngModel]="brief().intent ?? ''" (ngModelChange)="setBrief('intent', $event)"
-          [attr.aria-invalid]="errors().intent" [attr.aria-describedby]="errors().intent ? 'upload-intent-error' : null"></textarea>
-        @if (errors().intent) { <p class="lp-field__error" id="upload-intent-error" role="alert">Use 2,000 characters or fewer.</p> }
+          [ngModel]="brief().intent ?? ''"
+          (ngModelChange)="setBrief('intent', $event)"
+          [attr.aria-invalid]="errors().intent"
+          [attr.aria-describedby]="errors().intent ? 'upload-intent-error' : null"
+        ></textarea>
+        @if (errors().intent) {
+          <p class="lp-field__error" id="upload-intent-error" role="alert">
+            Use 2,000 characters or fewer.
+          </p>
+        }
       </div>
       <div class="lp-form__row">
         <div class="lp-field">
           <label class="lp-field__label" for="upload-genre">Genre</label>
           <div class="lp-select-wrap">
-            <select class="lp-select" id="upload-genre" name="genreChoice" [ngModel]="genreChoice()" (ngModelChange)="selectGenre($event)">
+            <select
+              class="lp-select"
+              id="upload-genre"
+              name="genreChoice"
+              [ngModel]="genreChoice()"
+              (ngModelChange)="selectGenre($event)"
+            >
               <option value="">Not specified</option>
-              @for (genre of genres; track genre) { <option>{{ genre }}</option> }
+              @for (genre of genres; track genre) {
+                <option>{{ genre }}</option>
+              }
             </select>
             <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-down" /></svg>
           </div>
@@ -38,8 +82,18 @@
         <div class="lp-field">
           <label class="lp-field__label" for="upload-experience">Your experience</label>
           <div class="lp-select-wrap">
-            <select class="lp-select" id="upload-experience" name="experience" [ngModel]="brief().experience ?? ''" (ngModelChange)="setBrief('experience', $event)">
-              <option value="">Not specified</option><option>Beginner</option><option>Intermediate</option><option>Advanced</option><option>Professional</option>
+            <select
+              class="lp-select"
+              id="upload-experience"
+              name="experience"
+              [ngModel]="brief().experience ?? ''"
+              (ngModelChange)="setBrief('experience', $event)"
+            >
+              <option value="">Not specified</option>
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
+              <option>Professional</option>
             </select>
             <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-down" /></svg>
           </div>
@@ -48,16 +102,34 @@
       @if (genreChoice() === 'Other') {
         <div class="lp-field" [class.is-invalid]="errors().genre">
           <label class="lp-field__label" for="upload-custom-genre">Custom genre (optional)</label>
-          <input class="lp-input" id="upload-custom-genre" name="customGenre" [ngModel]="brief().genre ?? ''" (ngModelChange)="setBrief('genre', $event)"
-            [attr.aria-invalid]="errors().genre" [attr.aria-describedby]="errors().genre ? 'upload-genre-error' : null" />
-          @if (errors().genre) { <p class="lp-field__error" id="upload-genre-error" role="alert">Use 100 characters or fewer.</p> }
+          <input
+            class="lp-input"
+            id="upload-custom-genre"
+            name="customGenre"
+            [ngModel]="brief().genre ?? ''"
+            (ngModelChange)="setBrief('genre', $event)"
+            [attr.aria-invalid]="errors().genre"
+            [attr.aria-describedby]="errors().genre ? 'upload-genre-error' : null"
+          />
+          @if (errors().genre) {
+            <p class="lp-field__error" id="upload-genre-error" role="alert">
+              Use 100 characters or fewer.
+            </p>
+          }
         </div>
       }
       <fieldset>
         <legend class="lp-form__legend">Feedback wanted</legend>
         <div class="lp-chips">
           @for (feedback of feedbackOptions; track feedback) {
-            <button class="lp-chip" type="button" [attr.aria-pressed]="selectedFeedback().includes(feedback)" (click)="toggleFeedback(feedback)">{{ feedback }}</button>
+            <button
+              class="lp-chip"
+              type="button"
+              [attr.aria-pressed]="selectedFeedback().includes(feedback)"
+              (click)="toggleFeedback(feedback)"
+            >
+              {{ feedback }}
+            </button>
           }
         </div>
       </fieldset>
@@ -66,48 +138,113 @@
         <div class="lp-form optional-fields">
           <div class="lp-field" [class.is-invalid]="errors().title">
             <label class="lp-field__label" for="upload-title">Title (optional)</label>
-            <input class="lp-input" id="upload-title" name="title" [ngModel]="title()" (ngModelChange)="setTitle($event)"
-              [attr.aria-invalid]="errors().title" [attr.aria-describedby]="errors().title ? 'upload-title-error' : null" />
-            @if (errors().title) { <p class="lp-field__error" id="upload-title-error" role="alert">Use 200 characters or fewer.</p> }
+            <input
+              class="lp-input"
+              id="upload-title"
+              name="title"
+              [ngModel]="title()"
+              (ngModelChange)="setTitle($event)"
+              [attr.aria-invalid]="errors().title"
+              [attr.aria-describedby]="errors().title ? 'upload-title-error' : null"
+            />
+            @if (errors().title) {
+              <p class="lp-field__error" id="upload-title-error" role="alert">
+                Use 200 characters or fewer.
+              </p>
+            }
           </div>
           <div class="lp-field" [class.is-invalid]="errors().requestedFeedback">
             <label class="lp-field__label" for="upload-feedback">Custom feedback (optional)</label>
-            <textarea class="lp-textarea" id="upload-feedback" name="feedback" [ngModel]="brief().requestedFeedback ?? ''" (ngModelChange)="setBrief('requestedFeedback', $event)"
-              [attr.aria-invalid]="errors().requestedFeedback" [attr.aria-describedby]="errors().requestedFeedback ? 'upload-feedback-error' : null"></textarea>
+            <textarea
+              class="lp-textarea"
+              id="upload-feedback"
+              name="feedback"
+              [ngModel]="brief().requestedFeedback ?? ''"
+              (ngModelChange)="setBrief('requestedFeedback', $event)"
+              [attr.aria-invalid]="errors().requestedFeedback"
+              [attr.aria-describedby]="errors().requestedFeedback ? 'upload-feedback-error' : null"
+            ></textarea>
           </div>
         </div>
       </details>
-      @if (errors().requestedFeedback) { <p class="lp-field__error" id="upload-feedback-error" role="alert">Use 2,000 characters or fewer.</p> }
+      @if (errors().requestedFeedback) {
+        <p class="lp-field__error" id="upload-feedback-error" role="alert">
+          Use 2,000 characters or fewer.
+        </p>
+      }
     </fieldset>
     @if (failed()) {
       <p role="alert">{{ failureMessage() }}</p>
-      <p class="lp-muted">{{ image() ? 'The selected file is still available.' : 'Select the photograph again to retry.' }}</p>
+      <p class="lp-muted">
+        {{
+          image()
+            ? 'The selected file is still available.'
+            : 'Select the photograph again to retry.'
+        }}
+      </p>
     }
     @if (saving()) {
       @let transfer = progress();
-      <p class="lp-muted">Keep this open until it finishes. {{ requestCritique() ? 'The critique is requested as soon as the file is saved.' : 'Your photograph will be saved without requesting a critique.' }}</p>
+      <p class="lp-muted">
+        Keep this open until it finishes.
+        {{
+          requestCritique()
+            ? 'The critique is requested as soon as the file is saved.'
+            : 'Your photograph will be saved without requesting a critique.'
+        }}
+      </p>
       <p>{{ image()?.name }}</p>
-      <progress aria-label="Upload progress" [attr.max]="transfer?.total || 1" [attr.value]="transfer?.total ? transfer?.transferred : null"></progress>
+      <progress
+        aria-label="Upload progress"
+        [attr.max]="transfer?.total || 1"
+        [attr.value]="transfer?.total ? transfer?.transferred : null"
+      ></progress>
       <p class="lp-muted" role="status">
         @if (transfer && transfer.total && transfer.transferred < transfer.total) {
-          {{ transfer.transferred | number: '1.0-0' }} of {{ transfer.total | number: '1.0-0' }} bytes transferred.
+          {{ transfer.transferred | number: '1.0-0' }} of
+          {{ transfer.total | number: '1.0-0' }} bytes transferred.
         } @else if (transfer && !transfer.total) {
           {{ transfer.transferred | number: '1.0-0' }} bytes transferred. Total size unavailable.
-        } @else { Saving photograph… }
+        } @else {
+          Saving photograph…
+        }
       </p>
     }
   </div>
   <footer class="lp-dialog__footer">
     @if (saving()) {
-      <button class="lp-button lp-button--secondary" type="button" (click)="closeRequested.emit()">Cancel upload</button>
+      <button class="lp-button lp-button--secondary" type="button" (click)="closeRequested.emit()">
+        Cancel upload
+      </button>
     } @else if (fileError()) {
-      <button class="lp-button lp-button--secondary" type="button" (click)="closeRequested.emit()">Cancel</button>
+      <button class="lp-button lp-button--secondary" type="button" (click)="closeRequested.emit()">
+        Cancel
+      </button>
     } @else if (failed()) {
-      <button class="lp-button lp-button--primary" type="submit" [disabled]="invalid() || saving()">Retry upload</button>
+      <button class="lp-button lp-button--primary" type="submit" [disabled]="invalid() || saving()">
+        Retry upload
+      </button>
     } @else {
-      <span class="lp-dialog__privacy"><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>Private. Only you can see this.</span>
-      <button class="lp-button lp-button--secondary" type="button" [disabled]="invalid() || saving()" (click)="submit(false)">Upload only</button>
-      <button class="lp-button lp-button--primary" type="button" [disabled]="invalid() || saving()" (click)="submit(true)">Upload and request critique</button>
+      <span class="lp-dialog__privacy"
+        ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>Private.
+        Only you can see this.</span
+      >
+      <button
+        class="lp-button lp-button--secondary"
+        type="button"
+        [disabled]="invalid() || saving()"
+        (click)="submit(false)"
+      >
+        Upload only
+      </button>
+      <button
+        class="lp-button lp-button--primary"
+        type="button"
+        [disabled]="invalid() || saving()"
+        (click)="submit(true)"
+      >
+        Upload and request critique
+      </button>
     }
   </footer>
 </form>

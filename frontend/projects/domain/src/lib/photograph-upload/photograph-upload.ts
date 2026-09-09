@@ -29,17 +29,36 @@ export class PhotographUpload {
   readonly closeRequested = output<void>();
   readonly started = output<void>();
   private transfer: AbortController | null = null;
-  constructor() { this.destroy.onDestroy(() => this.transfer?.abort()); }
-  cancelUpload(): void { this.transfer?.abort(); }
+  constructor() {
+    this.destroy.onDestroy(() => this.transfer?.abort());
+  }
+  cancelUpload(): void {
+    this.transfer?.abort();
+  }
   readonly dragging = signal(false);
-  readonly genres = ['Landscape', 'Portrait', 'Street', 'Architecture', 'Documentary', 'Still life', 'Other'];
+  readonly genres = [
+    'Landscape',
+    'Portrait',
+    'Street',
+    'Architecture',
+    'Documentary',
+    'Still life',
+    'Other',
+  ];
   readonly genreChoice = signal('');
   readonly feedbackOptions = ['Technical', 'Composition', 'Colour and processing', 'Storytelling'];
   readonly selectedFeedback = signal<string[]>([]);
-  readonly requestedFeedback = computed(() => [
-    this.feedbackOptions.filter(option => this.selectedFeedback().includes(option)).join(', '),
-    this.brief().requestedFeedback?.replace(/\r\n?/g, '\n').trim(),
-  ].filter(Boolean).join('\n') || null);
+  readonly requestedFeedback = computed(
+    () =>
+      [
+        this.feedbackOptions
+          .filter((option) => this.selectedFeedback().includes(option))
+          .join(', '),
+        this.brief().requestedFeedback?.replace(/\r\n?/g, '\n').trim(),
+      ]
+        .filter(Boolean)
+        .join('\n') || null,
+  );
   private readonly multipleFiles = signal(false);
   readonly requestCritique = signal(false);
   private readonly service = inject(PHOTOGRAPH_SERVICE);
@@ -60,7 +79,9 @@ export class PhotographUpload {
   readonly dirty = computed(
     () =>
       !this.acknowledged() &&
-      (!!this.image() || this.multipleFiles() || this.selectedFeedback().length > 0 ||
+      (!!this.image() ||
+        this.multipleFiles() ||
+        this.selectedFeedback().length > 0 ||
         this.attempted() ||
         this.title().trim().length > 0 ||
         Object.values(this.brief()).some((value) => !!value?.trim())),
@@ -120,14 +141,35 @@ export class PhotographUpload {
   choose(files: FileList | null): void {
     if (this.saving() || !files?.length) return;
     this.multipleFiles.set(files.length > 1);
-    if (files.length > 1) { this.image.set(null); return; }
+    if (files.length > 1) {
+      this.image.set(null);
+      return;
+    }
     this.image.set(files?.item(0) ?? null);
   }
-  dragOver(event: DragEvent): void { event.preventDefault(); if (!this.saving()) this.dragging.set(true); }
-  drop(event: DragEvent): void { event.preventDefault(); this.dragging.set(false); this.choose(event.dataTransfer?.files ?? null); }
-  selectGenre(value: string): void { this.genreChoice.set(value); this.setBrief('genre', value === 'Other' ? '' : value); }
-  toggleFeedback(value: string): void { this.selectedFeedback.update(selected => selected.includes(value) ? selected.filter(item => item !== value) : [...selected, value]); }
-  submit(critique: boolean): void { if (this.saving() || this.invalid()) return; this.requestCritique.set(critique); void this.save(); }
+  dragOver(event: DragEvent): void {
+    event.preventDefault();
+    if (!this.saving()) this.dragging.set(true);
+  }
+  drop(event: DragEvent): void {
+    event.preventDefault();
+    this.dragging.set(false);
+    this.choose(event.dataTransfer?.files ?? null);
+  }
+  selectGenre(value: string): void {
+    this.genreChoice.set(value);
+    this.setBrief('genre', value === 'Other' ? '' : value);
+  }
+  toggleFeedback(value: string): void {
+    this.selectedFeedback.update((selected) =>
+      selected.includes(value) ? selected.filter((item) => item !== value) : [...selected, value],
+    );
+  }
+  submit(critique: boolean): void {
+    if (this.saving() || this.invalid()) return;
+    this.requestCritique.set(critique);
+    void this.save();
+  }
   setTitle(value: string): void {
     this.title.set(value);
   }
