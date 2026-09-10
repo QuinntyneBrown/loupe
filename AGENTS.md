@@ -114,6 +114,9 @@ Page Object Model - one page object per screen, owning the selectors and the
 interactions. Tests state intent; page objects know the DOM. Never put a
 selector in a test.
 
+Run frontend tests in Chromium only. Do not configure or run Firefox, WebKit,
+or any other browser for frontend testing.
+
 ### Never write architecture tests
 
 Never add a test that asserts the shape of the codebase rather than its behavior:
