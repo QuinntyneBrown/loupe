@@ -1,5 +1,5 @@
 <article>
-  <a class="card-link" [routerLink]="destination()" [attr.aria-label]="'Open ' + name()"></a>
+  <a #link class="card-link" [routerLink]="destination()" [attr.aria-label]="'Open ' + name()"></a>
   <div class="head">
     <h2>{{ name() }}</h2>
     @if (portfolio(); as source) {

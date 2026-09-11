@@ -27,7 +27,9 @@
   </div>
   @if (total() === 0 && !failed()) {
     <div class="lp-empty">
-      <h2 class="lp-empty__title">Bookmark the photographers you learn from.</h2>
+      <h2 #emptyHeading tabindex="-1" class="lp-empty__title">
+        Bookmark the photographers you learn from.
+      </h2>
       <p class="lp-empty__text">
         Save a portfolio with a note on why it matters. Loupe summarises what it can read from the
         site and links your references to them.
@@ -39,7 +41,7 @@
       <h2 class="lp-empty__title">Couldn't load your photographers.</h2>
       <p class="lp-empty__text">Check your connection and try again. Nothing you saved is lost.</p>
       <div class="lp-empty__action">
-        <button class="lp-button lp-button--secondary" type="button" (click)="load()">
+        <button class="lp-button lp-button--secondary" type="button" (click)="load(true)">
           Try again
         </button>
       </div>
@@ -50,7 +52,7 @@
         class="lp-button lp-button--secondary"
         type="button"
         [disabled]="loading()"
-        (click)="load()"
+        (click)="load(true)"
       >
         {{ loading() ? 'Loading…' : 'Load more' }}
       </button>

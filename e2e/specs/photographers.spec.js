@@ -17,12 +17,14 @@ test('bookmarks show safe portfolio links and page without losing earlier cards 
   await photographers.expectCard('Photographer 02','portfolio2.example',0);
   photographers.library.failures=1; await photographers.more(); await photographers.expectError(); await photographers.expectCards(24);
   await photographers.retry(); await photographers.expectCards(25);
+  await photographers.expectCardFocused('Photographer 25');
   expect(photographers.library.calls.map(call=>call.operation)).toEqual(['list','list','list']);
 });
 
 test('empty and failed collections can recover without fetching portfolios',async ({page}) => {
   const photographers = await setup(page,0); photographers.library.failures=1; await photographers.open();
   await photographers.expectError(); await photographers.retry(); await photographers.expectEmpty();
+  await photographers.expectEmptyFocused();
   await photographers.expectAccessible();
 });
 

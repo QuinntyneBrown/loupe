@@ -1,4 +1,4 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, ElementRef, input, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -8,6 +8,10 @@ import { RouterLink } from '@angular/router';
   styleUrl: './photographer-card.css',
 })
 export class PhotographerCard {
+  private readonly link = viewChild.required<ElementRef<HTMLAnchorElement>>('link');
+  focus(): void {
+    this.link().nativeElement.focus();
+  }
   readonly destination = input.required<string>();
   readonly name = input.required<string>();
   readonly portfolioUrl = input.required<string>();

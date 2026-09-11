@@ -350,3 +350,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - GREEN: five collection Chromium cases pass at 1440, 768 and 375px, including Axe, paging and failure recovery. All 13 Inspiration regressions passed during the first implementation run. Portfolio hit areas now meet the minimum target size.
 - Desktop/mobile mock screenshots and implementation screenshots inspected. The read-only collection is in place; Add photographer, destination detail and shared navigation follow in later slices.
 
+
+### Photographer collection focus recovery
+- RED: both retry flows left the new card/empty heading unfocused.
+- GREEN: all five collection cases pass. Explicit pagination/retry now focuses the first added card or recovered empty heading after rendering, without moving focus on initial load.
+

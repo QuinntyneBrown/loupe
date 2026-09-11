@@ -18,6 +18,8 @@ export class PhotographersPage {
   }
   async more() {await this.page.getByRole('button',{name:'Load more',exact:true}).click();}
   async retry() {await this.page.getByRole('button',{name:'Try again',exact:true}).click();}
+  async expectCardFocused(name) {await expect(this.page.getByRole('link',{name:`Open ${name}`,exact:true})).toBeFocused();}
+  async expectEmptyFocused() {await expect(this.page.getByRole('heading',{name:'Bookmark the photographers you learn from.',exact:true})).toBeFocused();}
   async expectError() {await expect(this.page.getByRole('heading',{name:"Couldn't load your photographers.",exact:true})).toBeVisible();}
   async expectEmpty() {await expect(this.page.getByRole('heading',{name:'Bookmark the photographers you learn from.',exact:true})).toBeVisible();}
   async expectAccessible() {

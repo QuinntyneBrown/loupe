@@ -1,4 +1,14 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  Injector,
+  signal,
+  viewChild,
+  viewChildren,
+} from '@angular/core';
 import { PHOTOGRAPHER_SERVICE, PhotographerSummary } from 'api';
 import { PhotographerCard } from 'components';
 
@@ -11,6 +21,9 @@ import { PhotographerCard } from 'components';
 export class PhotographerCollection {
   private readonly service = inject(PHOTOGRAPHER_SERVICE);
   private readonly destroy = inject(DestroyRef);
+  private readonly injector = inject(Injector);
+  private readonly cards = viewChildren(PhotographerCard);
+  private readonly emptyHeading = viewChild<ElementRef<HTMLElement>>('emptyHeading');
   readonly items = signal<PhotographerSummary[]>([]);
   readonly total = signal<number | null>(null);
   readonly cursor = signal<string | null>(null);
@@ -23,8 +36,9 @@ export class PhotographerCollection {
   tagNames(item: PhotographerSummary): string[] {
     return item.tags.map((tag) => tag.name);
   }
-  async load(): Promise<void> {
+  async load(restoreFocus = false): Promise<void> {
     if (this.loading()) return;
+    const previousCount = this.items().length;
     this.loading.set(true);
     this.failed.set(false);
     try {
@@ -37,6 +51,16 @@ export class PhotographerCollection {
       ]);
       this.total.set(result.totalCount);
       this.cursor.set(result.nextCursor);
+      if (restoreFocus)
+        afterNextRender(
+          () => {
+            if (this.destroy.destroyed) return;
+            const card = this.cards()[Math.min(previousCount, this.items().length - 1)];
+            if (card) card.focus();
+            else this.emptyHeading()?.nativeElement.focus();
+          },
+          { injector: this.injector },
+        );
     } catch {
       if (!this.destroy.destroyed) this.failed.set(true);
     } finally {
