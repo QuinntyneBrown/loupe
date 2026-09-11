@@ -2,6 +2,7 @@ import { InjectionToken } from '@angular/core';
 import { DeletionResult } from './deletion-result';
 
 export interface IDeletionService {
+  deleteReference(id: string, revision: number): Promise<DeletionResult>;
   deletePhotograph(id: string, revision: number): Promise<DeletionResult>;
   get(id: string): Promise<DeletionResult>;
 }

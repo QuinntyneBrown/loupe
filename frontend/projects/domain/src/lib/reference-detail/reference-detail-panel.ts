@@ -23,6 +23,11 @@ import { REFERENCE_SERVICE, ReferenceResult, ServiceError } from 'api';
   styleUrl: './reference-detail-panel.css',
 })
 export class ReferenceDetailPanel {
+  readonly deleteRequested = output<ReferenceResult>();
+  requestDelete(menu: HTMLDetailsElement, item: ReferenceResult): void {
+    menu.open = false;
+    this.deleteRequested.emit(item);
+  }
   readonly replaceImageRequested = output<ReferenceResult>();
   private readonly actions = viewChild<ElementRef<HTMLElement>>('actions');
   requestImage(menu: HTMLDetailsElement, item: ReferenceResult): void {

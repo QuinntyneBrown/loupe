@@ -11,6 +11,7 @@ export class ReferenceLibrary {
     this.linkReceipts=new Map(); this.lostLinkResponses=0;
     this.updates = []; this.lostUpdateResponses = 0;
     this.imageReceipts = new Map();
+    this.deletions = new Map();
     this.uploadReceipts = new Map(); this.lostUploadResponses = 0;
     this.calls = []; this.failures = {}; this.errors = {}; this.gates = {};
     this.boards = []; this.boardCalls = [];
@@ -143,6 +144,15 @@ export class ReferenceLibrary {
         item.previewUrl = item.imageUrl; item.width = 160; item.height = 120; item.revision++;
         this.imageReceipts.set(input.operationKey, fingerprint);
         return { data: item };
+      }
+      if (operation === 'deleteReference') {
+        if (this.deletions.has(input.id)) return { data: this.deletions.get(input.id) };
+        const item = this.items.find(item => item.id === input.id);
+        if (!item) return { error: 'item_unavailable' };
+        if (item.revision !== input.revision) return { error: 'revision_conflict' };
+        const result = { id: crypto.randomUUID(), resourceId: item.id, status: 'Pending', deletedAt: new Date().toISOString(), completedAt: null };
+        this.items = this.items.filter(candidate => candidate.id !== item.id); this.deletions.set(input.id, result);
+        return { data: result };
       }
       if (operation === 'setTags') {
         const item = this.items.find(item => item.id === input.id);

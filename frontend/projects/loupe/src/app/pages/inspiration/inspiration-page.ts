@@ -31,6 +31,10 @@ import { UnsavedChanges } from '../../dialogs/unsaved-changes/unsaved-changes';
   styleUrl: './inspiration-page.css',
 })
 export class InspirationPage {
+  constructor() {
+    if (this.router.currentNavigation()?.extras.state?.['referenceDeleted'])
+      this.notice.set('Reference deleted.');
+  }
   readonly saveDialog = viewChild(SaveReference);
   readonly dirty = () => this.saveDialog()?.dirty() ?? false;
   private readonly unsaved = viewChild.required(UnsavedChanges);

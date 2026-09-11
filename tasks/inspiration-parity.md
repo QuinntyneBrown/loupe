@@ -224,3 +224,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - Given an owned reference, deletion removes its tags and board memberships, revokes media access, cancels source work and leaves boards/other references intact. Stale and foreign requests leave it unchanged, and a retry after restart returns its deletion journal entry.
 - RED: all 3 deletion cases returned 405.
 - GREEN: 19 reference deletion/replacement/import/membership cases and 10 existing photograph deletion/cleanup regressions pass.
+
+### Reference deletion dialog
+- RED: all 3 Chromium cases failed on missing Delete reference.
+- GREEN: 36 reference deletion/image/metadata and photograph-deletion regressions pass. Cancel restores menu focus, explicit Delete returns to Inspiration with confirmation, failures retry and stale revisions require review.
+- Desktop and 375px screenshots, Axe and overflow checks pass. The dialog follows the mock confirmation copy and Cancel-first focus.
+- A local test-runner startup raced a library build; the ignored parity config now uses the explicitly managed 4218 server without automatic startup. Tests ran after the server stabilized.

@@ -26,6 +26,14 @@
             >
               Replace image
             </button>
+            <button
+              type="button"
+              class="lp-button lp-button--ghost delete-action"
+              [disabled]="dirty()"
+              (click)="requestDelete(menu, item)"
+            >
+              Delete reference
+            </button>
           </div>
         </details>
       </div>

@@ -6,8 +6,17 @@
     [id]="id()"
     (discardRequested)="requestDiscard($event)"
     (replaceImageRequested)="replacingImage.set($event)"
+    (deleteRequested)="deletingReference.set($event)"
   />
 </main>
+@if (deletingReference(); as item) {
+  <lp-delete-reference
+    [reference]="item"
+    (closed)="closeDeletion()"
+    (deleted)="deletionComplete()"
+    (reviewed)="detail()?.reference.set($event)"
+  />
+}
 @if (replacingImage(); as item) {
   <lp-reference-image-dialog
     [reference]="item"
@@ -19,8 +28,10 @@
 <lp-unsaved-changes
   [dirty]="dirty"
   [warning]="
-    detail()?.saving() || imageDialog()?.busy()
-      ? 'This save may finish after you leave. Reopen the reference to check its saved metadata.'
-      : null
+    deletionDialog()?.busy()
+      ? 'Deletion may finish after you leave. Check Inspiration before trying again.'
+      : detail()?.saving() || imageDialog()?.busy()
+        ? 'This save may finish after you leave. Reopen the reference to check its saved metadata.'
+        : null
   "
 />

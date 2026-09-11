@@ -2,6 +2,14 @@ import { expect } from '@playwright/test';
 
 export class ReferenceDetailPage {
   constructor(page) { this.page = page; }
+  async openDelete() { await this.page.getByLabel('More actions', { exact: true }).click(); await this.page.getByRole('button', { name: 'Delete reference', exact: true }).click(); await expect(this.deleteDialog().getByRole('button', { name: 'Cancel', exact: true })).toBeFocused(); }
+  deleteDialog() { return this.page.getByRole('dialog', { name: 'Delete this reference?', exact: true }); }
+  async cancelDelete() { await this.deleteDialog().getByRole('button', { name: 'Cancel', exact: true }).click(); await expect(this.deleteDialog()).toHaveCount(0); await expect(this.page.getByLabel('More actions', { exact: true })).toBeFocused(); }
+  async confirmDelete() { await this.deleteDialog().getByRole('button', { name: 'Delete', exact: true }).click(); }
+  async expectDeleteError(message) { await expect(this.deleteDialog().getByRole('alert')).toHaveText(message); }
+  async expectDeleteDisabled() { await expect(this.deleteDialog().getByRole('button', { name: 'Delete', exact: true })).toBeDisabled(); }
+  async reviewDeletion() { await this.deleteDialog().getByRole('button', { name: 'Review latest reference', exact: true }).click(); }
+  async expectDeletionComplete() { await expect(this.page).toHaveURL(/\/inspiration$/); await expect(this.page.getByRole('status')).toContainText('Reference deleted.'); }
   async openImageReplacement() { await this.page.getByLabel('More actions', { exact: true }).click(); await this.page.getByRole('button', { name: 'Replace image', exact: true }).click(); }
   imageDialog() { return this.page.getByRole('dialog', { name: 'Add an image', exact: true }); }
   async chooseReplacement(type = 'image/png') { await this.imageDialog().getByLabel('Choose an image', { exact: true }).setInputFiles({ name: 'Replacement.png', mimeType: type, buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1kAAAAASUVORK5CYII=', 'base64') }); }

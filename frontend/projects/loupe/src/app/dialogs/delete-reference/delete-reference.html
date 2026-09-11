@@ -1,0 +1,78 @@
+<dialog
+  #modal
+  class="lp-dialog"
+  aria-labelledby="delete-reference-title"
+  aria-describedby="delete-reference-effects"
+  (cancel)="cancel($event)"
+>
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="delete-reference-title">Delete this reference?</h2>
+        <p class="lp-dialog__text" id="delete-reference-effects">
+          “{{ (latest() ?? reference()).title }}” is removed from every board and from search, along
+          with its tags and notes. The original page isn't affected.
+        </p>
+      </div>
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Close"
+        [disabled]="busy() || reviewing()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    @if (busy() || reviewing() || error() || latest()) {
+      <div class="lp-dialog__body">
+        @if (busy()) {
+          <p role="status">Deleting reference…</p>
+        }
+        @if (reviewing()) {
+          <p role="status">Loading latest details…</p>
+        }
+        @if (error()) {
+          <p role="alert">{{ error() }}</p>
+        }
+        @if (stale() && !unavailable()) {
+          <button
+            class="lp-button lp-button--secondary"
+            type="button"
+            [disabled]="reviewing()"
+            (click)="review()"
+          >
+            Review latest reference
+          </button>
+        }
+        @if (latest(); as item) {
+          <section aria-label="Latest saved details">
+            <h3>Latest saved details</h3>
+            <p>{{ item.title }}</p>
+            <p>{{ item.notes || 'No notes saved.' }}</p>
+            <p>{{ item.tags.length }} tags · {{ item.boardIds.length }} boards</p>
+          </section>
+        }
+      </div>
+    }
+    <footer class="lp-dialog__footer">
+      <button
+        class="lp-button lp-button--secondary"
+        type="button"
+        autofocus
+        [disabled]="busy() || reviewing()"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+      <button
+        class="lp-button lp-button--danger"
+        type="button"
+        [disabled]="busy() || reviewing() || stale() || unavailable()"
+        (click)="confirm()"
+      >
+        Delete
+      </button>
+    </footer>
+  </div>
+</dialog>

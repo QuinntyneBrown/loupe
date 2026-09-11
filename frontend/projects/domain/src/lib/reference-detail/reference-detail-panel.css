@@ -38,6 +38,7 @@ dd,
   position: relative;
 }
 :host .actions-menu__list {
+  display: grid;
   position: absolute;
   right: var(--lp-zero);
   z-index: var(--lp-z-menu);
@@ -47,6 +48,10 @@ dd,
   border-radius: var(--lp-radius-md);
   background: var(--lp-color-surface);
   box-shadow: var(--lp-shadow-md);
+}
+.delete-action {
+  color: var(--lp-color-danger);
+  border-top: var(--lp-hairline) solid var(--lp-color-border);
 }
 :host summary {
   list-style: none;
