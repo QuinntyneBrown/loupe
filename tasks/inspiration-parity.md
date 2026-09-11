@@ -274,3 +274,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: all 3 bulk cases rejected the unsupported all target.
 - GREEN: all 19 review/worker/text/replacement cases pass. Bulk decisions are atomic, including tag-limit failure. Undo restores the pre-review description, provenance, active tags and pending states, and refuses intervening revisions. New image analysis invalidates old Undo state.
 
+
+### Suggestions panel
+- RED: all 3 Chromium workflows failed on the absent AI suggestions region.
+- GREEN: 25 suggestions/metadata/tags/text cases pass. The mock-based panel separates pending output, edits/accepts descriptions, reviews tags individually or in bulk, restores via Undo, and polls background analysis while notes remain editable. Saved review state survives reload and failed decisions retry without claiming success.
+- Contracts and mock bindings remain interface-driven. Tag editing, additional stale/error states and visual/accessibility audit follow in the next slice.
+

@@ -1,5 +1,7 @@
+import { ReferenceAnalysis } from './reference-analysis.js';
 export class ReferenceLibrary {
   constructor(count) {
+    this.analysis = new ReferenceAnalysis(this);
     const imageUrl = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#ededed"/><path d="M0 600 600 0h100L100 600" fill="#999"/></svg>');
     this.items = Array.from({ length: count }, (_, index) => ({
       id: `10000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
@@ -19,6 +21,7 @@ export class ReferenceLibrary {
     this.drafts = new Map(); this.draftCalls = []; this.draftReceipts = new Map(); this.draftFailure = null; this.lostDraftResponses = 0;
   }
   async attach(page) {
+    await this.analysis.attach(page);
     await page.exposeFunction('loupeReferenceDrafts', async (operation, input) => {
       this.draftCalls.push({ operation, ...input });
       await this.gates['draft-' + operation]?.promise;

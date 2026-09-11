@@ -1,6 +1,13 @@
 import { expect } from '@playwright/test';
 
 export class ReferenceDetailPage {
+  suggestions() { return this.page.getByRole('region', { name: 'AI suggestions', exact: true }); }
+  async expectSuggestions(text) { await expect(this.suggestions()).toContainText(text); }
+  async editSuggestion(text) { await this.suggestions().getByLabel('Description', { exact: true }).fill(text); }
+  async reviewSuggestions(action) { await this.suggestions().getByRole('button', { name: action, exact: true }).click(); }
+  async expectSuggestionError(text) { await expect(this.suggestions().getByRole('alert')).toContainText(text); }
+  async undoSuggestions() { await this.suggestions().getByRole('button', { name: 'Undo', exact: true }).click(); }
+  async expectPendingTag(name, visible = true) { await expect(this.suggestions().getByRole('button', { name: 'Accept tag ' + name, exact: true })).toHaveCount(visible ? 1 : 0); }
   constructor(page) { this.page = page; }
   textEditor(field) { return this.page.getByRole('region', { name: field === 'description' ? 'Description' : 'Your notes', exact: true }); }
   async editText(field, value) { await this.textEditor(field).getByRole('textbox').fill(value); }

@@ -3,6 +3,7 @@ import { ReferenceMetadataEditor } from '../reference-metadata/reference-metadat
 import { ReferenceTags } from '../reference-tags/reference-tags';
 import { ReferenceBoards } from '../reference-boards/reference-boards';
 import { ReferenceTextEditor } from '../reference-text/reference-text-editor';
+import { ReferenceSuggestionsPanel } from '../reference-suggestions/reference-suggestions-panel';
 import { computed, output } from '@angular/core';
 import {
   afterNextRender,
@@ -28,6 +29,7 @@ import { REFERENCE_SERVICE, ReferenceResult, ServiceError } from 'api';
     ReferenceTags,
     ReferenceBoards,
     ReferenceTextEditor,
+    ReferenceSuggestionsPanel,
   ],
   templateUrl: './reference-detail-panel.html',
   styleUrl: './reference-detail-panel.css',
@@ -56,7 +58,9 @@ export class ReferenceDetailPanel {
   private readonly editor = viewChild(ReferenceMetadataEditor);
   private readonly tags = viewChild(ReferenceTags);
   private readonly texts = viewChildren(ReferenceTextEditor);
-  readonly dirty = computed(
+  private readonly suggestions = viewChild(ReferenceSuggestionsPanel);
+  readonly dirty = computed(() => this.metadataDirty() || !!this.suggestions()?.dirty());
+  readonly metadataDirty = computed(
     () =>
       !!(
         this.editor()?.dirty() ||
@@ -69,6 +73,7 @@ export class ReferenceDetailPanel {
     () =>
       !!(
         this.editor()?.saving() ||
+        this.suggestions()?.busy() ||
         this.tags()?.busy() ||
         this.texts().some((editor) => editor.busy())
       ),

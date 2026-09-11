@@ -41,3 +41,7 @@ export * from './lib/reference/reference-tag';
 export * from './lib/reference-draft/reference-draft-result';
 export * from './lib/reference-draft/reference-draft.service.contract';
 export * from './lib/reference-draft/reference-draft.service';
+export * from './lib/reference-analysis/reference-analysis.service.contract';
+export * from './lib/reference-analysis/reference-analysis.service';
+export * from './lib/reference-analysis/reference-suggestions';
+export * from './lib/reference-analysis/reference-suggestion-review';

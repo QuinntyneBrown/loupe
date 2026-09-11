@@ -1,4 +1,6 @@
 import { REFERENCE_IMPORT_SERVICE } from 'api';
+import { REFERENCE_ANALYSIS_SERVICE } from 'api';
+import { MockReferenceAnalysisService } from './mock-reference-analysis.service';
 import { MockReferenceImportService } from './mock-reference-import.service';
 import { REFERENCE_SERVICE } from 'api';
 import { MockReferenceService } from './mock-reference.service';
@@ -15,6 +17,7 @@ import { REFERENCE_DRAFT_SERVICE } from 'api';
 import { MockReferenceDraftService } from './mock-reference-draft.service';
 
 export const appProviders = [
+  { provide: REFERENCE_ANALYSIS_SERVICE, useClass: MockReferenceAnalysisService },
   { provide: REFERENCE_DRAFT_SERVICE, useClass: MockReferenceDraftService },
   { provide: BOARD_SERVICE, useClass: MockBoardService },
   { provide: REFERENCE_IMPORT_SERVICE, useClass: MockReferenceImportService },
