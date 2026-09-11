@@ -514,3 +514,8 @@ be established without printing credentials. Live quality checks are mandatory.
 ### Summary provenance and retry availability
 - Given a reviewed summary, its generation mode/date remain visible after bulk acceptance. Given a failed job with a future retry time, the control stays disabled until that time and identifies Azure OpenAI and the captured page fields sent.
 - RED: both Chromium cases failed on missing provenance/provider disclosure. GREEN: all 10 summary Chromium cases passed, including virtual-clock cooldown expiry. Domain build passed. One initial run started before the dev server was ready; rerun passed without changing assertions.
+
+### Private keyword search and combined filters
+- Given owner references/bookmarks, all whitespace-separated NFC query tokens must match active fields, with literal substring semantics. Tags combine with AND, boards with OR, then type/query/ownership filter before stable paging.
+- RED: all 7 API cases returned 404. GREEN: all 7 passed with private mixed results, hostname-only matching, NFC/case/literal percent matching, board/type exclusion, full counts, scoped cursors and invalid input.
+- Implementation uses PostgreSQL normalize/strpos and parameterized EF SqlQuery; official documentation checked: https://www.postgresql.org/docs/15/functions-string.html and https://learn.microsoft.com/en-us/ef/core/querying/sql-queries .
