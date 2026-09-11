@@ -1,5 +1,9 @@
 import {
   Component,
+  afterNextRender,
+  ElementRef,
+  Injector,
+  viewChild,
   computed,
   DestroyRef,
   effect,
@@ -17,6 +21,7 @@ import {
   ReferenceResult,
   ReferenceSuggestions,
   ReferenceSuggestionReview,
+  ReferenceSuggestedTag,
   ServiceError,
 } from 'api';
 
@@ -33,6 +38,24 @@ export class ReferenceSuggestionsPanel {
   private readonly service = inject(REFERENCE_ANALYSIS_SERVICE);
   private readonly references = inject(REFERENCE_SERVICE);
   private readonly destroy = inject(DestroyRef);
+  private readonly injector = inject(Injector);
+  private readonly tagField = viewChild<ElementRef<HTMLInputElement>>('tagField');
+  private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
+  readonly editingTag = signal<ReferenceSuggestedTag | null>(null);
+  readonly tagValue = signal('');
+  readonly tagCategory = signal('');
+  readonly categories = [
+    'subject',
+    'genre',
+    'lighting',
+    'composition',
+    'palette',
+    'mood',
+    'technique',
+  ];
+  readonly tagInvalid = computed(
+    () => !this.tagValue().trim() || [...this.tagValue().trim().normalize('NFC')].length > 50,
+  );
   private generation = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private requestKey: string | null = null;
@@ -73,6 +96,7 @@ export class ReferenceSuggestionsPanel {
   readonly dirty = computed(
     () =>
       this.busy() ||
+      !!this.editingTag() ||
       !!this.decision() ||
       (this.suggestions()?.descriptionState === 'pending' &&
         this.description().trim() !== this.suggestions()?.description),
@@ -98,6 +122,7 @@ export class ReferenceSuggestionsPanel {
         this.suggestions.set(null);
         this.operation.set(null);
         this.description.set('');
+        this.editingTag.set(null);
         this.decision.set(null);
         this.error.set('');
         this.failureCode.set('');
@@ -117,6 +142,21 @@ export class ReferenceSuggestionsPanel {
   }
   private valid(generation: number): boolean {
     return generation === this.generation && !this.destroy.destroyed;
+  }
+  editTag(tag: ReferenceSuggestedTag): void {
+    if (this.blocked()) return;
+    this.editingTag.set(tag);
+    this.tagValue.set(tag.name);
+    this.tagCategory.set(tag.category);
+    afterNextRender(() => this.tagField()?.nativeElement.focus(), { injector: this.injector });
+  }
+  cancelTag(): void {
+    if (this.busy() || this.decision()) return;
+    this.editingTag.set(null);
+    this.focusHeading();
+  }
+  private focusHeading(): void {
+    afterNextRender(() => this.heading()?.nativeElement.focus(), { injector: this.injector });
   }
   async load(generation = this.generation): Promise<void> {
     clearTimeout(this.timer);
@@ -187,6 +227,11 @@ export class ReferenceSuggestionsPanel {
   ): Promise<void> {
     if (this.blocked() || !this.suggestions()) return;
     if (
+      this.editingTag() &&
+      (target !== 'tag' || name !== this.editingTag()?.name || this.tagInvalid())
+    )
+      return;
+    if (
       decision === 'accept' &&
       target !== 'tag' &&
       this.suggestions()?.descriptionState === 'pending' &&
@@ -200,6 +245,9 @@ export class ReferenceSuggestionsPanel {
       operationId: this.suggestions()!.operationId,
       revision: this.reference().revision,
       ...(target !== 'tag' && decision === 'accept' ? { value: this.description().trim() } : {}),
+      ...(target === 'tag' && this.editingTag()
+        ? { value: this.tagValue().trim().normalize('NFC'), category: this.tagCategory() }
+        : {}),
     });
     await this.retryReview();
   }
@@ -238,6 +286,8 @@ export class ReferenceSuggestionsPanel {
       });
       this.undoRevision.set(reference.revision);
       this.decision.set(null);
+      this.editingTag.set(null);
+      this.focusHeading();
       this.saved.emit(reference);
       this.notice.set(
         decision.decision === 'dismiss'

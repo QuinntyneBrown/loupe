@@ -6,7 +6,9 @@
 >
   <div class="lp-ai-block__head">
     <div class="lp-row">
-      <h2 id="suggestions-title" class="lp-kicker lp-kicker--ai">AI suggestions</h2>
+      <h2 #heading tabindex="-1" id="suggestions-title" class="lp-kicker lp-kicker--ai">
+        AI suggestions
+      </h2>
       @if (suggestions() && !pending()) {
         <span class="lp-small lp-muted"
           >Reviewed · {{ acceptedCount() }} of {{ suggestions()!.tags.length }} tags accepted</span
@@ -133,13 +135,21 @@
           <span class="lp-ai-group__label">{{ group.category | titlecase }}</span>
           <div class="lp-tags">
             @for (tag of group.tags; track tag.name) {
-              <span class="lp-tag lp-tag--ai"
-                >{{ tag.name }}
+              <span class="lp-tag lp-tag--ai">
+                <button
+                  type="button"
+                  class="tag-name"
+                  [attr.aria-label]="'Edit tag ' + tag.name"
+                  [disabled]="blocked() || !!editingTag()"
+                  (click)="editTag(tag)"
+                >
+                  {{ tag.name }}
+                </button>
                 <button
                   type="button"
                   class="lp-tag__action"
                   [attr.aria-label]="'Accept tag ' + tag.name"
-                  [disabled]="blocked()"
+                  [disabled]="blocked() || !!editingTag()"
                   (click)="review('tag', 'accept', tag.name)"
                 >
                   <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-check" /></svg>
@@ -148,7 +158,7 @@
                   type="button"
                   class="lp-tag__action"
                   [attr.aria-label]="'Dismiss tag ' + tag.name"
-                  [disabled]="blocked()"
+                  [disabled]="blocked() || !!editingTag()"
                   (click)="review('tag', 'dismiss', tag.name)"
                 >
                   <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
@@ -159,11 +169,62 @@
         </div>
       }
     </div>
+    @if (editingTag(); as tag) {
+      <div class="lp-field">
+        <label class="lp-field__label" for="suggested-tag">Suggested tag</label>
+        <input
+          #tagField
+          id="suggested-tag"
+          class="lp-input"
+          type="text"
+          [value]="tagValue()"
+          (input)="tagValue.set($any($event.target).value)"
+          [disabled]="busy() || !!decision()"
+          [attr.aria-invalid]="tagInvalid()"
+          aria-describedby="suggested-tag-hint"
+        />
+        <p id="suggested-tag-hint" class="lp-field__hint">Use 50 characters or fewer.</p>
+        <label class="lp-field__label" for="suggested-category">Suggested category</label>
+        <select
+          id="suggested-category"
+          class="lp-select"
+          [value]="tagCategory()"
+          (change)="tagCategory.set($any($event.target).value)"
+          [disabled]="busy() || !!decision()"
+        >
+          @for (category of categories; track category) {
+            <option [value]="category">{{ category | titlecase }}</option>
+          }
+        </select>
+        <div class="lp-ai-block__actions">
+          <button
+            class="lp-button lp-button--secondary lp-button--sm"
+            type="button"
+            [disabled]="blocked() || tagInvalid()"
+            (click)="review('tag', 'accept', tag.name)"
+          >
+            Accept edited tag
+          </button>
+          <button
+            class="lp-button lp-button--ghost lp-button--sm"
+            type="button"
+            [disabled]="busy() || !!decision()"
+            (click)="cancelTag()"
+          >
+            Cancel tag edit
+          </button>
+        </div>
+      </div>
+    }
     <div class="lp-ai-block__actions">
       <button
         type="button"
         class="lp-button lp-button--primary lp-button--sm"
-        [disabled]="blocked() || (result.descriptionState === 'pending' && descriptionInvalid())"
+        [disabled]="
+          blocked() ||
+          !!editingTag() ||
+          (result.descriptionState === 'pending' && descriptionInvalid())
+        "
         (click)="review('all', 'accept')"
       >
         Accept all
@@ -171,7 +232,7 @@
       <button
         type="button"
         class="lp-button lp-button--ghost lp-button--sm"
-        [disabled]="blocked()"
+        [disabled]="blocked() || !!editingTag()"
         (click)="review('all', 'dismiss')"
       >
         Dismiss all

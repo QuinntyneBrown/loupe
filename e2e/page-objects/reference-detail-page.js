@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 export class ReferenceDetailPage {
   suggestions() { return this.page.getByRole('region', { name: 'AI suggestions', exact: true }); }
@@ -8,6 +9,9 @@ export class ReferenceDetailPage {
   async expectSuggestionError(text) { await expect(this.suggestions().getByRole('alert')).toContainText(text); }
   async undoSuggestions() { await this.suggestions().getByRole('button', { name: 'Undo', exact: true }).click(); }
   async expectPendingTag(name, visible = true) { await expect(this.suggestions().getByRole('button', { name: 'Accept tag ' + name, exact: true })).toHaveCount(visible ? 1 : 0); }
+  async editSuggestedTag(name, value, category) { await this.reviewSuggestions('Edit tag ' + name); await this.suggestions().getByLabel('Suggested tag', { exact: true }).fill(value); await this.suggestions().getByLabel('Suggested category', { exact: true }).selectOption(category); }
+  async expectSuggestedTagEditor(value) { await expect(this.suggestions().getByLabel('Suggested tag', { exact: true })).toHaveValue(value); }
+  async expectSuggestionsAccessible() { expect((await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]); expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true); }
   constructor(page) { this.page = page; }
   textEditor(field) { return this.page.getByRole('region', { name: field === 'description' ? 'Description' : 'Your notes', exact: true }); }
   async editText(field, value) { await this.textEditor(field).getByRole('textbox').fill(value); }

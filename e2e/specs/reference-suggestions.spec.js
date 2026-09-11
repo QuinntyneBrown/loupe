@@ -42,3 +42,25 @@ test('An image can request suggestions and show background progress without disa
   analysis.seed(item.id); analysis.operations.get(item.id).status = 'Succeeded';
   await detail.expectPendingTag('soft light'); expect(item.tags).toEqual([]);
 });
+
+test('Suggested tags can be edited and categorized before accepting, with failed drafts retained', async ({ page }) => {
+  const { detail, item, analysis } = await setup(page);
+  await detail.editSuggestedTag('soft light', '  North window  ', 'technique'); await detail.expectUnload(true);
+  analysis.errors.push('request_failed'); await detail.reviewSuggestions('Accept edited tag');
+  await detail.expectSuggestionError('Your decision has not been confirmed.'); await detail.expectSuggestedTagEditor('  North window  '); expect(item.tags).toEqual([]);
+  await detail.reviewSuggestions('Retry review'); await detail.expectPendingTag('soft light', false);
+  expect(item.tags).toEqual([{ name: 'North window', category: 'technique', provenance: 'edited-ai' }]);
+});
+
+test('A stale review retains its edited description and requires explicit latest review', async ({ page }) => {
+  const { detail, item } = await setup(page);
+  await detail.editSuggestion('My pending edited description.'); item.description = 'Changed in another tab'; item.revision++;
+  await detail.reviewSuggestions('Accept description'); await detail.expectSuggestionError('This reference changed.');
+  await detail.reviewSuggestions('Review latest metadata'); await detail.expectText('description', 'Changed in another tab');
+  await detail.reviewSuggestions('Retry review'); await detail.expectText('description', 'My pending edited description.');
+});
+
+for (const width of [1440, 768, 375]) test(`Suggestion review is accessible at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 900 });
+  const { detail } = await setup(page); await detail.expectPendingTag('soft light'); await detail.expectSuggestionsAccessible();
+});

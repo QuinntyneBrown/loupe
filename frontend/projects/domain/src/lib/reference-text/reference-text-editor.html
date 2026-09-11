@@ -24,7 +24,8 @@
   @if (field() === 'description') {
     <p class="lp-field__hint">
       {{
-        reference().descriptionProvenance === 'ai-accepted'
+        reference().descriptionProvenance === 'ai-accepted' ||
+        reference().descriptionProvenance === 'edited-ai'
           ? 'Started from the AI suggestion. Used for search.'
           : 'Used for search.'
       }}

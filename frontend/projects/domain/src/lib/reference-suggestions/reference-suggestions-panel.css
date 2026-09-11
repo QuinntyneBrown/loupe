@@ -1,6 +1,24 @@
 :host {
   display: block;
 }
+.tag-name {
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  padding: var(--lp-zero);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.tag-name:hover {
+  text-decoration: underline;
+}
+.lp-tag {
+  max-width: var(--lp-full);
+  white-space: normal;
+  height: auto;
+  min-height: var(--lp-control-height-xs);
+}
 .lp-ai-block {
   display: grid;
   gap: var(--lp-space-3);

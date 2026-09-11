@@ -280,3 +280,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - GREEN: 25 suggestions/metadata/tags/text cases pass. The mock-based panel separates pending output, edits/accepts descriptions, reviews tags individually or in bulk, restores via Undo, and polls background analysis while notes remain editable. Saved review state survives reload and failed decisions retry without claiming success.
 - Contracts and mock bindings remain interface-driven. Tag editing, additional stale/error states and visual/accessibility audit follow in the next slice.
 
+
+### Suggested-tag editing and accessibility
+- RED: tag editing failed on the absent Edit tag control. Existing stale-review recovery and all three viewport accessibility checks passed.
+- GREEN: 19 suggestions/text/tags/replacement/deletion Chromium cases pass. Tag names and categories edit before acceptance, failed drafts remain visible, and success records edited-AI provenance and restores heading focus.
+- Axe/overflow pass at 1440, 768 and 375px. Desktop suggestions and mobile tag editor screenshots inspected. Protection against overlapping review actions follows.
+
