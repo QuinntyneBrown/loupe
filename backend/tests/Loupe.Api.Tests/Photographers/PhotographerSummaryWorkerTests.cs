@@ -4,6 +4,8 @@ using System.Text;
 using System.Text.Json;
 using Loupe.Api.Tests.References;
 using Loupe.Worker;
+using Loupe.Application.PhotographerSummaries;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -55,6 +57,39 @@ public sealed class PhotographerSummaryWorkerTests(PostgreSqlFixture database) :
 
     private ApiFactory Factory(HttpMessageHandler pages, HttpMessageHandler ai) => new(database.ConnectionString, database.MediaRoot)
     { SourceTransport = pages, AiTransport = ai, Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only" } };
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Late_summary_cannot_publish_after_url_change_or_deletion(bool delete)
+    {
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var pages = new ControlledSourceTransport((request, _) => Task.FromResult(request.RequestUri!.AbsolutePath == "/robots.txt"
+            ? new HttpResponseMessage(HttpStatusCode.NotFound)
+            : new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("<title>Casey</title><main>Casey makes portraits.</main>", Encoding.UTF8, "text/html") }));
+        using var ai = new ControlledSourceTransport(async (_, _) => { started.TrySetResult(); await release.Task; return Output("{\"summary\":\"Casey makes portraits.\",\"tags\":[],\"unavailableReason\":null}"); });
+        await using var factory = Factory(pages, ai); using var owner = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        var id = await SaveAndAdmit(owner); var original = await owner.GetFromJsonAsync<JsonElement>($"/api/photographers/{id}/summary-analysis");
+        var running = Run(factory);
+        try
+        {
+            await started.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            using var changed = delete ? await owner.DeleteAsync($"/api/photographers/{id}?revision=1")
+                : await owner.PutAsJsonAsync($"/api/photographers/{id}", new { revision = 1, name = "Casey", portfolioUrl = "https://new.example/", summary = "Manual summary", notes = "Private notes" });
+            changed.EnsureSuccessStatusCode();
+        }
+        finally { release.TrySetResult(); }
+        Assert.True(await running);
+        Assert.Equal("Canceled", (await owner.GetFromJsonAsync<JsonElement>($"/api/operations/{original.GetProperty("id").GetGuid()}")).GetProperty("status").GetString());
+        using var suggestions = await owner.GetAsync($"/api/photographers/{id}/suggestions"); Assert.Equal(delete ? HttpStatusCode.NotFound : HttpStatusCode.NoContent, suggestions.StatusCode);
+        if (!delete) { using var cleanup = await owner.DeleteAsync($"/api/photographers/{id}?revision=2"); cleanup.EnsureSuccessStatusCode(); }
+    }
+    private static async Task<bool> Run(ApiFactory factory)
+    {
+        await using var scope = factory.Services.CreateAsyncScope();
+        return await scope.ServiceProvider.GetRequiredService<ISender>().Send(new RunPhotographerSummaryCommand());
+    }
     private static HttpResponseMessage Output(string text) => new(HttpStatusCode.OK)
     { Content = JsonContent.Create(new { status = "completed", output = new[] { new { type = "message", content = new[] { new { type = "output_text", text } } } } }) };
     private static async Task<Guid> SaveAndAdmit(HttpClient owner)

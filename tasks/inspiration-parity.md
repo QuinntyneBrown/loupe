@@ -491,3 +491,7 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both save/change/delete scenarios had no automatic summary operation (204 instead of 200).
 - GREEN: all 50 photographer and reference-analysis API cases pass. New bookmarks and changed portfolio URLs queue summaries when configured; full queues retain the bookmark with a failed operation. URL changes cancel old work; deletion cancels and redacts summary payloads. Lock ordering follows owner admission, operations, then bookmark writes.
 
+
+### Summary lifecycle edge cases
+- All 10 summary API cases pass, including late model responses after URL changes/deletion and the sixth save at a full five-operation owner queue. Canceled work cannot publish; queue pressure leaves manual content and the new bookmark intact.
+

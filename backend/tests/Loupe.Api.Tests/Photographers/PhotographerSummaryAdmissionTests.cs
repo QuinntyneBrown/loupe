@@ -65,9 +65,21 @@ public sealed class PhotographerSummaryAdmissionTests(PostgreSqlFixture database
         }
     }
 
-    private static async Task<Guid> Save(HttpClient owner)
+    [Fact]
+    public async Task A_full_queue_keeps_the_new_bookmark_with_an_explicit_retryable_summary_status()
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/photographers") { Content = JsonContent.Create(new { name = "Casey", portfolioUrl = "https://casey.example/", summary = "Manual summary", notes = "Private notes" }) };
+        await using var factory = Factory(); using var owner = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        for (var index = 0; index < 5; index++) await Save(owner, $"https://portfolio{index}.example/");
+        var id = await Save(owner, "https://last.example/");
+        var operation = await owner.GetFromJsonAsync<JsonElement>($"/api/photographers/{id}/summary-analysis");
+        Assert.Equal("Failed", operation.GetProperty("status").GetString()); Assert.Equal("analysis_limit", operation.GetProperty("failureCode").GetString());
+        Assert.Equal(6, (await owner.GetFromJsonAsync<JsonElement>("/api/photographers")).GetProperty("totalCount").GetInt32());
+        Assert.Equal("Manual summary", (await owner.GetFromJsonAsync<JsonElement>($"/api/photographers/{id}")).GetProperty("summary").GetString());
+    }
+
+    private static async Task<Guid> Save(HttpClient owner, string portfolioUrl = "https://casey.example/")
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/photographers") { Content = JsonContent.Create(new { name = "Casey", portfolioUrl, summary = "Manual summary", notes = "Private notes" }) };
         request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString()); using var response = await owner.SendAsync(request); response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("photographer").GetProperty("id").GetGuid();
     }
