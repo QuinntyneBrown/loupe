@@ -112,3 +112,11 @@ be established without printing credentials. Live quality checks are mandatory.
   to include the newly required tag-facet request without allowing writes.
 - Inspected 1440px collection and 375px filter-sheet screenshots; no page overflow.
   Production Angular build passed with the existing initial-bundle warning.
+
+### Reference manual tag input
+- Given an owned reference, entering a tag saves it and removing a tag updates
+  the active set; rereads and collection filters reflect the saved change.
+  A failed save retains the requested change for retry, and dirty tags join the
+  existing navigation/unload guard.
+- RED: both Chromium scenarios failed on the missing Add a tag input.
+- GREEN: 35 tag/metadata/filter/Inspiration cases passed; production build passed.

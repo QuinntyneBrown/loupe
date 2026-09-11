@@ -4,9 +4,14 @@ import { ReferenceUpload } from './reference-upload';
 import { UploadProgress } from '../common/upload-progress';
 import { InjectionToken } from '@angular/core';
 import { ReferencePage, ReferenceResult } from './reference-result';
-import { ReferenceTagFacet } from './reference-tag';
+import { ReferenceTag, ReferenceTagFacet } from './reference-tag';
 
 export interface IReferenceService {
+  setTags(
+    id: string,
+    revision: number,
+    tags: Pick<ReferenceTag, 'name' | 'category'>[],
+  ): Promise<ReferenceResult>;
   saveLink(input: ReferenceLink): Promise<ReferenceLinkResult>;
   upload(
     input: ReferenceUpload,

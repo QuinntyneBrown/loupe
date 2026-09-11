@@ -1,5 +1,6 @@
 import { ReferenceImportPanel } from '../reference-import/reference-import-panel';
 import { ReferenceMetadataEditor } from '../reference-metadata/reference-metadata-editor';
+import { ReferenceTags } from '../reference-tags/reference-tags';
 import { computed, output } from '@angular/core';
 import {
   afterNextRender,
@@ -17,15 +18,18 @@ import { REFERENCE_SERVICE, ReferenceResult, ServiceError } from 'api';
 
 @Component({
   selector: 'lp-reference-detail-panel',
-  imports: [DatePipe, ReferenceMetadataEditor, ReferenceImportPanel],
+  imports: [DatePipe, ReferenceMetadataEditor, ReferenceImportPanel, ReferenceTags],
   templateUrl: './reference-detail-panel.html',
   styleUrl: './reference-detail-panel.css',
 })
 export class ReferenceDetailPanel {
   readonly discardRequested = output<() => void>();
   private readonly editor = viewChild(ReferenceMetadataEditor);
-  readonly dirty = computed(() => !!(this.editor()?.dirty() || this.editor()?.busy()));
-  readonly saving = computed(() => !!this.editor()?.saving());
+  private readonly tags = viewChild(ReferenceTags);
+  readonly dirty = computed(
+    () => !!(this.editor()?.dirty() || this.editor()?.busy() || this.tags()?.dirty()),
+  );
+  readonly saving = computed(() => !!(this.editor()?.saving() || this.tags()?.busy()));
   readonly id = input.required<string>();
   private readonly service = inject(REFERENCE_SERVICE);
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');

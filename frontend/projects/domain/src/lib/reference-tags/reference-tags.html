@@ -1,0 +1,54 @@
+<section aria-labelledby="your-tags-title">
+  <div class="head">
+    <label class="lp-subheading" id="your-tags-title" for="tag-input">Your tags</label
+    ><span class="status" aria-live="polite">{{ status() }}</span>
+  </div>
+  <form (ngSubmit)="add()" class="chip-input">
+    @for (tag of reference().tags; track tag.name) {
+      <span class="lp-tag"
+        >{{ tag.name
+        }}<button
+          type="button"
+          class="lp-tag__action"
+          [attr.aria-label]="'Remove tag ' + tag.name"
+          [disabled]="busy()"
+          (click)="remove(tag.name)"
+        >
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg></button
+      ></span>
+    }
+    <input
+      #field
+      id="tag-input"
+      name="tag"
+      type="text"
+      placeholder="Add a tag"
+      aria-label="Add a tag"
+      [ngModel]="draft()"
+      (ngModelChange)="change($event)"
+      [disabled]="busy()"
+    />
+  </form>
+  @if (error()) {
+    <p role="alert">{{ error() }}</p>
+  }
+  @if (conflicted()) {
+    <button
+      type="button"
+      class="lp-button lp-button--secondary"
+      [disabled]="busy()"
+      (click)="reload()"
+    >
+      Load latest tags
+    </button>
+  } @else if (failed()) {
+    <button
+      type="button"
+      class="lp-button lp-button--secondary"
+      [disabled]="busy()"
+      (click)="save()"
+    >
+      Retry saving tags
+    </button>
+  }
+</section>

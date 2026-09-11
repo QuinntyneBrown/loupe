@@ -8,11 +8,33 @@ import { HttpClient, HttpErrorResponse, HttpEventType, HttpResponse } from '@ang
 import { filter, firstValueFrom, map, tap } from 'rxjs';
 import { IReferenceService } from './reference.service.contract';
 import { ReferencePage, ReferenceResult } from './reference-result';
-import { ReferenceTagFacet } from './reference-tag';
+import { ReferenceTag, ReferenceTagFacet } from './reference-tag';
 import { ServiceError } from '../common/service-error';
 
 @Injectable()
 export class ReferenceService implements IReferenceService {
+  async setTags(
+    id: string,
+    revision: number,
+    tags: Pick<ReferenceTag, 'name' | 'category'>[],
+  ): Promise<ReferenceResult> {
+    const token = await this.session.getRequestToken();
+    try {
+      return await firstValueFrom(
+        this.http.put<ReferenceResult>(
+          '/api/references/' + encodeURIComponent(id) + '/tags',
+          { revision, tags },
+          { headers: { 'X-CSRF-Token': token }, timeout: 15000 },
+        ),
+      );
+    } catch (error) {
+      throw new ServiceError(
+        error instanceof HttpErrorResponse && typeof error.error?.code === 'string'
+          ? error.error.code
+          : 'request_failed',
+      );
+    }
+  }
   private readonly http = inject(HttpClient);
   private readonly session = inject(SESSION_SERVICE);
   async saveLink(input: ReferenceLink): Promise<ReferenceLinkResult> {

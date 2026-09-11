@@ -2,6 +2,12 @@ import { expect } from '@playwright/test';
 
 export class ReferenceDetailPage {
   constructor(page) { this.page = page; }
+  async addTag(name) { const input = this.page.getByRole('textbox', { name: 'Add a tag', exact: true }); await input.fill(name); await input.press('Enter'); }
+  async removeTag(name) { await this.page.getByRole('button', { name: `Remove tag ${name}`, exact: true }).click(); }
+  async expectTag(name) { await expect(this.page.getByRole('button', { name: `Remove tag ${name}`, exact: true })).toBeVisible(); }
+  async expectNoTag(name) { await expect(this.page.getByRole('button', { name: `Remove tag ${name}`, exact: true })).toHaveCount(0); }
+  async expectTagFailure() { await expect(this.page.getByRole('region', { name: 'Your tags', exact: true }).getByRole('alert')).toHaveText('Tags could not be saved. Your change is still here. Try again.'); }
+  async retryTags() { await this.page.getByRole('button', { name: 'Retry saving tags', exact: true }).click(); }
   async expectTitle() { await expect(this.page).toHaveTitle('Reference \u00b7 Loupe'); }
   async expectHeadingFocus(title) { await expect(this.page.getByRole('heading', { name: title, exact: true })).toBeFocused(); }
   async edit() { await this.page.getByRole('button',{name:'Edit metadata',exact:true}).click(); await expect(this.page.getByLabel('Title',{exact:true})).toBeFocused(); }

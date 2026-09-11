@@ -2,10 +2,17 @@ import { ReferenceMetadata, ReferenceLink, ReferenceLinkResult } from 'api';
 import { ReferenceUpload, UploadProgress } from 'api';
 import { Injectable } from '@angular/core';
 import { IReferenceService, ReferencePage, ReferenceResult, ServiceError } from 'api';
-import { ReferenceTagFacet } from 'api';
+import { ReferenceTag, ReferenceTagFacet } from 'api';
 
 @Injectable()
 export class MockReferenceService implements IReferenceService {
+  setTags(
+    id: string,
+    revision: number,
+    tags: Pick<ReferenceTag, 'name' | 'category'>[],
+  ): Promise<ReferenceResult> {
+    return this.call('setTags', { id, revision, tags });
+  }
   saveLink(input: ReferenceLink): Promise<ReferenceLinkResult> {
     return this.call('saveLink', input);
   }

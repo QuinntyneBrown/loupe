@@ -9,6 +9,7 @@ export interface ReferenceSummary {
   attribution: string | null;
 }
 export interface ReferenceResult extends ReferenceSummary {
+  tags: ReferenceTag[];
   boardIds: string[];
   notes: string | null;
   imageUrl: string | null;
@@ -20,3 +21,4 @@ export interface ReferencePage {
   items: ReferenceSummary[];
   nextCursor: string | null;
 }
+import { ReferenceTag } from './reference-tag';

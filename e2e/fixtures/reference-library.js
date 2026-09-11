@@ -93,6 +93,13 @@ export class ReferenceLibrary {
         if(this.lostUpdateResponses>0) {this.lostUpdateResponses--;return {error:'request_failed'};}
         return {data:item};
       }
+      if (operation === 'setTags') {
+        const item = this.items.find(item => item.id === input.id);
+        if (!item) return { error: 'item_unavailable' };
+        if (item.revision !== input.revision) return { error: 'revision_conflict' };
+        item.tags = input.tags.map(tag => ({ ...tag, provenance: 'manual' })); item.revision++;
+        return { data: item };
+      }
       if (operation === 'upload') {
         const normalize=value => value?.replace(/\r\n?/g,'\n').trim() || null;
         const metadata={title:normalize(input.title)||input.filename.replace(/\.[^.]+$/,'')||'Untitled reference',sourceUrl:normalize(input.sourceUrl),attribution:normalize(input.attribution),notes:normalize(input.notes)};

@@ -4,7 +4,9 @@
 @if (error()) {
   <h1 #heading tabindex="-1" class="lp-title">Reference</h1>
   <p role="alert">{{ error() }}</p>
-  <button type="button" class="lp-button lp-button--secondary" (click)="retry()">Retry loading reference</button>
+  <button type="button" class="lp-button lp-button--secondary" (click)="retry()">
+    Retry loading reference
+  </button>
 }
 @if (reference(); as item) {
   <div class="lp-detail">
@@ -13,7 +15,8 @@
         <h1 #heading tabindex="-1" class="lp-title">{{ item.title }}</h1>
       </div>
       <p class="lp-detail__meta">
-        Saved <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'mediumDate' }}</time>
+        Saved
+        <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'mediumDate' }}</time>
       </p>
     </div>
     <div class="lp-detail__media">
@@ -61,6 +64,7 @@
         <h2 class="lp-kicker">Notes</h2>
         <p class="plain-text">{{ item.notes || 'No notes saved.' }}</p>
       </section>
+      <lp-reference-tags [reference]="item" (saved)="reference.set($event)" />
     </div>
   </div>
 }
