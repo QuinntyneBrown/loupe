@@ -16,7 +16,7 @@ public sealed class ListPhotographersQueryHandler(ICurrentOwner owner, IPhotogra
             throw new RequestValidationException("cursor", "This cursor belongs to a different view. Refresh the list.");
         var cursor = CreatedCursor.Parse(request.Cursor?[scope.Length..]);
         var found = await photographers.ListAsync(owner.Id, request.PageSize + 1, cursor, cancellationToken);
-        var items = found.Take(request.PageSize).Select(PhotographerResult.From).ToArray();
+        var items = found.Take(request.PageSize).ToArray();
         var next = found.Count > request.PageSize ? scope + new CreatedCursor(items[^1].CreatedAt, items[^1].Id).Encode() : null;
         return new(items, next, await photographers.CountAsync(owner.Id, cancellationToken));
     }

@@ -339,3 +339,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: deletion failed on the absent endpoint.
 - GREEN: 27 photographer and content-deletion API checks pass. Deletion immediately removes the bookmark from collection/detail, unlinks references without changing credit/source/notes, increments their revisions, and reuses the private deletion record. Replaying the original save key cannot resurrect the bookmark.
 
+
+### Photographer linked-reference reads
+- RED: the linked-reference collection returned 404.
+- GREEN: all 19 photographer API cases pass. Linked references page 24 at a time with private scoped cursors. Collection cards include full counts and at most three newest references through bounded projections; unlinking immediately changes the result set.
+

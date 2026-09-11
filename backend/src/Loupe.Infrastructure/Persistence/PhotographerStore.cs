@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Loupe.Application.Photographers;
 using Loupe.Application.Common;
+using Loupe.Application.References;
 using Loupe.Domain.Photographers;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,11 +14,19 @@ public sealed class PhotographerStore(LibraryDbContext database) : IPhotographer
     public Task<int> CountAsync(string ownerId, CancellationToken cancellationToken) =>
         database.Photographers.CountAsync(item => item.OwnerId == ownerId, cancellationToken);
 
-    public async Task<IReadOnlyList<Photographer>> ListAsync(string ownerId, int count, CreatedCursor? cursor, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<PhotographerSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, CancellationToken cancellationToken)
     {
         var query = database.Photographers.AsNoTracking().Where(item => item.OwnerId == ownerId);
         if (cursor is not null) query = query.Where(item => item.CreatedAt < cursor.CreatedAt || item.CreatedAt == cursor.CreatedAt && item.Id.CompareTo(cursor.Id) > 0);
-        return await query.OrderByDescending(item => item.CreatedAt).ThenBy(item => item.Id).Take(count).Include(item => item.Tags).ToListAsync(cancellationToken);
+        return await query.OrderByDescending(item => item.CreatedAt).ThenBy(item => item.Id).Take(count)
+            .Select(item => new PhotographerSummary(item.Id, item.Name, item.PortfolioUrl, item.CreatedAt, item.Summary,
+                item.Tags.OrderBy(tag => tag.Name).Select(tag => new PhotographerTagResult(tag.Name, tag.Category, tag.Provenance)).ToArray(),
+                database.References.Count(reference => reference.OwnerId == ownerId && reference.PhotographerId == item.Id),
+                database.References.Where(reference => reference.OwnerId == ownerId && reference.PhotographerId == item.Id)
+                    .OrderByDescending(reference => reference.CreatedAt).ThenBy(reference => reference.Id).Take(3)
+                    .Select(reference => new ReferenceSummary(reference.Id, reference.Title, reference.CreatedAt, reference.Width, reference.Height,
+                        reference.PreviewKey == null ? null : $"/api/references/{reference.Id}/preview" + (reference.ImageRevision > 1 ? $"?v={reference.ImageRevision}" : ""), reference.SourceUrl, reference.Attribution)).ToArray()))
+            .ToListAsync(cancellationToken);
     }
 
     public Task<Photographer?> FindOwnedAsync(string ownerId, Guid id, CancellationToken cancellationToken) =>
