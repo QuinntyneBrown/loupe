@@ -23,14 +23,14 @@
     }
   </div>
   @if (loaded() && !items().length && !failed()) {
-    <div class="lp-empty">
+    <div class="lp-empty" [class.lp-empty--compact]="tags().length > 0">
       <h2 class="lp-empty__title" #emptyHeading tabindex="-1">
         {{
           tags().length
             ? 'Nothing matches these tags.'
             : boardId()
               ? 'Nothing on this board yet.'
-              : 'No references yet'
+              : 'Save the photographs that move you.'
         }}
       </h2>
       <p class="lp-empty__text">
@@ -39,19 +39,27 @@
         } @else if (boardId()) {
           Save a new reference straight to it, or add existing ones from their detail view.
         } @else {
-          Your saved inspiration will appear here.
+          Upload an image or paste a link. Loupe keeps the source and suggests tags so you can find
+          it again.
         }
       </p>
-      @if (tags().length) {
-        <button type="button" class="lp-button lp-button--secondary" (click)="clearTags.emit()">
-          Clear tags
-        </button>
-      }
+      <div class="lp-empty__action">
+        @if (tags().length) {
+          <button type="button" class="lp-button lp-button--secondary" (click)="clearTags.emit()">
+            Clear tags
+          </button>
+        } @else {
+          <button type="button" class="lp-button lp-button--primary" (click)="saveRequested.emit()">
+            Save reference
+          </button>
+        }
+      </div>
     </div>
   }
   @if (failed()) {
-    <div class="lp-empty">
-      <p role="alert" class="lp-empty__text">Inspiration could not be loaded. Try again.</p>
+    <div class="lp-empty" role="alert">
+      <h2 class="lp-empty__title">Couldn't load your references.</h2>
+      <p class="lp-empty__text">Check your connection and try again. Nothing you saved is lost.</p>
       <div class="lp-empty__action">
         <button
           #retryButton
@@ -59,8 +67,7 @@
           class="lp-button lp-button--secondary"
           (click)="load(true)"
         >
-          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg>Retry
-          loading references
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg>Try again
         </button>
       </div>
     </div>

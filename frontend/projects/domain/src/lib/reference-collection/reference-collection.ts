@@ -38,6 +38,7 @@ export class ReferenceCollection {
   readonly boardId = input<string | null>(null);
   readonly tags = input<string[]>([]);
   readonly clearTags = output<void>();
+  readonly saveRequested = output<void>();
   readonly busy = input(false);
   readonly boardsRequested = output<ReferenceSummary>();
   readonly removeRequested = output<ReferenceSummary>();

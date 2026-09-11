@@ -140,7 +140,7 @@ export class InspirationPage {
   }
   async open() { await this.page.getByRole('navigation', { name: 'Library', exact: true }).getByRole('link', { name: 'Inspiration', exact: true }).click(); }
   async expectTitle() { await expect(this.page).toHaveTitle('Inspiration \u00b7 Loupe'); }
-  async expectEmptyFocus() { await expect(this.page.getByRole('heading', { name: 'No references yet', exact: true })).toBeFocused(); }
+  async expectEmptyFocus() { await expect(this.page.getByRole('heading', { name: 'Save the photographs that move you.', exact: true })).toBeFocused(); }
   async expectOpen() {
     await expect(this.page.getByRole('heading', { name: 'Inspiration', exact: true })).toBeVisible();
     await expect(this.page.getByRole('navigation', { name: 'Library', exact: true }).getByRole('link', { name: 'Inspiration', exact: true })).toHaveAttribute('aria-current', 'page');
@@ -149,8 +149,10 @@ export class InspirationPage {
   async openReference(title) { await this.page.getByRole('link', { name: title, exact: true }).click(); }
   async loadMore() { await this.page.getByRole('button', { name: 'Load more references', exact: true }).click(); }
   async expectReferenceFocus(title) { await expect(this.page.getByRole('link', { name: title, exact: true })).toBeFocused(); }
-  async expectEmpty() { await expect(this.page.getByRole('heading', { name: 'No references yet', exact: true })).toBeVisible(); }
+  async expectEmpty() { await expect(this.page.getByRole('heading', { name: 'Save the photographs that move you.', exact: true })).toBeVisible(); }
   async expectLoadingSkeleton(count) { await expect(this.page.locator('.lp-skeleton--tile')).toHaveCount(count); }
-  async expectFailure() { await expect(this.page.getByRole('alert')).toHaveText('Inspiration could not be loaded. Try again.'); await expect(this.page.getByRole('heading', { name: 'No references yet', exact: true })).toHaveCount(0); }
-  async retry() { await this.page.getByRole('button', { name: 'Retry loading references', exact: true }).click(); }
+  async expectFailure() { const alert = this.page.getByRole('region', { name: 'Your references', exact: true }).getByRole('alert'); await expect(alert).toContainText("Couldn't load your references."); await expect(alert).toContainText('Check your connection and try again. Nothing you saved is lost.'); await expect(this.page.getByRole('heading', { name: 'Save the photographs that move you.', exact: true })).toHaveCount(0); }
+  async retry() { await this.page.getByRole('region', { name: 'Your references', exact: true }).getByRole('button', { name: 'Try again', exact: true }).click(); }
+  async saveFromEmpty() { await this.page.getByRole('region', { name: 'Your references', exact: true }).getByRole('button', { name: 'Save reference', exact: true }).click(); }
+  async expectEmptySaveFocus() { await expect(this.page.getByRole('region', { name: 'Your references', exact: true }).getByRole('button', { name: 'Save reference', exact: true })).toBeFocused(); }
 }

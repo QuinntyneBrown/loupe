@@ -92,3 +92,6 @@ p {
   gap: var(--lp-space-5);
   min-width: var(--lp-zero);
 }
+lp-reference-filters:empty {
+  display: none;
+}

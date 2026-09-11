@@ -70,6 +70,7 @@
         [boardId]="boardId()"
         [tags]="tags()"
         (clearTags)="filterTags([])"
+        (saveRequested)="savingReference.set(true)"
         [busy]="busy()"
         (libraryCount)="libraryCount.set($event)"
         (boardsRequested)="picker.set($event)"

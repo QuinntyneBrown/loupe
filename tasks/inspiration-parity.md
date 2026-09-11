@@ -196,3 +196,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: an edited preview did not prevent unload, and browser Back bypassed the unsaved dialog.
 - GREEN: all 23 dialog/board cases pass. Keep editing restores the preview, Discard cancels it, and leaving an admitted final Save warns while ignoring its late response. The retained session guard allows sign-out to complete.
 
+
+### Collection empty and error parity
+- RED: 3 cases exposed the old empty/error copy and missing Save entry points.
+- GREEN: all 39 collection/board/filter/draft Chromium cases pass. Empty library and empty board actions open the unified dialog and restore their initiating control; retries preserve the existing focus behavior.
+- Empty/filter/error copy follows the mocks. Mobile grid spacing and the empty tag-host gap were corrected.
+

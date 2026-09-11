@@ -156,3 +156,10 @@ test('Leaving a pending final Save warns and ignores its late response', async (
   inspiration.library.release('draft-save'); await expect.poll(() => inspiration.library.items.length).toBe(1);
   await expect(page).toHaveURL(/\/my-work$/);
 });
+
+test('The empty library and empty board open Save directly and restore the initiating control', async ({ page }) => {
+  const inspiration = await setup(page); await inspiration.expectEmpty();
+  await inspiration.saveFromEmpty(); await inspiration.cancelDraft(); await inspiration.expectEmptySaveFocus();
+  await inspiration.newBoard('Empty study'); await inspiration.selectBoard('Empty study');
+  await inspiration.saveFromEmpty(); await inspiration.uploadDraft(); await inspiration.expectDraftBoardSelected('Empty study');
+});
