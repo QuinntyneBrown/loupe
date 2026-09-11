@@ -133,3 +133,57 @@ test("invalid details offer correction without retrying a different operation", 
   await screen.readPortfolio("bad-url");
   await screen.expectValidationOnly();
 });
+
+test("failed Back cleanup retries Back without closing or losing the owner edits", async ({
+  page,
+}) => {
+  const screen = await setup(page);
+  await screen.openAdd();
+  await screen.readPortfolio("https://casey.example/");
+  await screen.expectPreview();
+  await screen.editPreview("Casey Revised", "My description", "My notes");
+  screen.library.drafts.cancelFailures = 1;
+  await screen.backFromPreview();
+  await screen.expectCloseFailure();
+  await screen.retryAdd();
+  await screen.expectReadForm("https://casey.example/");
+  await screen.readPortfolio("https://casey.example/");
+  await screen.expectPreview();
+  await screen.expectEdits("Casey Revised", "My description", "My notes");
+  expect(screen.library.items).toHaveLength(0);
+});
+test("stale preview review preserves edits before a fresh final save", async ({
+  page,
+}) => {
+  const screen = await setup(page);
+  await screen.openAdd();
+  await screen.readPortfolio("https://casey.example/");
+  await screen.expectPreview();
+  await screen.editPreview("Casey Revised", "My description", "My notes");
+  [...screen.library.drafts.items.values()][0].revision++;
+  await screen.saveAdd();
+  await screen.reviewLatest();
+  await screen.expectEdits("Casey Revised", "My description", "My notes");
+  await screen.saveAdd();
+  await screen.expectClosed();
+  expect(screen.library.items).toHaveLength(1);
+});
+test("closing after a lost save acknowledgement refreshes all loaded cards", async ({
+  page,
+}) => {
+  const screen = await setup(page, 60);
+  await screen.more();
+  await screen.expectCards(48);
+  screen.library.drafts.lostSaveResponses = 1;
+  await screen.openAdd();
+  await screen.readPortfolio("https://casey.example/");
+  await screen.expectPreview();
+  await screen.saveAdd();
+  await screen.expectSaveFailure();
+  await screen.closePreview();
+  await screen.expectClosed();
+  await screen.expectCount(61);
+  await screen.expectCards(48);
+  await screen.more();
+  await screen.expectCards(61);
+});

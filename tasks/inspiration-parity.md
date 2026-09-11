@@ -381,3 +381,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: four new cases exposed the absent manual description, extra preview Cancel action and inappropriate validation Retry. Mobile Axe then caught the wrapped tag input target; the mock optional-label colour also failed contrast.
 - GREEN: all 14 Add/collection Chromium cases pass, including desktop/mobile Axe. Preview follows Back/Add, manual fallback saves an owner-written description, validation asks for corrections, chip input has an adequate hit area, and the modal body scrolls with footer actions visible. Optional text uses the accessible secondary text token.
 
+
+### Photographer draft recovery
+- RED: retrying a failed Back canceled and closed the dialog instead of returning to its form.
+- GREEN: all 17 Add/collection Chromium cases pass. Back retains its intent and owner edits; stale preview review keeps edits, and uncertain-save closure refreshes all loaded collection pages without duplicates.
+

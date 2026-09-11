@@ -7,6 +7,7 @@ export class PhotographerDrafts {
     this.failure = null;
     this.hold = false;
     this.lostSaveResponses = 0;
+    this.cancelFailures = 0;
   }
   async attach(page) {
     await page.exposeFunction(
@@ -49,6 +50,10 @@ export class PhotographerDrafts {
         const draft = this.items.get(input.id);
         if (!draft) return { error: "item_unavailable" };
         if (operation === "cancel") {
+          if (this.cancelFailures > 0) {
+            this.cancelFailures--;
+            return { error: "request_failed" };
+          }
           draft.canceled = true;
           return { data: null };
         }

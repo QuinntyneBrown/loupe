@@ -86,6 +86,7 @@ export class AddPhotographer {
   private pendingRead: Promise<PhotographerDraftResult> | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private retryAction: 'read' | 'save' | 'cancel' = 'read';
+  private cancelBack = false;
   private descriptionEdited = false;
   private tagsEdited = false;
   constructor() {
@@ -294,11 +295,12 @@ export class AddPhotographer {
     return this.retryAction === 'save'
       ? this.save()
       : this.retryAction === 'cancel'
-        ? this.cancel()
+        ? this.cancel(this.cancelBack)
         : this.read();
   }
   async cancel(back = false): Promise<boolean> {
     if (this.saving() || this.closing()) return false;
+    this.cancelBack = back;
     this.closing.set(true);
     this.retryable.set(false);
     this.error.set('');

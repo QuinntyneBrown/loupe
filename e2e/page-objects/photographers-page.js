@@ -69,6 +69,45 @@ export class PhotographersPage {
   dialog() {
     return this.page.getByRole("dialog");
   }
+  async backFromPreview() {
+    await this.dialog()
+      .getByRole("button", { name: "Back", exact: true })
+      .click();
+  }
+  async expectReadForm(url) {
+    await expect(
+      this.dialog().getByRole("button", { name: "Read the page", exact: true }),
+    ).toBeVisible();
+    await expect(
+      this.dialog().getByRole("textbox", { name: "Website", exact: true }),
+    ).toHaveValue(url);
+  }
+  async closePreview() {
+    await this.dialog()
+      .getByRole("button", { name: "Close", exact: true })
+      .click();
+  }
+  async expectCloseFailure() {
+    await expect(this.dialog().getByRole("alert")).toContainText(
+      "Couldn't close this preview",
+    );
+  }
+  async reviewLatest() {
+    await this.dialog()
+      .getByRole("button", { name: "Review latest preview", exact: true })
+      .click();
+  }
+  async expectEdits(name, description, notes) {
+    await expect(
+      this.dialog().getByRole("textbox", { name: "Name", exact: true }),
+    ).toHaveValue(name);
+    await expect(
+      this.dialog().getByRole("textbox", { name: /^Description/ }),
+    ).toHaveValue(description);
+    await expect(
+      this.dialog().getByRole("textbox", { name: /^Your notes/ }),
+    ).toHaveValue(notes);
+  }
   async expectPreviewActions() {
     await expect(
       this.dialog().getByRole("button", { name: "Back", exact: true }),
