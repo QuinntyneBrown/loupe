@@ -5,6 +5,37 @@
     <div class="lp-detail__head">
       <div class="lp-detail__title-row">
         <h1 class="lp-title">{{ item.title }}</h1>
+        <details class="detail-menu">
+          <summary class="lp-icon-button" role="button" aria-label="More actions">
+            <svg class="lp-icon" aria-hidden="true" viewBox="0 0 24 24">
+              <circle cx="5" cy="12" r="1" />
+              <circle cx="12" cy="12" r="1" />
+              <circle cx="19" cy="12" r="1" />
+            </svg>
+          </summary>
+          <div class="detail-menu__items">
+            @if (hasCritique()) {
+              <button
+                #regenerateButton
+                class="lp-button lp-button--ghost"
+                type="button"
+                [disabled]="regenerationBlocked()"
+                (click)="regenerateButton.focus(); regenerateRequested.emit(item)"
+              >
+                Regenerate critique
+              </button>
+            }
+            <button
+              #deleteButton
+              type="button"
+              class="lp-button lp-button--secondary"
+              (click)="deleteButton.focus(); deleteRequested.emit(item)"
+            >
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-trash" /></svg>
+              Delete photograph
+            </button>
+          </div>
+        </details>
       </div>
       <div class="lp-detail__meta">
         <span>
@@ -12,17 +43,37 @@
           Private
         </span>
         <span
-          >Saved
-          <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'medium' }}</time></span
+          >Uploaded
+          <time [attr.datetime]="item.createdAt">{{
+            item.createdAt | date: 'mediumDate'
+          }}</time></span
         >
+        <lp-critique-status
+          [photograph]="item"
+          [compact]="hasCritique()"
+          [briefDirty]="briefDirty()"
+          (completed)="completedCritiqueId.set($event)"
+          (reviewed)="photo.set($event)"
+        />
       </div>
+
+      @if (hasCritique()) {
+        <div class="lp-detail__actions">
+          <a
+            class="lp-button lp-button--primary"
+            routerLink="/compare"
+            [queryParams]="{ firstId: item.id }"
+            >Compare with a later attempt</a
+          >
+        </div>
+      }
     </div>
     <div class="lp-detail__media">
       <figure>
         <img [src]="item.imageUrl" [alt]="item.title" [width]="item.width" [height]="item.height" />
       </figure>
       <section aria-labelledby="capture-heading">
-        <h2 id="capture-heading" class="lp-kicker">Capture settings</h2>
+        <h2 id="capture-heading" class="visually-hidden">Capture settings</h2>
         @if (!hasCaptureSettings()) {
           <p class="lp-exif lp-exif--empty">No capture settings available.</p>
         }
@@ -37,41 +88,20 @@
           }
         </dl>
       </section>
-    </div>
-    <div class="lp-detail__body">
-      <section aria-labelledby="brief-heading">
-        <h2 id="brief-heading" class="lp-kicker">Critique brief</h2>
+      <section aria-label="Critique brief" class="lp-brief">
         <lp-photograph-brief
           [photograph]="item"
           (saved)="photo.set($event)"
           (discardRequested)="discardRequested.emit($event)"
         />
       </section>
-      <lp-critique-status
-        [photograph]="item"
-        [briefDirty]="briefDirty()"
-        (completed)="completedCritiqueId.set($event)"
-        (reviewed)="photo.set($event)"
-      />
-      <lp-photograph-critique
-        [id]="item.id"
-        [operationId]="completedCritiqueId()"
-        [regenerationBlocked]="regenerationBlocked()"
-        (regenerationRequested)="regenerateRequested.emit(item)"
-      />
-      <section aria-labelledby="notes-heading">
-        <h2 id="notes-heading" class="lp-kicker">Personal notes</h2>
+    </div>
+    <div class="lp-detail__body">
+      <lp-photograph-critique [id]="item.id" [operationId]="completedCritiqueId()" />
+      <section aria-label="Personal notes">
+        <h2 id="notes-heading" class="lp-kicker">Your notes</h2>
         <lp-photograph-notes [photograph]="item" (saved)="photo.set($event)" />
       </section>
-      <button
-        #deleteButton
-        type="button"
-        class="lp-button lp-button--secondary"
-        (click)="deleteButton.focus(); deleteRequested.emit(item)"
-      >
-        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-trash" /></svg>
-        Delete photograph
-      </button>
     </div>
   </div>
 } @else if (error() === 'item_unavailable') {

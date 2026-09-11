@@ -8,6 +8,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { PHOTOGRAPH_SERVICE, PhotographResult, OperationResult, ServiceError } from 'api';
 import { PhotographNotes } from '../photograph-notes/photograph-notes';
@@ -17,7 +18,14 @@ import { CritiqueStatus } from '../critique-status/critique-status';
 
 @Component({
   selector: 'lp-photograph-detail',
-  imports: [DatePipe, PhotographNotes, PhotographBrief, PhotographCritique, CritiqueStatus],
+  imports: [
+    RouterLink,
+    DatePipe,
+    PhotographNotes,
+    PhotographBrief,
+    PhotographCritique,
+    CritiqueStatus,
+  ],
   templateUrl: './photograph-detail.html',
   styleUrl: './photograph-detail.css',
 })
@@ -26,6 +34,8 @@ export class PhotographDetail {
   readonly discardRequested = output<() => void>();
   readonly deleteRequested = output<PhotographResult>();
   readonly regenerateRequested = output<PhotographResult>();
+  private readonly critiquePanel = viewChild(PhotographCritique);
+  readonly hasCritique = computed(() => !!this.critiquePanel()?.critique());
   private readonly critiqueStatus = viewChild(CritiqueStatus);
   readonly regenerationBlocked = computed(() => {
     const status = this.critiqueStatus();

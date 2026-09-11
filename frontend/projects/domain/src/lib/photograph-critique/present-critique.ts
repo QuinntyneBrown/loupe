@@ -24,7 +24,7 @@ const exifLabels: Record<string, string> = {
 };
 const aspectGroups = [
   {
-    label: 'Technical observations',
+    label: 'Technical',
     fields: [
       { key: 'exposure', label: 'Exposure' },
       { key: 'focus', label: 'Focus' },
@@ -36,7 +36,7 @@ const aspectGroups = [
     ],
   },
   {
-    label: 'Composition and expression',
+    label: 'Composition and story',
     fields: [
       { key: 'framing', label: 'Framing' },
       { key: 'subjectSeparation', label: 'Subject separation' },

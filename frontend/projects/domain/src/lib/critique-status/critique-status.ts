@@ -1,9 +1,11 @@
 import {
+  afterNextRender,
   Component,
   computed,
   effect,
   ElementRef,
   inject,
+  Injector,
   input,
   output,
   signal,
@@ -20,6 +22,15 @@ import { RequestCritique } from '../request-critique/request-critique';
   styleUrl: './critique-status.css',
 })
 export class CritiqueStatus {
+  readonly compact = input(false);
+  readonly expanded = signal(false);
+  readonly showDetails = computed(
+    () =>
+      !this.compact() ||
+      this.expanded() ||
+      !!this.error() ||
+      (!!this.operation() && this.operation()?.status !== 'Succeeded'),
+  );
   readonly photograph = input.required<PhotographResult>();
   readonly briefDirty = input(false);
   readonly id = computed(() => this.photograph().id);
@@ -43,6 +54,7 @@ export class CritiqueStatus {
     );
   });
   private readonly service = inject(CRITIQUE_SERVICE);
+  private readonly injector = inject(Injector);
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
   private refresh: (() => Promise<void>) | null = null;
 
@@ -106,6 +118,7 @@ export class CritiqueStatus {
     void this.refresh?.();
   }
   focus(): void {
-    this.heading()?.nativeElement.focus();
+    this.expanded.set(true);
+    afterNextRender(() => this.heading()?.nativeElement.focus(), { injector: this.injector });
   }
 }

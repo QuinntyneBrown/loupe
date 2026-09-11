@@ -26,7 +26,7 @@ export class ComparePage {
     await expect(side.locator('time').first()).toHaveAttribute('datetime', photograph.createdAt);
     for (const text of [photograph.brief.intent, photograph.notes, critique.brief.intent, critique.content.strengths[0].explanation])
       await expect(side).toContainText(text);
-    for (const heading of ['Strengths', 'Three priorities', 'Practice exercise', 'Exposure', 'Focus', 'Depth of field', 'Motion', 'Lighting', 'Color', 'Processing', 'Framing', 'Subject separation', 'Balance', 'Visual hierarchy', 'Mood'])
+    for (const heading of ['What works', 'Top three improvements', 'Practice exercise', 'Exposure', 'Focus', 'Depth of field', 'Motion', 'Lighting', 'Color', 'Processing', 'Framing', 'Subject separation', 'Balance', 'Visual hierarchy', 'Mood'])
       await expect(side.getByRole('heading', { name: heading, exact: true })).toBeVisible();
     await expect(side.getByRole('button', { name: /critique/i })).toHaveCount(0);
   }

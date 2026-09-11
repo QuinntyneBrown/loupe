@@ -1,10 +1,22 @@
+<div class="brief-header">
+  <h2 class="lp-kicker">Your brief</h2>
+  @if (!editing()) {
+    <button
+      #editButton
+      type="button"
+      class="lp-button lp-button--ghost lp-button--sm"
+      (click)="open()"
+    >
+      Edit brief
+    </button>
+  }
+</div>
 @if (!editing()) {
   @let brief = photograph().brief;
+  @if (brief.intent) {
+    <blockquote class="brief-quote">{{ brief.intent }}</blockquote>
+  }
   <dl class="lp-meta">
-    @if (brief.intent) {
-      <dt>Intent</dt>
-      <dd>{{ brief.intent }}</dd>
-    }
     @if (brief.genre) {
       <dt>Genre</dt>
       <dd>{{ brief.genre }}</dd>
@@ -21,9 +33,6 @@
   @if (!brief.intent && !brief.genre && !brief.experience && !brief.requestedFeedback) {
     <p>No brief added.</p>
   }
-  <button #editButton type="button" class="lp-button lp-button--ghost lp-button--sm" (click)="open()">
-    Edit brief
-  </button>
 } @else {
   <form class="lp-form" (ngSubmit)="save()" [attr.aria-busy]="busy()">
     <div class="lp-field">
@@ -89,7 +98,9 @@
         [attr.aria-describedby]="errors().requestedFeedback ? 'feedback-error' : null"
       ></textarea>
       @if (errors().requestedFeedback) {
-        <p id="feedback-error" class="lp-field__error" role="alert">Use 2,000 characters or fewer.</p>
+        <p id="feedback-error" class="lp-field__error" role="alert">
+          Use 2,000 characters or fewer.
+        </p>
       }
     </div>
     @if (failed()) {
@@ -103,7 +114,12 @@
             : 'This photograph changed. Your brief has been kept.'
         }}
       </p>
-      <button type="button" class="lp-button lp-button--secondary" [disabled]="busy()" (click)="reloadLatest()">
+      <button
+        type="button"
+        class="lp-button lp-button--secondary"
+        [disabled]="busy()"
+        (click)="reloadLatest()"
+      >
         Reload latest brief
       </button>
     }
@@ -120,10 +136,19 @@
       </section>
     }
     <div class="actions">
-      <button type="submit" class="lp-button lp-button--primary" [disabled]="busy() || conflicted() || invalid()">
+      <button
+        type="submit"
+        class="lp-button lp-button--primary"
+        [disabled]="busy() || conflicted() || invalid()"
+      >
         {{ failed() ? 'Retry brief save' : 'Save brief' }}
       </button>
-      <button type="button" class="lp-button lp-button--ghost" [disabled]="busy()" (click)="cancel()">
+      <button
+        type="button"
+        class="lp-button lp-button--ghost"
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
         Cancel brief edit
       </button>
     </div>

@@ -53,6 +53,8 @@
   --lp-detail-columns: minmax(0, 1fr);
   --lp-comparison-columns: minmax(0, 1fr);
   --lp-full: 100%;
+  --lp-full-viewport: 100vw;
+  --lp-sr-clip: inset(50%);
   --lp-heading-fluid: 5vw;
   --lp-heading-max: 4rem;
   --lp-skip-hidden: -200%;
