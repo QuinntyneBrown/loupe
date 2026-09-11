@@ -160,3 +160,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: the 503 retry case returned Failed instead of Queued.
 - GREEN: all 9 source-worker cases pass, including recovery after a temporary failure and termination after three attempts. HTTP client timeouts also enter the bounded retry path.
 
+
+### Independent source worker
+- RED: independent-host acceptance could not compile because ReferenceImportWorker was missing.
+- GREEN: 10 worker cases pass, including discovery and publication through a separate service provider. The production worker registers the import handler and runs the configured import pool under the shared durable capacity limit.
+
