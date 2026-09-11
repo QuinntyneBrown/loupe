@@ -481,3 +481,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both API scenarios returned 404 for missing summary endpoints.
 - GREEN: all 37 photographer API cases pass. Requests persist source revisions and captured content, deduplicate keyed/concurrent intent, enforce owner and revision checks, expose private durable status, and leave manual fields unchanged. Unconfigured generation returns 503 while the bookmark remains usable.
 
+
+### Grounded photographer summary worker
+- RED: three worker cases stayed Queued without a summary worker.
+- GREEN: 13 summary and reference-analysis API cases pass. The shared worker pool rotates across visual critiques, reference analysis and photographer summaries. The provider receives only captured title/description/main text, uses strict structured output with store:false, and publishes separate pending suggestions plus source provenance. Title-only output reports insufficient information; blocked pages never call the model. These checks use controlled transports, not live Azure.
+

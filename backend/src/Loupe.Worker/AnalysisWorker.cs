@@ -1,5 +1,6 @@
 using Loupe.Application.Critiques;
 using Loupe.Application.ReferenceAnalysis;
+using Loupe.Application.PhotographerSummaries;
 using Loupe.Infrastructure.Ai;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,17 +25,25 @@ public sealed class AnalysisWorker(IServiceScopeFactory scopes, IOptions<AiOptio
 
     private async Task ProcessAsync(CancellationToken stoppingToken)
     {
-        var referenceFirst = false;
+        var next = 0;
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 await using var scope = scopes.CreateAsyncScope();
                 var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-                referenceFirst = !referenceFirst;
-                var processed = referenceFirst
-                    ? await sender.Send(new RunReferenceAnalysisCommand(), stoppingToken) || await sender.Send(new RunCritiqueCommand(), stoppingToken)
-                    : await sender.Send(new RunCritiqueCommand(), stoppingToken) || await sender.Send(new RunReferenceAnalysisCommand(), stoppingToken);
+                var processed = false;
+                for (var offset = 0; offset < 3 && !processed; offset++)
+                {
+                    var kind = next;
+                    next = (next + 1) % 3;
+                    processed = kind switch
+                    {
+                        0 => await sender.Send(new RunReferenceAnalysisCommand(), stoppingToken),
+                        1 => await sender.Send(new RunCritiqueCommand(), stoppingToken),
+                        _ => await sender.Send(new RunPhotographerSummaryCommand(), stoppingToken)
+                    };
+                }
                 if (processed) continue;
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
