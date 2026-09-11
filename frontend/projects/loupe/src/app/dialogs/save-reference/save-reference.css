@@ -1,7 +1,7 @@
 .preview {
   display: flex;
   align-items: flex-start;
-  gap: var(--lp-space-5);
+  gap: var(--lp-space-4);
 }
 .preview img {
   width: var(--lp-thumb-size-lg);
@@ -90,4 +90,80 @@
   font-size: var(--lp-text-xs);
   color: var(--lp-color-text-2);
   margin-right: auto;
+}
+.board-picker {
+  min-width: var(--lp-zero);
+  padding: var(--lp-zero);
+  margin: var(--lp-zero);
+  border: var(--lp-zero);
+}
+.board-list {
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+  max-height: var(--lp-picker-max);
+  overflow: auto;
+}
+.board-picker legend {
+  margin-bottom: var(--lp-space-3);
+}
+.board-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-3);
+  padding: var(--lp-space-2) var(--lp-space-3);
+  cursor: pointer;
+  font-size: var(--lp-text-sm);
+}
+.board-choice:hover {
+  background: var(--lp-color-surface-2);
+}
+.board-choice > span:nth-child(2) {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.board-choice input {
+  accent-color: var(--lp-color-ink);
+  width: var(--lp-space-4);
+  height: var(--lp-space-4);
+  margin: var(--lp-zero);
+}
+.board-count {
+  font-size: var(--lp-text-xs);
+  font-family: var(--lp-font-mono);
+  color: var(--lp-color-text-2);
+}
+.board-new {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-2);
+  padding: var(--lp-space-2) var(--lp-space-3);
+  border-top: var(--lp-hairline) solid var(--lp-color-border);
+}
+.board-new input {
+  min-width: var(--lp-zero);
+  min-height: var(--lp-control-height-sm);
+}
+.upload--compact {
+  flex-direction: row;
+  padding: var(--lp-space-4);
+}
+.upload .visually-hidden:focus {
+  position: absolute;
+  width: var(--lp-hairline);
+  height: var(--lp-hairline);
+  clip-path: var(--lp-sr-clip);
+}
+.lp-field__optional {
+  font-weight: var(--lp-weight-regular);
+  color: var(--lp-color-text-2);
+  font-size: var(--lp-text-xs);
+  margin-left: var(--lp-space-1);
+}
+.lp-dialog__title,
+.lp-field__hint,
+.fallback p {
+  margin: var(--lp-zero);
+}
+.lp-dialog__text {
+  margin-bottom: var(--lp-zero);
 }

@@ -78,7 +78,11 @@
     />
   }
   @if (savingReference()) {
-    <lp-save-reference (closed)="savingReference.set(false)" (saved)="referenceSaved($event)" />
+    <lp-save-reference
+      [boardId]="boardId()"
+      (closed)="savingReference.set(false)"
+      (saved)="referenceSaved($event)"
+    />
   }
   @if (picker(); as reference) {
     <lp-board-picker

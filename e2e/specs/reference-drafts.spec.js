@@ -71,3 +71,36 @@ test('A saved source shows the existing reference without creating a duplicate',
   await inspiration.expectDraftDuplicate();
   expect(inspiration.library.items).toHaveLength(1);
 });
+
+test('Save from a board preselects it and supports a new board in the preview', async ({ page }) => {
+  const inspiration = await setup(page);
+  await inspiration.newBoard('Window light'); await inspiration.selectBoard('Window light');
+  await inspiration.openSave(); await inspiration.uploadDraft();
+  await inspiration.expectDraftBoardSelected('Window light'); await inspiration.newDraftBoard('Colour studies');
+  await inspiration.saveDraft(); await expect.poll(() => inspiration.library.items.length).toBe(1);
+  expect(inspiration.library.items[0].boardIds).toHaveLength(2);
+  await inspiration.expectBoard('Window light', 1); await inspiration.expectBoard('Colour studies', 1);
+});
+
+test('Back discards the temporary preview while keeping the source form available', async ({ page }) => {
+  const inspiration = await setup(page);
+  await inspiration.openSave(); await inspiration.uploadDraft(); await inspiration.backFromDraft();
+  expect(inspiration.library.drafts.size).toBe(0); expect(inspiration.library.items).toHaveLength(0);
+});
+
+test('A manual fallback image retains the original source, edited title and notes', async ({ page }) => {
+  const inspiration = await setup(page); inspiration.library.draftFailure = 'robots_disallowed';
+  await inspiration.openSave(); await inspiration.importDraft('https://source.example/restricted');
+  await inspiration.expectImportFallback(); await inspiration.addFallbackImage('Manual image', 'Keep this context.');
+  await inspiration.saveDraft(); await expect.poll(() => inspiration.library.items.length).toBe(1);
+  const saved = inspiration.library.items[0];
+  expect(saved.title).toBe('Manual image'); expect(saved.notes).toBe('Keep this context.');
+  expect(saved.sourceUrl).toBe('https://source.example/restricted'); expect(saved.previewUrl).not.toBeNull();
+});
+
+for (const width of [375, 768, 1440]) test(`Save dialog remains accessible at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 900 });
+  const inspiration = await setup(page);
+  await inspiration.openSave(); await inspiration.expectDraftAccessible();
+  await inspiration.uploadDraft(); await inspiration.expectDraftAccessible();
+});

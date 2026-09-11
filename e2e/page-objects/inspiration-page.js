@@ -1,10 +1,15 @@
 import { expect } from '@playwright/test';
 import { ReferenceLibrary } from '../fixtures/reference-library.js';
+import AxeBuilder from '@axe-core/playwright';
 
 export class InspirationPage {
   constructor(page) { this.page = page; }
   async configure(count) { this.library = new ReferenceLibrary(count); await this.library.attach(this.page); }
   async openSave() { await this.page.getByRole('button', { name: 'Save reference', exact: true }).first().click(); }
+  async expectDraftAccessible() {
+    expect((await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]);
+    expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
   async importDraft(source) {
     const dialog = this.page.getByRole('dialog');
     await dialog.getByRole('radio', { name: 'From a link', exact: true }).check();
@@ -16,6 +21,16 @@ export class InspirationPage {
   async expectImportFallback() { await expect(this.page.getByRole('dialog').getByRole('heading', { name: "Couldn't import this page", exact: true })).toBeVisible(); }
   async saveFallback(title, notes) { const dialog = this.page.getByRole('dialog'); await dialog.getByRole('textbox', { name: 'Title', exact: true }).fill(title); await dialog.getByRole('textbox', { name: 'Notes optional', exact: true }).fill(notes); await dialog.getByRole('button', { name: 'Save link', exact: true }).click(); }
   async expectDraftDuplicate() { await expect(this.page.getByRole('dialog').getByRole('heading', { name: 'Already saved', exact: true })).toBeVisible(); }
+  async expectDraftBoardSelected(name) { await expect(this.page.getByRole('dialog').getByRole('checkbox', { name, exact: true })).toBeChecked(); }
+  async newDraftBoard(name) { await this.page.getByRole('dialog').getByRole('textbox', { name: 'New board name', exact: true }).fill(name); }
+  async backFromDraft() { await this.page.getByRole('dialog').getByRole('button', { name: 'Back', exact: true }).click(); await expect(this.page.getByRole('dialog').getByRole('radio', { name: 'Upload an image', exact: true })).toBeVisible(); }
+  async addFallbackImage(title, notes) {
+    const dialog = this.page.getByRole('dialog');
+    await dialog.getByRole('textbox', { name: 'Title', exact: true }).fill(title);
+    await dialog.getByRole('textbox', { name: 'Notes optional', exact: true }).fill(notes);
+    await dialog.getByLabel('Add an image', { exact: true }).setInputFiles({ name: 'Added.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1kAAAAASUVORK5CYII=', 'base64') });
+    await this.expectDraftPreview();
+  }
   async uploadDraft() {
     const dialog = this.page.getByRole('dialog');
     await dialog.getByRole('radio', { name: 'Upload an image', exact: true }).check();

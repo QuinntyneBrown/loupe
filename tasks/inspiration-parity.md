@@ -179,3 +179,10 @@ be established without printing credentials. Live quality checks are mandatory.
 - GREEN: all 24 dialog/board/collection Chromium cases pass. Link imports expose editable previews, explicit fallback notes, duplicate detection and cancel without late reopening. Production build passes with the existing initial-bundle warning.
 - Azure CLI is authenticated and lists the existing qbs-ai-ynal4ns37wb6a resource in rg-qbs-prod. No keys were printed; deployment discovery is in progress for the approved live validation.
 
+
+### Save preview boards, Back and fallback image
+- RED: 3 cases failed on missing board selection, Back and Add an image controls.
+- GREEN: 9 workflow cases and 3 viewport accessibility cases pass. Current-board selection, inline creation, Back cleanup and retaining fallback source/title/notes are covered. Production build passes with the unchanged budget warning.
+- The expanded 375px preview was visually inspected. Picker borders, spacing and typography follow mock CSS. The mock's small optional/count text uses a 3.37:1 color; these labels use the existing secondary-text token to satisfy the accepted accessibility bar.
+- Existing Azure deployment discovery found photo-vision running gpt-4.1-mini (2025-04-14), provisioned successfully. No credentials have been printed.
+

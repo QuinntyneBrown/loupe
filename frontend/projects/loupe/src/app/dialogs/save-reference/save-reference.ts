@@ -5,6 +5,7 @@ import {
   DestroyRef,
   ElementRef,
   inject,
+  input,
   output,
   signal,
   viewChild,
@@ -17,6 +18,8 @@ import {
   ReferenceResult,
   ServiceError,
   UploadProgress,
+  BOARD_SERVICE,
+  BoardResult,
 } from 'api';
 
 @Component({
@@ -26,6 +29,12 @@ import {
   styleUrl: './save-reference.css',
 })
 export class SaveReference {
+  readonly boardId = input<string | null>(null);
+  readonly boards = signal<BoardResult[]>([]);
+  readonly selectedBoards = signal<string[]>([]);
+  readonly newBoardName = signal('');
+  readonly loadingBoards = signal(true);
+  readonly boardError = signal('');
   readonly sourceKind = signal<'link' | 'upload'>('link');
   readonly phase = signal<'form' | 'importing' | 'preview' | 'failed' | 'duplicate'>('form');
   readonly notes = signal('');
@@ -58,6 +67,8 @@ export class SaveReference {
   readonly error = signal('');
   readonly progress = signal<UploadProgress | null>(null);
   private readonly service = inject(REFERENCE_DRAFT_SERVICE);
+  private readonly boardService = inject(BOARD_SERVICE);
+  private readonly obsoleteDrafts = new Set<string>();
   private readonly destroy = inject(DestroyRef);
   private readonly modal = viewChild.required<ElementRef<HTMLDialogElement>>('modal');
   private uploadKey = crypto.randomUUID();
@@ -67,11 +78,88 @@ export class SaveReference {
   private importedSource = '';
   private timer: ReturnType<typeof setTimeout> | undefined;
   constructor() {
-    afterNextRender(() => this.modal().nativeElement.showModal());
+    afterNextRender(() => {
+      this.modal().nativeElement.showModal();
+      this.selectedBoards.set(this.boardId() ? [this.boardId()!] : []);
+      void this.loadBoards();
+    });
     this.destroy.onDestroy(() => {
       clearTimeout(this.timer);
       this.modal().nativeElement.close();
     });
+  }
+  async loadBoards(): Promise<void> {
+    this.loadingBoards.set(true);
+    this.boardError.set('');
+    try {
+      const boards = await this.boardService.list();
+      if (!this.destroy.destroyed) this.boards.set(boards);
+    } catch {
+      if (!this.destroy.destroyed) this.boardError.set('Boards could not be loaded. Try again.');
+    } finally {
+      if (!this.destroy.destroyed) this.loadingBoards.set(false);
+    }
+  }
+  toggleBoard(id: string): void {
+    this.selectedBoards.update((ids) =>
+      ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id],
+    );
+  }
+  private async discardObsolete(): Promise<void> {
+    for (const id of this.obsoleteDrafts) {
+      await this.service.cancel(id);
+      this.obsoleteDrafts.delete(id);
+    }
+  }
+  async back(): Promise<void> {
+    const draft = this.draft();
+    if (!draft || this.busy() || this.saving()) return;
+    this.busy.set(true);
+    this.error.set('');
+    try {
+      await this.discardObsolete();
+      await this.service.cancel(draft.id);
+      if (!this.destroy.destroyed) {
+        this.draft.set(null);
+        this.phase.set('form');
+        this.uploadKey = crypto.randomUUID();
+        this.importKey = crypto.randomUUID();
+      }
+    } catch {
+      if (!this.destroy.destroyed) this.error.set('The preview could not be discarded. Try again.');
+    } finally {
+      if (!this.destroy.destroyed) this.busy.set(false);
+    }
+  }
+  async addImage(event: Event): Promise<void> {
+    const previous = this.draft();
+    if (!previous || this.busy()) return;
+    this.choose(event);
+    const file = this.file();
+    if (!file) return;
+    const title = this.title(),
+      photographer = this.photographer();
+    this.busy.set(true);
+    try {
+      const next = await this.service.upload(file, previous.sourceUrl ?? '', this.uploadKey);
+      if (this.destroy.destroyed) {
+        await this.service.cancel(next.id);
+        return;
+      }
+      this.obsoleteDrafts.add(previous.id);
+      this.receive(next);
+      this.title.set(title);
+      this.photographer.set(photographer);
+      this.sourceKind.set('upload');
+      await this.discardObsolete();
+    } catch {
+      if (!this.destroy.destroyed)
+        this.error.set(
+          'The image could not be added. Your source and notes are still here. Try again.',
+        );
+    } finally {
+      if (!this.destroy.destroyed) this.busy.set(false);
+    }
   }
   choose(event: Event): void {
     const files = (event.target as HTMLInputElement).files;
@@ -188,6 +276,7 @@ export class SaveReference {
     clearTimeout(this.timer);
     this.error.set('');
     try {
+      await this.discardObsolete();
       if (draft) await this.service.cancel(draft.id);
       if (!this.destroy.destroyed) {
         this.modal().nativeElement.close();
@@ -205,7 +294,14 @@ export class SaveReference {
   }
   async save(): Promise<void> {
     const draft = this.draft();
-    if (!draft || this.saving() || this.busy() || !['preview', 'failed'].includes(this.phase()))
+    if (
+      !draft ||
+      this.saving() ||
+      this.busy() ||
+      this.loadingBoards() ||
+      this.boardError() ||
+      !['preview', 'failed'].includes(this.phase())
+    )
       return;
     const title = this.title().trim(),
       attribution = this.photographer().trim();
@@ -219,22 +315,48 @@ export class SaveReference {
       sourceUrl: draft.sourceUrl,
       notes: this.notes().trim() || null,
     };
-    const fingerprint = JSON.stringify(metadata);
-    if (fingerprint !== this.saveFingerprint) {
-      this.saveFingerprint = fingerprint;
-      this.saveKey = crypto.randomUUID();
+    const newName = this.newBoardName().trim().normalize('NFC');
+    if ([...newName].length > 80) {
+      this.error.set('Use 80 characters or fewer for the board name.');
+      return;
     }
     this.saving.set(true);
     this.error.set('');
     try {
-      const result = await this.service.save(draft.id, draft.revision, metadata, [], this.saveKey);
+      await this.discardObsolete();
+      if (newName) {
+        const board = await this.boardService.create(newName);
+        if (this.destroy.destroyed) return;
+        this.boards.update((boards) =>
+          [...boards, board].sort((a, b) => a.name.localeCompare(b.name)),
+        );
+        this.selectedBoards.update((ids) => [...ids, board.id]);
+        this.newBoardName.set('');
+      }
+      const boardIds = [...new Set(this.selectedBoards())].sort();
+      const fingerprint = JSON.stringify({ metadata, boardIds });
+      if (fingerprint !== this.saveFingerprint) {
+        this.saveFingerprint = fingerprint;
+        this.saveKey = crypto.randomUUID();
+      }
+      const result = await this.service.save(
+        draft.id,
+        draft.revision,
+        metadata,
+        boardIds,
+        this.saveKey,
+      );
       if (!this.destroy.destroyed) {
         this.modal().nativeElement.close();
         this.saved.emit(result.reference);
       }
-    } catch {
+    } catch (error) {
       if (!this.destroy.destroyed)
-        this.error.set('The reference could not be saved. Your preview is still here. Try again.');
+        this.error.set(
+          error instanceof ServiceError && error.code === 'board_name_conflict'
+            ? 'A board with this name already exists. Choose it above or use another name.'
+            : 'The reference could not be saved. Your preview is still here. Try again.',
+        );
     } finally {
       if (!this.destroy.destroyed) this.saving.set(false);
     }

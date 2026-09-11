@@ -69,6 +69,17 @@
             [disabled]="saving()"
           />
         </div>
+        <label class="upload upload--compact"
+          ><svg class="lp-icon" aria-hidden="true"><use href="#i-upload" /></svg
+          ><span>Add an image <span class="lp-field__optional">optional</span></span
+          ><input
+            class="visually-hidden"
+            type="file"
+            aria-label="Add an image"
+            accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
+            [disabled]="busy() || saving()"
+            (change)="addImage($event)"
+        /></label>
         <div class="lp-field">
           <label class="lp-field__label" for="failed-notes"
             >Notes <span class="lp-field__optional">optional</span></label
@@ -194,6 +205,52 @@
           </div>
         }
       }
+      @if (phase() === 'preview') {
+        <fieldset class="board-picker">
+          <legend class="lp-field__label">
+            Boards <span class="lp-field__optional">optional</span>
+          </legend>
+          <div class="board-list">
+            @if (loadingBoards()) {
+              <p role="status">Loading boards…</p>
+            }
+            @for (board of boards(); track board.id) {
+              <label class="board-choice"
+                ><input
+                  type="checkbox"
+                  [attr.aria-label]="board.name"
+                  [checked]="selectedBoards().includes(board.id)"
+                  (change)="toggleBoard(board.id)"
+                  [disabled]="saving() || busy()"
+                /><span>{{ board.name }}</span
+                ><span class="board-count">{{ board.referenceCount }}</span></label
+              >
+            }
+            <div class="board-new">
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-plus" /></svg
+              ><input
+                class="lp-input"
+                name="newBoardName"
+                aria-label="New board name"
+                placeholder="New board"
+                [ngModel]="newBoardName()"
+                (ngModelChange)="newBoardName.set($event)"
+                [disabled]="saving() || busy()"
+              />
+            </div>
+          </div>
+        </fieldset>
+        <p class="lp-field__hint">
+          Boards are listed alphabetically. Tags and a description are suggested after saving; you
+          review them before they apply.
+        </p>
+      }
+      @if ((phase() === 'preview' || phase() === 'failed') && boardError()) {
+        <p role="alert">{{ boardError() }}</p>
+        <button type="button" class="lp-button lp-button--secondary" (click)="loadBoards()">
+          Try loading boards again
+        </button>
+      }
       @if (busy() && phase() !== 'importing') {
         <p role="status">Preparing preview…</p>
       }
@@ -214,10 +271,10 @@
       <button
         type="button"
         class="lp-button lp-button--secondary"
-        [disabled]="closing() || saving()"
-        (click)="cancel()"
+        [disabled]="closing() || saving() || (phase() === 'preview' && busy())"
+        (click)="phase() === 'preview' ? back() : cancel()"
       >
-        {{ phase() === 'duplicate' ? 'Close' : 'Cancel' }}
+        {{ phase() === 'duplicate' ? 'Close' : phase() === 'preview' ? 'Back' : 'Cancel' }}
       </button>
       @if (phase() === 'duplicate') {
         <a
@@ -233,6 +290,8 @@
             busy() ||
             closing() ||
             saving() ||
+            ((phase() === 'preview' || phase() === 'failed') &&
+              (loadingBoards() || !!boardError())) ||
             (phase() === 'form' && (sourceKind() === 'upload' ? !file() : !source().trim()))
           "
         >
