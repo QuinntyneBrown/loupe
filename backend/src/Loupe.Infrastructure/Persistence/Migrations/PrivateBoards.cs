@@ -4,19 +4,102 @@ using System.Collections.Generic;
 using Loupe.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-#nullable disable
+#nullable enable
 
 namespace Loupe.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    partial class LibraryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260911122547_PrivateBoards")]
+    public sealed class PrivateBoards : Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-#pragma warning disable 612, 618
+            migrationBuilder.AddUniqueConstraint(
+                name: "AK_references_Id_OwnerId",
+                table: "references",
+                columns: new[] { "Id", "OwnerId" });
+
+            migrationBuilder.CreateTable(
+                name: "boards",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OwnerId = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    NormalizedName = table.Column<string>(type: "text", nullable: false),
+                    Revision = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_boards", x => x.Id);
+                    table.UniqueConstraint("AK_boards_Id_OwnerId", x => new { x.Id, x.OwnerId });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "board_references",
+                columns: table => new
+                {
+                    BoardId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ReferenceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OwnerId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_board_references", x => new { x.BoardId, x.ReferenceId });
+                    table.ForeignKey(
+                        name: "FK_board_references_boards_BoardId_OwnerId",
+                        columns: x => new { x.BoardId, x.OwnerId },
+                        principalTable: "boards",
+                        principalColumns: new[] { "Id", "OwnerId" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_board_references_references_ReferenceId_OwnerId",
+                        columns: x => new { x.ReferenceId, x.OwnerId },
+                        principalTable: "references",
+                        principalColumns: new[] { "Id", "OwnerId" },
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_board_references_BoardId_OwnerId",
+                table: "board_references",
+                columns: new[] { "BoardId", "OwnerId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_board_references_ReferenceId_OwnerId",
+                table: "board_references",
+                columns: new[] { "ReferenceId", "OwnerId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_boards_OwnerId_NormalizedName",
+                table: "boards",
+                columns: new[] { "OwnerId", "NormalizedName" },
+                unique: true);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "board_references");
+
+            migrationBuilder.DropTable(
+                name: "boards");
+
+            migrationBuilder.DropUniqueConstraint(
+                name: "AK_references_Id_OwnerId",
+                table: "references");
+        }
+    
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        {
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
@@ -131,7 +214,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("analysis_dispatch_cursor", (string)null);
+                    b.ToTable("analysis_dispatch_cursor", (string?)null);
 
                     b.HasData(
                         new
@@ -227,7 +310,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OwnerId", "Type", "ResourceId");
 
-                    b.ToTable("background_operations", (string)null);
+                    b.ToTable("background_operations", (string?)null);
                 });
 
             modelBuilder.Entity("Loupe.Domain.Operations.OperationReceipt", b =>
@@ -258,7 +341,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CreatedAt");
 
-                    b.ToTable("operation_receipts", (string)null);
+                    b.ToTable("operation_receipts", (string?)null);
                 });
 
             modelBuilder.Entity("Loupe.Domain.Photographs.Photograph", b =>
@@ -354,7 +437,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OwnerId", "CreatedAt", "Id");
 
-                    b.ToTable("photographs", (string)null);
+                    b.ToTable("photographs", (string?)null);
                 });
 
             modelBuilder.Entity("Loupe.Domain.References.Reference", b =>
@@ -416,7 +499,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OwnerId", "CreatedAt", "Id");
 
-                    b.ToTable("references", (string)null);
+                    b.ToTable("references", (string?)null);
                 });
 
             modelBuilder.Entity("Loupe.Domain.Sessions.ApplicationSession", b =>
@@ -442,49 +525,9 @@ namespace Loupe.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserVersion")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.ToTable("sessions", (string)null);
-                });
-
-            modelBuilder.Entity("Loupe.Domain.Users.User", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("NormalizedEmail")
-                        .IsRequired()
-                        .HasMaxLength(254)
-                        .HasColumnType("character varying(254)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PasswordVersion")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .IsUnique();
-
-                    b.ToTable("users", (string)null);
+                    b.ToTable("sessions", (string?)null);
                 });
 
             modelBuilder.Entity("Loupe.Domain.Boards.BoardReference", b =>
@@ -508,7 +551,6 @@ namespace Loupe.Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("References");
                 });
-#pragma warning restore 612, 618
         }
     }
 }

@@ -1,4 +1,5 @@
 using Loupe.Application.Common;
+using Loupe.Application.Boards;
 using Loupe.Application.Images;
 using Loupe.Application.Operations;
 using Microsoft.AspNetCore.Diagnostics;
@@ -15,6 +16,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
         {
             Loupe.Application.Sessions.InvalidCredentialsException => 401,
             RequestValidationException => 400,
+            BoardNameConflictException => 409,
             ResourceNotFoundException => 404,
             RevisionConflictException => 409,
             OperationConflictException => 409,
@@ -34,6 +36,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
         {
             Loupe.Application.Sessions.InvalidCredentialsException => "invalid_credentials",
             RequestValidationException => "invalid_request",
+            BoardNameConflictException => "board_name_conflict",
             ResourceNotFoundException => "item_unavailable",
             RevisionConflictException => "revision_conflict",
             OperationConflictException => "operation_conflict",

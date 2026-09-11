@@ -4,12 +4,15 @@ using Loupe.Domain.Operations;
 using Loupe.Domain.Deletions;
 using Loupe.Domain.References;
 using Microsoft.EntityFrameworkCore;
+using Loupe.Domain.Boards;
 
 namespace Loupe.Infrastructure.Persistence;
 
 public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options) : DbContext(options)
 {
     public DbSet<Loupe.Domain.Users.User> Users => Set<Loupe.Domain.Users.User>();
+    public DbSet<Board> Boards => Set<Board>();
+    public DbSet<BoardReference> BoardReferences => Set<BoardReference>();
     public DbSet<ApplicationSession> Sessions => Set<ApplicationSession>();
     public DbSet<Photograph> Photographs => Set<Photograph>();
     public DbSet<Reference> References => Set<Reference>();
@@ -23,6 +26,16 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Loupe.Domain.Users.User>().HasIndex(u => u.NormalizedEmail).IsUnique();
         modelBuilder.Entity<Loupe.Domain.Users.User>().Property(u => u.NormalizedEmail).HasMaxLength(254);
         modelBuilder.Entity<Loupe.Domain.Users.User>().Property(u => u.PasswordVersion).HasDefaultValue("");
+        modelBuilder.Entity<Board>().ToTable("boards").HasKey(board => board.Id);
+        modelBuilder.Entity<Board>().HasAlternateKey(board => new { board.Id, board.OwnerId });
+        modelBuilder.Entity<Board>().HasIndex(board => new { board.OwnerId, board.NormalizedName }).IsUnique();
+        modelBuilder.Entity<Board>().Property(board => board.Revision).IsConcurrencyToken();
+        modelBuilder.Entity<Reference>().HasAlternateKey(reference => new { reference.Id, reference.OwnerId });
+        modelBuilder.Entity<BoardReference>().ToTable("board_references").HasKey(item => new { item.BoardId, item.ReferenceId });
+        modelBuilder.Entity<BoardReference>().HasOne<Board>().WithMany(board => board.References)
+            .HasForeignKey(item => new { item.BoardId, item.OwnerId }).HasPrincipalKey(board => new { board.Id, board.OwnerId }).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<BoardReference>().HasOne<Reference>().WithMany()
+            .HasForeignKey(item => new { item.ReferenceId, item.OwnerId }).HasPrincipalKey(reference => new { reference.Id, reference.OwnerId }).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Reference>().ToTable("references").HasKey(reference => reference.Id);
         modelBuilder.Entity<Reference>().HasIndex(reference => new { reference.OwnerId, reference.CreatedAt, reference.Id });
         modelBuilder.Entity<Reference>().Property(reference => reference.Revision).HasDefaultValue(1L).IsConcurrencyToken();

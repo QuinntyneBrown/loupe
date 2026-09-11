@@ -54,3 +54,10 @@ be established without printing credentials. Live quality checks are mandatory.
 - Production Angular build passed (existing initial-bundle warning remains).
 - Isolated Chromium screenshot inspected: title/attribution overlay and source
   control render correctly. Collection/header/navigation work remains outstanding.
+
+### Private board creation
+- RED: 5 API cases returned 404 for the missing board endpoints.
+- GREEN: 12 combined board/reference-list API cases passed, covering private
+  persistence across API restart, alphabetical names, NFC/case-insensitive
+  duplicates, field validation and authentication.
+- Added an additive board/membership migration with owner-matched foreign keys.
