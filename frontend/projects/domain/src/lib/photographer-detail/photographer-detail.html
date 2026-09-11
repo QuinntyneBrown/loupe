@@ -85,16 +85,7 @@
           }
         </div>
       </section>
-      <div class="lp-field">
-        <label class="lp-subheading" for="photographer-notes">Your notes</label
-        ><textarea
-          id="photographer-notes"
-          class="lp-textarea"
-          rows="3"
-          readonly
-          [value]="photographer.notes ?? ''"
-        ></textarea>
-      </div>
+      <lp-photographer-notes [photographer]="photographer" (saved)="item.set($event)" />
     </div>
     <section aria-labelledby="references-title" [attr.aria-busy]="referenceLoading()">
       <div class="section-head">

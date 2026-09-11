@@ -141,3 +141,32 @@ test("a stale delete requires reviewing the latest bookmark before confirmation"
   await screen.confirmDeletion();
   await screen.expectDeleted();
 });
+
+test("notes save independently without changing the profile description or tags", async ({
+  page,
+}) => {
+  const { library, screen } = await setup(page);
+  await screen.open();
+  await screen.writeNotes("My new study notes");
+  await screen.saveNotes();
+  await screen.expectNotesSaved("My new study notes");
+  expect(library.items[0].summary).toContain("Portraits in available light");
+  expect(library.items[0].tags).toHaveLength(2);
+});
+test("failed notes retain the text and stale review preserves a newer name", async ({
+  page,
+}) => {
+  const { library, screen } = await setup(page);
+  await screen.open();
+  await screen.writeNotes("Keep this draft");
+  library.failures = 1;
+  await screen.saveNotes();
+  await screen.expectNotesFailure();
+  library.items[0].name = "New name";
+  library.items[0].revision++;
+  await screen.saveNotes();
+  await screen.reviewNotes();
+  await screen.saveNotes();
+  await screen.expectNotesSaved("Keep this draft");
+  expect(library.items[0].name).toBe("New name");
+});

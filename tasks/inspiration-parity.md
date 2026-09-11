@@ -401,3 +401,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: two cases failed on the missing delete action. Stale review subsequently exposed focus being attempted before Angular re-enabled Cancel.
 - GREEN: 22 profile/reference/photograph deletion Chromium checks pass. Confirmation names the bookmark and linked-reference count; Cancel has initial and post-review focus. Stale deletion requires renewed review, deletion retains references, and success returns to the collection with the retention notice.
 
+
+### Photographer notes
+- RED: both cases failed because notes were read-only.
+- GREEN: all ten profile Chromium cases pass. Notes have explicit Save and saved/dirty/pending/failure states, retain failed drafts and show the latest notes for conflict review. Retrying changes only notes while preserving newer name/description/tags. The page guard includes note drafts and active saves.
+

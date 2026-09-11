@@ -30,7 +30,8 @@ export class PhotographerDetailPage {
   private readonly editDialog = viewChild(EditPhotographer);
   private readonly unsaved = viewChild.required(UnsavedChanges);
   readonly dirty = () =>
-    !this.deleted && !!(this.editDialog()?.dirty() || this.deleteDialog()?.busy());
+    !this.deleted &&
+    !!(this.editDialog()?.dirty() || this.deleteDialog()?.busy() || this.detail()?.dirty());
   canLeave(): boolean | Promise<boolean> {
     return this.unsaved().canLeave(this.dirty());
   }

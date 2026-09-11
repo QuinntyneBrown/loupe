@@ -5,6 +5,35 @@ export class PhotographerPage {
   constructor(page) {
     this.page = page;
   }
+  notesPanel() {
+    return this.page.getByRole("region", { name: "Your notes", exact: true });
+  }
+  async writeNotes(text) {
+    await this.page
+      .getByRole("textbox", { name: "Your notes", exact: true })
+      .fill(text);
+  }
+  async saveNotes() {
+    await this.notesPanel()
+      .getByRole("button", { name: "Save", exact: true })
+      .click();
+  }
+  async expectNotesSaved(text) {
+    await expect(
+      this.page.getByRole("textbox", { name: "Your notes", exact: true }),
+    ).toHaveValue(text);
+    await expect(
+      this.notesPanel().getByText("Saved", { exact: true }),
+    ).toBeVisible();
+  }
+  async expectNotesFailure() {
+    await expect(this.notesPanel().getByRole("alert")).toBeVisible();
+  }
+  async reviewNotes() {
+    await this.notesPanel()
+      .getByRole("button", { name: "Review latest value", exact: true })
+      .click();
+  }
   async edit() {
     await this.page.getByLabel("More actions", { exact: true }).click();
     await this.page

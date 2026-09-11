@@ -1,15 +1,27 @@
-import { Component, computed, effect, inject, input, signal, output } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  output,
+  viewChild,
+} from '@angular/core';
+import { PhotographerNotes } from '../photographer-notes/photographer-notes';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PHOTOGRAPHER_SERVICE, PhotographerResult, ReferenceSummary } from 'api';
 
 @Component({
   selector: 'lp-photographer-detail',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, PhotographerNotes],
   templateUrl: './photographer-detail.html',
   styleUrl: './photographer-detail.css',
 })
 export class PhotographerDetail {
+  private readonly notes = viewChild(PhotographerNotes);
+  readonly dirty = computed(() => !!(this.notes()?.dirty() || this.notes()?.busy()));
   readonly editRequested = output<PhotographerResult>();
   readonly deleteRequested = output<{ item: PhotographerResult; count: number }>();
   delete(menu: HTMLDetailsElement): void {

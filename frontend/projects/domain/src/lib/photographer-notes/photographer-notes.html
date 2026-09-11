@@ -1,0 +1,55 @@
+<section aria-label="Your notes" class="lp-block">
+  <div class="head">
+    <label class="lp-subheading" for="photographer-notes">Your notes</label
+    ><span
+      class="save-status"
+      [class.saved]="status() === 'Saved'"
+      [class.failed]="failed()"
+      aria-live="polite"
+      >{{ status() }}</span
+    >
+  </div>
+  <textarea
+    id="photographer-notes"
+    class="lp-textarea"
+    rows="4"
+    placeholder="Why does this work matter to you?"
+    [ngModel]="draft()"
+    (ngModelChange)="draft.set($event)"
+    [disabled]="busy() || reviewing()"
+    [attr.aria-invalid]="invalid()"
+    [attr.aria-describedby]="invalid() ? 'notes-length-error' : null"
+  ></textarea>
+  @if (invalid()) {
+    <p id="notes-length-error" role="alert">Use 10,000 characters or fewer.</p>
+  }
+  @if (error()) {
+    <p role="alert">{{ error() }}</p>
+  }
+  @if (conflict() && !unavailable()) {
+    <button
+      class="lp-button lp-button--secondary lp-button--sm"
+      type="button"
+      [disabled]="reviewing()"
+      (click)="review()"
+    >
+      Review latest value
+    </button>
+  }
+  @if (latest(); as item) {
+    <div class="latest">
+      <h3>Latest saved notes</h3>
+      <p>{{ item.notes || 'Not provided' }}</p>
+    </div>
+  }
+  <div class="foot">
+    <button
+      class="lp-button lp-button--secondary lp-button--sm"
+      type="button"
+      [disabled]="!dirty() || busy() || reviewing() || conflict() || unavailable() || invalid()"
+      (click)="save()"
+    >
+      Save
+    </button>
+  </div>
+</section>
