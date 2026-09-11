@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Loupe.Admin/Loupe.Admin.csproj" />
     <Project Path="src/Loupe.Api/Loupe.Api.csproj" />
     <Project Path="src/Loupe.Application/Loupe.Application.csproj" />
     <Project Path="src/Loupe.Domain/Loupe.Domain.csproj" />

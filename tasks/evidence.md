@@ -771,3 +771,55 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Runtime documentation describes Azure endpoint/deployment versus saved model/version, server-side key provisioning, queue drain and rollback, retained historical results, data handling, and a real-provider smoke procedure. No Azure endpoint/deployment/API key was present in this session's environment, so a paid Azure smoke check and real-model photographic quality evaluation were not run. Controlled tests are not evidence of those checks.
 
 - Final isolated `CleanupFairnessTests` rerun with browser/build workloads stopped: 1 passed, 0 failed, 0 skipped (23 seconds). This supports a timing-sensitive test issue; the earlier full-suite failures are still recorded rather than reported as a clean full run.
+
+
+## Local authentication: database users and backend JWTs (2026-09-11)
+
+This change supersedes the historical OIDC evidence above. Accounts are operator
+provisioned; fresh accounts do not inherit legacy libraries. MediatR remains 12.5.0.
+
+- Red: local sign-in returned 405, anonymous antiforgery bootstrap returned 404,
+  and account seeding failed because the users table did not exist.
+- Green: real password verification and JWT-cookie sign-in, generic credential
+  failures, CSRF protection, exact idle/absolute expiry, rotation and sign-out.
+  The lifetime regression caught whole-second JWT timestamp truncation; rounding
+  the token's expiry up while enforcing exact database expiry fixed it.
+- Red: valid CLI provisioning and password-reset scenarios failed without the
+  Admin executable. Green: persisted generated accounts, 15/128-character
+  boundaries, concurrent case-insensitive duplicate rejection, password reset,
+  and revocation across API instances.
+- Red: matching stored sessions accepted signed JWTs lacking claims or carrying
+  the wrong subject, and attempt eleven returned 401 instead of 429. Green:
+  required subject/session claims and subject binding, cryptographic negative
+  cases, per-IP throttling, and controlled-clock recovery.
+- Red: the browser form test could not find the Email input. Green: credential
+  entry, generic errors, retained email/cleared password, retry, safe local return
+  destinations, sign-out, and accessibility across all shared viewports.
+- Migration verification preserves old photographs and ownership while removing
+  old sessions. Existing unrelated schema-upgrade tests now reauthenticate, and
+  tests that backdate activity set their clocks before issuing JWTs.
+- Complete backend run: **397 passed, 11 failed, 408 total**. All 11 failures are
+  `RobotsPolicyTests` resolving the unimplemented `IRobotsPolicy`. A clean detached
+  checkout of main at `57d2350` reproduces all 11 failures; its four selected
+  critique-operation tests pass. No robots implementation or expectations changed.
+- Complete Chromium run: **422 passed, one click timeout, 423 total**. The timeout
+  occurred performing the Upload photograph click in the Azure disclosure test.
+  A focused rerun of sign-in and Azure disclosure passed **31/31** without changing
+  assertions or timeouts. The final native-input/signal form refactor passed all
+  **25/25** sign-in checks. No other browser engine was configured or run.
+- Separate HTTPS smoke: fresh PostgreSQL migrations, a real CLI-created account,
+  successful password sign-in and session reads, sign-out 204 with copied-token
+  replay 401, and CLI reset revocation with old password 401/new password 200.
+  Temporary API/database containers, network and certificate were removed.
+- Locked acceptance-image build, full .NET format verification, Angular production
+  build, and standalone design-system build pass. The frontend's existing soft
+  500 kB bundle warning remains enforced (final initial bundle 532.83 kB); no
+  budgets were raised. Updated PlantUML
+  sources and PNGs document local authentication. Demo harness syntax checks pass;
+  historical demo videos were not rerecorded.
+
+Reproduce API checks with `./backend/Test.ps1`. This workstation lacks the pinned
+local .NET SDK, so checks used the repository's .NET 10.0.400 Linux acceptance
+image. Browser commands used Node 22.22.3 via npm exec because the installed
+22.21.0 is below Angular's declared supported patch version. Frontend regressions
+use `npm --prefix e2e test`; backend options/provisioning are in `backend/README.md`.

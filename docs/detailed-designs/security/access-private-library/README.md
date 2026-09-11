@@ -2,74 +2,85 @@
 
 ## Overview
 
-An **application session** — server-held authorization state established after OpenID Connect authentication — identifies the owner of a private library. **Ownership enforcement** — restriction of every record, relationship, media stream, and search result to that owner — prevents identifier substitution from exposing another library.
-
-This is a proposed design for the defined requirements. Existing files are illustrative HTML mockups; the repository contains no corresponding production implementation.
+Loupe verifies administrator-provisioned database accounts and issues signed JWTs
+in HttpOnly cookies. PostgreSQL sessions retain immediate revocation and exact
+idle/absolute expiry. Existing external identities are not mapped to new accounts.
 
 ## Description
 
-`SignInPage` lives in `frontend/projects/loupe` and owns routing and dialogs. `SessionStatus` lives in `frontend/projects/domain` and consumes `ISessionService` through `SESSION_SERVICE`. The contract and token share `session.service.contract.ts` in `frontend/projects/api`. `SessionService` is the separate production HTTP adapter. Composition substitutes a mock implementation under Playwright. State uses signals, and HTTP and observable conversion stay inside the adapter. Presentational controls in `components` consume inputs and emit outputs. Component class, template, and styles occupy separate files.
+The routed Angular sign-in page consumes `ISessionService` through
+`SESSION_SERVICE`. The API adapter obtains anonymous antiforgery proof, posts
+email/password credentials, and loads the authenticated session and refreshed
+antiforgery header. The page validates local return destinations, retains email
+on failure, clears passwords after attempts, and holds UI state in signals.
+Playwright injects the mock adapter. Password managers and paste remain available.
 
-`SessionsController` lives in `backend/src/Loupe.Api/Controllers` under `Loupe.Api.Controllers`. It binds requests, dispatches MediatR **12.5.0**, and returns results. Requests, handlers, and validators live in the matching feature namespace in `Loupe.Application`. `ApplicationSession` lives in `Loupe.Domain`; the domain references no other project. `ILibraryStore` and capability ports belong to Application. Infrastructure implements persistence and external adapters. Each type occupies its own named file.
+`SessionsController` binds and dispatches `SignInCommand` through MediatR 12.5.0.
+The Application handler validates credentials using `IUserStore` and
+`IPasswordService`, creates an `ApplicationSession`, asks `IJwtService` to sign a
+JWT, and persists the token hash. Infrastructure owns EF Core/PostgreSQL,
+ASP.NET Core PasswordHasher, and Microsoft IdentityModel. Domain types have no
+framework dependency. The result writer sets the Secure, HttpOnly, SameSite=Lax
+host cookie; neither passwords nor JWTs enter URLs, response JSON or browser storage.
 
-The API acts as the browser's session boundary. `OpenIdConnectAuthenticationAdapter` validates issuer, audience, signature, expiry, state, and nonce before `CompleteSignInCommandHandler` creates a session. Redirect targets are validated local paths. Failed callbacks establish no session and return safe retry guidance without tokens in application URLs or errors. The authorization-code exchange and tokens remain server-side. The selected identity provider and deployment callback values are `<TO SUPPLY>`.
+Authentication validates HS256, issuer, audience, lifetime, required claims, and
+the subject against the stored session. Database reads require the user's current
+password version and enforce 30 minutes idle and exactly 12 hours absolute.
+JWT timestamps round up only for whole-second representation; database expiry
+remains authoritative at subsecond boundaries. Sign-in replaces the old session;
+sign-out removes it before responding. Resetting a password changes its version
+and deletes all user sessions atomically, preventing an in-flight old-password
+login from restoring access after reset.
 
-`SessionCookieWriter` returns an opaque Secure, HttpOnly cookie, rotates its identifier on successful login, and applies a SameSite policy compatible with the configured callback. The main session cookie defaults to Lax; any cross-site identity correlation cookie uses only the secure policy required by that callback. Tokens and credentials never use browser local/session storage. Browser forms allow password managers and paste, with no added cognitive puzzle.
+Anonymous sign-in requires trusted-origin antiforgery protection. The per-process
+IP limiter permits ten protected attempts per minute and returns 429 with
+Retry-After. Unknown accounts undergo dummy hash verification and credential
+errors use generic responses. See the [operating guide](../../../../backend/README.md#local-accounts-and-authentication)
+for signing-key provisioning, proxy/scale assumptions, and cutover instructions.
 
-`ValidateSessionQueryHandler` rejects at 30 minutes idle or 12 hours absolute, using server time and last qualifying authenticated activity. Tests exercise immediately before and at both boundaries. `SignOutCommandHandler` revokes server state before acknowledgment. `SessionService` clears signals, pending requests, object URLs, and private drafts on explicit sign-out. Expiry handling delegates same-tab temporary draft preservation to the navigation feature.
+The operator CLI dispatches `CreateUserCommand` and `ResetPasswordCommand` through
+MediatR. It shares account persistence and password hashing with the API, takes
+passwords through hidden prompts or stdin, and requires only database configuration.
+Emails are normalized for unique lookup; passwords are never trimmed.
 
-`ICurrentOwner` derives ownership from the validated session; payload owner fields are rejected or ignored without reassignment. Every query, mutation, operation, relationship, comparison, picker, vector candidate, count, suggestion, and media read filters by owner and deletion state. Composite ownership checks prevent a permitted reference from linking a foreign board or bookmark. Absent and foreign items share 404; unauthenticated API/media reads return 401.
+`ICurrentOwner` derives the existing ownership key from Loupe's stable issuer and
+the new user ID. Private queries, mutations and media filter by that owner.
+Foreign and absent records return the same 404; anonymous requests return 401.
+Private responses prohibit caching. The migration invalidates previous sessions
+without deleting or reassigning photographs, references, or their media.
 
-Private API, page, and media responses use `Cache-Control: no-store, private`. Private media streams pass through authenticated authorization and never expose a public bucket/CDN URL. The application service worker, if introduced, excludes private responses. Sign-out and deletion evict application-held objects so Back/refresh cannot restore private content from application caches. Controlled identity fixtures and two-user direct API substitution cases verify these boundaries.
+## Interfaces
 
-The following contract surface names the proposed operations. Background commands run in the worker after a separate admission request; local evaluation commands run in the evaluation project.
-
-| Application request | Entry point | Input |
+| Entry point | Application operation | Result |
 | --- | --- | --- |
-| `CompleteSignInCommand` | `OIDC callback; POST /api/session/sign-out` | `validated code exchange or sign-out` |
-| `GetOwnedResourceQuery` | `all private API/media endpoints` | `resourceId; server-derived owner` |
+| GET /api/session/csrf | Framework antiforgery bootstrap | 204 and X-CSRF-Token |
+| POST /api/session/sign-in | SignInCommand | SessionResult and JWT cookie |
+| GET /api/session | GetSessionQuery | SessionResult and refreshed antiforgery proof |
+| POST /api/session/sign-out | RevokeSessionCommand | 204 and removed cookie |
+| Admin create-user | CreateUserCommand | Generated local user ID |
+| Admin reset-password | ResetPasswordCommand | Replaced password and revoked sessions |
 
-All operations inherit [shared contracts and open dependencies](../../README.md). Owner identity comes from authenticated server context, never from trusted client input. Mutations validate complete input before side effects and use conditional writes. API errors use the shared status mapping in [L2.md](../../../specs/L2.md#shared-acceptance-definitions). Visual implementation uses mirrored `--lp-` tokens and the specification's viewport matrix.
+## Requirements and verification
 
-Implementation proceeds one behavior at a time using the linked Given-When-Then criteria. Each acceptance test first fails for its expected missing behavior. API integration tests cover persistence and failures. Playwright tests use one page object per screen and injected service mocks. Real-provider release checks supplement deterministic fixtures where applicable. Each acceptance file identifies L2 coverage and each test names its criterion. Regression checks pass before the next behavior starts; no architecture tests are introduced.
-
-## Requirements
-
-The table preserves source wording verbatim, including its use of “must”. Quoted requirements are the sole exception to the design prose's shall/should/may convention. Each linked source section also supplies the acceptance criteria; deployment choices and unexecuted release evidence remain explicitly identified.
-
-| L2 ID | Refines (L1) | Requirement |
-| --- | --- | --- |
-| `L2-037` | `L1-010` | The configured OpenID Connect sign-in must establish a private application session only after successful issuer, audience, signature, expiry, state, and nonce validation. Default application session expiry is 30 minutes idle or 12 hours absolute. Credentials and tokens must not be stored in browser local/session storage. Tests must use a controlled identity provider, including invalid callbacks. |
-| `L2-038` | `L1-010` | Ownership must govern records, media, boards, relationships, operations, search results/counts, and suggestions. Clients must never choose the authenticated owner through a submitted user ID. All private response data must be non-publicly cached. |
-
-Acceptance criteria: [L2-037](../../../specs/L2.md#l2-037-authenticate-users-and-end-sessions), [L2-038](../../../specs/L2.md#l2-038-enforce-ownership-at-every-data-boundary).
+[L2-037](../../../specs/L2.md#l2-037-authenticate-users-and-end-sessions) and
+[L2-038](../../../specs/L2.md#l2-038-enforce-ownership-at-every-data-boundary) refine
+L1-010. Each slice follows failing acceptance tests before implementation, then
+relevant regressions. API tests use real PostgreSQL, CLI provisioning, real
+password verification and signing, controlled clocks, malformed JWTs, and multiple
+API instances. Migration tests retain legacy content without exposing it to fresh
+accounts. Chromium tests use page objects and injected mocks across the shared
+viewport matrix. No architecture tests are used.
 
 ## Diagrams
 
-The context view places this capability within the owner's private Loupe library. External services appear only where the slice uses provider or source content.
+![Context](diagrams/c4-context.png)
 
-![Context: Sign in and access only the owned library](diagrams/c4-context.png)
+![Containers](diagrams/c4-container.png)
 
-The container view separates Angular interaction, the .NET API, and authoritative persistence. Durable background work appears where processing continues after admission.
+![Components](diagrams/c4-component.png)
 
-![Containers: Sign in and access only the owned library](diagrams/c4-container.png)
+![Classes](diagrams/class-structure.png)
 
-The component view shows dispatch into Application handlers and inward-defined ports. Infrastructure supplies the persistence and provider implementations.
+![Authentication sequence](diagrams/sequence-037.png)
 
-![Components: Sign in and access only the owned library](diagrams/c4-component.png)
-
-The class view names the proposed state, requests, handlers, and interface-bound frontend service. Typed associations and dependencies show which element owns behavior.
-
-![Classes: Sign in and access only the owned library](diagrams/class-structure.png)
-
-The authenticate users and end sessions sequence traces `L2-037` through its enforcing operations. The accompanying Description defines state changes and significant recovery paths.
-
-![L2-037: Authenticate users and end sessions](diagrams/sequence-037.png)
-
-The enforce ownership at every data boundary sequence traces `L2-038` through its enforcing operations. The accompanying Description defines state changes and significant recovery paths.
-
-![L2-038: Enforce ownership at every data boundary](diagrams/sequence-038.png)
-
-Server-side session checks enforce idle and absolute expiry. Explicit sign-out revokes the session and clears private browser state; expiry preserves drafts only under the same-user memory rule.
-
-![Expire or end a private application session](diagrams/sequence-expire-and-sign-out.png)
+![Ownership sequence](diagrams/sequence-038.png)

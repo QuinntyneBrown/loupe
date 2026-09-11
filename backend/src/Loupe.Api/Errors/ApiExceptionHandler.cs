@@ -13,6 +13,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
         var validation = exception as RequestValidationException;
         var status = exception switch
         {
+            Loupe.Application.Sessions.InvalidCredentialsException => 401,
             RequestValidationException => 400,
             ResourceNotFoundException => 404,
             RevisionConflictException => 409,
@@ -31,6 +32,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
         };
         var code = exception switch
         {
+            Loupe.Application.Sessions.InvalidCredentialsException => "invalid_credentials",
             RequestValidationException => "invalid_request",
             ResourceNotFoundException => "item_unavailable",
             RevisionConflictException => "revision_conflict",

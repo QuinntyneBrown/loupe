@@ -1,10 +1,10 @@
 @startuml
 !include <C4/C4_Context>
 LAYOUT_WITH_LEGEND()
-title Context - Sign in and access only the owned library
-Person(owner, "Library owner", "Collects inspiration and practices photography")
-System(loupe, "Loupe", "Sign in and access only the owned library")
-Rel(owner, loupe, "Uses private library", "HTTPS")
-System_Ext(external, "Configured external services", "AI, embedding, or permitted source endpoints used by this slice")
-Rel(loupe, external, "Uses through bounded server adapters", "HTTPS")
+title Local Loupe authentication
+Person(owner, "Photographer", "Uses a private library")
+Person(admin, "Administrator", "Provisions accounts and resets passwords")
+System(loupe, "Loupe", "Verifies local passwords, issues JWTs, enforces private ownership")
+Rel(owner, loupe, "Signs in and uses library", "HTTPS")
+Rel(admin, loupe, "Manages accounts", "Local CLI")
 @enduml

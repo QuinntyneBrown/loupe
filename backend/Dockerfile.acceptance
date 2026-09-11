@@ -10,6 +10,7 @@ COPY backend/Directory.Build.props backend/Loupe.slnx backend/
 COPY backend/src/Loupe.Domain/*.csproj backend/src/Loupe.Domain/packages.lock.json backend/src/Loupe.Domain/
 COPY backend/src/Loupe.Application/*.csproj backend/src/Loupe.Application/packages.lock.json backend/src/Loupe.Application/
 COPY backend/src/Loupe.Infrastructure/*.csproj backend/src/Loupe.Infrastructure/packages.lock.json backend/src/Loupe.Infrastructure/
+COPY backend/src/Loupe.Admin/*.csproj backend/src/Loupe.Admin/packages.lock.json backend/src/Loupe.Admin/
 COPY backend/src/Loupe.Api/*.csproj backend/src/Loupe.Api/packages.lock.json backend/src/Loupe.Api/
 COPY backend/src/Loupe.Worker/*.csproj backend/src/Loupe.Worker/packages.lock.json backend/src/Loupe.Worker/
 COPY backend/tests/Loupe.Api.Tests/*.csproj backend/tests/Loupe.Api.Tests/packages.lock.json backend/tests/Loupe.Api.Tests/

@@ -2,7 +2,7 @@
 <#
 .SYNOPSIS
   Stands up the local demo stack used to record docs/demo/*.webm from a clean
-  environment: PostgreSQL, a throwaway local OIDC identity provider, the real
+  environment: PostgreSQL, locally provisioned accounts, the real
   Loupe.Api and Loupe.Worker (in Linux containers — see "Why containers" in
   docs/demo/README.md), and the Angular app served same-origin over HTTPS.
 
@@ -75,6 +75,7 @@ Write-Host "== 5. Network Postgres with the Api/Worker containers ==" -Foregroun
 docker network create loupe-demo-net 2>$null | Out-Null
 docker network connect loupe-demo-net loupe-demo-postgres 2>$null | Out-Null
 
+$env:Jwt__SigningKey = [Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
 Write-Host "== 6. Run Loupe.Api and Loupe.Worker ==" -ForegroundColor Cyan
 docker rm -f loupe-demo-api loupe-demo-worker 2>$null | Out-Null
 docker run -d --name loupe-demo-api --network loupe-demo-net -p 5001:5001 `
@@ -84,9 +85,7 @@ docker run -d --name loupe-demo-api --network loupe-demo-net -p 5001:5001 `
   -e ASPNETCORE_Kestrel__Certificates__Default__Password='demo-only' `
   -e ConnectionStrings__Library='Host=loupe-demo-postgres;Port=5432;Database=loupe_demo;Username=loupe;Password=loupe-demo-only' `
   -e Media__Root='/data/media' `
-  -e Identity__Authority='https://host.docker.internal:5444' `
-  -e Identity__ClientId='loupe-demo' `
-  -e Identity__ClientSecret='demo-only-not-a-real-secret' `
+  -e Jwt__Issuer='Loupe' -e Jwt__Audience='Loupe' -e Jwt__SigningKey `
   -e Browser__AllowedOrigins__0='https://localhost:4200' `
   -e Ai__Mode='Live' -e Ai__Endpoint -e Ai__Deployment -e Ai__Model -e Ai__ApiKey -e Imports__Mode='Live' `
   --entrypoint dotnet loupe-demo-runtime /app/api/Loupe.Api.dll | Out-Null
@@ -96,14 +95,14 @@ docker run -d --name loupe-demo-worker --network loupe-demo-net `
   -e Media__Root='/data/media' -e Ai__Mode='Live' -e Ai__Endpoint -e Ai__Deployment -e Ai__Model -e Ai__ApiKey -e Imports__Mode='Live' -e Cleanup__PollInterval='00:00:15' `
   --entrypoint dotnet loupe-demo-runtime /app/worker/Loupe.Worker.dll | Out-Null
 
-Write-Host "== 7. Start the demo identity provider (on the host, port 5444) ==" -ForegroundColor Cyan
-Push-Location "$RepoRoot/backend/src/Loupe.DemoIdentityProvider"
-dotnet build | Out-Null
-$env:ASPNETCORE_URLS = 'https://localhost:5444'
-$env:SigningKeyPath = "$ScratchDir/certs/idp-signing-key.pem"
-Start-Process -FilePath dotnet -ArgumentList 'run', '--no-build' -WindowStyle Hidden
-Remove-Item Env:\ASPNETCORE_URLS, Env:\SigningKeyPath -ErrorAction SilentlyContinue
-Pop-Location
+Remove-Item Env:\Jwt__SigningKey
+Write-Host "== 7. Provision local demo accounts ==" -ForegroundColor Cyan
+foreach ($email in 'photographer@example.com', 'api-demo@example.com') {
+  'local acceptance password' | docker run --rm -i --network loupe-demo-net `
+    -e ConnectionStrings__Library='Host=loupe-demo-postgres;Port=5432;Database=loupe_demo;Username=loupe;Password=loupe-demo-only' `
+    --entrypoint dotnet loupe-demo-runtime /app/admin/Loupe.Admin.dll create-user $email 'Demo Photographer'
+  if ($LASTEXITCODE -ne 0) { throw 'Demo account provisioning failed.' }
+}
 
 Write-Host "== 8. Build the Angular libraries and serve the app over HTTPS, same-origin proxy ==" -ForegroundColor Cyan
 Push-Location "$RepoRoot/frontend"
@@ -119,5 +118,4 @@ Pop-Location
 Write-Host "`nStack starting. Give the Angular dev server ~10s, then verify:" -ForegroundColor Green
 Write-Host "  https://localhost:4200        (the app)"
 Write-Host "  https://localhost:5001/api/session   (401 = Api is up)"
-Write-Host "  https://localhost:5444/.well-known/openid-configuration  (demo identity provider)"
 Write-Host "`nTear down with docs/demo/harness/teardown.ps1" -ForegroundColor Yellow

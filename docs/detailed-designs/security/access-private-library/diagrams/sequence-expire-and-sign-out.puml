@@ -30,8 +30,8 @@ box "Backend - Loupe Infrastructure" #FFF4E5
 end box
 owner -> shell : Continue editing or choose Sign out
 shell -> client : Authenticated request / protected sign-out
-client -> api : HTTPS with opaque session cookie
-api -> handler : Validate elapsed boundaries / dispatch sign-out
+client -> api : HTTPS with signed JWT session cookie
+api -> handler : Validate JWT and elapsed boundaries / dispatch sign-out
 handler -> sessions : Load current nonrevoked session
 sessions --> handler : Creation and last activity times
 alt idle >= 30 min or absolute age >= 12 h

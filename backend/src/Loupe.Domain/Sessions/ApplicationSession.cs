@@ -2,7 +2,8 @@ namespace Loupe.Domain.Sessions;
 
 public sealed class ApplicationSession
 {
-    public required string Id { get; init; }
+    public required string Id { get; set; }
+    public string UserVersion { get; init; } = "";
     public required string Issuer { get; init; }
     public required string Subject { get; init; }
     public required string Name { get; init; }

@@ -22,7 +22,7 @@ public sealed class UploadPhotographTests(PostgreSqlFixture database) : IClassFi
         await using (var scope = factory.Services.CreateAsyncScope())
             await scope.ServiceProvider.GetRequiredService<LibraryDbContext>().Database.MigrateAsync();
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, BaseAddress = new Uri("https://localhost") });
-        using var callback = await OidcFlow.CompleteAsync(factory, client);
+        using var callback = await LocalSignInFlow.CompleteAsync(factory, client);
         using var session = await client.GetAsync("/api/session");
         client.DefaultRequestHeaders.Add("X-CSRF-Token", session.Headers.GetValues("X-CSRF-Token").Single());
         client.DefaultRequestHeaders.Add("Origin", "https://localhost");
@@ -43,7 +43,7 @@ public sealed class UploadPhotographTests(PostgreSqlFixture database) : IClassFi
         Assert.Equal(6, decoded.Height);
         await using var second = new ApiFactory(database.ConnectionString, database.MediaRoot);
         using var later = second.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, BaseAddress = new Uri("https://localhost") });
-        using var login = await OidcFlow.CompleteAsync(second, later);
+        using var login = await LocalSignInFlow.CompleteAsync(second, later);
         using var revisited = await later.GetAsync(response.Headers.Location);
         Assert.Equal(HttpStatusCode.OK, revisited.StatusCode);
         using var retained = JsonDocument.Parse(await revisited.Content.ReadAsStringAsync());

@@ -17,7 +17,7 @@ skinparam package {
 
 actor "Library owner" as actor
 box "Frontend - Loupe application / domain / api" #E0F2FE
-participant "SessionStatus" as page
+participant "Routed library page" as page
 participant "SessionService" as client
 end box
 box "Backend - Loupe API application" #D1FADF
@@ -29,7 +29,7 @@ participant "ApplicationSession" as entity
 end box
 box "Backend - Loupe Infrastructure" #FFF4E5
 database "Library store" as db
-participant "IIdentityProvider / ISessionStore adapters" as ext
+participant "JWT and database session validation" as auth
 end box
 actor -> page : Enforce ownership at every data boundary
 page -> client : resourceId; server-derived owner

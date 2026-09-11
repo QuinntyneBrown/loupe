@@ -11,7 +11,7 @@ with the container stack when that increment is delivered.
 
 For deterministic browser acceptance, run `npm ci` in `../e2e`, then `npm test`
 here. Playwright starts its own separate mock composition on port 4207. It does
-not contact the production HTTP adapter or an external identity provider.
+not contact the production HTTP adapter or the real account database.
 
 The `api` library owns contracts and adapters. `components` is reserved for
 publishable presentation primitives, and `domain` for components consuming API
@@ -20,3 +20,10 @@ These are separate Angular projects with independent library build targets.
 
 See `../tasks/evidence.md` for delivered behavior and test evidence. The complete
 product scope remains in `../tasks/todo.md`; this is an incremental implementation.
+
+Sign-in uses local email/password credentials through `ISessionService` and
+`SESSION_SERVICE`. The production adapter obtains anonymous antiforgery proof,
+posts credentials, then refreshes authenticated session/antiforgery state. The
+browser retains only an HttpOnly session cookie. Playwright replaces this adapter
+with the fixture implementation; its account is `photographer@example.com` with
+the synthetic password `local acceptance password`.

@@ -1,5 +1,12 @@
 # Loupe demo videos
 
+The existing recordings predate local authentication and show the retired external
+sign-in flow. They are historical recordings, not evidence of the current login.
+The rerun harness now provisions local users and uses Loupe-issued JWT sessions.
+Demo-only accounts are `photographer@example.com` and `api-demo@example.com`, with
+the synthetic password `local acceptance password`. Never reuse these accounts
+or credentials in a deployed environment.
+
 Three recordings, all against real, running software — no product responses were
 mocked or invented for these takes. See "Integration substitutions and known
 limitations" below for exactly what stands in for what, and why.
@@ -103,13 +110,10 @@ delivered) Compose/deployment story; see `backend/README.md`.
 
 ## Integration substitutions and known limitations
 
-- **Identity provider.** `backend/src/Loupe.DemoIdentityProvider` is a small,
-  clearly-labeled throwaway OIDC provider (discovery, JWKS, PKCE-protected
-  authorize/token endpoints), built because no standalone local identity
-  provider exists in this repository yet — the only prior OIDC test double
-  (`ControlledIdentityProvider` in `backend/tests/Loupe.Api.Tests/Security/`)
-  is an in-process `HttpMessageHandler` a real browser cannot be redirected to.
-  It is never a real login and must never be deployed.
+- **Local accounts.** The rerun harness creates accounts through `Loupe.Admin` in
+  the same PostgreSQL database as the API. Password verification, JWT issuance,
+  and revocation run in the production backend. The old provider harness has
+  been removed. Existing videos still show its historical behavior.
 - **AI critique.** Historical recordings used a deterministic sample adapter,
   which has now been removed. New runs use Azure OpenAI with `Ai:Mode=Live`; supply `Ai__Endpoint`,
   `Ai__Deployment`, `Ai__Model`, and `Ai__ApiKey` in the calling environment
@@ -170,7 +174,7 @@ Prerequisites: Docker Desktop, .NET SDK `10.0.303`+ (see `global.json`), Node
 `24.18.x` (see `frontend/README.md`), PowerShell 7+.
 
 ```powershell
-# 1. Stand up Postgres, the demo identity provider, the containerized
+# 1. Stand up Postgres, local accounts, the containerized
 #    Loupe.Api/Loupe.Worker, and the Angular dev server (HTTPS, same-origin
 #    proxy). Prints the URLs to check once it's up.
 pwsh docs/demo/harness/setup.ps1
@@ -211,23 +215,15 @@ docker exec loupe-demo-postgres psql -U loupe -d loupe_demo \
 
 ## What setup.ps1 actually does (and why)
 
-- Trusts and exports the local ASP.NET Core HTTPS dev certificate — used by
-  the demo identity provider, the containerized API's Kestrel HTTPS listener,
-  and the Angular dev server, so the browser trusts all three with one cert.
-- Starts a demo-only PostgreSQL container (`pgvector/pgvector:pg17`, matching
-  the image family `backend/tests/Loupe.Api.Tests/PostgreSqlFixture.cs` uses)
-  and applies the real EF Core migrations from
-  `backend/src/Loupe.Infrastructure/Persistence/Migrations`. Applying
-  migrations uses Infrastructure's existing design-time factory and EF Design
-  dependency. The script makes no temporary source or package edits.
-- Builds `docs/demo/harness/Dockerfile.demo-runtime` and runs the real
-  `Loupe.Api` and `Loupe.Worker` from it, networked with Postgres and reaching
-  the host-side demo identity provider via `host.docker.internal`.
-- Starts `Loupe.DemoIdentityProvider` on the host and serves the Angular app
-  over HTTPS with `frontend/proxy.conf.demo.json` proxying `/api` and
-  `/signin-oidc` same-origin to the API — required because the OIDC callback
-  and API must share an origin with the browser page (`backend/README.md`).
+- Trusts and exports the local ASP.NET Core HTTPS development certificate for
+  the containerized API and Angular dev server.
+- Starts demo PostgreSQL and applies the real EF Core migrations using the
+  Infrastructure design-time factory.
+- Builds the API, Worker, and Admin CLI in the Linux runtime image and networks
+  the API/Worker with PostgreSQL. A fresh random signing key is supplied only to
+  the API through its environment; rerunning setup invalidates prior sessions.
+- Provisions both demo accounts by piping synthetic passwords to the Admin CLI.
+- Serves Angular over HTTPS with `/api` proxied same-origin to the API.
 
-`teardown.ps1` stops every container, the demo identity provider, the Angular
-dev server, and removes the scratch cert/media directory. It does not touch
-the repository working tree.
+`teardown.ps1` stops the demo containers and Angular dev server and removes the
+scratch cert/media directory. It does not modify repository source.

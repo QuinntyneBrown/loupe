@@ -18,7 +18,8 @@ public sealed class SessionStore(LibraryDbContext database) : ISessionStore
     public async Task<ApplicationSession?> ReadAndTouchAsync(string id, DateTimeOffset now, DateTimeOffset createdAfter,
         DateTimeOffset activeAfter, CancellationToken cancellationToken)
     {
-        var updated = await database.Sessions.Where(session => session.Id == id && session.CreatedAt > createdAfter && session.LastSeenAt > activeAfter)
+        var updated = await database.Sessions.Where(session => session.Id == id && session.CreatedAt > createdAfter && session.LastSeenAt > activeAfter
+            && database.Users.Any(u => u.Id == session.Subject && u.PasswordVersion == session.UserVersion))
             .ExecuteUpdateAsync(setters => setters.SetProperty(session => session.LastSeenAt,
                 session => session.LastSeenAt < now ? now : session.LastSeenAt), cancellationToken);
         return updated == 0 ? null : await database.Sessions.AsNoTracking().SingleOrDefaultAsync(session => session.Id == id, cancellationToken);

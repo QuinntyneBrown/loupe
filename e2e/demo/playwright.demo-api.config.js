@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
 // Records the loupe-api demo video. Requires the shared demo stack from
-// docs/demo/harness/setup.ps1 (Postgres, demo identity provider, the
+// docs/demo/harness/setup.ps1 (Postgres, local accounts, the
 // loupe-demo-api / loupe-demo-worker containers) to already be running.
 // Kept separate from ../playwright.config.js: different pacing, video
 // policy, and webServer than the ordinary acceptance run.

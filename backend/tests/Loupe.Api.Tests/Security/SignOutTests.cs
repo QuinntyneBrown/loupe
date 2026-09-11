@@ -25,7 +25,7 @@ public sealed class SignOutTests(PostgreSqlFixture database) : IClassFixture<Pos
         await using (var scope = factory.Services.CreateAsyncScope())
             await scope.ServiceProvider.GetRequiredService<LibraryDbContext>().Database.MigrateAsync();
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, BaseAddress = new Uri("https://localhost") });
-        using var callback = await OidcFlow.CompleteAsync(factory, client);
+        using var callback = await LocalSignInFlow.CompleteAsync(factory, client);
         using var session = await client.GetAsync("/api/session");
         if (origin is not null) client.DefaultRequestHeaders.Add("Origin", origin);
         if (tokenKind != "missing") client.DefaultRequestHeaders.Add("X-CSRF-Token",
@@ -43,7 +43,7 @@ public sealed class SignOutTests(PostgreSqlFixture database) : IClassFixture<Pos
         await using (var scope = factory.Services.CreateAsyncScope())
             await scope.ServiceProvider.GetRequiredService<LibraryDbContext>().Database.MigrateAsync();
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, BaseAddress = new Uri("https://localhost") });
-        using var callback = await OidcFlow.CompleteAsync(factory, client);
+        using var callback = await LocalSignInFlow.CompleteAsync(factory, client);
         var cookie = Assert.Single(callback.Headers.GetValues("Set-Cookie"), value => value.StartsWith("__Host-loupe-session=", StringComparison.Ordinal)).Split(';')[0];
         using var session = await client.GetAsync("/api/session");
         Assert.True(session.Headers.Contains("X-CSRF-Token"), "The authenticated session response must supply an antiforgery token.");

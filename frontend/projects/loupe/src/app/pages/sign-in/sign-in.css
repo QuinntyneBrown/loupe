@@ -8,3 +8,9 @@
   justify-content: center;
   gap: var(--lp-space-2);
 }
+
+.sign-in-form {
+  display: grid;
+  gap: var(--lp-space-4);
+  text-align: start;
+}

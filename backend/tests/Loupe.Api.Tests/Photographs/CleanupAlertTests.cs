@@ -19,8 +19,8 @@ public sealed class CleanupAlertTests : IAsyncLifetime
     public async Task L2_032_4_Overdue_cleanup_has_actionable_private_safe_diagnostics(int hours, bool overdue)
     {
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot);
-        using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         factory.Clock.Advance(-TimeSpan.FromHours(hours));
+        using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         var before = Directory.Exists(database.MediaRoot) ? Directory.GetFiles(database.MediaRoot) : [];
         const string privateTitle = "Private portrait of Ari at home";
         var photo = await PhotographFixture.UploadAsync(client, privateTitle);
