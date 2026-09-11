@@ -38,6 +38,8 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Photographer>().ToTable("photographers").HasKey(item => item.Id);
         modelBuilder.Entity<Photographer>().HasAlternateKey(item => new { item.Id, item.OwnerId });
         modelBuilder.Entity<Photographer>().Property(item => item.Revision).HasDefaultValue(1L).IsConcurrencyToken();
+        modelBuilder.Entity<Photographer>().Property(item => item.SourceRevision).HasDefaultValue(1L);
+        modelBuilder.Entity<Photographer>().Property(item => item.SourceJson).HasColumnType("jsonb");
         modelBuilder.Entity<Photographer>().HasIndex(item => new { item.OwnerId, item.CreatedAt, item.Id });
         modelBuilder.Entity<Photographer>().Property<string>("PortfolioHash").HasMaxLength(32).HasComputedColumnSql("md5(loupe_normalize_source(\"PortfolioUrl\"))", stored: true);
         modelBuilder.Entity<Photographer>().HasIndex("OwnerId", "PortfolioHash");

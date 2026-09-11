@@ -366,3 +366,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - Review then found the standalone worker's restricted handler registration needed updating. A process-level acceptance case reproduced Queued with the registration absent; adding the handler made all 23 source/draft/standalone-worker cases pass.
 - The shared source pool reads one allowed HTML page, ignores navigation/scripts/hidden sections, captures title/description/keywords and at most 20,000 main-text Unicode scalars, and never follows gallery links. Robots/password/paywall failures remain manual fallbacks. Captured provenance stays private on the draft.
 
+
+### Final photographer draft saves and source generations
+- RED: both final-save cases failed on the absent endpoint.
+- GREEN: 29 bookmark/draft/source-worker API checks pass. Final Save validates the whole draft and persists one bookmark under keyed retries; pending/stale drafts cannot commit. Captured source survives draft expiry. Equivalent URL spellings retain its generation, while a changed portfolio URL marks the retained capture as previous without replacing manual notes or summary.
+

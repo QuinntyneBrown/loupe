@@ -11,5 +11,9 @@ public sealed class Photographer
     public string? SummaryProvenance { get; set; }
     public string? Notes { get; set; }
     public long Revision { get; set; } = 1;
+    public long SourceRevision { get; set; } = 1;
+    public long? CapturedSourceRevision { get; set; }
+    public string? SourceJson { get; set; }
+    public string? SourceFailureCode { get; set; }
     public ICollection<PhotographerTag> Tags { get; } = new List<PhotographerTag>();
 }

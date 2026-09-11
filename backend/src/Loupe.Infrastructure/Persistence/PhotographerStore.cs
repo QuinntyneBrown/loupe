@@ -61,6 +61,8 @@ public sealed class PhotographerStore(LibraryDbContext database) : IPhotographer
             AND loupe_normalize_source("PortfolioUrl") = {source.NormalizedSource}
             """).AnyAsync(cancellationToken);
         if (duplicate) throw new PortfolioConflictException();
+        var previousSource = await database.Database.SqlQuery<string>($"SELECT loupe_normalize_source({photographer.PortfolioUrl}) AS \"Value\"").SingleAsync(cancellationToken);
+        if (previousSource != source.NormalizedSource) { photographer.SourceRevision++; photographer.SourceFailureCode = null; }
         photographer.Name = metadata.Name; photographer.PortfolioUrl = metadata.PortfolioUrl;
         if (photographer.Summary != metadata.Summary) photographer.SummaryProvenance = metadata.Summary is null ? null : "manual";
         photographer.Summary = metadata.Summary; photographer.Notes = metadata.Notes;

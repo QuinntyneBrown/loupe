@@ -1,5 +1,6 @@
 using Loupe.Api.Photographers;
 using Loupe.Application.PhotographerDrafts;
+using Loupe.Application.Photographers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,9 @@ public sealed class PhotographerDraftsController(ISender sender) : ControllerBas
     }
     [HttpGet("{id:guid}")]
     public Task<PhotographerDraftResult> Get(Guid id, CancellationToken cancellationToken) => sender.Send(new GetPhotographerDraftQuery(id), cancellationToken);
+    [HttpPost("{id:guid}/save")]
+    public Task<SavePhotographerResult> Save(Guid id, SavePhotographerDraftRequest request, [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken) =>
+        sender.Send(new SavePhotographerDraftCommand(id, request.Revision, request.Name, request.PortfolioUrl, request.Summary, request.Notes, request.Tags, operationKey), cancellationToken);
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Cancel(Guid id, CancellationToken cancellationToken)
     {
