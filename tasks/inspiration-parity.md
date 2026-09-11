@@ -148,3 +148,10 @@ be established without printing credentials. Live quality checks are mandatory.
 - GREEN: all 29 robots and restricted-network cases pass, including grouped agent rules, wildcard/end matching, encoded paths, missing policies and bounded failures.
 - An oversized-response exception initially escaped the fallback; the exact failure now maps to Unavailable. Source transport bypasses ambient proxies so connection checks apply to the destination.
 
+
+### Source draft extraction
+- RED: 4 API-driven worker cases failed for the missing import handler.
+- GREEN: 42 combined draft/worker/robots/network cases pass. Direct, Open Graph and Twitter images create private previews; denied redirects, cancellation during fetch and pages with only arbitrary images preserve explicit fallback behavior.
+- Publication checks the operation lease, owner and active draft in one transaction; original URLs remain attached and final fetched URL/time are retained in the operation output.
+- Worker hosting, legacy-reference publication and transient retry are the next source-processing slice.
+

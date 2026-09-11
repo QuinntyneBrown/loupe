@@ -2,6 +2,11 @@
   "version": 1,
   "dependencies": {
     "net10.0": {
+      "AngleSharp": {
+        "type": "Transitive",
+        "resolved": "1.8.1",
+        "contentHash": "fTLPBxwYK5zmt+ernY3GL1kFBDA/2Cl72hpNnMHeNceZNJ/AT7Km9CXFaMHybuEFhXDy2Dv7Bjkez5G0Z4Io4g=="
+      },
       "MediatR": {
         "type": "Transitive",
         "resolved": "12.5.0",
@@ -110,6 +115,7 @@
       "loupe.infrastructure": {
         "type": "Project",
         "dependencies": {
+          "AngleSharp": "[1.8.1, )",
           "Loupe.Application": "[1.0.0, )",
           "Microsoft.EntityFrameworkCore.Relational": "[10.0.11, )",
           "Microsoft.IdentityModel.JsonWebTokens": "[8.19.2, )",

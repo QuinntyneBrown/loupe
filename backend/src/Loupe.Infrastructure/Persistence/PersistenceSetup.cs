@@ -37,6 +37,8 @@ public static class PersistenceSetup
         services.AddSingleton<ISourceConnector, SocketSourceConnector>();
         services.AddScoped<IRestrictedPageFetcher, RestrictedPageFetcher>();
         services.AddScoped<IRobotsPolicy, RobotsPolicy>();
+        services.AddScoped<IReferenceSourceReader, ReferenceSourceReader>();
+        services.AddScoped<IReferenceImportWorkStore, ReferenceImportWorkStore>();
         services.AddHttpClient("sourceFetch", client =>
             {
                 client.Timeout = TimeSpan.FromSeconds(30);
