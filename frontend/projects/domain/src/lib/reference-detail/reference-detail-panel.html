@@ -13,6 +13,21 @@
     <div class="lp-detail__head">
       <div class="lp-detail__title-row">
         <h1 #heading tabindex="-1" class="lp-title">{{ item.title }}</h1>
+        <details #menu class="actions-menu">
+          <summary #actions class="lp-icon-button" aria-label="More actions">
+            <svg class="lp-icon" aria-hidden="true"><use href="#i-more" /></svg>
+          </summary>
+          <div class="actions-menu__list">
+            <button
+              type="button"
+              class="lp-button lp-button--ghost"
+              [disabled]="dirty()"
+              (click)="requestImage(menu, item)"
+            >
+              Replace image
+            </button>
+          </div>
+        </details>
       </div>
       <p class="lp-detail__meta">
         Saved

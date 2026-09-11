@@ -1,0 +1,85 @@
+<dialog #modal class="lp-dialog" aria-labelledby="add-image-title" (cancel)="cancel($event)">
+  <form class="lp-dialog__panel" (submit)="$event.preventDefault(); save()">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 id="add-image-title" class="lp-dialog__title">Add an image</h2>
+        <p class="lp-dialog__text">
+          Replaces the current image if there is one. Tags and notes are kept.
+        </p>
+      </div>
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Close"
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body">
+      <label class="upload" (dragover)="$event.preventDefault()" (drop)="drop($event)">
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-upload" /></svg>
+        <strong>Drop an image here, or browse</strong
+        ><span>JPEG, PNG, HEIC or WebP, up to 25 MB</span>
+        <input
+          #fileInput
+          class="visually-hidden"
+          aria-label="Choose an image"
+          type="file"
+          accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
+          [disabled]="busy()"
+          (change)="choose(fileInput.files)"
+        />
+      </label>
+      @if (file(); as selected) {
+        <p>{{ selected.name }}</p>
+      }
+      @if (error()) {
+        <p role="alert">{{ error() }}</p>
+      }
+      @if (stale()) {
+        <button
+          class="lp-button lp-button--secondary"
+          type="button"
+          [disabled]="busy()"
+          (click)="reload()"
+        >
+          Review latest reference
+        </button>
+      }
+      @if (latest(); as item) {
+        <p>Latest reference: {{ item.title }}. Saving replaces its current image.</p>
+      }
+      @if (busy()) {
+        <p role="status">Saving image…</p>
+        <progress
+          aria-label="Image upload"
+          [value]="progress()?.transferred ?? null"
+          [max]="progress()?.total ?? 1"
+        ></progress>
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      <span class="lp-dialog__privacy"
+        ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>Private.
+        Only you can see this.</span
+      >
+      <button
+        class="lp-button lp-button--secondary"
+        type="button"
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+      <button
+        class="lp-button lp-button--primary"
+        type="submit"
+        [disabled]="!file() || busy() || stale() || unavailable()"
+      >
+        Save image
+      </button>
+    </footer>
+  </form>
+</dialog>

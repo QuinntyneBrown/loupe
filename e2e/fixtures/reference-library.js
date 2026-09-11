@@ -10,6 +10,7 @@ export class ReferenceLibrary {
     this.importCalls=[];this.importOperations=new Map();this.importReceipts=new Map();this.importFailures={};this.importErrors={};this.lostImportResponses=0;
     this.linkReceipts=new Map(); this.lostLinkResponses=0;
     this.updates = []; this.lostUpdateResponses = 0;
+    this.imageReceipts = new Map();
     this.uploadReceipts = new Map(); this.lostUploadResponses = 0;
     this.calls = []; this.failures = {}; this.errors = {}; this.gates = {};
     this.boards = []; this.boardCalls = [];
@@ -131,6 +132,17 @@ export class ReferenceLibrary {
         item.revision++;
         if(this.lostUpdateResponses>0) {this.lostUpdateResponses--;return {error:'request_failed'};}
         return {data:item};
+      }
+      if (operation === 'replaceImage') {
+        const item = this.items.find(item => item.id === input.id);
+        if (!item) return { error: 'item_unavailable' };
+        const fingerprint = JSON.stringify(input), receipt = this.imageReceipts.get(input.operationKey);
+        if (receipt) return receipt === fingerprint ? { data: item } : { error: 'operation_conflict' };
+        if (item.revision !== input.revision) return { error: 'revision_conflict' };
+        item.imageUrl = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="160" height="120"><rect width="160" height="120" fill="silver"/></svg>');
+        item.previewUrl = item.imageUrl; item.width = 160; item.height = 120; item.revision++;
+        this.imageReceipts.set(input.operationKey, fingerprint);
+        return { data: item };
       }
       if (operation === 'setTags') {
         const item = this.items.find(item => item.id === input.id);

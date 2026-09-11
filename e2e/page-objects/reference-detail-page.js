@@ -2,6 +2,15 @@ import { expect } from '@playwright/test';
 
 export class ReferenceDetailPage {
   constructor(page) { this.page = page; }
+  async openImageReplacement() { await this.page.getByLabel('More actions', { exact: true }).click(); await this.page.getByRole('button', { name: 'Replace image', exact: true }).click(); }
+  imageDialog() { return this.page.getByRole('dialog', { name: 'Add an image', exact: true }); }
+  async chooseReplacement(type = 'image/png') { await this.imageDialog().getByLabel('Choose an image', { exact: true }).setInputFiles({ name: 'Replacement.png', mimeType: type, buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1kAAAAASUVORK5CYII=', 'base64') }); }
+  async saveImage() { await this.imageDialog().getByRole('button', { name: 'Save image', exact: true }).click(); }
+  async cancelImage() { await this.imageDialog().getByRole('button', { name: 'Cancel', exact: true }).click(); }
+  async expectImageDialogClosed() { await expect(this.imageDialog()).toHaveCount(0); await expect(this.page.getByLabel('More actions', { exact: true })).toBeFocused(); }
+  async expectImageError(message) { await expect(this.imageDialog().getByRole('alert')).toHaveText(message); }
+  async expectImageSaveDisabled() { await expect(this.imageDialog().getByRole('button', { name: 'Save image', exact: true })).toBeDisabled(); }
+  async reloadImageReference() { await this.imageDialog().getByRole('button', { name: 'Review latest reference', exact: true }).click(); }
   async addTag(name) { const input = this.page.getByRole('textbox', { name: 'Add a tag', exact: true }); await input.fill(name); await input.press('Enter'); }
   async removeTag(name) { await this.page.getByRole('button', { name: `Remove tag ${name}`, exact: true }).click(); }
   async expectTag(name) { await expect(this.page.getByRole('button', { name: `Remove tag ${name}`, exact: true })).toBeVisible(); }

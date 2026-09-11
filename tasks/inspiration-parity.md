@@ -214,3 +214,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both cases returned 405 because replacement was absent.
 - GREEN: all 42 replacement/upload/metadata/membership/source-worker cases pass. Separate image revision invalidates image and preview URLs without changing them for editorial updates.
 - The invalid-byte assertion follows the existing 415 unsupported-media contract; successful decoding and unchanged saved content remain asserted. Initial regression caught metadata URL churn and SQL identifier quoting; both were corrected.
+
+### Reference replacement dialog
+- RED: all 4 Chromium cases failed on the missing More actions control.
+- GREEN: 24 replacement/metadata/tag cases pass. Save is explicit, Cancel writes nothing, unsupported files are rejected, failed saves retain the file, and stale revisions require latest-reference review.
+- Desktop and 375px dialog screenshots were inspected; Axe and overflow checks pass at both sizes. The drop area uses the mock's spacing, type, border and radius tokens.

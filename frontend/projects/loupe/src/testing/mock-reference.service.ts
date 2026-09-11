@@ -6,6 +6,23 @@ import { ReferenceTag, ReferenceTagFacet } from 'api';
 
 @Injectable()
 export class MockReferenceService implements IReferenceService {
+  async replaceImage(
+    id: string,
+    revision: number,
+    image: File,
+    operationKey: string,
+  ): Promise<ReferenceResult> {
+    let bytes: ArrayBuffer;
+    try {
+      bytes = await image.arrayBuffer();
+    } catch {
+      throw new ServiceError('file_unavailable');
+    }
+    const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), (value) =>
+      value.toString(16).padStart(2, '0'),
+    ).join('');
+    return this.call('replaceImage', { id, revision, operationKey, hash, contentType: image.type });
+  }
   setTags(
     id: string,
     revision: number,

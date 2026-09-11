@@ -13,6 +13,52 @@ import { ServiceError } from '../common/service-error';
 
 @Injectable()
 export class ReferenceService implements IReferenceService {
+  async replaceImage(
+    id: string,
+    revision: number,
+    image: File,
+    operationKey: string,
+    onProgress?: (progress: UploadProgress) => void,
+  ): Promise<ReferenceResult> {
+    try {
+      await image.slice(0, 1).arrayBuffer();
+    } catch {
+      throw new ServiceError('file_unavailable');
+    }
+    const token = await this.session.getRequestToken();
+    const body = new FormData();
+    body.append('image', image, image.name);
+    body.append('revision', String(revision));
+    try {
+      return await firstValueFrom(
+        this.http
+          .put<ReferenceResult>('/api/references/' + encodeURIComponent(id) + '/image', body, {
+            headers: { 'X-CSRF-Token': token, 'Idempotency-Key': operationKey },
+            reportProgress: true,
+            observe: 'events',
+          })
+          .pipe(
+            tap((event) => {
+              if (event.type === HttpEventType.UploadProgress)
+                onProgress?.({ transferred: event.loaded, total: event.total ?? null });
+            }),
+            filter(
+              (event): event is HttpResponse<ReferenceResult> => event instanceof HttpResponse,
+            ),
+            map((response) => {
+              if (!response.body) throw new ServiceError('request_failed');
+              return response.body;
+            }),
+          ),
+      );
+    } catch (error) {
+      throw new ServiceError(
+        error instanceof HttpErrorResponse && typeof error.error?.code === 'string'
+          ? error.error.code
+          : 'request_failed',
+      );
+    }
+  }
   async setTags(
     id: string,
     revision: number,
