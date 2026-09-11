@@ -17,7 +17,7 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
         var existing = await database.References.FromSqlInterpolated($"""
             SELECT * FROM "references" WHERE "OwnerId" = {reference.OwnerId} AND "SourceHash" = {source.Hash}
               AND loupe_normalize_source("SourceUrl") = {source.NormalizedSource}
-            """).OrderBy(item => item.CreatedAt).ThenBy(item => item.Id).FirstOrDefaultAsync(cancellationToken);
+            """).Include(item => item.Boards).OrderBy(item => item.CreatedAt).ThenBy(item => item.Id).FirstOrDefaultAsync(cancellationToken);
         if (existing is not null) return existing;
         database.References.Add(reference);
         await database.SaveChangesAsync(cancellationToken);
@@ -41,7 +41,7 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         await LockSourceAsync(ownerId, metadata.SourceUrl, cancellationToken);
-        var reference = await database.References.SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken)
+        var reference = await database.References.Include(item => item.Boards).SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken)
             ?? throw new ResourceNotFoundException();
         if (reference.Revision != revision) throw new RevisionConflictException();
         reference.Title = metadata.Title;
@@ -55,9 +55,14 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
         return reference;
     }
 
-    public async Task<IReadOnlyList<ReferenceSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, CancellationToken cancellationToken)
+    private IQueryable<Reference> Filtered(string ownerId, Guid? boardId) => database.References.AsNoTracking()
+        .Where(reference => reference.OwnerId == ownerId && (boardId == null || reference.Boards.Any(item => item.BoardId == boardId)));
+
+    public Task<int> CountAsync(string ownerId, Guid? boardId, CancellationToken cancellationToken) => Filtered(ownerId, boardId).CountAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<ReferenceSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, Guid? boardId, CancellationToken cancellationToken)
     {
-        var query = database.References.AsNoTracking().Where(reference => reference.OwnerId == ownerId);
+        var query = Filtered(ownerId, boardId);
         if (cursor is not null) query = query.Where(reference => reference.CreatedAt < cursor.CreatedAt
             || reference.CreatedAt == cursor.CreatedAt && reference.Id.CompareTo(cursor.Id) > 0);
         return await query.OrderByDescending(reference => reference.CreatedAt).ThenBy(reference => reference.Id).Take(count)
@@ -73,5 +78,5 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
         await database.SaveChangesAsync(cancellationToken);
     }
     public Task<Reference?> FindOwnedAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>
-        database.References.AsNoTracking().SingleOrDefaultAsync(reference => reference.Id == id && reference.OwnerId == ownerId, cancellationToken);
+        database.References.AsNoTracking().Include(item => item.Boards).SingleOrDefaultAsync(reference => reference.Id == id && reference.OwnerId == ownerId, cancellationToken);
 }

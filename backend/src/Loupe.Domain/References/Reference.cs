@@ -15,4 +15,5 @@ public sealed class Reference
     public int? Height { get; set; }
     public Guid? CurrentImportOperationId { get; set; }
     public long Revision { get; set; } = 1;
+    public ICollection<Loupe.Domain.Boards.BoardReference> Boards { get; } = new List<Loupe.Domain.Boards.BoardReference>();
 }

@@ -1,4 +1,6 @@
 using Loupe.Api.References;
+using Loupe.Api.Boards;
+using Loupe.Application.Boards;
 using Loupe.Application.Images;
 using Loupe.Application.References;
 using MediatR;
@@ -12,6 +14,9 @@ namespace Loupe.Api.Controllers;
 [Route("api/references")]
 public sealed class ReferencesController(ISender sender) : ControllerBase
 {
+    [HttpPut("{id:guid}/boards")]
+    public Task<ReferenceResult> SetBoards(Guid id, SetReferenceBoardsRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new SetReferenceBoardsCommand(id, request.Revision, request.BoardIds), cancellationToken);
     [HttpPost("links")]
     public async Task<ActionResult<SaveReferenceUrlResult>> SaveLink(SaveReferenceUrlRequest request,
         [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken)
@@ -21,8 +26,8 @@ public sealed class ReferencesController(ISender sender) : ControllerBase
     }
 
     [HttpGet]
-    public Task<ReferencePage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null) =>
-        sender.Send(new ListReferencesQuery(pageSize, cursor), cancellationToken);
+    public Task<ReferencePage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null, [FromQuery] Guid? boardId = null) =>
+        sender.Send(new ListReferencesQuery(pageSize, cursor, boardId), cancellationToken);
 
     [HttpPost("images")]
     [RequestSizeLimit(UploadLimits.RequestBytes)]

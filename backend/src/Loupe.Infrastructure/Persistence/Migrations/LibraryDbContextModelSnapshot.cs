@@ -497,7 +497,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.HasOne("Loupe.Domain.References.Reference", null)
-                        .WithMany()
+                        .WithMany("Boards")
                         .HasForeignKey("ReferenceId", "OwnerId")
                         .HasPrincipalKey("Id", "OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -507,6 +507,10 @@ namespace Loupe.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Loupe.Domain.Boards.Board", b =>
                 {
                     b.Navigation("References");
+                });
+            modelBuilder.Entity("Loupe.Domain.References.Reference", b =>
+                {
+                    b.Navigation("Boards");
                 });
 #pragma warning restore 612, 618
         }

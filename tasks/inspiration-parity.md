@@ -61,3 +61,13 @@ be established without printing credentials. Live quality checks are mandatory.
   persistence across API restart, alphabetical names, NFC/case-insensitive
   duplicates, field validation and authentication.
 - Added an additive board/membership migration with owner-matched foreign keys.
+
+### Board editing and membership API
+- RED: 5 membership/edit scenarios failed for missing endpoints/fields. An initial
+  reused-container run missed newly copied tests; touching copied source forced
+  discovery and all 5 failures were confirmed before counting their coverage.
+- GREEN: 30 board/list/update integration cases passed. The strengthened pagination
+  identity assertion also passed with all 5 membership cases.
+- Rename/delete preserve references; membership replacement is atomic, revision
+  checked and idempotent. Counts cover the full filtered set. Cursors bind the
+  owner, selected board and page size.

@@ -34,7 +34,7 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<BoardReference>().ToTable("board_references").HasKey(item => new { item.BoardId, item.ReferenceId });
         modelBuilder.Entity<BoardReference>().HasOne<Board>().WithMany(board => board.References)
             .HasForeignKey(item => new { item.BoardId, item.OwnerId }).HasPrincipalKey(board => new { board.Id, board.OwnerId }).OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<BoardReference>().HasOne<Reference>().WithMany()
+        modelBuilder.Entity<BoardReference>().HasOne<Reference>().WithMany(reference => reference.Boards)
             .HasForeignKey(item => new { item.ReferenceId, item.OwnerId }).HasPrincipalKey(reference => new { reference.Id, reference.OwnerId }).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Reference>().ToTable("references").HasKey(reference => reference.Id);
         modelBuilder.Entity<Reference>().HasIndex(reference => new { reference.OwnerId, reference.CreatedAt, reference.Id });
