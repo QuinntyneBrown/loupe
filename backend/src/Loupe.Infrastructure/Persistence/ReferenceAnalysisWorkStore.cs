@@ -21,7 +21,7 @@ public sealed class ReferenceAnalysisWorkStore(LibraryDbContext database, IOpera
         var input = JsonSerializer.Deserialize<ReferenceAnalysisInput>(operation.InputJson!)!;
         if (reference is null || reference.CurrentAnalysisOperationId != operation.Id || reference.ImageRevision != input.ImageRevision || reference.ImageKey != input.ImageKey) return;
         var saved = new SavedReferenceSuggestions(operation.Id, input.ImageRevision, now, operation.Mode, operation.Model, operation.PromptVersion,
-            result.Description.Trim(), "pending", result.Tags.Select(tag => new ReferenceAnalysisTag(tag.Name.Trim().Normalize(), tag.Category)).ToArray());
+            result.Description.Trim(), "pending", result.Tags.Select(tag => new ReferenceSuggestedTag(tag.Name.Trim().Normalize(), tag.Category)).ToArray());
         var json = JsonSerializer.Serialize(saved);
         reference.SuggestionsJson = json;
         reference.Revision++;

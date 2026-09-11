@@ -264,3 +264,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: the host left reference analysis queued; malformed-output and canceled-publication checks already passed. A queued job from the failing host test also explained the follow-on publication failure.
 - GREEN: all 12 reference-worker, shared-capacity and critique-execution cases pass. The renamed AnalysisWorker alternates reference and critique work within its existing pool and database-enforced capacity. Invalid outputs retry once; replaced/deleted image results cannot publish.
 
+
+### Individual suggestion review
+- RED: all 3 API review cases returned 405.
+- GREEN: 16 review/worker/text/tag checks pass. Accepted and edited values record provenance; dismissed values stay out of active metadata; reviews persist after restart. Existing tag spelling/provenance survives duplicate acceptance, the 50-tag limit retains pending suggestions, and owner/revision/generation checks protect writes.
+
