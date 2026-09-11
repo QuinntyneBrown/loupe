@@ -426,3 +426,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: lost unlink/Undo responses left the displayed collection inconsistent, and unlink removed the focused control without recovery.
 - GREEN: all 20 profile Chromium cases pass. Retry recognizes the expected completed unlink, Undo checks a conflicting revision for an already-restored link, and focus follows the next/restored card. Newer assignments are still protected.
 
+
+### Private reference candidates for linking
+- RED: the candidate query returned 404.
+- GREEN: all 31 photographer API cases pass. Search is applied before paging across the owned library, treats SQL wildcard characters literally, and returns bounded selection metadata with current link revisions. Cursors are scoped to owner, destination photographer, query and page size; foreign bookmarks remain 404.
+

@@ -12,6 +12,10 @@ namespace Loupe.Api.Controllers;
 [Route("api/photographers")]
 public sealed class PhotographersController(ISender sender) : ControllerBase
 {
+    [HttpGet("{id:guid}/reference-candidates")]
+    public Task<ReferenceCandidatePage> Candidates(Guid id, CancellationToken cancellationToken, [FromQuery] string? query = null, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null) =>
+        sender.Send(new ListReferenceCandidatesQuery(id, query, pageSize, cursor), cancellationToken);
+
     [HttpDelete("{id:guid}")]
     public Task<DeletionResult> Delete(Guid id, [FromQuery] long revision, CancellationToken cancellationToken) =>
         sender.Send(new DeletePhotographerCommand(id, revision), cancellationToken);
