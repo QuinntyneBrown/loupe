@@ -68,6 +68,30 @@ public sealed class KeywordSearchTests(PostgreSqlFixture database) : IClassFixtu
         using var oversized = await owner.GetAsync("/api/search?query=" + new string('x', 501)); Assert.Equal(HttpStatusCode.BadRequest, oversized.StatusCode);
     }
 
+    [Fact]
+    public async Task Search_cards_include_linked_reference_counts_and_immediately_reflect_renames_and_unlinking()
+    {
+        await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot);
+        using var owner = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        var photographer = await Save(owner, "photographers", new { name = "Casey", portfolioUrl = "https://casey.example/" }, "photographer");
+        var reference = await Save(owner, "references/links", new { title = "Study", sourceUrl = "https://study.example/", attribution = "Original credit" }, "reference");
+        using var linked = await owner.PutAsJsonAsync($"/api/references/{reference}/photographer", new { revision = 1, photographerId = photographer }); linked.EnsureSuccessStatusCode();
+        var card = Assert.Single((await Search(owner, "type=photographers")).GetProperty("items").EnumerateArray());
+        Assert.Equal(1, card.GetProperty("referenceCount").GetInt32());
+        Assert.Empty(card.GetProperty("referencePreviewUrls").EnumerateArray());
+        using var renamed = await owner.PutAsJsonAsync($"/api/photographers/{photographer}", new { revision = 1, name = "Robin", portfolioUrl = "https://casey.example/", notes = "New direction" }); renamed.EnsureSuccessStatusCode();
+        Assert.Equal(new[] { reference }, Ids(await Search(owner, "query=robin&type=references")));
+        Assert.Equal(new[] { photographer }, Ids(await Search(owner, "query=new%20direction")));
+        using var unlinked = await owner.PutAsJsonAsync($"/api/references/{reference}/photographer", new { revision = 2, photographerId = (Guid?)null }); unlinked.EnsureSuccessStatusCode();
+        Assert.Empty(Ids(await Search(owner, "query=robin&type=references")));
+        Assert.Equal(0, (await Search(owner, "type=photographers")).GetProperty("items")[0].GetProperty("referenceCount").GetInt32());
+        using var deleted = await owner.DeleteAsync($"/api/references/{reference}?revision=3"); deleted.EnsureSuccessStatusCode();
+        Assert.Empty(Ids(await Search(owner, "type=references")));
+        using var tooManyTags = await owner.GetAsync("/api/search?" + string.Join('&', Enumerable.Range(0, 11).Select(i => "tags=t" + i))); Assert.Equal(HttpStatusCode.BadRequest, tooManyTags.StatusCode);
+        using var tooManyBoards = await owner.GetAsync("/api/search?" + string.Join('&', Enumerable.Range(0, 11).Select(_ => "boardIds=" + Guid.NewGuid()))); Assert.Equal(HttpStatusCode.BadRequest, tooManyBoards.StatusCode);
+        Assert.Empty(Ids(await Search(owner, "tags=unknown")));
+    }
+
     private static async Task<JsonElement> Search(HttpClient owner, string query) { using var response = await owner.GetAsync("/api/search?" + query); Assert.Equal(HttpStatusCode.OK, response.StatusCode); return await response.Content.ReadFromJsonAsync<JsonElement>(); }
     private static Guid[] Ids(JsonElement page) => page.GetProperty("items").EnumerateArray().Select(item => item.GetProperty("id").GetGuid()).ToArray();
     private static async Task<Guid> Save(HttpClient owner, string route, object input, string property)

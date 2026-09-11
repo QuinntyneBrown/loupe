@@ -519,3 +519,6 @@ be established without printing credentials. Live quality checks are mandatory.
 - Given owner references/bookmarks, all whitespace-separated NFC query tokens must match active fields, with literal substring semantics. Tags combine with AND, boards with OR, then type/query/ownership filter before stable paging.
 - RED: all 7 API cases returned 404. GREEN: all 7 passed with private mixed results, hostname-only matching, NFC/case/literal percent matching, board/type exclusion, full counts, scoped cursors and invalid input.
 - Implementation uses PostgreSQL normalize/strpos and parameterized EF SqlQuery; official documentation checked: https://www.postgresql.org/docs/15/functions-string.html and https://learn.microsoft.com/en-us/ef/core/querying/sql-queries .
+
+### Search card details and immediate changes
+- RED: the photographer result lacked referenceCount. GREEN: all 8 Search API cases passed after adding bounded thumbnail URLs/counts, including rename/unlink/delete visibility, notes, unknown tags and filter limits.

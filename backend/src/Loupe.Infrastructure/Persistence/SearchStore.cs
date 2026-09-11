@@ -18,7 +18,11 @@ public sealed class SearchStore(LibraryDbContext database) : ISearchStore
 
     private IQueryable<SearchItem> Filtered(string ownerId, SearchFilter filter) => database.Database.SqlQuery<SearchItem>($"""
         SELECT library."Id", library."Type", library."Title", library."CreatedAt", library."PreviewUrl", library."SourceUrl",
-            library."Attribution", library."Description", library."Width", library."Height"
+            library."Attribution", library."Description", library."Width", library."Height",
+            CASE WHEN library."Type" = 'photographer' THEN (SELECT count(*)::integer FROM "references" linked WHERE linked."OwnerId" = {ownerId} AND linked."PhotographerId" = library."Id") ELSE 0 END AS "ReferenceCount",
+            ARRAY(SELECT '/api/references/' || linked."Id" || '/preview?v=' || linked."ImageRevision" FROM "references" linked
+                WHERE library."Type" = 'photographer' AND linked."OwnerId" = {ownerId} AND linked."PhotographerId" = library."Id" AND linked."PreviewKey" IS NOT NULL
+                ORDER BY linked."CreatedAt" DESC, linked."Id" LIMIT 3) AS "ReferencePreviewUrls"
         FROM (
             SELECT r."Id", 'reference' AS "Type", r."Title", r."CreatedAt",
                 CASE WHEN r."PreviewKey" IS NULL THEN NULL ELSE '/api/references/' || r."Id" || '/preview?v=' || r."ImageRevision" END AS "PreviewUrl",
