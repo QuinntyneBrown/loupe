@@ -5,6 +5,17 @@ export class InspirationPage {
   constructor(page) { this.page = page; }
   async configure(count) { this.library = new ReferenceLibrary(count); await this.library.attach(this.page); }
   async openSave() { await this.page.getByRole('button', { name: 'Save reference', exact: true }).first().click(); }
+  async importDraft(source) {
+    const dialog = this.page.getByRole('dialog');
+    await dialog.getByRole('radio', { name: 'From a link', exact: true }).check();
+    await dialog.getByRole('textbox', { name: 'Link to the photograph', exact: true }).fill(source);
+    await dialog.getByRole('button', { name: 'Import', exact: true }).click();
+  }
+  async expectDraftPreview() { await expect(this.page.getByRole('dialog').getByRole('textbox', { name: 'Photographer', exact: true })).toBeVisible(); }
+  async expectImporting() { await expect(this.page.getByRole('dialog').getByRole('heading', { name: 'Importing…', exact: true })).toBeVisible(); }
+  async expectImportFallback() { await expect(this.page.getByRole('dialog').getByRole('heading', { name: "Couldn't import this page", exact: true })).toBeVisible(); }
+  async saveFallback(title, notes) { const dialog = this.page.getByRole('dialog'); await dialog.getByRole('textbox', { name: 'Title', exact: true }).fill(title); await dialog.getByRole('textbox', { name: 'Notes optional', exact: true }).fill(notes); await dialog.getByRole('button', { name: 'Save link', exact: true }).click(); }
+  async expectDraftDuplicate() { await expect(this.page.getByRole('dialog').getByRole('heading', { name: 'Already saved', exact: true })).toBeVisible(); }
   async uploadDraft() {
     const dialog = this.page.getByRole('dialog');
     await dialog.getByRole('radio', { name: 'Upload an image', exact: true }).check();

@@ -11,6 +11,23 @@ import { IReferenceDraftService } from './reference-draft.service.contract';
 
 @Injectable()
 export class ReferenceDraftService implements IReferenceDraftService {
+  async import(sourceUrl: string, operationKey: string): Promise<ReferenceDraftResult> {
+    const token = await this.session.getRequestToken();
+    try {
+      return await firstValueFrom(
+        this.http.post<ReferenceDraftResult>(
+          '/api/reference-drafts/links',
+          { sourceUrl },
+          {
+            headers: { 'X-CSRF-Token': token, 'Idempotency-Key': operationKey },
+            timeout: 15000,
+          },
+        ),
+      );
+    } catch (error) {
+      throw this.failure(error);
+    }
+  }
   private readonly http = inject(HttpClient);
   private readonly session = inject(SESSION_SERVICE);
   async upload(

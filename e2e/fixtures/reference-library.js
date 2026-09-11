@@ -13,7 +13,7 @@ export class ReferenceLibrary {
     this.uploadReceipts = new Map(); this.lostUploadResponses = 0;
     this.calls = []; this.failures = {}; this.errors = {}; this.gates = {};
     this.boards = []; this.boardCalls = [];
-    this.drafts = new Map(); this.draftCalls = []; this.draftReceipts = new Map();
+    this.drafts = new Map(); this.draftCalls = []; this.draftReceipts = new Map(); this.draftFailure = null;
   }
   async attach(page) {
     await page.exposeFunction('loupeReferenceDrafts', async (operation, input) => {
@@ -21,6 +21,11 @@ export class ReferenceLibrary {
       await this.gates['draft-' + operation]?.promise;
       if (this.failures['draft-' + operation] > 0) { this.failures['draft-' + operation]--; return { error: 'request_failed' }; }
       if (input.operationKey && this.draftReceipts.has(input.operationKey)) return { data: this.draftReceipts.get(input.operationKey) };
+      if (operation === 'import') {
+        const existing = this.items.find(item => item.sourceUrl === input.sourceUrl);
+        const draft = { ...new ReferenceLibrary(1).items[0], id: crypto.randomUUID(), title: existing?.title || 'source.example', attribution: null, imageUrl: null, previewUrl: null, sourceUrl: input.sourceUrl, committedReferenceId: existing?.id || null, failureCode: null, expiresAt: '2099-01-01T00:00:00Z', import: existing ? null : { id: crypto.randomUUID(), status: 'Queued', message: 'Waiting to start.' } };
+        this.drafts.set(draft.id, draft); this.draftReceipts.set(input.operationKey, draft); return { data: draft };
+      }
       if (operation === 'upload') {
         const base = new ReferenceLibrary(1).items[0];
         const draft = { ...base, id: crypto.randomUUID(), title: input.filename.replace(/\.[^.]+$/, ''), attribution: null, sourceUrl: input.sourceUrl || null, import: null, committedReferenceId: null, failureCode: null, expiresAt: '2099-01-01T00:00:00Z' };
@@ -29,7 +34,14 @@ export class ReferenceLibrary {
       const draft = this.drafts.get(input.id);
       if (operation === 'cancel') { this.drafts.delete(input.id); return { data: null }; }
       if (!draft) return { error: 'item_unavailable' };
-      if (operation === 'get') return { data: draft };
+      if (operation === 'get') {
+        if (draft.import?.status === 'Queued') {
+          draft.import.status = this.draftFailure ? 'Failed' : 'Succeeded'; draft.failureCode = this.draftFailure;
+          draft.title = 'Morning by the window'; draft.attribution = this.draftFailure ? null : 'Casey Example'; draft.revision++;
+          if (!this.draftFailure) { draft.imageUrl = new ReferenceLibrary(1).items[0].imageUrl; draft.previewUrl = draft.imageUrl; }
+        }
+        return { data: draft };
+      }
       if (operation === 'save') {
         if (draft.revision !== input.revision) return { error: 'revision_conflict' };
         const reference = { ...draft, ...input, id: crypto.randomUUID(), title: input.title.trim(), attribution: input.attribution?.trim() || null, tags: [], boardIds: input.boardIds, revision: 1 };

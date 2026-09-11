@@ -5,6 +5,7 @@ import { ReferenceLinkResult } from '../reference/reference-link';
 import { UploadProgress } from '../common/upload-progress';
 
 export interface IReferenceDraftService {
+  import(sourceUrl: string, operationKey: string): Promise<ReferenceDraftResult>;
   upload(
     image: File,
     sourceUrl: string,

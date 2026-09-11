@@ -173,3 +173,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - Legacy upload/link tests now open their retained direct routes. Their read-only call allowances include the required tag facet read, with write restrictions preserved.
 - Link import, board selection, progress/error states and final visual parity remain in the next dialog slices.
 
+
+### Unified source import dialog
+- RED: 4 link workflow cases failed on the missing From a link radio.
+- GREEN: all 24 dialog/board/collection Chromium cases pass. Link imports expose editable previews, explicit fallback notes, duplicate detection and cancel without late reopening. Production build passes with the existing initial-bundle warning.
+- Azure CLI is authenticated and lists the existing qbs-ai-ynal4ns37wb6a resource in rg-qbs-prod. No keys were printed; deployment discovery is in progress for the approved live validation.
+

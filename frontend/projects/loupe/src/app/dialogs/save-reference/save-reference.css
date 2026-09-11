@@ -30,3 +30,64 @@
 [role='alert'] {
   color: var(--lp-color-danger);
 }
+.segmented {
+  display: flex;
+  padding: var(--lp-space-1);
+  border-radius: var(--lp-radius-md);
+  background: var(--lp-color-surface-2);
+}
+.segmented label {
+  flex: 1;
+  position: relative;
+}
+.segmented input {
+  position: absolute;
+  opacity: var(--lp-zero);
+}
+.segmented span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lp-space-2);
+  padding: var(--lp-space-2);
+  font-size: var(--lp-text-sm);
+  border-radius: var(--lp-radius-sm);
+  cursor: pointer;
+}
+.segmented input:checked + span {
+  background: var(--lp-color-surface);
+  box-shadow: var(--lp-shadow-sm);
+}
+.segmented input:focus-visible + span {
+  outline: var(--lp-ring-width) solid var(--lp-color-focus);
+  outline-offset: var(--lp-space-1);
+}
+.upload:focus-within {
+  outline: var(--lp-ring-width) solid var(--lp-color-focus);
+}
+.import-progress progress {
+  width: var(--lp-full);
+  accent-color: var(--lp-color-ink);
+}
+.import-progress > div {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--lp-space-2);
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-text-2);
+}
+.fallback {
+  padding: var(--lp-space-4);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+  font-size: var(--lp-text-sm);
+}
+.lp-dialog__privacy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lp-space-1);
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-text-2);
+  margin-right: auto;
+}

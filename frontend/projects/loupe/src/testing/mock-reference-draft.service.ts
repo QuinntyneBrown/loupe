@@ -9,6 +9,9 @@ import {
 
 @Injectable()
 export class MockReferenceDraftService implements IReferenceDraftService {
+  import(sourceUrl: string, operationKey: string): Promise<ReferenceDraftResult> {
+    return this.call('import', { sourceUrl, operationKey });
+  }
   upload(image: File, sourceUrl: string, operationKey: string): Promise<ReferenceDraftResult> {
     return this.call('upload', { filename: image.name, sourceUrl, operationKey });
   }

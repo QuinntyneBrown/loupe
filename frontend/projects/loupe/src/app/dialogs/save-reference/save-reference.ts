@@ -1,6 +1,7 @@
 import {
   afterNextRender,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   inject,
@@ -9,6 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import {
   REFERENCE_DRAFT_SERVICE,
   ReferenceDraftResult,
@@ -19,11 +21,31 @@ import {
 
 @Component({
   selector: 'lp-save-reference',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './save-reference.html',
   styleUrl: './save-reference.css',
 })
 export class SaveReference {
+  readonly sourceKind = signal<'link' | 'upload'>('link');
+  readonly phase = signal<'form' | 'importing' | 'preview' | 'failed' | 'duplicate'>('form');
+  readonly notes = signal('');
+  readonly closing = signal(false);
+  readonly heading = computed(() =>
+    this.phase() === 'importing'
+      ? 'Importing…'
+      : this.phase() === 'failed'
+        ? "Couldn't import this page"
+        : this.phase() === 'duplicate'
+          ? 'Already saved'
+          : 'Save reference',
+  );
+  readonly sourceHost = computed(() => {
+    try {
+      return new URL(this.draft()?.sourceUrl || this.source()).host;
+    } catch {
+      return '';
+    }
+  });
   readonly closed = output<void>();
   readonly saved = output<ReferenceResult>();
   readonly draft = signal<ReferenceDraftResult | null>(null);
@@ -41,9 +63,15 @@ export class SaveReference {
   private uploadKey = crypto.randomUUID();
   private saveKey = crypto.randomUUID();
   private saveFingerprint = '';
+  private importKey = crypto.randomUUID();
+  private importedSource = '';
+  private timer: ReturnType<typeof setTimeout> | undefined;
   constructor() {
     afterNextRender(() => this.modal().nativeElement.showModal());
-    this.destroy.onDestroy(() => this.modal().nativeElement.close());
+    this.destroy.onDestroy(() => {
+      clearTimeout(this.timer);
+      this.modal().nativeElement.close();
+    });
   }
   choose(event: Event): void {
     const files = (event.target as HTMLInputElement).files;
@@ -70,8 +98,12 @@ export class SaveReference {
   }
   async preview(): Promise<void> {
     const file = this.file();
-    if (!file || this.busy()) return;
+    if (this.busy() || (this.sourceKind() === 'upload' && !file)) return;
     const source = this.source().trim();
+    if (!source && this.sourceKind() === 'link') {
+      this.error.set('Enter a link to the photograph.');
+      return;
+    }
     if (source) {
       try {
         const url = new URL(source);
@@ -90,33 +122,70 @@ export class SaveReference {
     }
     this.busy.set(true);
     this.error.set('');
+    if (source !== this.importedSource) {
+      this.importedSource = source;
+      this.importKey = crypto.randomUUID();
+      this.uploadKey = crypto.randomUUID();
+    }
+    if (this.sourceKind() === 'link') this.phase.set('importing');
     try {
-      const draft = await this.service.upload(file, source, this.uploadKey, (value) =>
-        this.progress.set(value),
-      );
+      const draft =
+        this.sourceKind() === 'link'
+          ? await this.service.import(source, this.importKey)
+          : await this.service.upload(file!, source, this.uploadKey, (value) =>
+              this.progress.set(value),
+            );
       if (this.destroy.destroyed) {
         await this.service.cancel(draft.id);
         return;
       }
-      this.draft.set(draft);
-      this.title.set(draft.title);
-      this.photographer.set(draft.attribution ?? '');
+      this.receive(draft);
     } catch (error) {
-      if (!this.destroy.destroyed)
+      if (!this.destroy.destroyed) {
+        this.phase.set('form');
         this.error.set(
           error instanceof ServiceError && error.code === 'file_unavailable'
             ? 'Choose the image again to retry.'
             : 'The preview could not be prepared. Try again.',
         );
+      }
     } finally {
       if (!this.destroy.destroyed) this.busy.set(false);
     }
   }
+  private receive(draft: ReferenceDraftResult): void {
+    if (this.destroy.destroyed || this.closing()) return;
+    this.draft.set(draft);
+    if (draft.committedReferenceId) {
+      this.phase.set('duplicate');
+      return;
+    }
+    if (draft.import && ['Queued', 'Running'].includes(draft.import.status)) {
+      this.phase.set('importing');
+      this.timer = setTimeout(() => void this.poll(), 500);
+      return;
+    }
+    this.title.set(draft.title);
+    this.photographer.set(draft.attribution ?? '');
+    this.phase.set(draft.failureCode ? 'failed' : 'preview');
+  }
+  async poll(): Promise<void> {
+    const draft = this.draft();
+    if (!draft || this.destroy.destroyed || this.closing()) return;
+    this.error.set('');
+    try {
+      this.receive(await this.service.get(draft.id));
+    } catch {
+      if (!this.destroy.destroyed && !this.closing())
+        this.error.set('Import status could not be loaded. Try again.');
+    }
+  }
   async cancel(event?: Event): Promise<void> {
     event?.preventDefault();
-    if (this.busy() || this.saving()) return;
+    if (this.closing() || this.saving()) return;
     const draft = this.draft();
-    this.busy.set(true);
+    this.closing.set(true);
+    clearTimeout(this.timer);
     this.error.set('');
     try {
       if (draft) await this.service.cancel(draft.id);
@@ -127,15 +196,20 @@ export class SaveReference {
     } catch {
       if (!this.destroy.destroyed) this.error.set('The preview could not be discarded. Try again.');
     } finally {
-      if (!this.destroy.destroyed) this.busy.set(false);
+      if (!this.destroy.destroyed) {
+        this.closing.set(false);
+        if (this.phase() === 'importing' && draft)
+          this.timer = setTimeout(() => void this.poll(), 500);
+      }
     }
   }
   async save(): Promise<void> {
     const draft = this.draft();
-    if (!draft || this.saving() || this.busy()) return;
+    if (!draft || this.saving() || this.busy() || !['preview', 'failed'].includes(this.phase()))
+      return;
     const title = this.title().trim(),
       attribution = this.photographer().trim();
-    if (!title || title.length > 200 || attribution.length > 200) {
+    if (!title || title.length > 200 || attribution.length > 200 || this.notes().length > 10000) {
       this.error.set('Enter a title and use 200 characters or fewer for each field.');
       return;
     }
@@ -143,7 +217,7 @@ export class SaveReference {
       title,
       attribution: attribution || null,
       sourceUrl: draft.sourceUrl,
-      notes: null,
+      notes: this.notes().trim() || null,
     };
     const fingerprint = JSON.stringify(metadata);
     if (fingerprint !== this.saveFingerprint) {
