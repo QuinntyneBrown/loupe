@@ -52,7 +52,8 @@ public sealed class ReferenceSourceReader(IRestrictedPageFetcher fetcher, IRobot
     {
         if (response.StatusCode is System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.PaymentRequired or System.Net.HttpStatusCode.Forbidden)
             throw new SourceImportException("source_access_denied");
-        if (!response.IsSuccessStatusCode) throw new SourceImportException("source_unavailable");
+        if (!response.IsSuccessStatusCode)
+            throw new SourceImportException((int)response.StatusCode >= 500 || response.StatusCode == System.Net.HttpStatusCode.RequestTimeout ? "source_unavailable" : "source_not_available");
     }
 
     private static string? Clean(string? value, int limit)

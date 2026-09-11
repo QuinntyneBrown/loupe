@@ -22,6 +22,8 @@ public sealed class RunReferenceImportCommandHandler(IReferenceImportWorkStore w
         catch (OperationCanceledException) when (timeout.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
         { result = new(null, null, input.SourceUrl, null, "source_timeout"); }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && attempt.IsCancellationRequested) { return true; }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        { result = new(null, null, input.SourceUrl, null, "source_timeout"); }
         catch (SourceImportException failure) { result = new(null, null, input.SourceUrl, null, failure.Code); }
         catch (SourceFetchException) { result = new(null, null, input.SourceUrl, null, "source_restricted"); }
         catch (Exception failure) when (failure is HttpRequestException or IOException or InvalidDataException or ImageValidationException)

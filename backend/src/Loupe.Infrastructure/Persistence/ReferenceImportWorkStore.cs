@@ -24,6 +24,20 @@ public sealed class ReferenceImportWorkStore(LibraryDbContext database, IOperati
         var draft = await database.ReferenceDrafts.FromSqlInterpolated($"SELECT * FROM reference_drafts WHERE \"Id\" = {operation.ResourceId} AND \"OwnerId\" = {operation.OwnerId} FOR UPDATE")
             .SingleOrDefaultAsync(cancellationToken);
         if (draft is null || draft.ExpiresAt <= now || draft.CommittedReferenceId is not null || draft.ImportOperationId != operation.Id) return;
+        var retry = result.FailureCode is "source_unavailable" or "source_timeout" && operation.AttemptCount < 3;
+        if (retry)
+        {
+            current.Status = OperationStatus.Queued;
+            current.FailureCode = result.FailureCode;
+            current.NextAttemptAt = now.AddSeconds(operation.AttemptCount == 1 ? 5 : 30);
+            current.UpdatedAt = now;
+            current.LeaseToken = null;
+            current.LeaseExpiresAt = null;
+            current.Message = "The source is temporarily unavailable. Waiting to try again.";
+            await database.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return;
+        }
         // Failed transactions leave media for reference-aware orphan cleanup.
         if (result.Image is { } image)
         {

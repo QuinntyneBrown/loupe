@@ -155,3 +155,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - Publication checks the operation lease, owner and active draft in one transaction; original URLs remain attached and final fetched URL/time are retained in the operation output.
 - Worker hosting, legacy-reference publication and transient retry are the next source-processing slice.
 
+
+### Source retry scheduling
+- RED: the 503 retry case returned Failed instead of Queued.
+- GREEN: all 9 source-worker cases pass, including recovery after a temporary failure and termination after three attempts. HTTP client timeouts also enter the bounded retry path.
+
