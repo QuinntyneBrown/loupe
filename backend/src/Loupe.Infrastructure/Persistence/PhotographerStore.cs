@@ -2,6 +2,7 @@ using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Loupe.Application.Photographers;
+using Loupe.Application.PhotographerSummaries;
 using Loupe.Application.Common;
 using Loupe.Application.References;
 using Loupe.Domain.Photographers;
@@ -9,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Loupe.Infrastructure.Persistence;
 
-public sealed class PhotographerStore(LibraryDbContext database) : IPhotographerStore
+public sealed class PhotographerStore(LibraryDbContext database, IPhotographerSummaryQueue summaries) : IPhotographerStore
 {
     public Task<Photographer?> FindSourceOwnedAsync(string ownerId, string url, CancellationToken cancellationToken) =>
         database.Photographers.FromSqlInterpolated($"""
@@ -50,18 +51,25 @@ public sealed class PhotographerStore(LibraryDbContext database) : IPhotographer
     public async Task<Photographer> SaveAsync(Photographer photographer, CancellationToken cancellationToken)
     {
         if (database.Database.CurrentTransaction is null) throw new InvalidOperationException("Portfolio writes require a transaction.");
+        await AnalysisAdmissionLock.AcquireAsync(database, photographer.OwnerId, cancellationToken);
         var source = await LockPortfolioAsync(photographer.OwnerId, photographer.PortfolioUrl, cancellationToken);
         var existing = await database.Photographers.FromSqlInterpolated($"""
             SELECT * FROM photographers WHERE "OwnerId" = {photographer.OwnerId} AND "PortfolioHash" = {source.Hash}
             AND loupe_normalize_source("PortfolioUrl") = {source.NormalizedSource}
             """).Include(item => item.Tags).SingleOrDefaultAsync(cancellationToken);
         if (existing is not null) return existing;
-        database.Photographers.Add(photographer); await database.SaveChangesAsync(cancellationToken); return photographer;
+        database.Photographers.Add(photographer);
+        await summaries.QueueIfConfiguredAsync(photographer, cancellationToken);
+        await database.SaveChangesAsync(cancellationToken); return photographer;
     }
 
     public async Task<Photographer> UpdateAsync(string ownerId, Guid id, long revision, PhotographerMetadata metadata, CancellationToken cancellationToken)
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
+        await AnalysisAdmissionLock.AcquireAsync(database, ownerId, cancellationToken);
+        var previous = await database.Photographers.AsNoTracking().SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken) ?? throw new ResourceNotFoundException();
+        var sourceChanged = !await database.Database.SqlQuery<bool>($"SELECT loupe_normalize_source({previous.PortfolioUrl}) = loupe_normalize_source({metadata.PortfolioUrl}) AS \"Value\"").SingleAsync(cancellationToken);
+        if (sourceChanged) await summaries.CancelAsync(id, ownerId, false, cancellationToken);
         var source = await LockPortfolioAsync(ownerId, metadata.PortfolioUrl, cancellationToken);
         var photographer = await database.Photographers.FromSqlInterpolated($"SELECT * FROM photographers WHERE \"Id\" = {id} AND \"OwnerId\" = {ownerId} FOR UPDATE")
             .Include(item => item.Tags).SingleOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException();
@@ -71,8 +79,7 @@ public sealed class PhotographerStore(LibraryDbContext database) : IPhotographer
             AND loupe_normalize_source("PortfolioUrl") = {source.NormalizedSource}
             """).AnyAsync(cancellationToken);
         if (duplicate) throw new PortfolioConflictException();
-        var previousSource = await database.Database.SqlQuery<string>($"SELECT loupe_normalize_source({photographer.PortfolioUrl}) AS \"Value\"").SingleAsync(cancellationToken);
-        if (previousSource != source.NormalizedSource) { photographer.SourceRevision++; photographer.SourceFailureCode = null; }
+        if (sourceChanged) { photographer.SourceRevision++; photographer.SourceFailureCode = null; photographer.CurrentSummaryOperationId = null; }
         photographer.Name = metadata.Name; photographer.PortfolioUrl = metadata.PortfolioUrl;
         if (photographer.Summary != metadata.Summary) photographer.SummaryProvenance = metadata.Summary is null ? null : "manual";
         photographer.Summary = metadata.Summary; photographer.Notes = metadata.Notes;
@@ -86,6 +93,7 @@ public sealed class PhotographerStore(LibraryDbContext database) : IPhotographer
             else if (tag.Name != input.Name || tag.Category != input.Category) { tag.Name = input.Name; tag.Category = input.Category; tag.Provenance = "manual"; }
         }
         photographer.Revision++;
+        if (sourceChanged) await summaries.QueueIfConfiguredAsync(photographer, cancellationToken);
         try { await database.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateConcurrencyException) { throw new RevisionConflictException(); }
         await transaction.CommitAsync(cancellationToken); return photographer;

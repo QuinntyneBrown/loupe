@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Loupe.Application.Common;
 using Loupe.Application.Deletions;
+using Loupe.Application.PhotographerSummaries;
 using Loupe.Domain.Deletions;
 using Loupe.Domain.Operations;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ using Npgsql;
 
 namespace Loupe.Infrastructure.Persistence;
 
-public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock) : IDeletionStore
+public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock, IPhotographerSummaryQueue summaries) : IDeletionStore
 {
     public async Task<DeletionOperation> DeletePhotographerAsync(Guid id, string ownerId, long revision, CancellationToken cancellationToken)
     {
@@ -21,6 +22,7 @@ public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock)
             var previous = await database.Deletions.AsNoTracking().SingleOrDefaultAsync(item => item.OwnerId == ownerId
                 && item.ResourceType == "photographer" && item.ResourceId == id, cancellationToken);
             if (previous is not null) return previous;
+            await summaries.CancelAsync(id, ownerId, true, cancellationToken);
             var photographer = await database.Photographers.FromSqlInterpolated($"SELECT * FROM photographers WHERE \"Id\" = {id} AND \"OwnerId\" = {ownerId} FOR UPDATE")
                 .SingleOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException();
             if (photographer.Revision != revision) throw new RevisionConflictException();

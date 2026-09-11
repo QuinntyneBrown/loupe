@@ -486,3 +486,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: three worker cases stayed Queued without a summary worker.
 - GREEN: 13 summary and reference-analysis API cases pass. The shared worker pool rotates across visual critiques, reference analysis and photographer summaries. The provider receives only captured title/description/main text, uses strict structured output with store:false, and publishes separate pending suggestions plus source provenance. Title-only output reports insufficient information; blocked pages never call the model. These checks use controlled transports, not live Azure.
 
+
+### Automatic summary lifecycle
+- RED: both save/change/delete scenarios had no automatic summary operation (204 instead of 200).
+- GREEN: all 50 photographer and reference-analysis API cases pass. New bookmarks and changed portfolio URLs queue summaries when configured; full queues retain the bookmark with a failed operation. URL changes cancel old work; deletion cancels and redacts summary payloads. Lock ordering follows owner admission, operations, then bookmark writes.
+

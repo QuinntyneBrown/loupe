@@ -44,6 +44,27 @@ public sealed class PhotographerSummaryAdmissionTests(PostgreSqlFixture database
         Assert.Equal("Manual summary", (await owner.GetFromJsonAsync<JsonElement>($"/api/photographers/{id}")).GetProperty("summary").GetString());
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Saving_queues_a_summary_and_url_changes_or_deletion_cancel_old_work(bool delete)
+    {
+        await using var factory = Factory(); using var owner = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        var id = await Save(owner);
+        using var queued = await owner.GetAsync($"/api/photographers/{id}/summary-analysis"); Assert.Equal(HttpStatusCode.OK, queued.StatusCode);
+        var old = (await queued.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        using var mutation = delete ? await owner.DeleteAsync($"/api/photographers/{id}?revision=1")
+            : await owner.PutAsJsonAsync($"/api/photographers/{id}", new { revision = 1, name = "Casey", portfolioUrl = "https://new.example/", summary = "Manual summary", notes = "Private notes" });
+        mutation.EnsureSuccessStatusCode();
+        Assert.Equal("Canceled", (await owner.GetFromJsonAsync<JsonElement>($"/api/operations/{old}")).GetProperty("status").GetString());
+        if (!delete)
+        {
+            var current = await owner.GetFromJsonAsync<JsonElement>($"/api/photographers/{id}/summary-analysis");
+            Assert.NotEqual(old, current.GetProperty("id").GetGuid()); Assert.Equal("Queued", current.GetProperty("status").GetString());
+            var bookmark = await owner.GetFromJsonAsync<JsonElement>($"/api/photographers/{id}"); Assert.Equal("Manual summary", bookmark.GetProperty("summary").GetString());
+        }
+    }
+
     private static async Task<Guid> Save(HttpClient owner)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/photographers") { Content = JsonContent.Create(new { name = "Casey", portfolioUrl = "https://casey.example/", summary = "Manual summary", notes = "Private notes" }) };
