@@ -120,3 +120,14 @@ be established without printing credentials. Live quality checks are mandatory.
   existing navigation/unload guard.
 - RED: both Chromium scenarios failed on the missing Add a tag input.
 - GREEN: 35 tag/metadata/filter/Inspiration cases passed; production build passed.
+
+### Private upload drafts and final save
+- RED: all 3 API scenarios failed on the absent draft upload endpoint.
+- GREEN: draft privacy/cancel, atomic edited save with boards, repeated final-save
+  acknowledgment, invalid-board rollback and stale-preview revision cases passed.
+- Combined upload/cleanup regression initially had one cleanup timeout. The exact
+  test passed in isolation, then all 18 cases passed together without rebuilding;
+  no timeout threshold or assertion was reduced.
+- Draft media stays out of the library, remains protected from orphan cleanup
+  while active, and transfers to the reference in the final receipt transaction.
+  Drafts expire after 24 hours. Link import and the unified dialog remain next.

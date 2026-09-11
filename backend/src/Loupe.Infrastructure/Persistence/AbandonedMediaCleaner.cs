@@ -18,6 +18,10 @@ public sealed class AbandonedMediaCleaner(LibraryDbContext database, IOptions<Me
         var referenced = keys.SelectMany(photo => new[] { photo.ImageKey, photo.PreviewKey }).ToHashSet(StringComparer.Ordinal);
         var referenceKeys = await database.References.AsNoTracking().Select(reference => new { reference.ImageKey, reference.PreviewKey }).ToListAsync(cancellationToken);
         referenced.UnionWith(referenceKeys.SelectMany(reference => new[] { reference.ImageKey, reference.PreviewKey }).OfType<string>());
+        var draftKeys = await database.ReferenceDrafts.AsNoTracking().Where(draft => draft.ExpiresAt > clock.GetUtcNow())
+            .Select(draft => new { draft.ImageKey, draft.PreviewKey }).ToListAsync(cancellationToken);
+        referenced.UnionWith(draftKeys.SelectMany(draft => new[] { draft.ImageKey, draft.PreviewKey }).OfType<string>());
+        await database.ReferenceDrafts.Where(draft => draft.ExpiresAt <= clock.GetUtcNow()).ExecuteDeleteAsync(cancellationToken);
         var cutoff = (clock.GetUtcNow() - TimeSpan.FromHours(1)).UtcDateTime;
         var removed = 0;
         var failed = 0;
