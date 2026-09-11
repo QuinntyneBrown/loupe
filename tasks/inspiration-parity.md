@@ -234,3 +234,7 @@ be established without printing credentials. Live quality checks are mandatory.
 ### Reference board links
 - RED: the detail workflow failed on missing Add to boards.
 - GREEN: all 14 detail-board/board/deletion/replacement Chromium cases pass. The existing picker supports inline creation, returns focus to its trigger and updates the named board links; each link opens the matching board collection.
+
+### Independent description and notes API
+- RED: all 3 text cases failed on absent description/notes endpoints.
+- GREEN: 23 text/metadata/replacement/deletion/tag API cases pass. Description and notes save independently with revision checks, description provenance is manual, clearing remains absent, and the 4,000/10,000 character limits are enforced.

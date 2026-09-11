@@ -15,6 +15,12 @@ namespace Loupe.Api.Controllers;
 [Route("api/references")]
 public sealed class ReferencesController(ISender sender) : ControllerBase
 {
+    [HttpPut("{id:guid}/description")]
+    public Task<ReferenceResult> Description(Guid id, UpdateReferenceTextRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new UpdateReferenceTextCommand(id, request.Revision, ReferenceTextField.Description, request.Text), cancellationToken);
+    [HttpPut("{id:guid}/notes")]
+    public Task<ReferenceResult> Notes(Guid id, UpdateReferenceTextRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new UpdateReferenceTextCommand(id, request.Revision, ReferenceTextField.Notes, request.Text), cancellationToken);
     [HttpDelete("{id:guid}")]
     public Task<DeletionResult> Delete(Guid id, [FromQuery] long revision, CancellationToken cancellationToken) =>
         sender.Send(new DeleteReferenceCommand(id, revision), cancellationToken);

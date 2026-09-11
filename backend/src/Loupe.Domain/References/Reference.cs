@@ -9,6 +9,8 @@ public sealed class Reference
     public string? SourceUrl { get; set; }
     public string? Attribution { get; set; }
     public string? Notes { get; set; }
+    public string? Description { get; set; }
+    public string? DescriptionProvenance { get; set; }
     public string? ImageKey { get; set; }
     public string? PreviewKey { get; set; }
     public int? Width { get; set; }
