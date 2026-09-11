@@ -1,5 +1,6 @@
 using Loupe.Api.Photographers;
 using Loupe.Application.Photographers;
+using Loupe.Application.Deletions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,10 @@ namespace Loupe.Api.Controllers;
 [Route("api/photographers")]
 public sealed class PhotographersController(ISender sender) : ControllerBase
 {
+    [HttpDelete("{id:guid}")]
+    public Task<DeletionResult> Delete(Guid id, [FromQuery] long revision, CancellationToken cancellationToken) =>
+        sender.Send(new DeletePhotographerCommand(id, revision), cancellationToken);
+
     [HttpGet]
     public Task<PhotographerPage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null) =>
         sender.Send(new ListPhotographersQuery(pageSize, cursor), cancellationToken);

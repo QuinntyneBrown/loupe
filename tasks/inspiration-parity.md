@@ -334,3 +334,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both attribution variants failed on the absent link endpoint; the foreign-item case already returned 404.
 - GREEN: 36 photographer/reference metadata/suggestion cases pass. Link changes are private, revision checked, and preserve textual attribution through rename, replacement and unlink. The database enforces owner-matched associations.
 
+
+### Photographer deletion
+- RED: deletion failed on the absent endpoint.
+- GREEN: 27 photographer and content-deletion API checks pass. Deletion immediately removes the bookmark from collection/detail, unlinks references without changing credit/source/notes, increments their revisions, and reuses the private deletion record. Replaying the original save key cannot resurrect the bookmark.
+

@@ -12,6 +12,33 @@ namespace Loupe.Infrastructure.Persistence;
 
 public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock) : IDeletionStore
 {
+    public async Task<DeletionOperation> DeletePhotographerAsync(Guid id, string ownerId, long revision, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
+            await AnalysisAdmissionLock.AcquireAsync(database, ownerId, cancellationToken);
+            var previous = await database.Deletions.AsNoTracking().SingleOrDefaultAsync(item => item.OwnerId == ownerId
+                && item.ResourceType == "photographer" && item.ResourceId == id, cancellationToken);
+            if (previous is not null) return previous;
+            var photographer = await database.Photographers.FromSqlInterpolated($"SELECT * FROM photographers WHERE \"Id\" = {id} AND \"OwnerId\" = {ownerId} FOR UPDATE")
+                .SingleOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException();
+            if (photographer.Revision != revision) throw new RevisionConflictException();
+            await database.References.Where(item => item.OwnerId == ownerId && item.PhotographerId == id)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.PhotographerId, (Guid?)null)
+                    .SetProperty(item => item.Revision, item => item.Revision + 1), cancellationToken);
+            var now = clock.GetUtcNow();
+            var operation = new DeletionOperation { OwnerId = ownerId, ResourceType = "photographer", ResourceId = id, DeletedAt = now, CompletedAt = now, MediaKeys = [] };
+            database.Deletions.Add(operation); database.Photographers.Remove(photographer);
+            await database.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken); return operation;
+        }
+        catch (DbUpdateConcurrencyException) { throw new RevisionConflictException(); }
+        catch (Exception exception) when (exception is NpgsqlException { IsTransient: true }
+            or DbUpdateException { InnerException: NpgsqlException { IsTransient: true } })
+        { throw new ServiceUnavailableException(); }
+    }
+
     public async Task<DeletionOperation> DeleteReferenceAsync(Guid id, string ownerId, long revision, CancellationToken cancellationToken)
     {
         try { return await DeleteReferenceCoreAsync(id, ownerId, revision, cancellationToken); }
