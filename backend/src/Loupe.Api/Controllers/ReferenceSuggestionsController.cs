@@ -13,6 +13,10 @@ namespace Loupe.Api.Controllers;
 [Route("api/references/{id:guid}/suggestions")]
 public sealed class ReferenceSuggestionsController(ISender sender) : ControllerBase
 {
+    [HttpPost("undo")]
+    public Task<ReferenceResult> Undo(Guid id, UndoReferenceSuggestionRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new UndoReferenceSuggestionCommand(id, request.Revision), cancellationToken);
+
     [HttpPut]
     public Task<ReferenceResult> Review(Guid id, ReviewReferenceSuggestionRequest request, CancellationToken cancellationToken) =>
         sender.Send(new ReviewReferenceSuggestionCommand(id, request.OperationId, request.Revision, request.Target, request.Decision, request.Name, request.Value, request.Category), cancellationToken);

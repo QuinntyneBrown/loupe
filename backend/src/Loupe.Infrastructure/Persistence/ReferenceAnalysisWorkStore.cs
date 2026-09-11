@@ -24,6 +24,7 @@ public sealed class ReferenceAnalysisWorkStore(LibraryDbContext database, IOpera
             result.Description.Trim(), "pending", result.Tags.Select(tag => new ReferenceSuggestedTag(tag.Name.Trim().Normalize(), tag.Category)).ToArray());
         var json = JsonSerializer.Serialize(saved);
         reference.SuggestionsJson = json;
+        reference.SuggestionUndoJson = null;
         reference.Revision++;
         current.OutputJson = json;
         current.Status = OperationStatus.Succeeded; current.CompletedAt = now; current.UpdatedAt = now;

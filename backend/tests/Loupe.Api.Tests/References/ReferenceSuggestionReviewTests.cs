@@ -82,6 +82,49 @@ public sealed class ReferenceSuggestionReviewTests(PostgreSqlFixture database) :
     private static Task<HttpResponseMessage> Review(HttpClient owner, Guid id, Guid operationId, long revision, string target, string decision, string? name = null, string? value = null, string? category = null) =>
         owner.PutAsJsonAsync($"/api/references/{id}/suggestions", new { operationId, revision, target, decision, name, value, category });
 
+    [Theory]
+    [InlineData("accept")]
+    [InlineData("dismiss")]
+    public async Task Bulk_review_is_atomic_and_undo_restores_previous_metadata_and_pending_states(string decision)
+    {
+        await using var factory = Factory(); using var owner = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        var (id, operation) = await GenerateAsync(factory, owner);
+        using var manual = await owner.PutAsJsonAsync($"/api/references/{id}/description", new { revision = 2, text = "My earlier description" }); manual.EnsureSuccessStatusCode();
+        using var reviewed = await Review(owner, id, operation, 3, "all", decision); reviewed.EnsureSuccessStatusCode();
+        var active = await reviewed.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal(decision == "accept" ? 2 : 0, active.GetProperty("tags").GetArrayLength());
+        Assert.Equal(decision == "accept" ? "A sunlit room." : "My earlier description", active.GetProperty("description").GetString());
+        if (decision == "accept")
+        {
+            Assert.Equal("ai-accepted", active.GetProperty("descriptionProvenance").GetString());
+            Assert.All(active.GetProperty("tags").EnumerateArray(), tag => Assert.Equal("ai-accepted", tag.GetProperty("provenance").GetString()));
+        }
+        using var undo = await owner.PostAsJsonAsync($"/api/references/{id}/suggestions/undo", new { revision = 4 }); undo.EnsureSuccessStatusCode();
+        var restored = await undo.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Empty(restored.GetProperty("tags").EnumerateArray()); Assert.Equal("My earlier description", restored.GetProperty("description").GetString());
+        Assert.Equal("manual", restored.GetProperty("descriptionProvenance").GetString()); Assert.Equal("Private notes", restored.GetProperty("notes").GetString());
+        var suggestions = await owner.GetFromJsonAsync<JsonElement>($"/api/references/{id}/suggestions");
+        Assert.Equal("pending", suggestions.GetProperty("descriptionState").GetString());
+        Assert.All(suggestions.GetProperty("tags").EnumerateArray(), tag => Assert.Equal("pending", tag.GetProperty("state").GetString()));
+        using var repeated = await owner.PostAsJsonAsync($"/api/references/{id}/suggestions/undo", new { revision = 5 }); Assert.Equal(HttpStatusCode.Conflict, repeated.StatusCode);
+    }
+
+    [Fact]
+    public async Task Bulk_limit_failure_applies_nothing_and_undo_cannot_overwrite_later_edits()
+    {
+        await using var factory = Factory(); using var owner = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        var (id, operation) = await GenerateAsync(factory, owner);
+        var tags = Enumerable.Range(0, 49).Select(i => new { name = $"Tag {i}" }).ToArray();
+        using var manual = await owner.PutAsJsonAsync($"/api/references/{id}/tags", new { revision = 2, tags }); manual.EnsureSuccessStatusCode();
+        using var limit = await Review(owner, id, operation, 3, "all", "accept"); Assert.Equal(HttpStatusCode.BadRequest, limit.StatusCode);
+        var unchanged = await owner.GetFromJsonAsync<JsonElement>($"/api/references/{id}");
+        Assert.Equal(3, unchanged.GetProperty("revision").GetInt64()); Assert.Equal(JsonValueKind.Null, unchanged.GetProperty("description").ValueKind); Assert.Equal(49, unchanged.GetProperty("tags").GetArrayLength());
+        using var dismissed = await Review(owner, id, operation, 3, "all", "dismiss"); dismissed.EnsureSuccessStatusCode();
+        using var edit = await owner.PutAsJsonAsync($"/api/references/{id}/notes", new { revision = 4, text = "A later note" }); edit.EnsureSuccessStatusCode();
+        using var stale = await owner.PostAsJsonAsync($"/api/references/{id}/suggestions/undo", new { revision = 4 }); Assert.Equal(HttpStatusCode.Conflict, stale.StatusCode);
+        using var latest = await owner.PostAsJsonAsync($"/api/references/{id}/suggestions/undo", new { revision = 5 }); Assert.Equal(HttpStatusCode.Conflict, latest.StatusCode);
+    }
+
     private static async Task<(Guid Id, Guid Operation)> GenerateAsync(ApiFactory factory, HttpClient owner)
     {
         using var upload = await ReferenceFixture.SubmitAsync(owner, new Dictionary<string, string> { ["notes"] = "Private notes" }); upload.EnsureSuccessStatusCode();

@@ -269,3 +269,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: all 3 API review cases returned 405.
 - GREEN: 16 review/worker/text/tag checks pass. Accepted and edited values record provenance; dismissed values stay out of active metadata; reviews persist after restart. Existing tag spelling/provenance survives duplicate acceptance, the 50-tag limit retains pending suggestions, and owner/revision/generation checks protect writes.
 
+
+### Bulk suggestion review and Undo
+- RED: all 3 bulk cases rejected the unsupported all target.
+- GREEN: all 19 review/worker/text/replacement cases pass. Bulk decisions are atomic, including tag-limit failure. Undo restores the pre-review description, provenance, active tags and pending states, and refuses intervening revisions. New image analysis invalidates old Undo state.
+

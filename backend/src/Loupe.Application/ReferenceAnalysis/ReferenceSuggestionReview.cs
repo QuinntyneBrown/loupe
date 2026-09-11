@@ -10,6 +10,14 @@ public static class ReferenceSuggestionReview
     {
         var saved = reference.SuggestionsJson is null ? null : JsonSerializer.Deserialize<SavedReferenceSuggestions>(reference.SuggestionsJson);
         if (saved is null || saved.OperationId != decision.OperationId || saved.ImageRevision != reference.ImageRevision) throw new RevisionConflictException();
+        if (decision.Target == "all")
+        {
+            if (saved.DescriptionState != "pending" && saved.Tags.All(tag => tag.State != "pending")) throw new RevisionConflictException();
+            if (saved.DescriptionState == "pending") Apply(reference, decision with { Target = "description" });
+            foreach (var tag in saved.Tags.Where(tag => tag.State == "pending"))
+                Apply(reference, decision with { Target = "tag", Name = tag.Name, Value = null, Category = null });
+            return;
+        }
         var accept = decision.Decision == "accept";
         var state = accept ? "accepted" : "dismissed";
         if (decision.Target == "description")
