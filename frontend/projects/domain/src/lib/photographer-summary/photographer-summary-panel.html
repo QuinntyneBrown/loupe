@@ -1,0 +1,108 @@
+<section
+  class="summary"
+  aria-labelledby="summary-title"
+  [attr.aria-busy]="active() || loading()"
+  [class.quiet]="!!unavailable()"
+>
+  <header>
+    <h2 class="lp-kicker lp-kicker--ai" id="summary-title">Summary</h2>
+    @if (active()) {
+      <span class="note" role="status"
+        ><span class="lp-spinner" aria-hidden="true"></span>Reading the site…</span
+      >
+    }
+  </header>
+  @if (loadFailed()) {
+    <p role="alert">Couldn't load the summary status.</p>
+    <button class="lp-button lp-button--secondary lp-button--sm" (click)="load()">Try again</button>
+  } @else if (active() || loading()) {
+    <div class="skeleton-lines" aria-hidden="true">
+      <div class="lp-skeleton line long"></div>
+      <div class="lp-skeleton line medium"></div>
+      <div class="lp-skeleton line short"></div>
+    </div>
+    <p class="note">Usually under a minute. Only the bookmarked page Loupe can reach is read.</p>
+  } @else if (unavailable()) {
+    <p>{{ unavailable() }}</p>
+  } @else if (operation()?.status === 'Failed') {
+    <p role="alert">
+      {{
+        operation()?.failureCode === 'analysis_limit'
+          ? 'Your photographer is saved. Too many operations are active; try again when one finishes.'
+          : "Couldn't summarise the site this time. The page was reachable; the summary step failed."
+      }}
+    </p>
+    <button
+      class="lp-button lp-button--secondary lp-button--sm"
+      [disabled]="busy() || metadataDirty() || conflicted()"
+      (click)="request()"
+    >
+      Try again
+    </button>
+  }
+  @if (suggestions(); as value) {
+    @if (value.summaryStatus === 'pending') {
+      <div class="proposal">
+        <p class="note">
+          {{ previous() ? 'Suggestion from the previous portfolio URL' : 'Suggested summary' }} ·
+          {{ value.mode }} · {{ value.createdAt | date: 'd MMM yyyy' }}
+        </p>
+        <p>{{ value.summary }}</p>
+      </div>
+    }
+    <p class="note">
+      <a
+        [href]="value.source.fetchedUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        referrerpolicy="no-referrer"
+        >Source page</a
+      >
+      · {{ value.source.retrievedAt | date: 'd MMM yyyy' }}
+    </p>
+    <p class="note">Only the page Loupe could read was used. Nothing behind a login.</p>
+  }
+  @if (photographer().summary) {
+    @if (suggestions() || active() || operation()?.status === 'Failed') {
+      <p class="note">Saved description</p>
+    }
+    <p>{{ photographer().summary }}</p>
+  } @else if (!operation() && !loading() && !suggestions()) {
+    <p>No summary available. Your notes and tags still help you find this bookmark.</p>
+  }
+  @if (photographer().source; as source) {
+    @if (!suggestions()) {
+      <p class="note">
+        <a
+          [href]="source.fetchedUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          referrerpolicy="no-referrer"
+          >{{ photographer().sourceIsCurrent ? 'Captured page' : 'Previous captured page' }}</a
+        >
+        · {{ source.retrievedAt | date: 'd MMM yyyy' }}
+      </p>
+    }
+  }
+  @if (error()) {
+    <p role="alert">{{ error() }}</p>
+  }
+  @if (conflicted()) {
+    <button
+      class="lp-button lp-button--secondary lp-button--sm"
+      [disabled]="busy() || metadataDirty()"
+      (click)="reviewLatest()"
+    >
+      Review latest bookmark
+    </button>
+  }
+  @if (!operation() && !loading() && !loadFailed()) {
+    <button
+      class="lp-button lp-button--secondary lp-button--sm"
+      [disabled]="busy() || metadataDirty() || conflicted()"
+      (click)="request()"
+    >
+      Generate summary
+    </button>
+  }
+</section>

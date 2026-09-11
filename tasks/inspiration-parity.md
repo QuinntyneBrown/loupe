@@ -500,3 +500,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: four API cases received 405 for missing review actions.
 - GREEN: all 49 photographer API cases pass. Individual summary/tag and bulk accept/dismiss preserve unrelated manual fields, record accepted/edited provenance, reject stale/foreign review, and support revision-protected Undo. Review writes lock the bookmark to avoid concurrent tag insertion races.
 
+
+### Photographer summary read and status panel
+- RED: four browser cases found only the old static summary block.
+- GREEN: all 32 summary/profile Chromium cases pass. The panel polls pending operations, shows dated Live/source provenance, explains blocked pages, retries failed generation and preserves manual text. Desktop and 320px accessibility checks pass. Review controls are the next slice.
+

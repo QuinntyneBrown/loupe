@@ -113,6 +113,9 @@
   --lp-space-8: 40px;
   --lp-space-9: 48px;
   --lp-tag-skeleton-width: 110px;
+  --lp-summary-skeleton-long: 95%;
+  --lp-summary-skeleton-medium: 88%;
+  --lp-summary-skeleton-short: 60%;
   --lp-tag-input-min: 10ch;
   --lp-space-10: 64px;
   --lp-space-11: 96px;

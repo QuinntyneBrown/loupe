@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import { PhotographerNotes } from '../photographer-notes/photographer-notes';
 import { PhotographerTags } from '../photographer-tags/photographer-tags';
+import { PhotographerSummaryPanel } from '../photographer-summary/photographer-summary-panel';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
@@ -27,7 +28,7 @@ import {
 
 @Component({
   selector: 'lp-photographer-detail',
-  imports: [DatePipe, RouterLink, PhotographerNotes, PhotographerTags],
+  imports: [DatePipe, RouterLink, PhotographerNotes, PhotographerTags, PhotographerSummaryPanel],
   templateUrl: './photographer-detail.html',
   styleUrl: './photographer-detail.css',
 })
@@ -176,6 +177,9 @@ export class PhotographerDetail {
   }
   private readonly notes = viewChild(PhotographerNotes);
   private readonly tags = viewChild(PhotographerTags);
+  readonly metadataDirty = computed(
+    () => !!(this.notes()?.dirty() || this.notes()?.busy() || this.tags()?.dirty()),
+  );
   readonly dirty = computed(
     () => !!(this.notes()?.dirty() || this.notes()?.busy() || this.tags()?.dirty()),
   );

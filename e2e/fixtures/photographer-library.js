@@ -1,4 +1,5 @@
 import { PhotographerDrafts } from "./photographer-drafts.js";
+import { PhotographerSummaries } from './photographer-summaries.js';
 export class PhotographerLibrary {
   constructor(count = 7) {
     this.items = Array.from({ length: count }, (_, index) => ({
@@ -31,11 +32,13 @@ export class PhotographerLibrary {
       },
     }));
     this.calls = [];
+    this.summaries = new PhotographerSummaries(this);
     this.failures = 0;
     this.drafts = new PhotographerDrafts(this);
     this.linked = [];
   }
   async attach(page) {
+    await this.summaries.attach(page);
     await this.drafts.attach(page);
     await page.exposeFunction(
       "loupePhotographers",

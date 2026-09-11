@@ -5,6 +5,10 @@ export class PhotographerPage {
   constructor(page) {
     this.page = page;
   }
+  summaryPanel() {return this.page.getByRole('region',{name:'Summary',exact:true});}
+  async expectSummaryState(text) {await expect(this.summaryPanel()).toContainText(text);}
+  async retrySummary() {await this.summaryPanel().getByRole('button',{name:'Try again',exact:true}).click();}
+  async expectSummarySource(url) {await expect(this.summaryPanel().getByRole('link',{name:'Source page',exact:true})).toHaveAttribute('href',url);}
   linkDialog() {
     return this.page.getByRole("dialog", {
       name: "Link references",
