@@ -13,6 +13,7 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
 {
     public DbSet<Loupe.Domain.Users.User> Users => Set<Loupe.Domain.Users.User>();
     public DbSet<Photographer> Photographers => Set<Photographer>();
+    public DbSet<PhotographerDraft> PhotographerDrafts => Set<PhotographerDraft>();
     public DbSet<Board> Boards => Set<Board>();
     public DbSet<BoardReference> BoardReferences => Set<BoardReference>();
     public DbSet<ApplicationSession> Sessions => Set<ApplicationSession>();
@@ -29,6 +30,10 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Loupe.Domain.Users.User>().HasIndex(u => u.NormalizedEmail).IsUnique();
         modelBuilder.Entity<Loupe.Domain.Users.User>().Property(u => u.NormalizedEmail).HasMaxLength(254);
         modelBuilder.Entity<Loupe.Domain.Users.User>().Property(u => u.PasswordVersion).HasDefaultValue("");
+        modelBuilder.Entity<PhotographerDraft>().ToTable("photographer_drafts").HasKey(item => item.Id);
+        modelBuilder.Entity<PhotographerDraft>().HasIndex(item => new { item.OwnerId, item.ExpiresAt });
+        modelBuilder.Entity<PhotographerDraft>().Property(item => item.Revision).IsConcurrencyToken();
+        modelBuilder.Entity<PhotographerDraft>().HasOne(item => item.ImportOperation).WithMany().HasForeignKey(item => item.ImportOperationId).OnDelete(DeleteBehavior.SetNull);
         modelBuilder.Entity<Photographer>().ToTable("photographers").HasKey(item => item.Id);
         modelBuilder.Entity<Photographer>().HasAlternateKey(item => new { item.Id, item.OwnerId });
         modelBuilder.Entity<Photographer>().Property(item => item.Revision).HasDefaultValue(1L).IsConcurrencyToken();

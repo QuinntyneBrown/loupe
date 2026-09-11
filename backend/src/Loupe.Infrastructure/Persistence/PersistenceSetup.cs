@@ -29,6 +29,7 @@ public static class PersistenceSetup
         services.AddScoped<IPhotographStore, PhotographStore>();
         services.AddScoped<IReferenceStore, ReferenceStore>();
         services.AddScoped<IPhotographerStore, PhotographerStore>();
+        services.AddScoped<Loupe.Application.PhotographerDrafts.IPhotographerDraftStore, PhotographerDraftStore>();
         services.AddScoped<IReferencePhotographerStore, ReferencePhotographerStore>();
         services.AddSingleton<IPortfolioUrlPolicy, PortfolioUrlPolicy>();
         services.AddScoped<IReferenceImageStore, ReferenceImageStore>();

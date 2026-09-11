@@ -11,6 +11,11 @@ namespace Loupe.Infrastructure.Persistence;
 
 public sealed class PhotographerStore(LibraryDbContext database) : IPhotographerStore
 {
+    public Task<Photographer?> FindSourceOwnedAsync(string ownerId, string url, CancellationToken cancellationToken) =>
+        database.Photographers.FromSqlInterpolated($"""
+            SELECT * FROM photographers WHERE "OwnerId" = {ownerId} AND "PortfolioHash" = md5(loupe_normalize_source({url}))
+            AND loupe_normalize_source("PortfolioUrl") = loupe_normalize_source({url})
+            """).AsNoTracking().SingleOrDefaultAsync(cancellationToken);
     public Task<int> CountAsync(string ownerId, CancellationToken cancellationToken) =>
         database.Photographers.CountAsync(item => item.OwnerId == ownerId, cancellationToken);
 

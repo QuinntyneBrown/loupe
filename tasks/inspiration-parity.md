@@ -355,3 +355,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both retry flows left the new card/empty heading unfocused.
 - GREEN: all five collection cases pass. Explicit pagination/retry now focuses the first added card or recovered empty heading after rendering, without moving focus on initial load.
 
+
+### Photographer read drafts
+- RED: private/duplicate draft cases returned 404. After correcting the unconfigured fixture to null (the supported configuration), its fallback case also failed on 404.
+- GREEN: 26 draft/bookmark/abandoned-media API cases pass. Page-read admission creates no bookmark, deduplicates operation keys, returns existing portfolios before admission, hides foreign/expired/canceled drafts, and supports repeated cancellation. Expired drafts join existing cleanup.
+

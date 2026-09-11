@@ -16,13 +16,16 @@ public sealed class AbandonedMediaCleaner(LibraryDbContext database, IOptions<Me
         await MediaTransactionLock.ProtectCleanupAsync(database, cancellationToken);
         var now = clock.GetUtcNow();
         var expired = database.ReferenceDrafts.Where(draft => draft.ExpiresAt <= now).Select(draft => draft.Id);
-        await database.BackgroundOperations.Where(operation => operation.Type == OperationType.ReferenceDraftImport && expired.Contains(operation.ResourceId))
+        var expiredPhotographers = database.PhotographerDrafts.Where(draft => draft.ExpiresAt <= now).Select(draft => draft.Id);
+        await database.BackgroundOperations.Where(operation => operation.Type == OperationType.ReferenceDraftImport && expired.Contains(operation.ResourceId)
+            || operation.Type == OperationType.PhotographerDraftImport && expiredPhotographers.Contains(operation.ResourceId))
             .ExecuteUpdateAsync(setters => setters.SetProperty(operation => operation.Status, OperationStatus.Canceled)
                 .SetProperty(operation => operation.InputJson, (string?)null).SetProperty(operation => operation.OutputJson, (string?)null)
                 .SetProperty(operation => operation.CompletedAt, now).SetProperty(operation => operation.UpdatedAt, now)
                 .SetProperty(operation => operation.LeaseToken, (Guid?)null).SetProperty(operation => operation.LeaseExpiresAt, (DateTimeOffset?)null)
                 .SetProperty(operation => operation.NextAttemptAt, (DateTimeOffset?)null).SetProperty(operation => operation.Message, "Preview expired."), cancellationToken);
         await database.ReferenceDrafts.Where(draft => draft.ExpiresAt <= now).ExecuteDeleteAsync(cancellationToken);
+        await database.PhotographerDrafts.Where(draft => draft.ExpiresAt <= now).ExecuteDeleteAsync(cancellationToken);
         if (!Directory.Exists(options.Value.Root)) { await transaction.CommitAsync(cancellationToken); return 0; }
         var keys = await database.Photographs.AsNoTracking().Select(photo => new { photo.ImageKey, photo.PreviewKey }).ToListAsync(cancellationToken);
         var referenced = keys.SelectMany(photo => new[] { photo.ImageKey, photo.PreviewKey }).ToHashSet(StringComparer.Ordinal);
