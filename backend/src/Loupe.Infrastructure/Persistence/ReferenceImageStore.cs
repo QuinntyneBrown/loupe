@@ -33,6 +33,7 @@ public sealed class ReferenceImageStore(LibraryDbContext database, IImageStore i
         reference.Height = image.Height;
         reference.CurrentImportOperationId = null;
         reference.CurrentAnalysisOperationId = null;
+        reference.SuggestionsJson = null;
         reference.Revision++;
         reference.ImageRevision++;
         await database.SaveChangesAsync(cancellationToken);

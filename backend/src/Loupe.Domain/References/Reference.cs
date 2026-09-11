@@ -17,6 +17,7 @@ public sealed class Reference
     public int? Height { get; set; }
     public Guid? CurrentImportOperationId { get; set; }
     public Guid? CurrentAnalysisOperationId { get; set; }
+    public string? SuggestionsJson { get; set; }
     public long Revision { get; set; } = 1;
     public long ImageRevision { get; set; } = 1;
     public ICollection<ReferenceTag> Tags { get; } = new List<ReferenceTag>();

@@ -253,3 +253,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both replacement/deletion cases left the old analysis Queued.
 - GREEN: all 9 analysis-admission/replacement/deletion cases pass. Replacement serializes with admission, cancels prior work and clears its current pointer; deletion cancels analysis and clears durable input/output.
 - Provider implementation reference checked against official OpenAI [image inputs](https://developers.openai.com/api/docs/guides/images-vision) and [structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs). The existing Azure deployment remains the configured target.
+
+### Visual suggestions publication and provider
+- RED: the API integration workflow reached its admitted operation but no worker handler was registered.
+- GREEN: 20 visual-analysis/critique-provider/execution cases and 15 critique validation/timeout/renewal regressions pass.
+- The Azure Responses adapter sends the validated preview with a strict description/tag schema and excludes notes. Publication retains editorial fields and stores private, timestamped suggestions separately, guarded by the lease and image revision.
+- Retry handling is shared with critiques, preserving the existing critique messages and bounded backoff. Worker-host registration, review actions, additional adversarial cases and live evaluation remain separate slices.

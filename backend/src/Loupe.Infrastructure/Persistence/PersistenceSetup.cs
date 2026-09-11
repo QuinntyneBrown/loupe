@@ -30,6 +30,9 @@ public static class PersistenceSetup
         services.AddScoped<IReferenceImageStore, ReferenceImageStore>();
         services.AddScoped<IReferenceTextStore, ReferenceTextStore>();
         services.AddScoped<IReferenceAnalysisStore, ReferenceAnalysisStore>();
+        services.AddScoped<IReferenceAnalysisWorkStore, ReferenceAnalysisWorkStore>();
+        services.AddScoped<IReferenceAnalysisProvider, AzureOpenAiReferenceAnalysisProvider>();
+        services.AddScoped<IAnalysisFailureStore, AnalysisFailureStore>();
         services.AddSingleton<IReferenceAnalysisConfiguration, ReferenceAnalysisConfiguration>();
         services.AddScoped<Loupe.Application.ReferenceDrafts.IReferenceDraftStore, ReferenceDraftStore>();
         services.AddScoped<IReferenceTagStore, ReferenceTagStore>();
