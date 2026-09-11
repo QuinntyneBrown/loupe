@@ -476,3 +476,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: cancel after a completed save with a lost response left the reference showing no photographer.
 - GREEN: all 14 reference-picker Chromium cases pass. Closing after an attempted save refreshes the reference, stale inline creation retains its draft until explicit review, and normalized duplicates retain existing bookmark metadata.
 
+
+### Durable photographer summary admission
+- RED: both API scenarios returned 404 for missing summary endpoints.
+- GREEN: all 37 photographer API cases pass. Requests persist source revisions and captured content, deduplicate keyed/concurrent intent, enforce owner and revision checks, expose private durable status, and leave manual fields unchanged. Unconfigured generation returns 503 while the bookmark remains usable.
+

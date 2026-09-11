@@ -15,5 +15,6 @@ public sealed class Photographer
     public long? CapturedSourceRevision { get; set; }
     public string? SourceJson { get; set; }
     public string? SourceFailureCode { get; set; }
+    public Guid? CurrentSummaryOperationId { get; set; }
     public ICollection<PhotographerTag> Tags { get; } = new List<PhotographerTag>();
 }
