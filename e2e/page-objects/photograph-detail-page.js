@@ -256,6 +256,28 @@ export class PhotographDetailPage {
     await expect(this.page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();
     await expect(this.page.getByRole('img', { name: title, exact: true })).toBeVisible();
   }
+  async expectContentFitsViewport(title) {
+    await this.expectImage(title);
+    await this.page.evaluate(() => document.fonts.ready);
+    await expect.poll(() => this.page.evaluate(() =>
+      Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
+    ), { message: 'Photograph detail must not require horizontal scrolling' }).toBeLessThanOrEqual(0);
+    const heading = this.page.getByRole('heading', { level: 1, name: title, exact: true });
+    const titleBounds = await heading.evaluate(element => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      return [...range.getClientRects()].map(rect => ({ left: rect.left, right: rect.right }));
+    });
+    for (const bounds of titleBounds) {
+      expect(bounds.left, 'Title text must remain inside the viewport').toBeGreaterThanOrEqual(0);
+      expect(bounds.right, 'Title text must wrap without being clipped').toBeLessThanOrEqual(this.page.viewportSize().width);
+    }
+    for (const control of await this.page.getByRole('main').locator('button:visible, input:visible, textarea:visible, select:visible').all()) {
+      const box = await control.boundingBox();
+      expect(box.x, 'Detail controls must remain reachable without horizontal scrolling').toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(this.page.viewportSize().width);
+    }
+  }
   async openMissing() { await this.page.goto('/my-work/00000000-0000-4000-8000-999999999999'); }
   async expectSaved(title = 'Study 01') {
     await expect(this.page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();

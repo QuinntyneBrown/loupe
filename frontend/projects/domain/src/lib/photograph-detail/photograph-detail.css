@@ -1,5 +1,23 @@
 :host {
   display: block;
+  min-width: var(--lp-zero);
+}
+.lp-detail__title-row,
+.lp-title,
+.lp-detail__body > *,
+.lp-exif__item {
+  min-width: var(--lp-zero);
+}
+.lp-title,
+.lp-exif dd {
+  overflow-wrap: anywhere;
+}
+.lp-exif dd {
+  min-width: var(--lp-zero);
+  margin: var(--lp-zero);
+}
+.lp-exif dt {
+  flex-shrink: var(--lp-zero);
 }
 .lp-detail__media figure {
   margin: var(--lp-zero);
