@@ -1,9 +1,24 @@
 import { Injectable } from '@angular/core';
-import { IPhotographerService, PhotographerPage, ServiceError } from 'api';
+import {
+  IPhotographerService,
+  PhotographerPage,
+  PhotographerResult,
+  PhotographerReferencePage,
+  ServiceError,
+} from 'api';
 
 @Injectable()
 export class MockPhotographerService implements IPhotographerService {
   async list(cursor?: string): Promise<PhotographerPage> {
+    return this.call('list', { cursor });
+  }
+  get(id: string): Promise<PhotographerResult> {
+    return this.call('get', { id });
+  }
+  references(id: string, cursor?: string): Promise<PhotographerReferencePage> {
+    return this.call('references', { id, cursor });
+  }
+  private async call<T>(operation: string, input: object): Promise<T> {
     const callback = (
       window as Window & {
         loupePhotographers?: (
@@ -13,8 +28,8 @@ export class MockPhotographerService implements IPhotographerService {
       }
     ).loupePhotographers;
     if (!callback) throw new ServiceError('request_failed');
-    const result = await callback('list', { cursor });
+    const result = await callback(operation, input);
     if (result.error) throw new ServiceError(result.error);
-    return result.data as PhotographerPage;
+    return result.data as T;
   }
 }

@@ -386,3 +386,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: retrying a failed Back canceled and closed the dialog instead of returning to its form.
 - GREEN: all 17 Add/collection Chromium cases pass. Back retains its intent and owner edits; stale preview review keeps edits, and uncertain-save closure refreshes all loaded collection pages without duplicates.
 
+
+### Photographer detail reads
+- RED: three cases could not reach the absent detail route.
+- GREEN: all 20 photographer Chromium cases pass. The private profile exposes bookmark metadata and captured-page provenance; linked references page independently and profile failures can retry. Desktop/mobile Axe checks pass. This read slice precedes editing, deletion, linking and generated-summary controls.
+

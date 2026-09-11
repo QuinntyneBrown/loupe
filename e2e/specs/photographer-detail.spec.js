@@ -1,0 +1,51 @@
+import { test, expect } from "@playwright/test";
+import { MyWorkPage } from "../page-objects/my-work-page.js";
+import { PhotographerLibrary } from "../fixtures/photographer-library.js";
+import { PhotographerPage } from "../page-objects/photographer-page.js";
+async function setup(page) {
+  await new MyWorkPage(page).configureCollection(0);
+  const library = new PhotographerLibrary(1);
+  await library.attach(page);
+  return { library, screen: new PhotographerPage(page) };
+}
+for (const width of [1440, 375])
+  test(`photographer detail shows private bookmark and source at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    const { library, screen } = await setup(page);
+    await screen.open();
+    await screen.expectProfile(
+      "Photographer 01",
+      library.items[0].summary,
+      "Study the window light.",
+    );
+    await screen.expectSource("https://portfolio1.example/work");
+    await screen.expectEmpty();
+    await screen.expectAccessible();
+  });
+test("photographer detail retries a failed load and pages linked references", async ({
+  page,
+}) => {
+  const { library, screen } = await setup(page);
+  library.failures = 1;
+  library.linked = Array.from({ length: 25 }, (_, i) => ({
+    id: "reference-" + i,
+    title: "Study " + i,
+    createdAt: "2026-08-12T12:00:00Z",
+    previewUrl: null,
+    width: null,
+    height: null,
+    sourceUrl: null,
+    attribution: "Photographer 01",
+  }));
+  await screen.open();
+  await screen.expectError();
+  await screen.retry();
+  await screen.expectReferences(24);
+  await screen.more();
+  await screen.expectReferences(25);
+  expect(
+    library.calls.filter((call) => call.operation === "references"),
+  ).toHaveLength(2);
+});

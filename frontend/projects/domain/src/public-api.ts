@@ -7,6 +7,7 @@ export * from './lib/attempt-comparison/attempt-comparison';
 export * from './lib/attempt-picker/attempt-picker';
 export * from './lib/reference-collection/reference-collection';
 export * from './lib/photographer-collection/photographer-collection';
+export * from './lib/photographer-detail/photographer-detail';
 export * from './lib/reference-detail/reference-detail-panel';
 export * from './lib/reference-upload/reference-image-panel';
 export * from './lib/reference-link/reference-link-panel';

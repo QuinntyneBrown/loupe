@@ -1,0 +1,129 @@
+@if (loading()) {
+  <div class="stack" aria-label="Loading photographer" aria-busy="true">
+    <div class="lp-skeleton lp-skeleton--title" aria-hidden="true"></div>
+    <div class="lp-skeleton lp-skeleton--card narrow" aria-hidden="true"></div>
+    <div class="grid">
+      @for (tile of skeletons; track tile) {
+        <div class="lp-skeleton lp-skeleton--tile" aria-hidden="true"></div>
+      }
+    </div>
+  </div>
+} @else if (failed()) {
+  <div class="lp-empty" role="alert">
+    <h1 class="lp-empty__title">Couldn't load this photographer.</h1>
+    <p class="lp-empty__text">The bookmark may have been deleted, or the connection dropped.</p>
+    <div class="lp-empty__action">
+      <button class="lp-button lp-button--secondary" (click)="retry()">Try again</button
+      ><a class="lp-button lp-button--ghost" routerLink="/photographers">Back to Photographers</a>
+    </div>
+  </div>
+} @else if (item(); as photographer) {
+  <div class="stack">
+    <header>
+      <h1 class="lp-title">{{ photographer.name }}</h1>
+      <div class="meta">
+        <a
+          class="lp-link"
+          [href]="photographer.portfolioUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          referrerpolicy="no-referrer"
+          ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-globe" /></svg
+          >{{ host()
+          }}<svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-external" /></svg></a
+        ><span>Bookmarked {{ photographer.createdAt | date: 'd MMM yyyy' }}</span>
+      </div>
+    </header>
+    <div class="stack narrow">
+      <section class="summary" aria-labelledby="summary-title">
+        <h2 id="summary-title" class="lp-kicker">Summary</h2>
+        @if (photographer.summary) {
+          <p class="summary-text">{{ photographer.summary }}</p>
+        } @else {
+          <p>No summary available. Your notes and tags still help you find this bookmark.</p>
+        }
+        @if (photographer.source; as source) {
+          <p class="source">
+            <a
+              [href]="source.fetchedUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              referrerpolicy="no-referrer"
+              >{{ photographer.sourceIsCurrent ? 'Captured page' : 'Previous captured page' }}</a
+            >
+            · {{ source.retrievedAt | date: 'd MMM yyyy' }}
+          </p>
+        }
+      </section>
+      <section aria-labelledby="photographer-tags-title">
+        <h2 class="lp-subheading" id="photographer-tags-title">Tags</h2>
+        <div class="tags">
+          @for (tag of photographer.tags; track tag.name) {
+            <span class="lp-tag">{{ tag.name }}</span>
+          } @empty {
+            <p>No tags yet.</p>
+          }
+        </div>
+      </section>
+      <div class="lp-field">
+        <label class="lp-subheading" for="photographer-notes">Your notes</label
+        ><textarea
+          id="photographer-notes"
+          class="lp-textarea"
+          rows="3"
+          readonly
+          [value]="photographer.notes ?? ''"
+        ></textarea>
+      </div>
+    </div>
+    <section aria-labelledby="references-title" [attr.aria-busy]="referenceLoading()">
+      <div class="section-head">
+        <h2 id="references-title" class="lp-subheading">References</h2>
+        @if (referenceCount() !== null) {
+          <span>{{ referenceCount() }} references</span>
+        }
+      </div>
+      <div class="grid">
+        @for (reference of references(); track reference.id) {
+          <article class="tile">
+            <a
+              [routerLink]="'/inspiration/' + reference.id"
+              [attr.aria-label]="'Open ' + reference.title"
+            >
+              @if (reference.previewUrl) {
+                <img [src]="reference.previewUrl" alt="" loading="lazy" />
+              } @else {
+                <div class="placeholder" role="img" aria-label="No preview available">
+                  <svg class="lp-icon" aria-hidden="true"><use href="#i-image" /></svg>
+                </div>
+              }
+              <h3>{{ reference.title }}</h3></a
+            >
+          </article>
+        }
+      </div>
+      @if (referenceCount() === 0) {
+        <div class="lp-empty">
+          <h3 class="lp-empty__title">No references linked yet.</h3>
+          <p class="lp-empty__text">
+            Link references you've already saved, or set the photographer from a reference's page.
+          </p>
+        </div>
+      }
+      @if (referenceFailed()) {
+        <p role="alert">Couldn't load linked references.</p>
+        <button class="lp-button lp-button--secondary" (click)="loadReferences()">Try again</button>
+      } @else if (cursor()) {
+        <div class="more">
+          <button
+            class="lp-button lp-button--secondary"
+            [disabled]="referenceLoading()"
+            (click)="loadReferences()"
+          >
+            {{ referenceLoading() ? 'Loading…' : 'Load more' }}
+          </button>
+        </div>
+      }
+    </section>
+  </div>
+}

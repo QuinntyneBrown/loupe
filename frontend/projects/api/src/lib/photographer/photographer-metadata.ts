@@ -13,6 +13,18 @@ export interface PhotographerResult extends PhotographerMetadata {
   revision: number;
   summaryProvenance: string | null;
   tags: ReferenceTag[];
+  sourceRevision: number;
+  sourceIsCurrent: boolean;
+  sourceFailureCode: string | null;
+  source: {
+    requestedUrl: string;
+    fetchedUrl: string;
+    retrievedAt: string;
+    title: string | null;
+    description: string | null;
+    mainText: string;
+    tags: string[];
+  } | null;
 }
 export interface SavePhotographerResult {
   photographer: PhotographerResult;

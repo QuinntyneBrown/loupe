@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lp-space-2);
+  min-height: var(--lp-control-height);
+  margin-bottom: var(--lp-space-6);
+  font-size: var(--lp-text-sm);
+  color: var(--lp-color-text-2);
+}
