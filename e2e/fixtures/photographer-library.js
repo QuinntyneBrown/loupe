@@ -1,3 +1,4 @@
+import { PhotographerDrafts } from './photographer-drafts.js';
 export class PhotographerLibrary {
   constructor(count = 7) {
     this.items = Array.from({length: count}, (_, index) => ({
@@ -7,9 +8,10 @@ export class PhotographerLibrary {
       tags: [{name:'window light',category:'lighting',provenance:'manual'},{name:'portrait',category:'genre',provenance:'manual'}],
       referenceCount: index ? 0 : 6, references: [],
     }));
-    this.calls = []; this.failures = 0;
+    this.calls = []; this.failures = 0; this.drafts=new PhotographerDrafts(this);
   }
   async attach(page) {
+    await this.drafts.attach(page);
     await page.exposeFunction('loupePhotographers', async (operation, input) => {
       this.calls.push({operation,...input});
       if (this.failures > 0) {this.failures--; return {error:'request_failed'};}

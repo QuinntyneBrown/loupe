@@ -1,6 +1,9 @@
 :host {
   display: block;
 }
+.lp-page-header__actions {
+  align-self: flex-start;
+}
 h1,
 p {
   margin: var(--lp-zero);

@@ -8,9 +8,11 @@ import { CRITIQUE_SERVICE, CritiqueService } from 'api';
 import { COMPARISON_SERVICE, ComparisonService } from 'api';
 import { BOARD_SERVICE, BoardService } from 'api';
 import { PHOTOGRAPHER_SERVICE, PhotographerService } from 'api';
+import { PHOTOGRAPHER_DRAFT_SERVICE, PhotographerDraftService } from 'api';
 import { REFERENCE_DRAFT_SERVICE, ReferenceDraftService } from 'api';
 
 export const appProviders = [
+  { provide: PHOTOGRAPHER_DRAFT_SERVICE, useClass: PhotographerDraftService },
   { provide: PHOTOGRAPHER_SERVICE, useClass: PhotographerService },
   { provide: REFERENCE_ANALYSIS_SERVICE, useClass: ReferenceAnalysisService },
   { provide: REFERENCE_DRAFT_SERVICE, useClass: ReferenceDraftService },

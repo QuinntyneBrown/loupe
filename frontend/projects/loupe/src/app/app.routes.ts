@@ -1,4 +1,5 @@
 import { ReferenceLinkPage } from './pages/reference-link/reference-link-page';
+import { photographerDraftUnsavedGuard } from './photographer-draft-unsaved.guard';
 import { referenceDraftUnsavedGuard } from './reference-draft-unsaved.guard';
 import { referenceLinkUnsavedGuard } from './reference-link-unsaved.guard';
 import { referenceUnsavedGuard } from './reference-unsaved.guard';
@@ -22,6 +23,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/photographers/photographers-page').then((module) => module.PhotographersPage),
     canActivate: [sessionGuard],
+    canDeactivate: [photographerDraftUnsavedGuard],
     title: 'Photographers · Loupe',
   },
   {

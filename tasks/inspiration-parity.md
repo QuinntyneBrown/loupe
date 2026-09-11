@@ -371,3 +371,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both final-save cases failed on the absent endpoint.
 - GREEN: 29 bookmark/draft/source-worker API checks pass. Final Save validates the whole draft and persists one bookmark under keyed retries; pending/stale drafts cannot commit. Captured source survives draft expiry. Equivalent URL spellings retain its generation, while a changed portfolio URL marks the retained capture as previous without replacing manual notes or summary.
 
+
+### Add photographer dialog
+- RED: five Chromium cases failed on the missing Add photographer control.
+- GREEN: all ten Add/collection cases pass. Reading creates a private draft; preview supports edits, tags and final Save. Cancel does not create a bookmark, blocked pages permit manual entry, existing portfolios are detected, and lost save responses retry the retained operation key.
+
