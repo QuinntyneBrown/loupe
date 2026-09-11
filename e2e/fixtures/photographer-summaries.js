@@ -8,6 +8,15 @@ export class PhotographerSummaries {
     const item=this.library.items.find(item=>item.id===input.id);if(!item)return {error:'item_unavailable'};
     if(operation==='current')return {data:this.operation};if(operation==='suggestions')return {data:this.value};
     if(operation==='request'){if(this.receipts.has(input.operationKey))return {data:this.receipts.get(input.operationKey)};if(item.revision!==input.revision)return {error:'revision_conflict'};this.queued();this.receipts.set(input.operationKey,this.operation);return {data:this.operation};}
+    if(operation==='review'){
+      if(item.revision!==input.revision||this.value?.operationId!==input.operationId||this.value.sourceRevision!==item.sourceRevision)return {error:'revision_conflict'};
+      this.undo={revision:item.revision+1,summary:item.summary,summaryProvenance:item.summaryProvenance,tags:structuredClone(item.tags),value:structuredClone(this.value)};
+      const accept=input.decision==='accept',state=accept?'accepted':'dismissed';
+      if((input.target==='summary'||input.target==='all')&&this.value.summaryStatus==='pending'){if(accept){item.summary=input.value??this.value.summary;item.summaryProvenance=item.summary===this.value.summary?'ai-accepted':'edited-ai';}this.value.summaryStatus=state;}
+      if(input.target==='tag'||input.target==='all')for(const tag of this.value.tags.filter(tag=>tag.state==='pending'&&(input.target==='all'||tag.name===input.name))){if(accept){const name=input.target==='tag'?(input.value??tag.name):tag.name,category=input.target==='tag'?(input.category??tag.category):tag.category;if(!item.tags.some(item=>item.name.toUpperCase()===name.toUpperCase()))item.tags.push({name,category,provenance:name===tag.name&&category===tag.category?'ai-accepted':'edited-ai'});}tag.state=state;}
+      item.revision++;return {data:item};
+    }
+    if(operation==='undo'){if(item.revision!==input.revision||this.undo?.revision!==input.revision)return {error:'revision_conflict'};item.summary=this.undo.summary;item.summaryProvenance=this.undo.summaryProvenance;item.tags=this.undo.tags;this.value=this.undo.value;this.undo=null;item.revision++;return {data:item};}
     return {error:'item_unavailable'};
   });}
 }

@@ -8,8 +8,13 @@ import {
   output,
   signal,
   untracked,
+  afterNextRender,
+  ElementRef,
+  Injector,
+  viewChild,
 } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, TitleCasePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   PHOTOGRAPHER_SERVICE,
   PHOTOGRAPHER_SUMMARY_SERVICE,
@@ -17,11 +22,13 @@ import {
   PhotographerSuggestions,
   OperationResult,
   ServiceError,
+  PhotographerSuggestedTag,
+  PhotographerSuggestionReview,
 } from 'api';
 
 @Component({
   selector: 'lp-photographer-summary',
-  imports: [DatePipe],
+  imports: [DatePipe, TitleCasePipe, FormsModule],
   templateUrl: './photographer-summary-panel.html',
   styleUrl: './photographer-summary-panel.css',
 })
@@ -36,6 +43,64 @@ export class PhotographerSummaryPanel {
   readonly busy = signal(false);
   readonly error = signal('');
   readonly conflicted = signal(false);
+  readonly summaryDraft = signal('');
+  readonly editingTag = signal<PhotographerSuggestedTag | null>(null);
+  readonly tagName = signal('');
+  readonly tagCategory = signal('');
+  readonly notice = signal('');
+  readonly undoRevision = signal<number | null>(null);
+  readonly categories = [
+    'subject',
+    'genre',
+    'lighting',
+    'composition',
+    'palette',
+    'mood',
+    'technique',
+  ];
+  readonly summaryEdited = computed(
+    () =>
+      this.suggestions()?.summaryStatus === 'pending' &&
+      this.summaryDraft().trim() !== this.suggestions()?.summary?.trim(),
+  );
+  readonly summaryInvalid = computed(
+    () =>
+      !this.summaryDraft().trim() ||
+      Array.from(this.summaryDraft().trim()).length > 4000 ||
+      this.summaryDraft().includes('\0'),
+  );
+  readonly tagInvalid = computed(
+    () =>
+      !this.tagName().trim() ||
+      Array.from(this.tagName().trim().normalize('NFC')).length > 50 ||
+      this.tagName().includes('\0'),
+  );
+  readonly dirty = computed(() => this.busy() || this.summaryEdited() || !!this.editingTag());
+  readonly pending = computed(
+    () =>
+      this.suggestions()?.summaryStatus === 'pending' ||
+      this.suggestions()?.tags.some((tag) => tag.state === 'pending'),
+  );
+  readonly groups = computed(() =>
+    this.categories
+      .map((category) => ({
+        category,
+        tags:
+          this.suggestions()?.tags.filter(
+            (tag) => tag.category === category && tag.state === 'pending',
+          ) ?? [],
+      }))
+      .filter((group) => group.tags.length),
+  );
+  readonly reviewDisabled = computed(
+    () =>
+      this.busy() ||
+      this.metadataDirty() ||
+      this.previous() ||
+      this.active() ||
+      this.conflicted() ||
+      this.loading(),
+  );
   readonly active = computed(() => ['Queued', 'Running'].includes(this.operation()?.status ?? ''));
   readonly host = computed(() => new URL(this.photographer().portfolioUrl).hostname);
   readonly previous = computed(
@@ -62,6 +127,112 @@ export class PhotographerSummaryPanel {
   private readonly service = inject(PHOTOGRAPHER_SUMMARY_SERVICE);
   private readonly photographers = inject(PHOTOGRAPHER_SERVICE);
   private readonly destroy = inject(DestroyRef);
+  private readonly injector = inject(Injector);
+  private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
+  private readonly tagField = viewChild<ElementRef<HTMLInputElement>>('tagField');
+  private focus(element: 'heading' | 'tag' = 'heading'): void {
+    afterNextRender(
+      () => {
+        if (!this.destroy.destroyed)
+          (element === 'tag' ? this.tagField() : this.heading())?.nativeElement.focus();
+      },
+      { injector: this.injector },
+    );
+  }
+  editTag(tag: PhotographerSuggestedTag): void {
+    this.editingTag.set(tag);
+    this.tagName.set(tag.name);
+    this.tagCategory.set(tag.category);
+    this.focus('tag');
+  }
+  cancelTag(): void {
+    this.editingTag.set(null);
+    this.focus();
+  }
+  async review(
+    target: 'summary' | 'tag' | 'all',
+    decision: 'accept' | 'dismiss',
+    tag?: PhotographerSuggestedTag,
+    edited = false,
+  ): Promise<void> {
+    const value = this.suggestions();
+    if (
+      !value ||
+      this.reviewDisabled() ||
+      (decision === 'accept' &&
+        (target === 'summary' || target === 'all') &&
+        value.summaryStatus === 'pending' &&
+        this.summaryInvalid()) ||
+      (edited && this.tagInvalid())
+    )
+      return;
+    const input: PhotographerSuggestionReview = {
+      operationId: value.operationId,
+      revision: this.photographer().revision,
+      target,
+      decision,
+      name: tag?.name,
+      value:
+        target === 'summary' || target === 'all'
+          ? this.summaryDraft()
+          : edited
+            ? this.tagName().trim().normalize('NFC')
+            : undefined,
+      category: edited ? this.tagCategory() : undefined,
+    };
+    const generation = this.generation,
+      id = this.photographer().id;
+    this.busy.set(true);
+    this.error.set('');
+    this.notice.set('');
+    try {
+      const saved = await this.service.review(id, input);
+      if (this.destroy.destroyed || generation !== this.generation) return;
+      this.saved.emit(saved);
+      this.undoRevision.set(saved.revision);
+      if (target === 'tag') this.editingTag.set(null);
+      await this.load();
+      this.notice.set(
+        `${target === 'summary' ? 'Summary' : target === 'tag' ? 'Tag' : 'Suggestions'} ${decision === 'accept' ? 'accepted' : 'dismissed'}.`,
+      );
+      this.focus();
+    } catch (error) {
+      if (!this.destroy.destroyed && generation === this.generation) {
+        this.conflicted.set(error instanceof ServiceError && error.code === 'revision_conflict');
+        this.error.set(
+          this.conflicted()
+            ? 'This bookmark changed. Review its latest details before saving your suggestion edits.'
+            : "Couldn't save this review. Your edits are kept. Try the action again.",
+        );
+      }
+    } finally {
+      if (!this.destroy.destroyed) this.busy.set(false);
+    }
+  }
+  async undo(): Promise<void> {
+    const revision = this.undoRevision();
+    if (revision === null || this.busy() || this.metadataDirty()) return;
+    const generation = this.generation,
+      id = this.photographer().id;
+    this.busy.set(true);
+    this.error.set('');
+    try {
+      const saved = await this.service.undo(id, revision);
+      if (this.destroy.destroyed || generation !== this.generation) return;
+      this.saved.emit(saved);
+      this.undoRevision.set(null);
+      await this.load();
+      this.notice.set('Review undone.');
+      this.focus();
+    } catch {
+      if (!this.destroy.destroyed)
+        this.error.set(
+          "Couldn't undo this review. The bookmark may have changed; your saved content is kept.",
+        );
+    } finally {
+      if (!this.destroy.destroyed) this.busy.set(false);
+    }
+  }
   private generation = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private requestInput: { revision: number; key: string } | null = null;
@@ -101,7 +272,9 @@ export class PhotographerSummaryPanel {
       const completed =
         operation?.status === 'Succeeded' && this.operation()?.status !== 'Succeeded';
       this.operation.set(operation);
+      const keepDraft = this.summaryEdited();
       this.suggestions.set(suggestions);
+      if (!keepDraft) this.summaryDraft.set(suggestions?.summary ?? '');
       if (completed && !this.metadataDirty()) {
         const latest = await this.photographers.get(id);
         if (this.destroy.destroyed || generation !== this.generation) return;
@@ -115,7 +288,15 @@ export class PhotographerSummaryPanel {
     }
   }
   async request(): Promise<void> {
-    if (this.busy() || this.active() || this.metadataDirty() || this.conflicted()) return;
+    if (
+      this.busy() ||
+      this.active() ||
+      this.metadataDirty() ||
+      this.conflicted() ||
+      this.summaryEdited() ||
+      this.editingTag()
+    )
+      return;
     this.requestInput ??= { revision: this.photographer().revision, key: crypto.randomUUID() };
     this.busy.set(true);
     this.error.set('');

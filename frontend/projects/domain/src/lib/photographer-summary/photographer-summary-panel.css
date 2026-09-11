@@ -2,15 +2,16 @@
   display: block;
 }
 .summary {
-  padding: var(--lp-space-5);
+  padding: var(--lp-space-4) var(--lp-space-5);
   background: var(--lp-color-ai-bg);
   border: var(--lp-hairline) solid var(--lp-color-ai-border);
-  border-radius: var(--lp-radius-lg);
+  border-radius: var(--lp-radius-md);
   display: grid;
   gap: var(--lp-space-3);
 }
 .quiet {
-  background: var(--lp-color-surface);
+  background: var(--lp-color-surface-2);
+  border-color: var(--lp-color-border);
 }
 header {
   display: flex;
@@ -21,6 +22,7 @@ header {
 }
 h2,
 p {
+  line-height: var(--lp-leading-relaxed);
   margin: var(--lp-zero);
 }
 p {
@@ -28,7 +30,7 @@ p {
   overflow-wrap: anywhere;
 }
 .note {
-  color: var(--lp-color-text-2);
+  color: var(--lp-color-ai);
   font-size: var(--lp-text-xs);
 }
 span.note {
@@ -46,6 +48,7 @@ a {
   gap: var(--lp-space-2);
 }
 .line {
+  background: var(--lp-color-surface);
   height: var(--lp-space-3);
   border-radius: var(--lp-radius-sm);
 }
@@ -63,4 +66,24 @@ a {
 }
 [role='alert'] {
   color: var(--lp-color-danger);
+}
+.actions,
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lp-space-2);
+}
+.proposal label {
+  display: grid;
+  gap: var(--lp-space-2);
+}
+.lp-textarea {
+  border-color: var(--lp-color-ai-border);
+}
+h3 {
+  margin: var(--lp-zero);
+}
+details summary {
+  cursor: pointer;
 }

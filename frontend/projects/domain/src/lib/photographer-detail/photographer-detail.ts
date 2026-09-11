@@ -177,12 +177,11 @@ export class PhotographerDetail {
   }
   private readonly notes = viewChild(PhotographerNotes);
   private readonly tags = viewChild(PhotographerTags);
+  private readonly summaryPanel = viewChild(PhotographerSummaryPanel);
   readonly metadataDirty = computed(
     () => !!(this.notes()?.dirty() || this.notes()?.busy() || this.tags()?.dirty()),
   );
-  readonly dirty = computed(
-    () => !!(this.notes()?.dirty() || this.notes()?.busy() || this.tags()?.dirty()),
-  );
+  readonly dirty = computed(() => this.metadataDirty() || !!this.summaryPanel()?.dirty());
   readonly editRequested = output<PhotographerResult>();
   readonly linkRequested = output<PhotographerResult>();
   private readonly linkButton = viewChild<ElementRef<HTMLButtonElement>>('linkButton');

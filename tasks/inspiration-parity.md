@@ -505,3 +505,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: four browser cases found only the old static summary block.
 - GREEN: all 32 summary/profile Chromium cases pass. The panel polls pending operations, shows dated Live/source provenance, explains blocked pages, retries failed generation and preserves manual text. Desktop and 320px accessibility checks pass. Review controls are the next slice.
 
+
+### Editable photographer suggestion review
+- RED: four browser cases failed on absent summary/tag review controls.
+- GREEN: all eight summary Chromium cases pass; the 28 profile regressions also passed. Edited values retain drafts after failed/stale review, actions preserve unrelated fields, Undo restores the prior description, and the leave guard protects edits. Corrected a page-object dropdown locator to its accessible combobox role. Manual desktop/320px Axe inspection found low-contrast Edit text; the mock's edit icon replaces it, and both inspections now report zero violations.
+

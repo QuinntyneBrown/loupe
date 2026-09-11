@@ -9,6 +9,12 @@ export class PhotographerPage {
   async expectSummaryState(text) {await expect(this.summaryPanel()).toContainText(text);}
   async retrySummary() {await this.summaryPanel().getByRole('button',{name:'Try again',exact:true}).click();}
   async expectSummarySource(url) {await expect(this.summaryPanel().getByRole('link',{name:'Source page',exact:true})).toHaveAttribute('href',url);}
+  async editSuggestedSummary(value) {await this.summaryPanel().getByRole('textbox',{name:'Suggested summary',exact:true}).fill(value);}
+  async expectSuggestedSummary(value) {await expect(this.summaryPanel().getByRole('textbox',{name:'Suggested summary',exact:true})).toHaveValue(value);}
+  async summaryAction(name) {await this.summaryPanel().getByRole('button',{name,exact:true}).click();}
+  async expectSummaryNotice(text) {await expect(this.summaryPanel().getByRole('status')).toContainText(text);}
+  async expectSummaryError(text) {await expect(this.summaryPanel().getByRole('alert')).toContainText(text);}
+  async editSummaryTag(name,value,category) {await this.summaryAction('Edit tag '+name);await this.summaryPanel().getByLabel('Suggested tag',{exact:true}).fill(value);await this.summaryPanel().getByRole('combobox',{name:'Suggested category',exact:true}).selectOption(category);}
   linkDialog() {
     return this.page.getByRole("dialog", {
       name: "Link references",
