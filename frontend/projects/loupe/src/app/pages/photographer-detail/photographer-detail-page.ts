@@ -25,11 +25,13 @@ export class PhotographerDetailPage {
   readonly linking = signal<PhotographerResult | null>(null);
   readonly notice = signal('');
   private readonly linkDialog = viewChild(LinkPhotographerReferences);
-  closeLinks(count: number): void {
+  closeLinks(result: { linked: number; refresh: boolean }): void {
     this.linking.set(null);
-    if (count) {
-      this.detail().refreshReferences(count);
-      this.notice.set(`${count} references linked.`);
+    if (result.refresh) {
+      this.detail().refreshReferences(result.linked);
+      this.notice.set(
+        result.linked ? `${result.linked} references linked.` : 'Reference links refreshed.',
+      );
     }
     this.detail().focusLink();
   }

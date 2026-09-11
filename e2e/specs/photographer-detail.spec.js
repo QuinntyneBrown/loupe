@@ -383,3 +383,86 @@ test("linking moves an existing assignment and cancel makes no link changes", as
   expect(references.items[0].photographer.id).toBe("photographer-1");
   expect(references.items[0].attribution).toBe("Supplied photographer");
 });
+
+test("a partial link failure keeps only unfinished selections for retry", async ({
+  page,
+}) => {
+  const { screen, references } = await linkedSetup(page);
+  references.items.forEach((item) => (item.photographer = null));
+  await screen.open();
+  await screen.expectEmpty();
+  await screen.openLinkPicker();
+  await screen.chooseReference("Reference 01");
+  await screen.chooseReference("Reference 02");
+  references.errors.setPhotographer = [null, "request_failed"];
+  await screen.submitLinks(2);
+  await screen.expectLinkFailure("1 linked");
+  await screen.expectSelected(1);
+  await screen.confirmLinks(1);
+  await screen.expectReferences(2);
+  expect(
+    references.calls.filter((call) => call === "setPhotographer"),
+  ).toHaveLength(3);
+});
+test("closing after an uncertain link refreshes the completed server change", async ({
+  page,
+}) => {
+  const { screen, references } = await linkedSetup(page);
+  references.items.forEach((item) => (item.photographer = null));
+  await screen.open();
+  await screen.expectEmpty();
+  await screen.openLinkPicker();
+  await screen.chooseReference("Reference 01");
+  references.lostPhotographerResponses = 1;
+  await screen.submitLinks(1);
+  await screen.expectLinkFailure();
+  await screen.cancelLinkPicker();
+  await screen.expectReferences(1);
+});
+test("retry recognizes an already-completed link after its response was lost", async ({
+  page,
+}) => {
+  const { screen, references } = await linkedSetup(page);
+  references.items.forEach((item) => (item.photographer = null));
+  await screen.open();
+  await screen.expectEmpty();
+  await screen.openLinkPicker();
+  await screen.chooseReference("Reference 01");
+  references.lostPhotographerResponses = 1;
+  await screen.submitLinks(1);
+  await screen.expectLinkFailure();
+  await screen.confirmLinks(1);
+  await screen.expectReferences(1);
+});
+test("changed link assignments require explicit review before moving them", async ({
+  page,
+}) => {
+  const { screen, references } = await linkedSetup(page);
+  references.items.forEach((item) => (item.photographer = null));
+  await screen.open();
+  await screen.expectEmpty();
+  await screen.openLinkPicker();
+  await screen.chooseReference("Reference 01");
+  references.items[0].photographer = {
+    id: "another",
+    name: "Changed elsewhere",
+  };
+  references.items[0].revision++;
+  await screen.submitLinks(1);
+  await screen.expectLinkFailure();
+  expect(references.items[0].photographer.id).toBe("another");
+  await screen.reviewLink();
+  await screen.confirmLinks(1);
+  await screen.expectReferences(1);
+});
+for (const width of [1440, 375])
+  test(`reference picker is accessible at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 812 });
+    const { screen, references } = await linkedSetup(page, 25);
+    references.items.forEach((item) => (item.photographer = null));
+    await screen.open();
+    await screen.expectEmpty();
+    await screen.openLinkPicker();
+    await screen.chooseReference("Reference 01");
+    await screen.expectAccessible();
+  });

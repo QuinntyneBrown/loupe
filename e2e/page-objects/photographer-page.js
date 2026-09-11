@@ -11,6 +11,19 @@ export class PhotographerPage {
       exact: true,
     });
   }
+  async submitLinks(count) {
+    await this.linkDialog()
+      .getByRole("button", { name: `Link ${count} references`, exact: true })
+      .click();
+  }
+  async expectLinkFailure(text = "Couldn't link") {
+    await expect(this.linkDialog().getByRole("alert")).toContainText(text);
+  }
+  async reviewLink() {
+    await this.linkDialog()
+      .getByRole("button", { name: "Review latest reference", exact: true })
+      .click();
+  }
   async openLinkPicker() {
     await this.page
       .getByRole("button", { name: "Link references", exact: true })

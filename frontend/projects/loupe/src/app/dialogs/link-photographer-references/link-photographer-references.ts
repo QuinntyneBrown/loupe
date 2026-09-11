@@ -27,7 +27,8 @@ import {
 })
 export class LinkPhotographerReferences {
   readonly photographer = input.required<PhotographerResult>();
-  readonly closed = output<number>();
+  readonly closed = output<{ linked: number; refresh: boolean }>();
+  private attempted = false;
   readonly query = signal('');
   readonly items = signal<ReferenceCandidate[]>([]);
   readonly cursor = signal<string | null>(null);
@@ -103,7 +104,7 @@ export class LinkPhotographerReferences {
   }
   cancel(event?: Event): void {
     event?.preventDefault();
-    if (!this.saving()) this.closed.emit(this.linked());
+    if (!this.saving()) this.closed.emit({ linked: this.linked(), refresh: this.attempted });
   }
   async review(): Promise<void> {
     const stale = this.stale();
@@ -132,31 +133,46 @@ export class LinkPhotographerReferences {
     try {
       for (const candidate of this.selected().values()) {
         try {
+          this.attempted = true;
           await this.references.setPhotographer(
             candidate.id,
             candidate.revision,
             this.photographer().id,
           );
           if (this.destroy.destroyed) return;
-          this.linked.update((count) => count + 1);
-          this.selected.update((selected) => {
-            const next = new Map(selected);
-            next.delete(candidate.id);
-            return next;
-          });
+          this.complete(candidate.id);
         } catch (error) {
           if (this.destroy.destroyed) return;
-          if (error instanceof ServiceError && error.code === 'revision_conflict')
+          if (error instanceof ServiceError && error.code === 'revision_conflict') {
+            try {
+              const latest = await this.references.get(candidate.id);
+              if (this.destroy.destroyed) return;
+              if (latest.photographer?.id === this.photographer().id) {
+                this.complete(candidate.id);
+                continue;
+              }
+            } catch {
+              if (this.destroy.destroyed) return;
+            }
             this.stale.set(candidate);
+          }
           this.error.set(
             `${this.linked()} linked. Couldn't link ${candidate.title}. ${this.stale() ? 'Review its latest details before trying again.' : 'Your remaining selections are kept; try linking again.'}`,
           );
           return;
         }
       }
-      this.closed.emit(this.linked());
+      this.closed.emit({ linked: this.linked(), refresh: true });
     } finally {
       if (!this.destroy.destroyed) this.saving.set(false);
     }
+  }
+  private complete(id: string): void {
+    this.linked.update((count) => count + 1);
+    this.selected.update((selected) => {
+      const next = new Map(selected);
+      next.delete(id);
+      return next;
+    });
   }
 }

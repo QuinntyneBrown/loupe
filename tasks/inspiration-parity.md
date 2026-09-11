@@ -436,3 +436,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: two cases failed on the absent Link references control.
 - GREEN: the existing 20 profile checks passed, and both new picker cases pass after correcting a whitespace-sensitive page-object assertion. Selection survives search beyond page one; linking can move an existing assignment while retaining attribution. Cancel makes no mutation. Refreshing linked references preserves unsaved notes.
 
+
+### Link picker failure recovery
+- RED: cancel after an unacknowledged link did not refresh the profile, and retry mistook an already-completed assignment for an unresolved conflict. Partial-failure, explicit stale-review and desktop/mobile Axe cases already passed.
+- GREEN: all 28 profile Chromium cases pass. Closing after any attempted link refreshes the reference view; retry reads a conflicting reference to recognize a completed assignment. Remaining selections are retained after partial failure. Mobile picker screenshot inspected with visible footer and scrollable results.
+
