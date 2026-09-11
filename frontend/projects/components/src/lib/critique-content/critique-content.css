@@ -106,7 +106,7 @@ dd {
 }
 .lp-meta {
   display: grid;
-  grid-template-columns: max-content minmax(var(--lp-zero), 1fr);
+  grid-template-columns: max-content minmax(var(--lp-zero), var(--lp-fraction));
   gap: var(--lp-space-2) var(--lp-space-5);
   font-size: var(--lp-text-sm);
   margin-top: var(--lp-space-3);

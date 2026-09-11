@@ -76,6 +76,8 @@ export class CritiqueStatus {
         try {
           const result = await this.service.getOperation(id);
           if (active) {
+            const wasProcessing = ['Queued', 'Running'].includes(this.operation()?.status ?? '');
+            if (wasProcessing && result?.status === 'Succeeded') this.expanded.set(true);
             this.operation.set(result);
             this.error.set(null);
             if (result?.status === 'Succeeded' && result.id !== completedId) {
