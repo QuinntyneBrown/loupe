@@ -170,3 +170,53 @@ test("failed notes retain the text and stale review preserves a newer name", asy
   await screen.expectNotesSaved("Keep this draft");
   expect(library.items[0].name).toBe("New name");
 });
+
+test("tag chips add and remove while preserving unsaved notes", async ({
+  page,
+}) => {
+  const { library, screen } = await setup(page);
+  await screen.open();
+  await screen.writeNotes("Unsaved notes");
+  await screen.addTag("interiors");
+  await screen.expectTag("interiors");
+  await screen.removeTag("portrait");
+  await screen.expectNoTag("portrait");
+  await screen.saveNotes();
+  await screen.reviewNotes();
+  await screen.saveNotes();
+  await screen.expectNotesSaved("Unsaved notes");
+  expect(library.items[0].tags.map((tag) => tag.name)).toEqual([
+    "window light",
+    "interiors",
+  ]);
+});
+test("tag failures can retry and stale review retains another newly added tag", async ({
+  page,
+}) => {
+  const { library, screen } = await setup(page);
+  await screen.open();
+  await screen.expectEmpty();
+  library.failures = 1;
+  await screen.addTag("interiors");
+  await screen.expectTagError("Couldn't save");
+  library.items[0].tags.push({
+    name: "new elsewhere",
+    category: null,
+    provenance: "manual",
+  });
+  library.items[0].revision++;
+  await screen.retryTag();
+  await screen.reviewTags();
+  await screen.retryTag();
+  await screen.expectTag("interiors");
+  await screen.expectTag("new elsewhere");
+});
+test("duplicate tag names are rejected without saving another variant", async ({
+  page,
+}) => {
+  const { library, screen } = await setup(page);
+  await screen.open();
+  await screen.addTag(" WINDOW LIGHT ");
+  await screen.expectTagError("already");
+  expect(library.calls.some((call) => call.operation === "update")).toBe(false);
+});

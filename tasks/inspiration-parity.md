@@ -406,3 +406,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both cases failed because notes were read-only.
 - GREEN: all ten profile Chromium cases pass. Notes have explicit Save and saved/dirty/pending/failure states, retain failed drafts and show the latest notes for conflict review. Retrying changes only notes while preserving newer name/description/tags. The page guard includes note drafts and active saves.
 
+
+### Photographer tag chips
+- RED: three cases failed on absent Add a tag/remove controls.
+- GREEN: all 13 profile Chromium cases pass. Tag additions/removals persist immediately, reject case-normalized duplicates, and retain failed actions. Conflict review reapplies one action to current metadata without losing unrelated tags. Unsaved notes survive tag writes and can be reviewed and saved afterward.
+

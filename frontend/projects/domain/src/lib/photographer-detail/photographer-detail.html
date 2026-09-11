@@ -75,16 +75,7 @@
           </p>
         }
       </section>
-      <section aria-labelledby="photographer-tags-title">
-        <h2 class="lp-subheading" id="photographer-tags-title">Tags</h2>
-        <div class="tags">
-          @for (tag of photographer.tags; track tag.name) {
-            <span class="lp-tag">{{ tag.name }}</span>
-          } @empty {
-            <p>No tags yet.</p>
-          }
-        </div>
-      </section>
+      <lp-photographer-tags [photographer]="photographer" (saved)="item.set($event)" />
       <lp-photographer-notes [photographer]="photographer" (saved)="item.set($event)" />
     </div>
     <section aria-labelledby="references-title" [attr.aria-busy]="referenceLoading()">

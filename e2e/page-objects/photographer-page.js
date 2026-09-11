@@ -5,6 +5,51 @@ export class PhotographerPage {
   constructor(page) {
     this.page = page;
   }
+  tagsPanel() {
+    return this.page.getByRole("region", { name: "Tags", exact: true });
+  }
+  async addTag(name) {
+    const input = this.tagsPanel().getByRole("textbox", {
+      name: "Add a tag",
+      exact: true,
+    });
+    await input.fill(name);
+    await input.press("Enter");
+  }
+  async removeTag(name) {
+    await this.tagsPanel()
+      .getByRole("button", { name: `Remove tag ${name}`, exact: true })
+      .click();
+  }
+  async expectTag(name) {
+    await expect(
+      this.tagsPanel().getByRole("button", {
+        name: `Remove tag ${name}`,
+        exact: true,
+      }),
+    ).toBeVisible();
+  }
+  async expectNoTag(name) {
+    await expect(
+      this.tagsPanel().getByRole("button", {
+        name: `Remove tag ${name}`,
+        exact: true,
+      }),
+    ).toHaveCount(0);
+  }
+  async expectTagError(text) {
+    await expect(this.tagsPanel().getByRole("alert")).toContainText(text);
+  }
+  async retryTag() {
+    await this.tagsPanel()
+      .getByRole("button", { name: "Retry", exact: true })
+      .click();
+  }
+  async reviewTags() {
+    await this.tagsPanel()
+      .getByRole("button", { name: "Review latest tags", exact: true })
+      .click();
+  }
   notesPanel() {
     return this.page.getByRole("region", { name: "Your notes", exact: true });
   }
