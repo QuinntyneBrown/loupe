@@ -9,7 +9,7 @@ public sealed class CritiqueConfiguration(IOptions<AiOptions> options) : ICritiq
 {
     public AnalysisIdentity GetIdentity() => options.Value.Mode switch
     {
-        "Live" when !string.IsNullOrWhiteSpace(options.Value.ApiKey) => new(ExecutionMode.Live, options.Value.Model, "critique-v2"),
+        "Live" when options.Value.IsConfigured => new(ExecutionMode.Live, options.Value.Model, "critique-v2"),
         _ => throw new IntegrationNotConfiguredException()
     };
 }

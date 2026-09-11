@@ -745,3 +745,10 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - The 30-second `HttpClient.Timeout` bounds one connection attempt, not yet the cross-call budget L2-040.3 describes (robots + preview + image fetch sharing one 30-second total). That needs a `FetchBudget` accumulating elapsed time across calls, which has no real caller yet; introducing it before the robots-check and preview-selector slices exist would be speculative. Decoded-byte limits (2,000,000 HTML / 512,000 robots) are deliberately left to those same callers, which know which limit applies to what they're reading.
 - Full regression: `./backend/Test.ps1` passed 360/360 (2m11s). `dotnet format backend/Loupe.slnx --verify-no-changes --no-restore` passed with no changes.
 - Review: no Critical or Required findings.
+
+## Azure OpenAI critiques — configuration and transport
+
+- L2-036.6–7 / L2-041: Replaced the direct OpenAI adapter with Azure Responses, API-key authentication, explicit resource endpoint and deployment, and shared API/worker configuration availability checks.
+- RED: Azure configuration and live transport acceptance run failed 14 cases for the expected missing validation/admission guards and old OpenAI URL; 2 existing missing-key cases passed.
+- GREEN: `./backend/Test.ps1 -Filter FullyQualifiedName~Critiques`: 116 passed, 0 failed, 0 skipped (Linux acceptance container).
+- Global formatting verification reports pre-existing whitespace defects in untouched `DemoRetirementTests.cs` (lines 65–68); no formatting suppressions were added.

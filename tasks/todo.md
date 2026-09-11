@@ -366,3 +366,8 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 - [ ] L2-052.2: Given approved visual baselines for My Work, critique, comparison, Inspiration, reference, Photographers, photographer detail, and Search at 375, 768, and 1440 pixels, when the application is rendered with deterministic content, then visual comparison shows no unexplained layout or styling regression; review records deliberate baseline updates.
 - [ ] L2-052.3: Given photographs with dark, bright, saturated, and monochrome content, when viewed in cards and details, then surrounding controls remain readable, no tint/filter is applied to the displayed photograph, and the complete detail image follows L2-012/L2-044.
 - [ ] L2-052.4: Given keyboard focus, validation error, processing, and selected states, when displayed on each application screen, then the same state meaning and appearance match the documented reference and remain accessible without color alone.
+
+## Azure OpenAI critique integration
+- [x] L2-036.6–7: Configure Azure and verify the Responses request using failing-first API acceptance tests.
+- [ ] L2-036.8–9: Verify saved-result compatibility and Azure failure handling.
+- [ ] L2-041.2 / L2-050: Name Azure in request disclosures; update setup and run regression checks.
