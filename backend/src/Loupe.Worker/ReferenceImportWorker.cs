@@ -1,4 +1,5 @@
 using Loupe.Application.ReferenceImports;
+using Loupe.Application.PhotographerImports;
 using Loupe.Infrastructure.Ai;
 using Loupe.Infrastructure.ReferenceImports;
 using MediatR;
@@ -20,12 +21,18 @@ public sealed class ReferenceImportWorker(IServiceScopeFactory scopes, IOptions<
 
     private async Task ProcessAsync(CancellationToken stoppingToken)
     {
+        var photographerFirst = false;
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 await using var scope = scopes.CreateAsyncScope();
-                if (await scope.ServiceProvider.GetRequiredService<ISender>().Send(new RunReferenceImportCommand(), stoppingToken)) continue;
+                var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+                photographerFirst = !photographerFirst;
+                var processed = photographerFirst
+                    ? await sender.Send(new RunPhotographerImportCommand(), stoppingToken) || await sender.Send(new RunReferenceImportCommand(), stoppingToken)
+                    : await sender.Send(new RunReferenceImportCommand(), stoppingToken) || await sender.Send(new RunPhotographerImportCommand(), stoppingToken);
+                if (processed) continue;
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
             catch (Exception) { logger.LogError("Source import processing failed; inspect durable operation status"); }

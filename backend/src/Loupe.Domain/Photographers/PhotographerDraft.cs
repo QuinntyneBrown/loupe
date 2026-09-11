@@ -6,6 +6,7 @@ public sealed class PhotographerDraft
     public required string OwnerId { get; init; }
     public required string PortfolioUrl { get; init; }
     public string? Name { get; set; }
+    public string? SourceJson { get; set; }
     public required DateTimeOffset ExpiresAt { get; init; }
     public long Revision { get; set; } = 1;
     public bool Canceled { get; set; }

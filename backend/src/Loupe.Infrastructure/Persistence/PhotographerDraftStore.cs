@@ -47,7 +47,7 @@ public sealed class PhotographerDraftStore(LibraryDbContext database, IPhotograp
                 .SetProperty(item => item.Message, "Page reading canceled."), cancellationToken);
         var draft = await database.PhotographerDrafts.FromSqlInterpolated($"SELECT * FROM photographer_drafts WHERE \"Id\" = {id} AND \"OwnerId\" = {ownerId} FOR UPDATE")
             .SingleOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException();
-        if (!draft.Canceled) {draft.Canceled = true; draft.Name = null; draft.Revision++; await database.SaveChangesAsync(cancellationToken);}
+        if (!draft.Canceled) {draft.Canceled = true; draft.Name = null; draft.SourceJson = null; draft.Revision++; await database.SaveChangesAsync(cancellationToken);}
         await transaction.CommitAsync(cancellationToken);
     }
 }

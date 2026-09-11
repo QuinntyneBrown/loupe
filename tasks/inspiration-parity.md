@@ -360,3 +360,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: private/duplicate draft cases returned 404. After correcting the unconfigured fixture to null (the supported configuration), its fallback case also failed on 404.
 - GREEN: 26 draft/bookmark/abandoned-media API cases pass. Page-read admission creates no bookmark, deduplicates operation keys, returns existing portfolios before admission, hides foreign/expired/canceled drafts, and supports repeated cancellation. Expired drafts join existing cleanup.
 
+
+### Bounded photographer page reading
+- RED: five allowed/restricted/Unicode worker cases remained Queued. The implemented pipeline passed 22 source/draft cases.
+- Review then found the standalone worker's restricted handler registration needed updating. A process-level acceptance case reproduced Queued with the registration absent; adding the handler made all 23 source/draft/standalone-worker cases pass.
+- The shared source pool reads one allowed HTML page, ignores navigation/scripts/hidden sections, captures title/description/keywords and at most 20,000 main-text Unicode scalars, and never follows gallery links. Robots/password/paywall failures remain manual fallbacks. Captured provenance stays private on the draft.
+

@@ -2,6 +2,7 @@ using Loupe.Application.Maintenance;
 using Loupe.Application.Critiques;
 using Loupe.Application.ReferenceAnalysis;
 using Loupe.Application.ReferenceImports;
+using Loupe.Application.PhotographerImports;
 using Loupe.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,7 +26,7 @@ public static class Program
         {
             options.TypeEvaluator = type => type.Namespace == typeof(CleanDeletedContentCommand).Namespace
                 || type == typeof(RunCritiqueCommandHandler) || type == typeof(RunReferenceImportCommandHandler)
-                || type == typeof(RunReferenceAnalysisCommandHandler);
+                || type == typeof(RunReferenceAnalysisCommandHandler) || type == typeof(RunPhotographerImportCommandHandler);
             options.RegisterServicesFromAssemblyContaining<CleanDeletedContentCommand>();
         });
         builder.Services.AddOptions<CleanupOptions>().BindConfiguration("Cleanup")

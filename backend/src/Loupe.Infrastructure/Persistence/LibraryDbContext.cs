@@ -33,6 +33,7 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<PhotographerDraft>().ToTable("photographer_drafts").HasKey(item => item.Id);
         modelBuilder.Entity<PhotographerDraft>().HasIndex(item => new { item.OwnerId, item.ExpiresAt });
         modelBuilder.Entity<PhotographerDraft>().Property(item => item.Revision).IsConcurrencyToken();
+        modelBuilder.Entity<PhotographerDraft>().Property(item => item.SourceJson).HasColumnType("jsonb");
         modelBuilder.Entity<PhotographerDraft>().HasOne(item => item.ImportOperation).WithMany().HasForeignKey(item => item.ImportOperationId).OnDelete(DeleteBehavior.SetNull);
         modelBuilder.Entity<Photographer>().ToTable("photographers").HasKey(item => item.Id);
         modelBuilder.Entity<Photographer>().HasAlternateKey(item => new { item.Id, item.OwnerId });
