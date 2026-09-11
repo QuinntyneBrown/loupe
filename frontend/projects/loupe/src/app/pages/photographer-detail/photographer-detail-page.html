@@ -2,5 +2,13 @@
   <a class="back" routerLink="/photographers"
     ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-left" /></svg
     >Photographers</a
-  ><lp-photographer-detail [id]="id()" />
+  ><lp-photographer-detail [id]="id()" (editRequested)="editing.set($event)" />
 </main>
+<lp-unsaved-changes [dirty]="dirty" />
+@if (editing(); as item) {
+  <lp-edit-photographer
+    [photographer]="item"
+    (saved)="saved($event)"
+    (closed)="editing.set(null)"
+  />
+}

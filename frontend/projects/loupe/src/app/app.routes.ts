@@ -1,4 +1,5 @@
 import { ReferenceLinkPage } from './pages/reference-link/reference-link-page';
+import { photographerUnsavedGuard } from './photographer-unsaved.guard';
 import { photographerDraftUnsavedGuard } from './photographer-draft-unsaved.guard';
 import { referenceDraftUnsavedGuard } from './reference-draft-unsaved.guard';
 import { referenceLinkUnsavedGuard } from './reference-link-unsaved.guard';
@@ -20,6 +21,7 @@ import { ComparePage } from './pages/compare/compare-page';
 export const routes: Routes = [
   {
     path: 'photographers/:id',
+    canDeactivate: [photographerUnsavedGuard],
     loadComponent: () =>
       import('./pages/photographer-detail/photographer-detail-page').then(
         (module) => module.PhotographerDetailPage,

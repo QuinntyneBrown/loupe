@@ -49,3 +49,58 @@ test("photographer detail retries a failed load and pages linked references", as
     library.calls.filter((call) => call.operation === "references"),
   ).toHaveLength(2);
 });
+
+test("editing bookmark details updates the profile and preserves notes and tags", async ({
+  page,
+}) => {
+  const { library, screen } = await setup(page);
+  await screen.open();
+  await screen.edit();
+  await screen.changeDetails(
+    "Casey Revised",
+    "https://changed.example/",
+    "An owner description",
+  );
+  await screen.saveDetails();
+  await screen.expectDetailsClosed();
+  await screen.expectProfile(
+    "Casey Revised",
+    "An owner description",
+    "Study the window light.",
+  );
+  expect(library.items[0].tags).toHaveLength(2);
+  await screen.expectSource("https://portfolio1.example/work", false);
+});
+test("canceling detail edits leaves the bookmark untouched", async ({
+  page,
+}) => {
+  const { library, screen } = await setup(page);
+  await screen.open();
+  await screen.edit();
+  await screen.changeDetails("Changed", "https://changed.example/", "Changed");
+  await screen.cancelDetails();
+  await screen.expectDetailsClosed();
+  expect(library.calls.some((call) => call.operation === "update")).toBe(false);
+});
+test("failed and stale edits retain the draft and preserve newer unrelated notes", async ({
+  page,
+}) => {
+  const { library, screen } = await setup(page);
+  await screen.open();
+  await screen.edit();
+  await screen.changeDetails(
+    "Casey Revised",
+    "https://portfolio1.example/work",
+    "My description",
+  );
+  library.failures = 1;
+  await screen.saveDetails();
+  await screen.expectSaveFailure();
+  library.items[0].notes = "Newer notes";
+  library.items[0].revision++;
+  await screen.retrySave();
+  await screen.reviewLatest();
+  await screen.saveDetails();
+  await screen.expectDetailsClosed();
+  await screen.expectProfile("Casey Revised", "My description", "Newer notes");
+});

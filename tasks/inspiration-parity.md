@@ -391,3 +391,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: three cases could not reach the absent detail route.
 - GREEN: all 20 photographer Chromium cases pass. The private profile exposes bookmark metadata and captured-page provenance; linked references page independently and profile failures can retry. Desktop/mobile Axe checks pass. This read slice precedes editing, deletion, linking and generated-summary controls.
 
+
+### Photographer edit details
+- RED: three cases failed on absent More actions/Edit details. After implementation, the page object was corrected to address the native summary by its accessible label (Chromium exposes it as generic).
+- GREEN: all six detail Chromium cases pass, including profile accessibility. Save uses the current revision; cancel leaves the bookmark untouched; failure retains edits; reviewing a stale revision preserves newer unrelated notes and tags before retrying.
+

@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PHOTOGRAPHER_SERVICE, PhotographerResult, ReferenceSummary } from 'api';
@@ -10,6 +10,12 @@ import { PHOTOGRAPHER_SERVICE, PhotographerResult, ReferenceSummary } from 'api'
   styleUrl: './photographer-detail.css',
 })
 export class PhotographerDetail {
+  readonly editRequested = output<PhotographerResult>();
+  edit(menu: HTMLDetailsElement): void {
+    menu.open = false;
+    const item = this.item();
+    if (item) this.editRequested.emit(item);
+  }
   readonly id = input.required<string>();
   private readonly service = inject(PHOTOGRAPHER_SERVICE);
   readonly item = signal<PhotographerResult | null>(null);

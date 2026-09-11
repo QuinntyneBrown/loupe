@@ -1,6 +1,38 @@
 :host {
   display: block;
 }
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-3);
+}
+.title-row h1 {
+  overflow-wrap: anywhere;
+  min-width: var(--lp-zero);
+}
+.menu {
+  position: relative;
+  flex-shrink: var(--lp-zero);
+}
+.menu summary {
+  list-style: none;
+  cursor: pointer;
+}
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+.menu-list {
+  position: absolute;
+  right: var(--lp-zero);
+  top: var(--lp-full);
+  min-width: var(--lp-space-12);
+  padding: var(--lp-space-2);
+  background: var(--lp-color-surface);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+  box-shadow: var(--lp-shadow-lg);
+  z-index: var(--lp-z-menu);
+}
 h1,
 h2,
 h3,

@@ -56,6 +56,21 @@ export class PhotographerLibrary {
             },
           };
         }
+        if (operation === "update") {
+          const item = this.items.find((item) => item.id === input.id);
+          if (!item) return { error: "item_unavailable" };
+          if (item.revision !== input.revision)
+            return { error: "revision_conflict" };
+          const changed = item.portfolioUrl !== input.portfolioUrl;
+          Object.assign(item, input, {
+            revision: item.revision + 1,
+            sourceIsCurrent: changed ? false : item.sourceIsCurrent,
+            sourceRevision: changed
+              ? item.sourceRevision + 1
+              : item.sourceRevision,
+          });
+          return { data: item };
+        }
         if (operation === "get")
           return this.items.some((item) => item.id === input.id)
             ? { data: this.items.find((item) => item.id === input.id) }

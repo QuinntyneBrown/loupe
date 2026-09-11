@@ -20,7 +20,19 @@
 } @else if (item(); as photographer) {
   <div class="stack">
     <header>
-      <h1 class="lp-title">{{ photographer.name }}</h1>
+      <div class="title-row">
+        <h1 class="lp-title">{{ photographer.name }}</h1>
+        <details #menu class="menu">
+          <summary class="lp-icon-button" aria-label="More actions">
+            <svg class="lp-icon" aria-hidden="true"><use href="#i-more" /></svg>
+          </summary>
+          <div class="menu-list">
+            <button class="lp-button lp-button--ghost" type="button" (click)="edit(menu)">
+              Edit details
+            </button>
+          </div>
+        </details>
+      </div>
       <div class="meta">
         <a
           class="lp-link"

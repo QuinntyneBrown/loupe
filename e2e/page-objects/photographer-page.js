@@ -5,6 +5,54 @@ export class PhotographerPage {
   constructor(page) {
     this.page = page;
   }
+  async edit() {
+    await this.page.getByLabel("More actions", { exact: true }).click();
+    await this.page
+      .getByRole("button", { name: "Edit details", exact: true })
+      .click();
+  }
+  dialog() {
+    return this.page.getByRole("dialog", { name: "Edit details", exact: true });
+  }
+  async changeDetails(name, url, description) {
+    await this.dialog()
+      .getByRole("textbox", { name: "Name", exact: true })
+      .fill(name);
+    await this.dialog()
+      .getByRole("textbox", { name: "Website", exact: true })
+      .fill(url);
+    await this.dialog()
+      .getByRole("textbox", { name: "Description", exact: true })
+      .fill(description);
+  }
+  async saveDetails() {
+    await this.dialog()
+      .getByRole("button", { name: "Save", exact: true })
+      .click();
+  }
+  async cancelDetails() {
+    await this.dialog()
+      .getByRole("button", { name: "Cancel", exact: true })
+      .click();
+  }
+  async expectDetailsClosed() {
+    await expect(this.dialog()).not.toBeVisible();
+  }
+  async expectSaveFailure() {
+    await expect(this.dialog().getByRole("alert")).toContainText(
+      "Couldn't save",
+    );
+  }
+  async retrySave() {
+    await this.dialog()
+      .getByRole("button", { name: "Retry", exact: true })
+      .click();
+  }
+  async reviewLatest() {
+    await this.dialog()
+      .getByRole("button", { name: "Review latest", exact: true })
+      .click();
+  }
   async open(id = "photographer-1") {
     await this.page.goto("/photographers/" + id);
     await new SignInPage(this.page).continue();
