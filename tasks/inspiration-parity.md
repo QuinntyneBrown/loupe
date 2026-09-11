@@ -202,3 +202,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - GREEN: all 39 collection/board/filter/draft Chromium cases pass. Empty library and empty board actions open the unified dialog and restore their initiating control; retries preserve the existing focus behavior.
 - Empty/filter/error copy follows the mocks. Mobile grid spacing and the empty tag-host gap were corrected.
 
+
+### Board pagination through Remove and Undo
+- RED: removing one of 48 loaded board references reset the collection to 24.
+- GREEN: all 21 board/filter/collection cases pass. Remove keeps 47 displayed entries, Undo restores 48 and keyboard focus, and the existing cursor loads the remaining entries without duplication.
+- Membership success updates the displayed collection and board counts without resetting its pages; restoration respects the current board and tags.
+

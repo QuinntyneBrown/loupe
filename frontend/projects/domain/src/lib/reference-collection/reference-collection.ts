@@ -13,7 +13,7 @@ import {
   signal,
   viewChildren,
 } from '@angular/core';
-import { REFERENCE_SERVICE, ReferenceSummary } from 'api';
+import { REFERENCE_SERVICE, ReferenceSummary, ReferenceResult } from 'api';
 import { ReferenceCard } from 'components';
 
 @Component({
@@ -44,6 +44,35 @@ export class ReferenceCollection {
   readonly removeRequested = output<ReferenceSummary>();
   readonly libraryCount = output<number>();
   private generation = 0;
+  remove(id: string): void {
+    const index = this.items().findIndex((item) => item.id === id);
+    if (index < 0) return;
+    this.items.update((items) => items.filter((item) => item.id !== id));
+    this.focusItem(Math.min(index, this.items().length - 1));
+  }
+  restore(reference: ReferenceResult): void {
+    if (this.boardId() && !reference.boardIds.includes(this.boardId()!)) return;
+    const names = reference.tags.map((tag) => tag.name.normalize('NFC').toUpperCase());
+    if (!this.tags().every((tag) => names.includes(tag.normalize('NFC').toUpperCase()))) return;
+    this.items.update((items) =>
+      [...items.filter((item) => item.id !== reference.id), reference].sort(
+        (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt) || a.id.localeCompare(b.id),
+      ),
+    );
+    this.focusItem(this.items().findIndex((item) => item.id === reference.id));
+  }
+  private focusItem(index: number): void {
+    const generation = this.generation;
+    afterNextRender(
+      () => {
+        if (this.destroyed.destroyed || generation !== this.generation) return;
+        const card = this.cards()[index];
+        if (card) card.focus();
+        else this.emptyHeading()?.nativeElement.focus();
+      },
+      { injector: this.injector },
+    );
+  }
   constructor() {
     effect(() => {
       this.boardId();

@@ -74,3 +74,15 @@ test('inline board creation survives a membership failure and retries without du
   await inspiration.selectBoard('Window light');
   await inspiration.expectReferences(1);
 });
+
+test('Remove and Undo retain loaded board pages and the remaining cursor', async ({ page }) => {
+  const { inspiration, signIn } = await setup(page, 50);
+  await inspiration.newBoard('Window light');
+  const boardId = inspiration.library.boards[0].id;
+  inspiration.library.items.forEach(item => { item.boardIds = [boardId]; });
+  await page.reload(); await signIn.continue(); await inspiration.selectBoard('Window light');
+  await inspiration.loadMore(); await inspiration.expectReferences(48);
+  await inspiration.removeFromBoard('Reference 48'); await inspiration.expectReferences(47);
+  await inspiration.undoRemoval(); await inspiration.expectReferences(48); await inspiration.expectReferenceFocus('Reference 48');
+  await inspiration.loadMore(); await inspiration.expectReferences(50);
+});

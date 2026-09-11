@@ -128,7 +128,8 @@ export class InspirationPage {
       if (this.destroy.destroyed) return;
       this.undo.set({ referenceId: reference.id, boardId: board.id, boardName: board.name });
       this.notice.set(`Removed from ${board.name}.`);
-      this.refresh();
+      if (this.boardId() === board.id) this.collection().remove(reference.id);
+      await this.navigation().refresh();
     } catch {
       if (!this.destroy.destroyed)
         this.failure.set('The reference could not be removed from the board. Try again.');
@@ -144,13 +145,14 @@ export class InspirationPage {
     try {
       const latest = await this.references.get(undo.referenceId);
       if (this.destroy.destroyed) return;
-      await this.boardService.setMemberships(latest.id, latest.revision, [
+      const restored = await this.boardService.setMemberships(latest.id, latest.revision, [
         ...new Set([...latest.boardIds, undo.boardId]),
       ]);
       if (this.destroy.destroyed) return;
       this.undo.set(null);
       this.notice.set(`Restored to ${undo.boardName}.`);
-      this.refresh();
+      if (this.boardId() === undo.boardId) this.collection().restore(restored);
+      await this.navigation().refresh();
     } catch {
       if (!this.destroy.destroyed)
         this.failure.set(
