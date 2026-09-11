@@ -37,6 +37,7 @@ export * from './lib/reference-import/reference-import.service';
 export * from './lib/board/board-result';
 export * from './lib/photographer/photographer-result';
 export * from './lib/photographer/photographer-metadata';
+export * from './lib/photographer/reference-candidate';
 export * from './lib/photographer-draft/photographer-draft-result';
 export * from './lib/photographer-draft/photographer-draft.service.contract';
 export * from './lib/photographer-draft/photographer-draft.service';

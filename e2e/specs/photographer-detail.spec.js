@@ -338,3 +338,48 @@ test("unlink and Undo recover focus on the next and restored reference", async (
   await screen.undoUnlink();
   await screen.expectReferenceFocused("Reference 01");
 });
+
+test("link picker searches beyond page one and retains selections across queries", async ({
+  page,
+}) => {
+  const { screen, references } = await linkedSetup(page, 26);
+  references.items.forEach((item) => (item.photographer = null));
+  await screen.open();
+  await screen.expectEmpty();
+  await screen.writeNotes("Keep this unfinished note");
+  await screen.openLinkPicker();
+  await screen.chooseReference("Reference 01");
+  await screen.searchReferences("Reference 26");
+  await screen.chooseReference("Reference 26");
+  await screen.expectSelected(2);
+  await screen.confirmLinks(2);
+  await screen.expectReferences(2);
+  await screen.saveNotes();
+  await screen.expectNotesSaved("Keep this unfinished note");
+  expect(
+    references.items.filter(
+      (item) => item.photographer?.id === "photographer-1",
+    ),
+  ).toHaveLength(2);
+});
+test("linking moves an existing assignment and cancel makes no link changes", async ({
+  page,
+}) => {
+  const { screen, references } = await linkedSetup(page, 2);
+  references.items.forEach(
+    (item) =>
+      (item.photographer = { id: "another-photographer", name: "Another" }),
+  );
+  await screen.open();
+  await screen.expectEmpty();
+  await screen.openLinkPicker();
+  await screen.chooseReference("Reference 01");
+  await screen.cancelLinkPicker();
+  expect(references.items[0].photographer.id).toBe("another-photographer");
+  await screen.openLinkPicker();
+  await screen.chooseReference("Reference 01");
+  await screen.confirmLinks(1);
+  await screen.expectReferences(1);
+  expect(references.items[0].photographer.id).toBe("photographer-1");
+  expect(references.items[0].attribution).toBe("Supplied photographer");
+});

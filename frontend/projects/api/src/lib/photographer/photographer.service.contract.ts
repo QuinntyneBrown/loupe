@@ -2,6 +2,7 @@ import { InjectionToken } from '@angular/core';
 import { PhotographerPage } from './photographer-result';
 import { PhotographerResult, PhotographerMetadata } from './photographer-metadata';
 import { ReferenceSummary } from '../reference/reference-result';
+import { ReferenceCandidatePage } from './reference-candidate';
 
 export interface PhotographerReferencePage {
   items: ReferenceSummary[];
@@ -10,6 +11,7 @@ export interface PhotographerReferencePage {
 }
 
 export interface IPhotographerService {
+  candidates(id: string, query: string, cursor?: string): Promise<ReferenceCandidatePage>;
   list(cursor?: string): Promise<PhotographerPage>;
   get(id: string): Promise<PhotographerResult>;
   update(

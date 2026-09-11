@@ -431,3 +431,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: the candidate query returned 404.
 - GREEN: all 31 photographer API cases pass. Search is applied before paging across the owned library, treats SQL wildcard characters literally, and returns bounded selection metadata with current link revisions. Cursors are scoped to owner, destination photographer, query and page size; foreign bookmarks remain 404.
 
+
+### Link references picker
+- RED: two cases failed on the absent Link references control.
+- GREEN: the existing 20 profile checks passed, and both new picker cases pass after correcting a whitespace-sensitive page-object assertion. Selection survives search beyond page one; linking can move an existing assignment while retaining attribution. Cancel makes no mutation. Refreshing linked references preserves unsaved notes.
+

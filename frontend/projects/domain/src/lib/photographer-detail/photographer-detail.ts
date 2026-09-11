@@ -180,6 +180,16 @@ export class PhotographerDetail {
     () => !!(this.notes()?.dirty() || this.notes()?.busy() || this.tags()?.dirty()),
   );
   readonly editRequested = output<PhotographerResult>();
+  readonly linkRequested = output<PhotographerResult>();
+  private readonly linkButton = viewChild<ElementRef<HTMLButtonElement>>('linkButton');
+  focusLink(): void {
+    afterNextRender(
+      () => {
+        if (!this.destroy.destroyed) this.linkButton()?.nativeElement.focus();
+      },
+      { injector: this.injector },
+    );
+  }
   readonly deleteRequested = output<{ item: PhotographerResult; count: number }>();
   delete(menu: HTMLDetailsElement): void {
     menu.open = false;
@@ -211,6 +221,14 @@ export class PhotographerDetail {
     }
   });
   private generation = 0;
+  private referenceGeneration = 0;
+  private refreshTarget = 0;
+  refreshReferences(additional = 0): void {
+    this.refreshTarget = Math.max(24, this.references().length + additional);
+    this.referenceGeneration++;
+    this.referenceLoading.set(false);
+    void this.loadReferences();
+  }
   constructor() {
     effect(() => {
       const id = this.id();
@@ -244,21 +262,36 @@ export class PhotographerDetail {
   async loadReferences(): Promise<void> {
     if (this.referenceLoading()) return;
     const generation = this.generation;
+    const referenceGeneration = ++this.referenceGeneration;
+    const refresh = this.refreshTarget > 0;
     this.referenceLoading.set(true);
     this.referenceFailed.set(false);
     try {
-      const result = await this.service.references(this.id(), this.cursor() ?? undefined);
-      if (generation !== this.generation) return;
+      let result = await this.service.references(
+        this.id(),
+        refresh ? undefined : (this.cursor() ?? undefined),
+      );
+      let incoming = [...result.items];
+      while (refresh && incoming.length < this.refreshTarget && result.nextCursor) {
+        result = await this.service.references(this.id(), result.nextCursor);
+        incoming.push(...result.items);
+      }
+      if (generation !== this.generation || referenceGeneration !== this.referenceGeneration)
+        return;
       this.references.update((items) => {
+        if (refresh) items = [];
         const ids = new Set(items.map((item) => item.id));
-        return [...items, ...result.items.filter((item) => !ids.has(item.id))];
+        return [...items, ...incoming.filter((item) => !ids.has(item.id))];
       });
+      this.refreshTarget = 0;
       this.cursor.set(result.nextCursor);
       this.referenceCount.set(result.totalCount);
     } catch {
-      if (generation === this.generation) this.referenceFailed.set(true);
+      if (generation === this.generation && referenceGeneration === this.referenceGeneration)
+        this.referenceFailed.set(true);
     } finally {
-      if (generation === this.generation) this.referenceLoading.set(false);
+      if (generation === this.generation && referenceGeneration === this.referenceGeneration)
+        this.referenceLoading.set(false);
     }
   }
 }

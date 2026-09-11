@@ -19,40 +19,52 @@
   </div>
 } @else if (item(); as photographer) {
   <div class="stack">
-    <header>
-      <div class="title-row">
-        <h1 class="lp-title">{{ photographer.name }}</h1>
-        <details #menu class="menu">
-          <summary #actions class="lp-icon-button" aria-label="More actions">
-            <svg class="lp-icon" aria-hidden="true"><use href="#i-more" /></svg>
-          </summary>
-          <div class="menu-list">
-            <button class="lp-button lp-button--ghost" type="button" (click)="edit(menu)">
-              Edit details
-            </button>
-            <button
-              class="lp-button lp-button--ghost delete-action"
-              type="button"
-              [disabled]="referenceCount() === null"
-              (click)="delete(menu)"
-            >
-              Delete photographer
-            </button>
-          </div>
-        </details>
+    <header class="profile-header">
+      <div>
+        <div class="title-row">
+          <h1 class="lp-title">{{ photographer.name }}</h1>
+          <details #menu class="menu">
+            <summary #actions class="lp-icon-button" aria-label="More actions">
+              <svg class="lp-icon" aria-hidden="true"><use href="#i-more" /></svg>
+            </summary>
+            <div class="menu-list">
+              <button class="lp-button lp-button--ghost" type="button" (click)="edit(menu)">
+                Edit details
+              </button>
+              <button
+                class="lp-button lp-button--ghost delete-action"
+                type="button"
+                [disabled]="referenceCount() === null"
+                (click)="delete(menu)"
+              >
+                Delete photographer
+              </button>
+            </div>
+          </details>
+        </div>
+        <div class="meta">
+          <a
+            class="lp-link"
+            [href]="photographer.portfolioUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            referrerpolicy="no-referrer"
+            ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-globe" /></svg
+            >{{ host()
+            }}<svg class="lp-icon lp-icon--sm" aria-hidden="true">
+              <use href="#i-external" /></svg></a
+          ><span>Bookmarked {{ photographer.createdAt | date: 'd MMM yyyy' }}</span>
+        </div>
       </div>
-      <div class="meta">
-        <a
-          class="lp-link"
-          [href]="photographer.portfolioUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          referrerpolicy="no-referrer"
-          ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-globe" /></svg
-          >{{ host()
-          }}<svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-external" /></svg></a
-        ><span>Bookmarked {{ photographer.createdAt | date: 'd MMM yyyy' }}</span>
-      </div>
+      <button
+        #linkButton
+        class="lp-button lp-button--primary"
+        type="button"
+        (click)="linkRequested.emit(photographer)"
+      >
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-link" /></svg>Link
+        references
+      </button>
     </header>
     <div class="stack narrow">
       <section class="summary" aria-labelledby="summary-title">
@@ -151,6 +163,15 @@
           <p class="lp-empty__text">
             Link references you've already saved, or set the photographer from a reference's page.
           </p>
+          <div class="lp-empty__action">
+            <button
+              class="lp-button lp-button--secondary"
+              type="button"
+              (click)="linkRequested.emit(photographer)"
+            >
+              Link references
+            </button>
+          </div>
         </div>
       }
       @if (referenceFailed()) {

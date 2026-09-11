@@ -93,6 +93,30 @@ export class PhotographerLibrary {
           return this.items.some((item) => item.id === input.id)
             ? { data: this.items.find((item) => item.id === input.id) }
             : { error: "item_unavailable" };
+        if (operation === "candidates") {
+          const query = (input.query || "").toLowerCase();
+          const matches = (this.referenceLibrary?.items ?? []).filter((item) =>
+            [
+              item.title,
+              item.attribution,
+              item.notes,
+              item.description,
+              item.sourceUrl,
+              ...item.tags.map((tag) => tag.name),
+            ].some((value) => value?.toLowerCase().includes(query)),
+          );
+          const offset = input.cursor
+            ? matches.findIndex((item) => item.id === input.cursor) + 1
+            : 0;
+          return {
+            data: {
+              items: matches.slice(offset, offset + 24),
+              nextCursor:
+                offset + 24 < matches.length ? matches[offset + 23].id : null,
+              totalCount: matches.length,
+            },
+          };
+        }
         if (operation === "references") {
           const linked = this.referenceLibrary
             ? this.referenceLibrary.items.filter(

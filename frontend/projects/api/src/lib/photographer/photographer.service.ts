@@ -6,9 +6,17 @@ import { IPhotographerService, PhotographerReferencePage } from './photographer.
 import { PhotographerResult, PhotographerMetadata } from './photographer-metadata';
 import { SESSION_SERVICE } from '../session/session.service.contract';
 import { PhotographerPage } from './photographer-result';
+import { ReferenceCandidatePage } from './reference-candidate';
 
 @Injectable()
 export class PhotographerService implements IPhotographerService {
+  candidates(id: string, query: string, cursor?: string): Promise<ReferenceCandidatePage> {
+    return this.read(
+      `/api/photographers/${encodeURIComponent(id)}/reference-candidates`,
+      cursor,
+      query,
+    );
+  }
   private readonly http = inject(HttpClient);
   private readonly session = inject(SESSION_SERVICE);
   async update(
@@ -39,11 +47,11 @@ export class PhotographerService implements IPhotographerService {
   references(id: string, cursor?: string): Promise<PhotographerReferencePage> {
     return this.read(`/api/photographers/${encodeURIComponent(id)}/references`, cursor);
   }
-  private async read<T>(url: string, cursor?: string): Promise<T> {
+  private async read<T>(url: string, cursor?: string, query?: string): Promise<T> {
     try {
       return await firstValueFrom(
         this.http.get<T>(url, {
-          params: cursor ? { cursor } : {},
+          params: { ...(cursor ? { cursor } : {}), ...(query ? { query } : {}) },
           timeout: 15000,
         }),
       );

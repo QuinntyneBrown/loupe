@@ -6,8 +6,20 @@
     [id]="id()"
     (editRequested)="editing.set($event)"
     (deleteRequested)="deleting.set($event)"
+    (linkRequested)="linking.set($event)"
   />
 </main>
+@if (notice()) {
+  <div class="notice" role="status">
+    <span>{{ notice() }}</span
+    ><button class="lp-icon-button" aria-label="Dismiss" (click)="notice.set('')">
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
+    </button>
+  </div>
+}
+@if (linking(); as item) {
+  <lp-link-photographer-references [photographer]="item" (closed)="closeLinks($event)" />
+}
 <lp-unsaved-changes [dirty]="dirty" />
 @if (deleting(); as request) {
   <lp-delete-photographer
@@ -19,9 +31,5 @@
   />
 }
 @if (editing(); as item) {
-  <lp-edit-photographer
-    [photographer]="item"
-    (saved)="saved($event)"
-    (closed)="closeEdit()"
-  />
+  <lp-edit-photographer [photographer]="item" (saved)="saved($event)" (closed)="closeEdit()" />
 }

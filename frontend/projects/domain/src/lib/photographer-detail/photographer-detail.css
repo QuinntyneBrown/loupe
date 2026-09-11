@@ -1,6 +1,16 @@
 :host {
   display: block;
 }
+.profile-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--lp-space-4);
+}
+.profile-header > div {
+  min-width: var(--lp-zero);
+}
 .title-row {
   display: flex;
   align-items: center;

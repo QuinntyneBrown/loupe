@@ -5,6 +5,48 @@ export class PhotographerPage {
   constructor(page) {
     this.page = page;
   }
+  linkDialog() {
+    return this.page.getByRole("dialog", {
+      name: "Link references",
+      exact: true,
+    });
+  }
+  async openLinkPicker() {
+    await this.page
+      .getByRole("button", { name: "Link references", exact: true })
+      .first()
+      .click();
+  }
+  async chooseReference(title) {
+    await this.linkDialog()
+      .getByRole("checkbox", { name: new RegExp("^" + title + " ") })
+      .check();
+  }
+  async searchReferences(query) {
+    await this.linkDialog()
+      .getByRole("searchbox", { name: "Search your references", exact: true })
+      .fill(query);
+  }
+  async expectSelected(count) {
+    await expect(
+      this.linkDialog().getByText(
+        `${count} selected. Ticking a reference that has a photographer moves it here.`,
+        { exact: true },
+      ),
+    ).toBeVisible();
+  }
+  async confirmLinks(count) {
+    await this.linkDialog()
+      .getByRole("button", { name: `Link ${count} references`, exact: true })
+      .click();
+    await expect(this.linkDialog()).not.toBeVisible();
+  }
+  async cancelLinkPicker() {
+    await this.linkDialog()
+      .getByRole("button", { name: "Cancel", exact: true })
+      .click();
+    await expect(this.linkDialog()).not.toBeVisible();
+  }
   async unlink(title) {
     await this.page
       .getByRole("article")

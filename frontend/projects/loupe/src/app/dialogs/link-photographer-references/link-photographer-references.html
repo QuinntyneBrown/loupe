@@ -1,0 +1,105 @@
+<dialog
+  #modal
+  class="lp-dialog lp-dialog--wide"
+  aria-labelledby="link-references-title"
+  (cancel)="cancel($event)"
+>
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="link-references-title">Link references</h2>
+        <p class="lp-dialog__text">
+          Attribute saved references to {{ photographer().name }}. A reference has one photographer.
+        </p>
+      </div>
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Close"
+        [disabled]="saving()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body">
+      <input
+        class="lp-input"
+        type="search"
+        aria-label="Search your references"
+        placeholder="Search your references"
+        autofocus
+        [ngModel]="query()"
+        (ngModelChange)="search($event)"
+        [disabled]="saving()"
+      />
+      <div class="picker-list" aria-label="References" [attr.aria-busy]="loading()">
+        @for (item of items(); track item.id) {
+          <label class="candidate"
+            ><input
+              #checkbox
+              type="checkbox"
+              [checked]="selected().has(item.id) || item.photographer?.id === photographer().id"
+              [disabled]="saving() || !!stale() || item.photographer?.id === photographer().id"
+              (change)="choose(item, checkbox.checked)"
+            />
+            @if (item.previewUrl) {
+              <img [src]="item.previewUrl" alt="" class="thumb" loading="lazy" />
+            } @else {
+              <span class="thumb placeholder" aria-hidden="true"
+                ><svg class="lp-icon"><use href="#i-image" /></svg
+              ></span>
+            }
+            <span class="candidate-text"
+              ><span>{{ item.title }}</span
+              ><span class="meta"
+                >Saved {{ item.createdAt | date: 'd MMM yyyy' }} ·
+                {{ item.photographer?.name || 'No photographer'
+                }}{{ item.photographer?.id === photographer().id ? ' · Already linked' : '' }}</span
+              ></span
+            ></label
+          >
+        }
+      </div>
+      @if (loading()) {
+        <p role="status">Loading references…</p>
+      }
+      @if (loadFailed()) {
+        <p role="alert">Couldn't load your references.</p>
+        <button class="lp-button lp-button--secondary" (click)="load()">Try again</button>
+      } @else if (cursor()) {
+        <button
+          class="lp-button lp-button--secondary"
+          [disabled]="loading() || saving()"
+          (click)="load()"
+        >
+          Load more
+        </button>
+      } @else if (total() === 0) {
+        <p>No references match this search.</p>
+      }
+      <p class="selection">
+        {{ selected().size }} selected. Ticking a reference that has a photographer moves it here.
+      </p>
+      @if (error()) {
+        <p role="alert">{{ error() }}</p>
+      }
+      @if (stale()) {
+        <button class="lp-button lp-button--secondary" [disabled]="saving()" (click)="review()">
+          Review latest reference
+        </button>
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" [disabled]="saving()" (click)="cancel()">
+        Cancel</button
+      ><button
+        class="lp-button lp-button--primary"
+        [disabled]="saving() || !!stale() || !selected().size"
+        (click)="save()"
+      >
+        {{ saving() ? 'Linking…' : 'Link ' + selected().size + ' references' }}
+      </button>
+    </footer>
+  </div>
+</dialog>

@@ -4,12 +4,16 @@ import {
   PhotographerPage,
   PhotographerResult,
   PhotographerMetadata,
+  ReferenceCandidatePage,
   PhotographerReferencePage,
   ServiceError,
 } from 'api';
 
 @Injectable()
 export class MockPhotographerService implements IPhotographerService {
+  candidates(id: string, query: string, cursor?: string): Promise<ReferenceCandidatePage> {
+    return this.call('candidates', { id, query, cursor });
+  }
   update(
     id: string,
     input: PhotographerMetadata & { revision: number },
