@@ -746,15 +746,28 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - Full regression: `./backend/Test.ps1` passed 360/360 (2m11s). `dotnet format backend/Loupe.slnx --verify-no-changes --no-restore` passed with no changes.
 - Review: no Critical or Required findings.
 
-## Azure OpenAI critiques — configuration and transport
+## Azure OpenAI critiques â€” configuration and transport
 
-- L2-036.6–7 / L2-041: Replaced the direct OpenAI adapter with Azure Responses, API-key authentication, explicit resource endpoint and deployment, and shared API/worker configuration availability checks.
+- L2-036.6â€“7 / L2-041: Replaced the direct OpenAI adapter with Azure Responses, API-key authentication, explicit resource endpoint and deployment, and shared API/worker configuration availability checks.
 - RED: Azure configuration and live transport acceptance run failed 14 cases for the expected missing validation/admission guards and old OpenAI URL; 2 existing missing-key cases passed.
 - GREEN: `./backend/Test.ps1 -Filter FullyQualifiedName~Critiques`: 116 passed, 0 failed, 0 skipped (Linux acceptance container).
-- Global formatting verification reports pre-existing whitespace defects in untouched `DemoRetirementTests.cs` (lines 65–68); no formatting suppressions were added.
+- Global formatting verification reports pre-existing whitespace defects in untouched `DemoRetirementTests.cs` (lines 65â€“68); no formatting suppressions were added.
 
-## Azure OpenAI critiques — compatibility and failures
+## Azure OpenAI critiques â€” compatibility and failures
 
 - RED: `Azure_requests_preserve` failed because the direct-OpenAI operation was reused.
 - GREEN: Introduced `azure-critique-v2` provenance/cache identity. The 27 targeted reuse, Azure transport failure, strict response, and timeout tests passed; no existing result is deleted or relabeled.
 - Changed-file C# formatting verification passed. Global formatting has the unrelated baseline issue recorded above.
+
+## Azure OpenAI critiques â€” disclosure, review, and release checks
+
+- L2-041.2: RED: all four request/retry/regeneration/upload disclosure cases failed on absent Azure text. GREEN: 84 Chromium critique/request/recovery/upload regressions passed with the new wording.
+- Visual QA caught the upload disclosure clipped by the scrolling form. Two added Page Object viewport assertions failed with intersection ratio zero at 375 and 1440 pixels. Moved disclosure into the fixed action area using existing design tokens; all 54 final disclosure/upload/viewport regressions passed. Inspected both saved screenshots. No browser other than Chromium ran.
+- Existing port 4207 was occupied. Tests used a temporary external Playwright configuration on 4217 with the same Chromium project and assertions. Server startup required a 300-second allowance under concurrent builds; no application timeout or assertion was relaxed.
+- All three Angular libraries built in production mode through the test startup command; `ng build loupe` also passed. Its initial bundle is 529.80 kB, with the existing configured 500 kB warning threshold still enforced (29.80 kB over; no budget changes).
+- Full Linux API acceptance: 382 passed, 13 failed, 0 skipped. Eleven failures are the missing `IRobotsPolicy` registration; all eleven reproduced in an isolated export of unchanged main (`cddb82a`). Two cleanup deadline failures also occurred in the full run. The baseline's three cleanup tests passed; on this branch a targeted rerun passed two but repeated `CleanupFairnessTests`' 15-second timeout while browser tests were active. Cleanup code and assertions were not changed.
+- The updated PowerShell harness parses successfully and passes Azure variables by name without printing values. JavaScript syntax checks, changed-file C# formatting, UTF-8 decoding of every changed text file, and diff whitespace checks passed. Whole-solution formatting still reports the pre-existing `DemoRetirementTests.cs` whitespace defects.
+- Reviewed configuration admission, request authentication, private input boundaries, cache identity, schema/error handling, and interface/DI placement. No new dependency, API wire contract, or schema migration; MediatR remains 12.5.0. Endpoint is trusted operator configuration, validated as an HTTPS resource root; redirects and HTTP logging remain disabled.
+- Runtime documentation describes Azure endpoint/deployment versus saved model/version, server-side key provisioning, queue drain and rollback, retained historical results, data handling, and a real-provider smoke procedure. No Azure endpoint/deployment/API key was present in this session's environment, so a paid Azure smoke check and real-model photographic quality evaluation were not run. Controlled tests are not evidence of those checks.
+
+- Final isolated `CleanupFairnessTests` rerun with browser/build workloads stopped: 1 passed, 0 failed, 0 skipped (23 seconds). This supports a timing-sensitive test issue; the earlier full-suite failures are still recorded rather than reported as a clean full run.

@@ -65,8 +65,8 @@ Options configuration; model/version remains saved provenance. No API contract,
 database migration, embedding, tagging, summary, or provisioning change is needed.
 
 Delivery slices (criteria and evidence are appended to the existing task files):
-1. L2-036.6–7: Azure transport and configuration, API acceptance RED then GREEN.
-2. L2-036.8–9: Preserve old critiques without reusing them for Azure; retain safe
+1. L2-036.6â€“7: Azure transport and configuration, API acceptance RED then GREEN.
+2. L2-036.8â€“9: Preserve old critiques without reusing them for Azure; retain safe
    failure/retry behavior, with acceptance RED then GREEN.
 3. L2-041.2 / L2-050: Disclosure in request, retry, regeneration, and upload flows;
    Chromium Page Object acceptance RED then GREEN, setup docs and regression checks.

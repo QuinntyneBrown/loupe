@@ -111,9 +111,11 @@ delivered) Compose/deployment story; see `backend/README.md`.
   is an in-process `HttpMessageHandler` a real browser cannot be redirected to.
   It is never a real login and must never be deployed.
 - **AI critique.** Historical recordings used a deterministic sample adapter,
-  which has now been removed. New runs use `Ai:Mode=Live`; supply `Ai__ApiKey`
-  in the calling environment to enable real analysis. The harness passes the
-  variable by name without printing it. Without it, AI requests report
+  which has now been removed. New runs use Azure OpenAI with `Ai:Mode=Live`; supply `Ai__Endpoint`,
+  `Ai__Deployment`, `Ai__Model`, and `Ai__ApiKey` in the calling environment
+  using the [backend setup guide](../../backend/README.md#azure-openai-critiques).
+  The harness passes these variables by name without printing their values.
+  Without the required configuration, AI requests report
   Integration not configured; manual library work remains available. Existing
   sample critiques are archived by the retirement migration. Historical videos
   are not evidence of real-provider analysis or the current critique layout.

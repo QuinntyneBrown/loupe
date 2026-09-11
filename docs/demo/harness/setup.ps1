@@ -88,12 +88,12 @@ docker run -d --name loupe-demo-api --network loupe-demo-net -p 5001:5001 `
   -e Identity__ClientId='loupe-demo' `
   -e Identity__ClientSecret='demo-only-not-a-real-secret' `
   -e Browser__AllowedOrigins__0='https://localhost:4200' `
-  -e Ai__Mode='Live' -e Ai__ApiKey -e Imports__Mode='Live' `
+  -e Ai__Mode='Live' -e Ai__Endpoint -e Ai__Deployment -e Ai__Model -e Ai__ApiKey -e Imports__Mode='Live' `
   --entrypoint dotnet loupe-demo-runtime /app/api/Loupe.Api.dll | Out-Null
 docker run -d --name loupe-demo-worker --network loupe-demo-net `
   -v "${ScratchDir}/demo-media:/data/media" `
   -e ConnectionStrings__Library='Host=loupe-demo-postgres;Port=5432;Database=loupe_demo;Username=loupe;Password=loupe-demo-only' `
-  -e Media__Root='/data/media' -e Ai__Mode='Live' -e Ai__ApiKey -e Imports__Mode='Live' -e Cleanup__PollInterval='00:00:15' `
+  -e Media__Root='/data/media' -e Ai__Mode='Live' -e Ai__Endpoint -e Ai__Deployment -e Ai__Model -e Ai__ApiKey -e Imports__Mode='Live' -e Cleanup__PollInterval='00:00:15' `
   --entrypoint dotnet loupe-demo-runtime /app/worker/Loupe.Worker.dll | Out-Null
 
 Write-Host "== 7. Start the demo identity provider (on the host, port 5444) ==" -ForegroundColor Cyan

@@ -1,10 +1,13 @@
 @if (retryingOriginal()) {
   <p>
-    Retry uses the failed operation’s original image and brief. The current critique stays available
-    until a successful replacement. Personal notes are not sent.
+    Retry sends the original image, brief, and camera settings to Azure OpenAI. The current critique
+    stays available until a successful replacement. Personal notes are not sent.
   </p>
 } @else {
-  <p>This uses your saved image and brief. Personal notes are not sent for critique.</p>
+  <p>
+    This sends your saved image, brief, and camera settings to Azure OpenAI. Personal notes are not
+    sent for critique.
+  </p>
 }
 @if (briefDirty() && !submission()) {
   <p>Save or cancel your brief edits before requesting a critique.</p>

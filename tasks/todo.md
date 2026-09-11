@@ -368,6 +368,6 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 - [ ] L2-052.4: Given keyboard focus, validation error, processing, and selected states, when displayed on each application screen, then the same state meaning and appearance match the documented reference and remain accessible without color alone.
 
 ## Azure OpenAI critique integration
-- [x] L2-036.6–7: Configure Azure and verify the Responses request using failing-first API acceptance tests.
-- [x] L2-036.8–9: Verify saved-result compatibility and Azure failure handling.
-- [ ] L2-041.2 / L2-050: Name Azure in request disclosures; update setup and run regression checks.
+- [x] L2-036.6â€“7: Configure Azure and verify the Responses request using failing-first API acceptance tests.
+- [x] L2-036.8â€“9: Verify saved-result compatibility and Azure failure handling.
+- [x] L2-041.2 / L2-050: Name Azure in request disclosures; update setup and run regression checks.

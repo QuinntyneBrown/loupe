@@ -246,5 +246,11 @@
         Upload and request critique
       </button>
     }
+    @if (!saving()) {
+      <p class="critique-disclosure">
+        Requesting a critique sends your image, brief, and camera settings to Azure OpenAI.
+        Personal notes are not sent.
+      </p>
+    }
   </footer>
 </form>
