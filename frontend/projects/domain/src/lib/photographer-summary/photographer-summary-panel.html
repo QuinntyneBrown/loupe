@@ -6,6 +6,9 @@
 >
   <header>
     <h2 #heading tabindex="-1" class="lp-kicker lp-kicker--ai" id="summary-title">Summary</h2>
+    @if (suggestions(); as value) {
+      <span class="note">{{ value.mode }} · {{ value.createdAt | date: 'd MMM yyyy' }}</span>
+    }
     @if (active()) {
       <span class="note" role="status"
         ><span class="lp-spinner" aria-hidden="true"></span>Reading the site…</span
@@ -34,18 +37,20 @@
     </p>
     <button
       class="lp-button lp-button--secondary lp-button--sm"
-      [disabled]="busy() || metadataDirty() || conflicted()"
+      [disabled]="busy() || metadataDirty() || conflicted() || retryWaiting()"
       (click)="request()"
     >
       Try again
     </button>
+    @if (retryWaiting()) {
+      <p class="note">Retry available {{ operation()?.retryAvailableAt | date: 'shortTime' }}.</p>
+    }
   }
   @if (suggestions(); as value) {
     @if (value.summaryStatus === 'pending') {
       <div class="proposal">
         <p class="note">
-          {{ previous() ? 'Suggestion from the previous portfolio URL' : 'Suggested summary' }} ·
-          {{ value.mode }} · {{ value.createdAt | date: 'd MMM yyyy' }}
+          {{ previous() ? 'Suggestion from the previous portfolio URL' : 'Suggested summary' }}
         </p>
         <label
           ><span class="lp-label">Suggested summary</span>
@@ -263,5 +268,8 @@
     >
       Generate summary
     </button>
+  }
+  @if (!loading() && !loadFailed() && (!operation() || operation()?.status === 'Failed')) {
+    <p class="note">Azure OpenAI receives the captured page title, description and main text to suggest a summary and tags. Your private notes are not sent.</p>
   }
 </section>

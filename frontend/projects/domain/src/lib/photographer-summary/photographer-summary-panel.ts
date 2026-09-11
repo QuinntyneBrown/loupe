@@ -49,6 +49,7 @@ export class PhotographerSummaryPanel {
   readonly tagCategory = signal('');
   readonly notice = signal('');
   readonly undoRevision = signal<number | null>(null);
+  readonly retryWaiting = signal(false);
   readonly categories = [
     'subject',
     'genre',
@@ -113,7 +114,7 @@ export class PhotographerSummaryPanel {
       return 'This page does not contain enough information for a summary. Your notes and tags still make this bookmark searchable.';
     const code = this.operation()?.failureCode;
     if (code === 'robots_disallowed')
-      return `${this.host()} doesn't allow automated reading, so there's no summary. Your notes and tags still make this bookmark searchable.`;
+      return `${this.host()} doesn't allow automated reading, so there's no generated summary. Your notes and tags still make this bookmark searchable.`;
     if (code === 'source_access_denied')
       return 'This page requires access Loupe does not have. Your notes and tags still make this bookmark searchable.';
     if (code?.startsWith('source_') || code?.startsWith('robots_'))
@@ -237,6 +238,15 @@ export class PhotographerSummaryPanel {
   private timer: ReturnType<typeof setTimeout> | undefined;
   private requestInput: { revision: number; key: string } | null = null;
   constructor() {
+    effect((onCleanup) => {
+      const available = this.operation()?.retryAvailableAt;
+      const delay = available ? Date.parse(available) - Date.now() : 0;
+      this.retryWaiting.set(delay > 0);
+      if (delay > 0) {
+        const timer = setTimeout(() => this.retryWaiting.set(false), delay);
+        onCleanup(() => clearTimeout(timer));
+      }
+    });
     let previous = '';
     effect(() => {
       const item = this.photographer();
@@ -290,6 +300,7 @@ export class PhotographerSummaryPanel {
   async request(): Promise<void> {
     if (
       this.busy() ||
+      this.retryWaiting() ||
       this.active() ||
       this.metadataDirty() ||
       this.conflicted() ||

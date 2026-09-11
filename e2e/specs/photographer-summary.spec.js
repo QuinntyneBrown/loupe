@@ -24,3 +24,11 @@ test('failed and stale summary reviews retain edited text and newer notes',async
 test('edited summary drafts participate in the page leave guard',async({page})=>{
  const {library,screen}=await setup(page);library.summaries.complete();await screen.open();await screen.editSuggestedSummary('Unsaved suggestion');await screen.backToCollection();await screen.keepEditing();await screen.expectSuggestedSummary('Unsaved suggestion');await screen.backToCollection();await screen.discardNotes();
 });
+
+test('reviewed summaries retain their generation mode and date',async({page})=>{
+ const {library,screen}=await setup(page);library.summaries.complete();await screen.open();await screen.summaryAction('Accept all');await screen.expectSummaryNotice('Suggestions accepted');await screen.expectSummaryState('Live · 11 Sep 2026');
+});
+
+test('summary retries disclose the provider and wait for the retry time',async({page})=>{
+ await page.clock.install();const {library,screen}=await setup(page);library.summaries.fail('provider_rate_limited');library.summaries.operation.retryAvailableAt=new Date(Date.now()+60000).toISOString();await screen.open();await screen.expectSummaryState('Azure OpenAI');await screen.expectSummaryRetryEnabled(false);expect(library.summaries.calls).not.toContain('request');await page.clock.fastForward(61000);await screen.expectSummaryRetryEnabled(true);await screen.retrySummary();await screen.expectSummaryState('Reading the site…');
+});

@@ -510,3 +510,7 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: four browser cases failed on absent summary/tag review controls.
 - GREEN: all eight summary Chromium cases pass; the 28 profile regressions also passed. Edited values retain drafts after failed/stale review, actions preserve unrelated fields, Undo restores the prior description, and the leave guard protects edits. Corrected a page-object dropdown locator to its accessible combobox role. Manual desktop/320px Axe inspection found low-contrast Edit text; the mock's edit icon replaces it, and both inspections now report zero violations.
 
+
+### Summary provenance and retry availability
+- Given a reviewed summary, its generation mode/date remain visible after bulk acceptance. Given a failed job with a future retry time, the control stays disabled until that time and identifies Azure OpenAI and the captured page fields sent.
+- RED: both Chromium cases failed on missing provenance/provider disclosure. GREEN: all 10 summary Chromium cases passed, including virtual-clock cooldown expiry. Domain build passed. One initial run started before the dev server was ready; rerun passed without changing assertions.

@@ -2,6 +2,11 @@ import { expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { SignInPage } from "./sign-in-page.js";
 export class PhotographerPage {
+  async expectSummaryRetryEnabled(enabled) {
+    const button = this.summaryPanel().getByRole('button', { name: 'Try again', exact: true });
+    if (enabled) await expect(button).toBeEnabled();
+    else await expect(button).toBeDisabled();
+  }
   constructor(page) {
     this.page = page;
   }
