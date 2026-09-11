@@ -416,3 +416,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: dialog closure left More actions unfocused; the unsaved-note Keep editing/Discard case already passed.
 - GREEN: all 15 profile Chromium cases pass. Canceling either edit or deletion restores the visible menu trigger after rendering. Notes can remain on the page or be explicitly discarded before navigation.
 
+
+### Unlink photographer references and Undo
+- RED: two cases failed on the missing Unlink action.
+- GREEN: 30 profile/Inspiration Chromium cases pass. Unlink preserves saved attribution and library content, adjusts the visible linked count, and offers Undo using the returned reference revision. A newer photographer assignment prevents Undo from overwriting it.
+

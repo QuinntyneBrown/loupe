@@ -146,6 +146,10 @@ export class ReferenceLibrary {
         if (input.field === 'description') item.descriptionProvenance = item.description ? 'manual' : null;
         item.revision++; return { data: item };
       }
+      if(operation==='setPhotographer') {
+        const item=this.items.find(item=>item.id===input.id);if(!item)return {error:'item_unavailable'};if(item.revision!==input.revision)return {error:'revision_conflict'};
+        item.photographer=input.photographerId?{id:input.photographerId,name:'Photographer 01',portfolioUrl:'https://portfolio1.example/work'}:null;item.revision++;return {data:item};
+      }
       if (operation === 'replaceImage') {
         const item = this.items.find(item => item.id === input.id);
         if (!item) return { error: 'item_unavailable' };

@@ -101,9 +101,49 @@
               }
               <h3>{{ reference.title }}</h3></a
             >
+            <button
+              class="lp-icon-button unlink"
+              type="button"
+              aria-label="Unlink from this photographer"
+              [disabled]="referenceBusy()"
+              (click)="unlink(reference)"
+            >
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
+            </button>
           </article>
         }
       </div>
+      @if (linkError()) {
+        <p role="alert">{{ linkError() }}</p>
+        @if (unlinkRetry(); as reference) {
+          <button
+            class="lp-button lp-button--secondary"
+            [disabled]="referenceBusy()"
+            (click)="unlink(reference)"
+          >
+            Retry unlink
+          </button>
+        }
+      }
+      @if (unlinked()) {
+        <div class="unlink-notice" role="status">
+          <span>Reference unlinked.</span
+          ><button
+            class="lp-button lp-button--ghost"
+            [disabled]="referenceBusy()"
+            (click)="undoUnlink()"
+          >
+            Undo</button
+          ><button
+            class="lp-icon-button"
+            aria-label="Dismiss"
+            [disabled]="referenceBusy()"
+            (click)="unlinked.set(null)"
+          >
+            <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
+          </button>
+        </div>
+      }
       @if (referenceCount() === 0) {
         <div class="lp-empty">
           <h3 class="lp-empty__title">No references linked yet.</h3>

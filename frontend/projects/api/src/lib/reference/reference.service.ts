@@ -13,6 +13,27 @@ import { ServiceError } from '../common/service-error';
 
 @Injectable()
 export class ReferenceService implements IReferenceService {
+  async setPhotographer(
+    id: string,
+    revision: number,
+    photographerId: string | null,
+  ): Promise<ReferenceResult> {
+    try {
+      return await firstValueFrom(
+        this.http.put<ReferenceResult>(
+          `/api/references/${encodeURIComponent(id)}/photographer`,
+          { revision, photographerId },
+          { headers: { 'X-CSRF-Token': await this.session.getRequestToken() }, timeout: 15000 },
+        ),
+      );
+    } catch (error) {
+      throw new ServiceError(
+        error instanceof HttpErrorResponse && typeof error.error?.code === 'string'
+          ? error.error.code
+          : 'request_failed',
+      );
+    }
+  }
   async updateText(
     id: string,
     revision: number,

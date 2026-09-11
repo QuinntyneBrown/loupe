@@ -16,7 +16,13 @@ import { PhotographerNotes } from '../photographer-notes/photographer-notes';
 import { PhotographerTags } from '../photographer-tags/photographer-tags';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { PHOTOGRAPHER_SERVICE, PhotographerResult, ReferenceSummary } from 'api';
+import {
+  PHOTOGRAPHER_SERVICE,
+  PhotographerResult,
+  ReferenceSummary,
+  REFERENCE_SERVICE,
+  ServiceError,
+} from 'api';
 
 @Component({
   selector: 'lp-photographer-detail',
@@ -25,6 +31,84 @@ import { PHOTOGRAPHER_SERVICE, PhotographerResult, ReferenceSummary } from 'api'
   styleUrl: './photographer-detail.css',
 })
 export class PhotographerDetail {
+  private readonly referenceService = inject(REFERENCE_SERVICE);
+  readonly referenceBusy = signal(false);
+  readonly linkError = signal('');
+  readonly unlinked = signal<{
+    reference: ReferenceSummary;
+    revision: number;
+    position: number;
+  } | null>(null);
+  readonly unlinkRetry = signal<ReferenceSummary | null>(null);
+  async unlink(reference: ReferenceSummary): Promise<void> {
+    if (this.referenceBusy()) return;
+    this.referenceBusy.set(true);
+    this.linkError.set('');
+    this.unlinkRetry.set(reference);
+    try {
+      const current = await this.referenceService.get(reference.id);
+      if (this.destroy.destroyed) return;
+      if (current.photographer?.id !== this.id()) {
+        this.linkError.set('This reference changed. It is no longer linked to this photographer.');
+        this.removeReference(reference.id);
+        this.unlinkRetry.set(null);
+        return;
+      }
+      const result = await this.referenceService.setPhotographer(
+        reference.id,
+        current.revision,
+        null,
+      );
+      if (this.destroy.destroyed) return;
+      const position = this.references().findIndex((item) => item.id === reference.id);
+      this.unlinked.set({ reference, revision: result.revision, position });
+      this.removeReference(reference.id);
+      this.unlinkRetry.set(null);
+    } catch (error) {
+      if (!this.destroy.destroyed)
+        this.linkError.set(
+          error instanceof ServiceError && error.code === 'revision_conflict'
+            ? 'This reference changed. Retry to review its current link.'
+            : "Couldn't unlink this reference. Your library is unchanged unless the request completed. Retry to check.",
+        );
+    } finally {
+      if (!this.destroy.destroyed) this.referenceBusy.set(false);
+    }
+  }
+  private removeReference(id: string): void {
+    if (!this.references().some((item) => item.id === id)) return;
+    this.references.update((items) => items.filter((item) => item.id !== id));
+    this.referenceCount.update((count) => (count === null ? null : Math.max(0, count - 1)));
+  }
+  async undoUnlink(): Promise<void> {
+    const undo = this.unlinked();
+    if (!undo || this.referenceBusy()) return;
+    this.referenceBusy.set(true);
+    this.linkError.set('');
+    try {
+      await this.referenceService.setPhotographer(undo.reference.id, undo.revision, this.id());
+      if (this.destroy.destroyed) return;
+      this.references.update((items) => {
+        const next = items.filter((item) => item.id !== undo.reference.id);
+        next.splice(Math.max(0, undo.position), 0, undo.reference);
+        return next;
+      });
+      this.referenceCount.update((count) => (count === null ? null : count + 1));
+      this.unlinked.set(null);
+    } catch (error) {
+      if (!this.destroy.destroyed) {
+        const stale = error instanceof ServiceError && error.code === 'revision_conflict';
+        this.linkError.set(
+          stale
+            ? 'This reference changed. Undo cannot overwrite the newer assignment.'
+            : "Couldn't restore the link. Try Undo again.",
+        );
+        if (stale) this.unlinked.set(null);
+      }
+    } finally {
+      if (!this.destroy.destroyed) this.referenceBusy.set(false);
+    }
+  }
   private readonly actions = viewChild<ElementRef<HTMLElement>>('actions');
   private readonly injector = inject(Injector);
   private readonly destroy = inject(DestroyRef);

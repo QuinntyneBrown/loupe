@@ -7,6 +7,11 @@ import { ReferencePage, ReferenceResult } from './reference-result';
 import { ReferenceTag, ReferenceTagFacet } from './reference-tag';
 
 export interface IReferenceService {
+  setPhotographer(
+    id: string,
+    revision: number,
+    photographerId: string | null,
+  ): Promise<ReferenceResult>;
   updateText(
     id: string,
     revision: number,

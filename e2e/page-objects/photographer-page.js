@@ -5,6 +5,32 @@ export class PhotographerPage {
   constructor(page) {
     this.page = page;
   }
+  async unlink(title) {
+    await this.page
+      .getByRole("article")
+      .filter({
+        has: this.page.getByRole("link", {
+          name: "Open " + title,
+          exact: true,
+        }),
+      })
+      .getByRole("button", {
+        name: "Unlink from this photographer",
+        exact: true,
+      })
+      .click();
+  }
+  async undoUnlink() {
+    await this.page.getByRole("button", { name: "Undo", exact: true }).click();
+  }
+  async expectUnlinked() {
+    await expect(this.page.getByRole("status")).toContainText(
+      "Reference unlinked",
+    );
+  }
+  async expectUndoConflict() {
+    await expect(this.page.getByRole("alert")).toContainText("changed");
+  }
   async expectActionsFocused() {
     await expect(
       this.page.getByLabel("More actions", { exact: true }),

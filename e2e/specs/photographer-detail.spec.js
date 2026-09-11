@@ -248,3 +248,52 @@ test("unsaved notes can keep editing or explicitly discard before leaving", asyn
   await screen.discardNotes();
   expect(library.items[0].notes).toBe("Private unfinished notes");
 });
+
+async function linkedSetup(page, count = 2) {
+  const result = await setup(page);
+  const { ReferenceLibrary } = await import("../fixtures/reference-library.js");
+  const references = new ReferenceLibrary(count);
+  references.items.forEach(
+    (item) =>
+      (item.photographer = {
+        id: "photographer-1",
+        name: "Photographer 01",
+        portfolioUrl: "https://portfolio1.example/work",
+      }),
+  );
+  await references.attach(page);
+  result.library.referenceLibrary = references;
+  return { ...result, references };
+}
+test("unlink preserves a reference and attribution and Undo restores the link", async ({
+  page,
+}) => {
+  const { screen, references } = await linkedSetup(page);
+  await screen.open();
+  await screen.expectReferences(2);
+  await screen.unlink("Reference 01");
+  await screen.expectUnlinked();
+  await screen.expectReferences(1);
+  expect(references.items[0].photographer).toBeNull();
+  expect(references.items[0].attribution).toBe("Supplied photographer");
+  await screen.undoUnlink();
+  await screen.expectReferences(2);
+  expect(references.items[0].photographer.id).toBe("photographer-1");
+});
+test("Undo never overwrites a newer photographer assignment", async ({
+  page,
+}) => {
+  const { screen, references } = await linkedSetup(page);
+  await screen.open();
+  await screen.expectReferences(2);
+  await screen.unlink("Reference 01");
+  await screen.expectUnlinked();
+  references.items[0].photographer = {
+    id: "another-photographer",
+    name: "Another",
+  };
+  references.items[0].revision++;
+  await screen.undoUnlink();
+  await screen.expectUndoConflict();
+  expect(references.items[0].photographer.id).toBe("another-photographer");
+});

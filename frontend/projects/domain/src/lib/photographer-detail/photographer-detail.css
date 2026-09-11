@@ -146,3 +146,36 @@ p {
   justify-content: center;
   margin-top: var(--lp-space-6);
 }
+.unlink {
+  position: absolute;
+  top: var(--lp-space-3);
+  right: var(--lp-space-3);
+  background: var(--lp-color-surface);
+  color: var(--lp-color-text);
+  opacity: var(--lp-zero);
+}
+.tile:hover .unlink,
+.tile:focus-within .unlink {
+  opacity: var(--lp-fraction);
+}
+.unlink-notice {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-3);
+  margin-top: var(--lp-space-4);
+  padding: var(--lp-space-3) var(--lp-space-4);
+  border-radius: var(--lp-radius-md);
+  background: var(--lp-color-ink);
+  color: var(--lp-color-on-ink);
+}
+.unlink-notice button {
+  color: inherit;
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}
+@media (hover: none) {
+  .unlink {
+    opacity: var(--lp-fraction);
+  }
+}

@@ -94,13 +94,20 @@ export class PhotographerLibrary {
             ? { data: this.items.find((item) => item.id === input.id) }
             : { error: "item_unavailable" };
         if (operation === "references") {
-          const offset = Number(input.cursor || 0);
+          const linked = this.referenceLibrary
+            ? this.referenceLibrary.items.filter(
+                (item) => item.photographer?.id === input.id,
+              )
+            : this.linked;
+          const offset = input.cursor
+            ? linked.findIndex((item) => item.id === input.cursor) + 1
+            : 0;
           return {
             data: {
-              items: this.linked.slice(offset, offset + 24),
+              items: linked.slice(offset, offset + 24),
               nextCursor:
-                offset + 24 < this.linked.length ? String(offset + 24) : null,
-              totalCount: this.linked.length,
+                offset + 24 < linked.length ? linked[offset + 23].id : null,
+              totalCount: linked.length,
             },
           };
         }
