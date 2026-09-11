@@ -2,4 +2,4 @@ using MediatR;
 
 namespace Loupe.Application.Photographers;
 
-public sealed record ListPhotographersQuery(int PageSize = 24, string? Cursor = null) : IRequest<PhotographerPage>;
+public sealed record ListPhotographersQuery(int PageSize = 24, string? Cursor = null, string? Query = null) : IRequest<PhotographerPage>;

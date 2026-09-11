@@ -446,3 +446,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: a completed row appeared unchecked after a later row failed.
 - GREEN: all eight picker cases pass. Completed rows immediately display their current photographer and become checked/disabled, so retry concerns only unfinished selections.
 
+
+### Search photographer bookmarks before paging
+- RED: the list ignored query text (25 results instead of two) and accepted null-character/oversized queries.
+- GREEN: all 33 photographer API cases pass. Bookmark fields and active tags are searched before paging with literal wildcard handling, owner isolation and query-scoped cursors. Queries are bounded to 200 Unicode scalars.
+

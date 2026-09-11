@@ -16,7 +16,7 @@ public sealed class ListPhotographerTests(PostgreSqlFixture database) : IClassFi
         var bookmarks = new List<(Guid Id, DateTimeOffset CreatedAt)>();
         for (var index = 0; index < 25; index++)
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/photographers") { Content = JsonContent.Create(new { name = $"Photographer {index}", portfolioUrl = $"https://portfolio.example/{index}" }) };
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/photographers") { Content = JsonContent.Create(new { name = index < 2 ? $"100% Window {index}" : $"Photographer {index}", portfolioUrl = $"https://portfolio.example/{index}" }) };
             request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
             using var saved = await owner.SendAsync(request); saved.EnsureSuccessStatusCode();
             var bookmark = (await saved.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("photographer");
@@ -37,12 +37,23 @@ public sealed class ListPhotographerTests(PostgreSqlFixture database) : IClassFi
         using var crossOwner = await stranger.GetAsync($"/api/photographers?cursor={cursor}"); Assert.Equal(HttpStatusCode.BadRequest, crossOwner.StatusCode);
         using var crossSize = await owner.GetAsync($"/api/photographers?pageSize=10&cursor={cursor}"); Assert.Equal(HttpStatusCode.BadRequest, crossSize.StatusCode);
         var empty = await stranger.GetFromJsonAsync<JsonElement>("/api/photographers"); Assert.Empty(empty.GetProperty("items").EnumerateArray()); Assert.Equal(0, empty.GetProperty("totalCount").GetInt32());
+        var matches = await owner.GetFromJsonAsync<JsonElement>("/api/photographers?query=window&pageSize=1");
+        Assert.Equal(2, matches.GetProperty("totalCount").GetInt32());
+        Assert.Equal(bookmarks[1].Id, Assert.Single(matches.GetProperty("items").EnumerateArray()).GetProperty("id").GetGuid());
+        var searchCursor = Uri.EscapeDataString(matches.GetProperty("nextCursor").GetString()!);
+        var otherMatch = await owner.GetFromJsonAsync<JsonElement>($"/api/photographers?query=window&pageSize=1&cursor={searchCursor}");
+        Assert.Equal(bookmarks[0].Id, Assert.Single(otherMatch.GetProperty("items").EnumerateArray()).GetProperty("id").GetGuid());
+        using var changedQuery = await owner.GetAsync($"/api/photographers?query=another&pageSize=1&cursor={searchCursor}"); Assert.Equal(HttpStatusCode.BadRequest, changedQuery.StatusCode);
+        var literal = await owner.GetFromJsonAsync<JsonElement>("/api/photographers?query=%25"); Assert.Equal(2, literal.GetProperty("totalCount").GetInt32());
+        var privateSearch = await stranger.GetFromJsonAsync<JsonElement>("/api/photographers?query=window"); Assert.Equal(0, privateSearch.GetProperty("totalCount").GetInt32());
     }
 
     [Theory]
     [InlineData("pageSize=0")]
     [InlineData("pageSize=101")]
     [InlineData("cursor=invalid")]
+    [InlineData("query=%00")]
+    [InlineData("query=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")]
     public async Task Invalid_pagination_returns_a_validation_error(string query)
     {
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot);

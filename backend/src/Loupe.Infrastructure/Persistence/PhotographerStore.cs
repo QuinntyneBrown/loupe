@@ -16,12 +16,22 @@ public sealed class PhotographerStore(LibraryDbContext database) : IPhotographer
             SELECT * FROM photographers WHERE "OwnerId" = {ownerId} AND "PortfolioHash" = md5(loupe_normalize_source({url}))
             AND loupe_normalize_source("PortfolioUrl") = loupe_normalize_source({url})
             """).AsNoTracking().SingleOrDefaultAsync(cancellationToken);
-    public Task<int> CountAsync(string ownerId, CancellationToken cancellationToken) =>
-        database.Photographers.CountAsync(item => item.OwnerId == ownerId, cancellationToken);
+    public Task<int> CountAsync(string ownerId, CancellationToken cancellationToken, string query = "") =>
+        Matching(ownerId, query).CountAsync(cancellationToken);
 
-    public async Task<IReadOnlyList<PhotographerSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, CancellationToken cancellationToken)
+    private IQueryable<Photographer> Matching(string ownerId, string query)
     {
-        var query = database.Photographers.AsNoTracking().Where(item => item.OwnerId == ownerId);
+        var items = database.Photographers.AsNoTracking().Where(item => item.OwnerId == ownerId);
+        if (query.Length == 0) return items;
+        var pattern = "%" + query.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("%", "\\%", StringComparison.Ordinal).Replace("_", "\\_", StringComparison.Ordinal) + "%";
+        return items.Where(item => EF.Functions.ILike(item.Name, pattern, "\\") ||
+            EF.Functions.ILike(item.PortfolioUrl, pattern, "\\") || EF.Functions.ILike(item.Summary ?? "", pattern, "\\") ||
+            EF.Functions.ILike(item.Notes ?? "", pattern, "\\") || item.Tags.Any(tag => EF.Functions.ILike(tag.Name, pattern, "\\")));
+    }
+
+    public async Task<IReadOnlyList<PhotographerSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, CancellationToken cancellationToken, string search = "")
+    {
+        var query = Matching(ownerId, search);
         if (cursor is not null) query = query.Where(item => item.CreatedAt < cursor.CreatedAt || item.CreatedAt == cursor.CreatedAt && item.Id.CompareTo(cursor.Id) > 0);
         return await query.OrderByDescending(item => item.CreatedAt).ThenBy(item => item.Id).Take(count)
             .Select(item => new PhotographerSummary(item.Id, item.Name, item.PortfolioUrl, item.CreatedAt, item.Summary,

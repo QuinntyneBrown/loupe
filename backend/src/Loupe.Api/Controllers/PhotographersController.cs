@@ -21,8 +21,8 @@ public sealed class PhotographersController(ISender sender) : ControllerBase
         sender.Send(new DeletePhotographerCommand(id, revision), cancellationToken);
 
     [HttpGet]
-    public Task<PhotographerPage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null) =>
-        sender.Send(new ListPhotographersQuery(pageSize, cursor), cancellationToken);
+    public Task<PhotographerPage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null, [FromQuery] string? query = null) =>
+        sender.Send(new ListPhotographersQuery(pageSize, cursor, query), cancellationToken);
 
     [HttpPost]
     public async Task<ActionResult<SavePhotographerResult>> Save(SavePhotographerRequest request, [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken)

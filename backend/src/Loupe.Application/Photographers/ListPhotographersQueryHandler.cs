@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using Loupe.Application.Common;
 using Loupe.Application.Security;
@@ -11,13 +12,15 @@ public sealed class ListPhotographersQueryHandler(ICurrentOwner owner, IPhotogra
     public async Task<PhotographerPage> Handle(ListPhotographersQuery request, CancellationToken cancellationToken)
     {
         if (request.PageSize is < 1 or > 100) throw new RequestValidationException("pageSize", "Choose between 1 and 100 items.");
-        var scope = Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { type = "photographers", owner.Id, request.PageSize }))) + ".";
+        if (request.Query?.Contains('\0') == true) throw new RequestValidationException("query", "Remove the null character from the query.");
+        var query = TextField.Normalize(request.Query?.Normalize(NormalizationForm.FormC), 200, "query") ?? "";
+        var scope = Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { type = "photographers", owner.Id, request.PageSize, query }))) + ".";
         if (request.Cursor is not null && (request.Cursor.Length > 200 || !request.Cursor.StartsWith(scope, StringComparison.Ordinal)))
             throw new RequestValidationException("cursor", "This cursor belongs to a different view. Refresh the list.");
         var cursor = CreatedCursor.Parse(request.Cursor?[scope.Length..]);
-        var found = await photographers.ListAsync(owner.Id, request.PageSize + 1, cursor, cancellationToken);
+        var found = await photographers.ListAsync(owner.Id, request.PageSize + 1, cursor, cancellationToken, query);
         var items = found.Take(request.PageSize).ToArray();
         var next = found.Count > request.PageSize ? scope + new CreatedCursor(items[^1].CreatedAt, items[^1].Id).Encode() : null;
-        return new(items, next, await photographers.CountAsync(owner.Id, cancellationToken));
+        return new(items, next, await photographers.CountAsync(owner.Id, cancellationToken, query));
     }
 }
