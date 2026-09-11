@@ -104,3 +104,37 @@ for (const width of [375, 768, 1440]) test(`Save dialog remains accessible at ${
   await inspiration.openSave(); await inspiration.expectDraftAccessible();
   await inspiration.uploadDraft(); await inspiration.expectDraftAccessible();
 });
+
+test('Retry after a lost final-save response preserves one reference and one new board', async ({ page }) => {
+  const inspiration = await setup(page); inspiration.library.lostDraftResponses = 1;
+  await inspiration.openSave(); await inspiration.uploadDraft(); await inspiration.newDraftBoard('Window study'); await inspiration.saveDraft();
+  await inspiration.expectDraftError('The reference could not be saved. Your preview is still here. Try again.');
+  await inspiration.saveDraft(); await inspiration.expectSaveClosed();
+  expect(inspiration.library.items).toHaveLength(1); expect(inspiration.library.boards).toHaveLength(1);
+});
+
+test('Cancel overlapping a fallback image response discards both temporary drafts', async ({ page }) => {
+  const inspiration = await setup(page); inspiration.library.draftFailure = 'robots_disallowed';
+  await inspiration.openSave(); await inspiration.importDraft('https://source.example/restricted'); await inspiration.expectImportFallback();
+  inspiration.library.pause('draft-upload'); inspiration.library.pause('draft-cancel');
+  await inspiration.chooseFallbackImage(); const cancel = inspiration.cancelDraft();
+  await expect.poll(() => inspiration.library.draftCalls.some(call => call.operation === 'cancel')).toBe(true);
+  inspiration.library.release('draft-upload'); await expect.poll(() => inspiration.library.drafts.size).toBe(2);
+  inspiration.library.release('draft-cancel'); await cancel;
+  await expect.poll(() => inspiration.library.drafts.size).toBe(0); expect(inspiration.library.items).toHaveLength(0);
+});
+
+test('Upload transfer progress waits for the preview acknowledgment', async ({ page }) => {
+  const inspiration = await setup(page); inspiration.library.pause('draft-upload');
+  await inspiration.openSave(); await inspiration.startUploadDraft();
+  await inspiration.reportDraftProgress(64, 128); await inspiration.expectDraftProgress(64, 128);
+  expect(inspiration.library.items).toHaveLength(0);
+  inspiration.library.release('draft-upload'); await inspiration.expectDraftPreview();
+});
+
+test('A source saved elsewhere during preview shows the existing reference at final Save', async ({ page }) => {
+  const inspiration = await setup(page);
+  await inspiration.openSave(); await inspiration.importDraft('https://source.example/work'); await inspiration.expectDraftPreview();
+  const existing = { ...new (inspiration.library.constructor)(1).items[0], sourceUrl: 'https://source.example/work' }; inspiration.library.items.push(existing);
+  await inspiration.saveDraft(); await inspiration.expectDraftDuplicate(); expect(inspiration.library.items).toEqual([existing]);
+});

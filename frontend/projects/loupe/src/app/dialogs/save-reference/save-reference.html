@@ -252,6 +252,11 @@
         </button>
       }
       @if (busy() && phase() !== 'importing') {
+        <progress
+          aria-label="Upload progress"
+          [attr.value]="progress()?.total ? progress()?.transferred : null"
+          [attr.max]="progress()?.total || null"
+        ></progress>
         <p role="status">Preparing preview…</p>
       }
       @if (saving()) {

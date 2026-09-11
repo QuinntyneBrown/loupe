@@ -142,7 +142,7 @@ export class SaveReference {
     this.busy.set(true);
     try {
       const next = await this.service.upload(file, previous.sourceUrl ?? '', this.uploadKey);
-      if (this.destroy.destroyed) {
+      if (this.destroy.destroyed || this.closing()) {
         await this.service.cancel(next.id);
         return;
       }
@@ -223,7 +223,7 @@ export class SaveReference {
           : await this.service.upload(file!, source, this.uploadKey, (value) =>
               this.progress.set(value),
             );
-      if (this.destroy.destroyed) {
+      if (this.destroy.destroyed || this.closing()) {
         await this.service.cancel(draft.id);
         return;
       }
@@ -347,6 +347,15 @@ export class SaveReference {
         this.saveKey,
       );
       if (!this.destroy.destroyed) {
+        if (result.alreadySaved) {
+          this.draft.set({
+            ...draft,
+            committedReferenceId: result.reference.id,
+            title: result.reference.title,
+          });
+          this.phase.set('duplicate');
+          return;
+        }
         this.modal().nativeElement.close();
         this.saved.emit(result.reference);
       }

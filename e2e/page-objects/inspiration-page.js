@@ -28,9 +28,19 @@ export class InspirationPage {
     const dialog = this.page.getByRole('dialog');
     await dialog.getByRole('textbox', { name: 'Title', exact: true }).fill(title);
     await dialog.getByRole('textbox', { name: 'Notes optional', exact: true }).fill(notes);
-    await dialog.getByLabel('Add an image', { exact: true }).setInputFiles({ name: 'Added.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1kAAAAASUVORK5CYII=', 'base64') });
+    await this.chooseFallbackImage();
     await this.expectDraftPreview();
   }
+  async chooseFallbackImage() { await this.page.getByRole('dialog').getByLabel('Add an image', { exact: true }).setInputFiles({ name: 'Added.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1kAAAAASUVORK5CYII=', 'base64') }); }
+  async expectDraftError(message) { await expect(this.page.getByRole('dialog').getByRole('alert')).toHaveText(message); }
+  async startUploadDraft() {
+    const dialog = this.page.getByRole('dialog');
+    await dialog.getByRole('radio', { name: 'Upload an image', exact: true }).check();
+    await dialog.getByLabel('Choose an image', { exact: true }).setInputFiles({ name: 'Morning.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1kAAAAASUVORK5CYII=', 'base64') });
+    await dialog.getByRole('button', { name: 'Continue', exact: true }).click();
+  }
+  async reportDraftProgress(transferred, total) { await this.page.evaluate(detail => window.dispatchEvent(new CustomEvent('loupe-reference-draft-upload-progress', { detail })), { transferred, total }); }
+  async expectDraftProgress(transferred, total) { const progress = this.page.getByRole('dialog').getByRole('progressbar', { name: 'Upload progress', exact: true }); await expect(progress).toHaveJSProperty('value', transferred); await expect(progress).toHaveJSProperty('max', total); }
   async uploadDraft() {
     const dialog = this.page.getByRole('dialog');
     await dialog.getByRole('radio', { name: 'Upload an image', exact: true }).check();

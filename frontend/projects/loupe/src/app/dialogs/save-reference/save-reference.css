@@ -69,6 +69,10 @@
   width: var(--lp-full);
   accent-color: var(--lp-color-ink);
 }
+progress {
+  width: var(--lp-full);
+  accent-color: var(--lp-color-ink);
+}
 .import-progress > div {
   display: flex;
   justify-content: space-between;

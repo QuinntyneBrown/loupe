@@ -5,6 +5,7 @@ import {
   ReferenceMetadata,
   ReferenceLinkResult,
   ServiceError,
+  UploadProgress,
 } from 'api';
 
 @Injectable()
@@ -12,8 +13,21 @@ export class MockReferenceDraftService implements IReferenceDraftService {
   import(sourceUrl: string, operationKey: string): Promise<ReferenceDraftResult> {
     return this.call('import', { sourceUrl, operationKey });
   }
-  upload(image: File, sourceUrl: string, operationKey: string): Promise<ReferenceDraftResult> {
-    return this.call('upload', { filename: image.name, sourceUrl, operationKey });
+  async upload(
+    image: File,
+    sourceUrl: string,
+    operationKey: string,
+    progress?: (value: UploadProgress) => void,
+  ): Promise<ReferenceDraftResult> {
+    const report = (event: Event) => {
+      if (event instanceof CustomEvent) progress?.(event.detail as UploadProgress);
+    };
+    window.addEventListener('loupe-reference-draft-upload-progress', report);
+    try {
+      return await this.call('upload', { filename: image.name, sourceUrl, operationKey });
+    } finally {
+      window.removeEventListener('loupe-reference-draft-upload-progress', report);
+    }
   }
   get(id: string): Promise<ReferenceDraftResult> {
     return this.call('get', { id });

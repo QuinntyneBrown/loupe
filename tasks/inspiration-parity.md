@@ -186,3 +186,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - The expanded 375px preview was visually inspected. Picker borders, spacing and typography follow mock CSS. The mock's small optional/count text uses a 3.37:1 color; these labels use the existing secondary-text token to satisfy the accepted accessibility bar.
 - Existing Azure deployment discovery found photo-vision running gpt-4.1-mini (2025-04-14), provisioned successfully. No credentials have been printed.
 
+
+### Draft retry, progress and cancellation races
+- RED: cancellation left one preview behind when an image response overlapped Cancel; upload progress was missing; a final-save duplicate closed the dialog.
+- GREEN: all 16 dialog cases pass. Both overlapping previews are discarded, transfer progress remains separate from acknowledgment, late duplicates show Already saved, and a lost save response retries without duplicating its reference or new board.
+

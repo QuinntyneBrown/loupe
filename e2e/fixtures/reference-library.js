@@ -13,7 +13,7 @@ export class ReferenceLibrary {
     this.uploadReceipts = new Map(); this.lostUploadResponses = 0;
     this.calls = []; this.failures = {}; this.errors = {}; this.gates = {};
     this.boards = []; this.boardCalls = [];
-    this.drafts = new Map(); this.draftCalls = []; this.draftReceipts = new Map(); this.draftFailure = null;
+    this.drafts = new Map(); this.draftCalls = []; this.draftReceipts = new Map(); this.draftFailure = null; this.lostDraftResponses = 0;
   }
   async attach(page) {
     await page.exposeFunction('loupeReferenceDrafts', async (operation, input) => {
@@ -44,9 +44,13 @@ export class ReferenceLibrary {
       }
       if (operation === 'save') {
         if (draft.revision !== input.revision) return { error: 'revision_conflict' };
+        const existing = input.sourceUrl ? this.items.find(item => item.sourceUrl === input.sourceUrl) : null;
+        if (existing) { const result = { reference: existing, alreadySaved: true }; this.draftReceipts.set(input.operationKey, result); return { data: result }; }
         const reference = { ...draft, ...input, id: crypto.randomUUID(), title: input.title.trim(), attribution: input.attribution?.trim() || null, tags: [], boardIds: input.boardIds, revision: 1 };
         this.items.unshift(reference); draft.committedReferenceId = reference.id;
-        const result = { reference, alreadySaved: false }; this.draftReceipts.set(input.operationKey, result); return { data: result };
+        const result = { reference, alreadySaved: false }; this.draftReceipts.set(input.operationKey, result);
+        if (this.lostDraftResponses > 0) { this.lostDraftResponses--; return { error: 'request_failed' }; }
+        return { data: result };
       }
       throw new Error('Unexpected draft operation: ' + operation);
     });
