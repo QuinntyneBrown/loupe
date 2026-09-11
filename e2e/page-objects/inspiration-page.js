@@ -4,6 +4,23 @@ import { ReferenceLibrary } from '../fixtures/reference-library.js';
 export class InspirationPage {
   constructor(page) { this.page = page; }
   async configure(count) { this.library = new ReferenceLibrary(count); await this.library.attach(this.page); }
+  async openSave() { await this.page.getByRole('button', { name: 'Save reference', exact: true }).first().click(); }
+  async uploadDraft() {
+    const dialog = this.page.getByRole('dialog');
+    await dialog.getByRole('radio', { name: 'Upload an image', exact: true }).check();
+    await dialog.getByLabel('Choose an image', { exact: true }).setInputFiles({ name: 'Morning.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1kAAAAASUVORK5CYII=', 'base64') });
+    await dialog.getByRole('button', { name: 'Continue', exact: true }).click();
+    await expect(dialog.getByRole('heading', { name: 'Save reference', exact: true })).toBeVisible();
+    await expect(dialog.getByRole('textbox', { name: 'Title', exact: true })).toBeVisible();
+  }
+  async editDraft(title, photographer) {
+    const dialog = this.page.getByRole('dialog');
+    await dialog.getByRole('textbox', { name: 'Title', exact: true }).fill(title);
+    await dialog.getByRole('textbox', { name: 'Photographer', exact: true }).fill(photographer);
+  }
+  async saveDraft() { await this.page.getByRole('dialog').getByRole('button', { name: 'Save', exact: true }).click(); }
+  async cancelDraft() { await this.page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click(); await expect(this.page.getByRole('dialog')).toHaveCount(0); }
+  async expectSaveClosed() { await expect(this.page.getByRole('dialog')).toHaveCount(0); await expect(this.page.getByRole('button', { name: 'Save reference', exact: true }).first()).toBeFocused(); }
   async expectBoard(name, count) {
     const board = this.page.getByRole('navigation', { name: 'Boards', exact: true }).getByRole('link', { name, exact: true });
     await expect(board).toBeVisible();

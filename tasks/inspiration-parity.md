@@ -165,3 +165,11 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: independent-host acceptance could not compile because ReferenceImportWorker was missing.
 - GREEN: 10 worker cases pass, including discovery and publication through a separate service provider. The production worker registers the import handler and runs the configured import pool under the shared durable capacity limit.
 
+
+### Unified save upload preview
+- RED: both Chromium cases failed on the absent Save reference header action.
+- GREEN: upload/edit/final-save and cancellation pass. Production build passes with the existing bundle warning; desktop and 375px preview screenshots were inspected without page overflow.
+- Regression: 57/58 passed together; the remaining navigation case encountered a formatter-triggered dev-server reload and passed unchanged on a stable server. An earlier pair of simultaneous suites collided in their shared trace directory; subsequent suites run sequentially.
+- Legacy upload/link tests now open their retained direct routes. Their read-only call allowances include the required tag facet read, with write restrictions preserved.
+- Link import, board selection, progress/error states and final visual parity remain in the next dialog slices.
+

@@ -1,0 +1,111 @@
+<dialog #modal class="lp-dialog" aria-labelledby="save-reference-title" (cancel)="cancel($event)">
+  <form class="lp-dialog__panel" (ngSubmit)="draft() ? save() : preview()">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="save-reference-title">
+          Save reference
+        </h2>
+      </div>
+      <button
+        type="button"
+        class="lp-icon-button"
+        aria-label="Close"
+        [disabled]="busy() || saving()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body" [attr.aria-busy]="busy() || saving()">
+      @if (draft(); as preview) {
+        <div class="preview">
+          <img [src]="preview.previewUrl" alt="Preview of the reference image" />
+          <div class="fields">
+            <div class="lp-field">
+              <label class="lp-field__label" for="draft-title">Title</label
+              ><input
+                id="draft-title"
+                class="lp-input"
+                name="title"
+                [ngModel]="title()"
+                (ngModelChange)="title.set($event)"
+                [disabled]="saving()"
+              />
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="draft-photographer">Photographer</label
+              ><input
+                id="draft-photographer"
+                class="lp-input"
+                name="photographer"
+                [ngModel]="photographer()"
+                (ngModelChange)="photographer.set($event)"
+                [disabled]="saving()"
+              />
+              <p class="lp-field__hint">Add the photographer's name if you know it.</p>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div role="radiogroup" aria-label="Where is the image?">
+          <label><input type="radio" name="source" value="upload" checked />Upload an image</label>
+        </div>
+        <label class="upload"
+          ><svg class="lp-icon" aria-hidden="true"><use href="#i-upload" /></svg
+          ><span>{{ file()?.name || 'Choose an image' }}</span
+          ><input
+            type="file"
+            aria-label="Choose an image"
+            accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
+            (change)="choose($event)"
+            [disabled]="busy()"
+        /></label>
+        <p class="lp-field__hint">JPEG, PNG, HEIC or WebP · up to 25 MB</p>
+        <div class="lp-field">
+          <label class="lp-field__label" for="draft-source"
+            >Source link <span class="lp-field__optional">optional</span></label
+          ><input
+            id="draft-source"
+            type="url"
+            class="lp-input"
+            name="sourceUrl"
+            [ngModel]="source()"
+            (ngModelChange)="source.set($event)"
+            [disabled]="busy()"
+            placeholder="https://"
+          />
+        </div>
+      }
+      @if (busy()) {
+        <p role="status">Preparing preview…</p>
+      }
+      @if (saving()) {
+        <p role="status">Saving reference…</p>
+      }
+      @if (error()) {
+        <p role="alert">{{ error() }}</p>
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      <span class="lp-dialog__privacy"
+        ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>Private.
+        Only you can see this.</span
+      >
+      <button
+        type="button"
+        class="lp-button lp-button--secondary"
+        [disabled]="busy() || saving()"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="lp-button lp-button--primary"
+        [disabled]="busy() || saving() || (!draft() && !file())"
+      >
+        {{ draft() ? 'Save' : 'Continue' }}
+      </button>
+    </footer>
+  </form>
+</dialog>

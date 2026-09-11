@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { open } from 'node:fs/promises';
 import AxeBuilder from '@axe-core/playwright';
+import { SignInPage } from './sign-in-page.js';
 
 const labels = { title: 'Title (optional)', sourceUrl: 'Source URL (optional)', attribution: 'Attribution (optional)', notes: 'Notes (optional)' };
 export class ReferenceUploadPage {
   constructor(page) { this.page = page; }
-  async open() { await this.page.getByRole('link', { name: 'Upload reference', exact: true }).click(); }
+  async open() { await this.page.goto('/inspiration/upload'); await new SignInPage(this.page).continue(); }
   async expectOpen() { await expect(this.page.getByRole('heading', { name: 'Upload reference', exact: true })).toBeVisible(); }
   async chooseImage() { await this.page.getByLabel('Reference image', { exact: true }).setInputFiles({ name: 'Morning.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64') }); }
   async chooseFile(size, mimeType = 'image/png') {

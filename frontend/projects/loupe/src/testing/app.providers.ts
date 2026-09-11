@@ -11,8 +11,11 @@ import { COMPARISON_SERVICE } from 'api';
 import { MockComparisonService } from './mock-comparison.service';
 import { BOARD_SERVICE } from 'api';
 import { MockBoardService } from './mock-board.service';
+import { REFERENCE_DRAFT_SERVICE } from 'api';
+import { MockReferenceDraftService } from './mock-reference-draft.service';
 
 export const appProviders = [
+  { provide: REFERENCE_DRAFT_SERVICE, useClass: MockReferenceDraftService },
   { provide: BOARD_SERVICE, useClass: MockBoardService },
   { provide: REFERENCE_IMPORT_SERVICE, useClass: MockReferenceImportService },
   { provide: REFERENCE_SERVICE, useClass: MockReferenceService },

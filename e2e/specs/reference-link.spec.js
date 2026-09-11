@@ -15,7 +15,7 @@ async function setup(page,count=0) {
 for(const optional of [false,true]) test(`L2-010: save source with optional context=${optional}`,async({page})=>{
  const {work,inspiration,signIn,link,detail}=await setup(page);await link.fill({sourceUrl:' https://source.example/study#original ',...(optional?{title:' Study ',attribution:' Artist ',notes:' Keep this. '}: {})});await link.save();
  await expect.poll(()=>inspiration.library.items.length).toBe(1);await detail.expectSaved(inspiration.library.items[0]);await page.reload();await signIn.continue();await detail.expectSaved(inspiration.library.items[0]);
- expect(inspiration.library.items[0].title).toBe(optional?'Study':'source.example');expect(inspiration.library.items[0].imageUrl).toBeNull();expect(work.library.photos).toHaveLength(0);expect(inspiration.library.calls.every(call=>['list','get','saveLink'].includes(call))).toBe(true);
+ expect(inspiration.library.items[0].title).toBe(optional?'Study':'source.example');expect(inspiration.library.items[0].imageUrl).toBeNull();expect(work.library.photos).toHaveLength(0);expect(inspiration.library.calls.every(call=>['list','get','tags','saveLink'].includes(call))).toBe(true);
 });
 test('L2-010.4: duplicate source preserves saved metadata and retains the submitted draft',async({page})=>{
  const {inspiration,link,detail}=await setup(page,1);const original={...inspiration.library.items[0]};await link.fill({sourceUrl:'HTTPS://SOURCE.example:443/photo#fragment',title:'New attempted title',notes:'New attempted note'});await link.save();await link.expectDuplicate();await link.expectDraft({title:'New attempted title',notes:'New attempted note'});expect(inspiration.library.items).toEqual([original]);await link.openExisting();await detail.expectSaved(original);

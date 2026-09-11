@@ -1,4 +1,3 @@
-import { RouterLink } from '@angular/router';
 import { Component, computed, DestroyRef, inject, input, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { BoardNavigation, ReferenceCollection, ReferenceFilters } from 'domain';
@@ -13,21 +12,28 @@ import {
 import { BoardDialog } from '../../dialogs/board/board-dialog';
 import { BoardPicker } from '../../dialogs/board-picker/board-picker';
 import { TagFiltersDialog } from '../../dialogs/tag-filters/tag-filters-dialog';
+import { SaveReference } from '../../dialogs/save-reference/save-reference';
 @Component({
   selector: 'lp-inspiration-page',
   imports: [
     ReferenceCollection,
-    RouterLink,
     BoardNavigation,
     BoardDialog,
     BoardPicker,
     ReferenceFilters,
     TagFiltersDialog,
+    SaveReference,
   ],
   templateUrl: './inspiration-page.html',
   styleUrl: './inspiration-page.css',
 })
 export class InspirationPage {
+  readonly savingReference = signal(false);
+  referenceSaved(reference: ReferenceResult): void {
+    this.savingReference.set(false);
+    this.notice.set(`“${reference.title}” saved.`);
+    this.refresh();
+  }
   readonly tags = input<string[], string | string[] | undefined>([], {
     transform: (value) => (value === undefined ? [] : Array.isArray(value) ? value : [value]),
   });

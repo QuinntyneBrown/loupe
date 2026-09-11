@@ -34,14 +34,14 @@
       </p>
     </div>
     <div class="lp-page-header__actions">
-      <a class="lp-button lp-button--secondary" routerLink="/inspiration/link">
-        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-link" /></svg>
-        Save link
-      </a>
-      <a class="lp-button lp-button--primary" routerLink="/inspiration/upload">
-        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-upload" /></svg>
-        Upload reference
-      </a>
+      <button
+        type="button"
+        class="lp-button lp-button--primary"
+        (click)="savingReference.set(true)"
+      >
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-plus" /></svg>
+        Save reference
+      </button>
     </div>
   </div>
   <div class="inspiration-layout">
@@ -76,6 +76,9 @@
       (closed)="this.editor.set(null)"
       (saved)="boardSaved($event)"
     />
+  }
+  @if (savingReference()) {
+    <lp-save-reference (closed)="savingReference.set(false)" (saved)="referenceSaved($event)" />
   }
   @if (picker(); as reference) {
     <lp-board-picker

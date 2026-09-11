@@ -1,0 +1,32 @@
+.preview {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lp-space-5);
+}
+.preview img {
+  width: var(--lp-thumb-size-lg);
+  aspect-ratio: var(--lp-reference-ratio);
+  object-fit: cover;
+  border-radius: var(--lp-radius-sm);
+}
+.fields {
+  display: grid;
+  gap: var(--lp-space-4);
+  min-width: var(--lp-zero);
+  flex: 1;
+}
+.upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--lp-space-3);
+  padding: var(--lp-space-6);
+  border: var(--lp-hairline) dashed var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+}
+.upload input {
+  max-width: var(--lp-full);
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}

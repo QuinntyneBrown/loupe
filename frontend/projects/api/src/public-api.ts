@@ -38,3 +38,6 @@ export * from './lib/board/board-result';
 export * from './lib/board/board.service.contract';
 export * from './lib/board/board.service';
 export * from './lib/reference/reference-tag';
+export * from './lib/reference-draft/reference-draft-result';
+export * from './lib/reference-draft/reference-draft.service.contract';
+export * from './lib/reference-draft/reference-draft.service';

@@ -13,8 +13,31 @@ export class ReferenceLibrary {
     this.uploadReceipts = new Map(); this.lostUploadResponses = 0;
     this.calls = []; this.failures = {}; this.errors = {}; this.gates = {};
     this.boards = []; this.boardCalls = [];
+    this.drafts = new Map(); this.draftCalls = []; this.draftReceipts = new Map();
   }
   async attach(page) {
+    await page.exposeFunction('loupeReferenceDrafts', async (operation, input) => {
+      this.draftCalls.push({ operation, ...input });
+      await this.gates['draft-' + operation]?.promise;
+      if (this.failures['draft-' + operation] > 0) { this.failures['draft-' + operation]--; return { error: 'request_failed' }; }
+      if (input.operationKey && this.draftReceipts.has(input.operationKey)) return { data: this.draftReceipts.get(input.operationKey) };
+      if (operation === 'upload') {
+        const base = new ReferenceLibrary(1).items[0];
+        const draft = { ...base, id: crypto.randomUUID(), title: input.filename.replace(/\.[^.]+$/, ''), attribution: null, sourceUrl: input.sourceUrl || null, import: null, committedReferenceId: null, failureCode: null, expiresAt: '2099-01-01T00:00:00Z' };
+        this.drafts.set(draft.id, draft); this.draftReceipts.set(input.operationKey, draft); return { data: draft };
+      }
+      const draft = this.drafts.get(input.id);
+      if (operation === 'cancel') { this.drafts.delete(input.id); return { data: null }; }
+      if (!draft) return { error: 'item_unavailable' };
+      if (operation === 'get') return { data: draft };
+      if (operation === 'save') {
+        if (draft.revision !== input.revision) return { error: 'revision_conflict' };
+        const reference = { ...draft, ...input, id: crypto.randomUUID(), title: input.title.trim(), attribution: input.attribution?.trim() || null, tags: [], boardIds: input.boardIds, revision: 1 };
+        this.items.unshift(reference); draft.committedReferenceId = reference.id;
+        const result = { reference, alreadySaved: false }; this.draftReceipts.set(input.operationKey, result); return { data: result };
+      }
+      throw new Error('Unexpected draft operation: ' + operation);
+    });
     await page.exposeFunction('loupeBoards', async (operation, input) => {
       this.boardCalls.push({ operation, ...input });
       await this.gates['boards-' + operation]?.promise;
