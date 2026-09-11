@@ -108,7 +108,8 @@ public sealed class CurrentCritiqueOperationTests(PostgreSqlFixture database) : 
     public async Task L2_033_2_Existing_admitted_work_is_discoverable_after_schema_upgrade()
     {
         await using var factory = CreateFactory();
-        using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        var subject = Guid.NewGuid().ToString();
+        using var client = await factory.CreateAuthenticatedClientAsync(subject);
         var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
         using var admitted = await SubmitAsync(client, id);
         Assert.Equal(HttpStatusCode.Accepted, admitted.StatusCode);
@@ -118,8 +119,12 @@ public sealed class CurrentCritiqueOperationTests(PostgreSqlFixture database) : 
             await migrator.MigrateAsync("20260908011430_CritiqueAnalysisImages");
             await migrator.MigrateAsync();
         }
-        Assert.Equal(await admitted.Content.ReadAsStringAsync(), await client.GetStringAsync(Location(id)));
-        using var deleted = await client.DeleteAsync($"/api/photographs/{id}?revision=1");
+        // The authentication migration intentionally revokes every previous session.
+        using var expired = await client.GetAsync(Location(id));
+        Assert.Equal(HttpStatusCode.Unauthorized, expired.StatusCode);
+        using var later = await factory.CreateAuthenticatedClientAsync(subject);
+        Assert.Equal(await admitted.Content.ReadAsStringAsync(), await later.GetStringAsync(Location(id)));
+        using var deleted = await later.DeleteAsync($"/api/photographs/{id}?revision=1");
         deleted.EnsureSuccessStatusCode();
     }
 

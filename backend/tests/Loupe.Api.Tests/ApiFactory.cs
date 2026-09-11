@@ -1,11 +1,8 @@
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.IdentityModel.Protocols;
 using Loupe.Api.Tests.Security;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Diagnostics;
@@ -19,7 +16,6 @@ namespace Loupe.Api.Tests;
 
 public sealed class ApiFactory(string? connectionString = null, string? mediaRoot = null) : WebApplicationFactory<Program>
 {
-    public ControlledIdentityProvider Identity { get; } = new();
     public TestClock Clock { get; } = new();
     public TimeProvider? ClockOverride { get; init; }
     public CapturedApiFailure Failure { get; } = new();
@@ -37,20 +33,22 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
         var client = CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, BaseAddress = new Uri("https://localhost") });
         try
         {
-            using var callback = await OidcFlow.CompleteAsync(this, client, subject);
-            using var session = await client.GetAsync("/api/session");
-            session.EnsureSuccessStatusCode();
-            client.DefaultRequestHeaders.Add("X-CSRF-Token", session.Headers.GetValues("X-CSRF-Token").Single());
-            client.DefaultRequestHeaders.Add("Origin", "https://localhost");
+            await ReauthenticateAsync(client, subject);
             return client;
         }
         catch { client.Dispose(); throw; }
     }
 
-    public override async ValueTask DisposeAsync()
+    public async Task ReauthenticateAsync(HttpClient client, string subject)
     {
-        await base.DisposeAsync();
-        Identity.Dispose();
+        client.DefaultRequestHeaders.Remove("X-CSRF-Token");
+        client.DefaultRequestHeaders.Remove("Origin");
+        using var login = await LocalSignInFlow.CompleteAsync(this, client, subject);
+        login.EnsureSuccessStatusCode();
+        using var session = await client.GetAsync("/api/session");
+        session.EnsureSuccessStatusCode();
+        client.DefaultRequestHeaders.Add("X-CSRF-Token", session.Headers.GetValues("X-CSRF-Token").Single());
+        client.DefaultRequestHeaders.Add("Origin", "https://localhost");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -61,19 +59,14 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
         {
             ["Ai:Endpoint"] = "https://loupe-fixture.openai.azure.com",
             ["Ai:Deployment"] = "critique-fixture",
-            ["Identity:Authority"] = "https://identity.example",
-            ["Identity:ClientId"] = "loupe-fixture",
-            ["Identity:ClientSecret"] = "fixture-only-not-a-real-secret",
+            ["Jwt:Issuer"] = "Loupe",
+            ["Jwt:Audience"] = "Loupe",
+            ["Jwt:SigningKey"] = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("fixture-only-local-signing-key-32-bytes".PadRight(64, 'x'))),
             ["Browser:AllowedOrigins:0"] = "https://localhost",
             ["Media:Root"] = mediaRoot ?? Path.Combine(Path.GetTempPath(), "loupe-unused-media"),
             ["ConnectionStrings:Library"] = connectionString ?? "Host=localhost;Database=unused;Username=unused"
         }));
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(Settings));
-        builder.ConfigureTestServices(services => services.PostConfigure<OpenIdConnectOptions>("oidc", options =>
-        {
-            options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(Identity.Configuration);
-            options.Backchannel = new HttpClient(Identity, disposeHandler: false);
-        }));
         builder.ConfigureTestServices(services =>
         {
             if (CritiqueProvider is not null || AiTransport is null)

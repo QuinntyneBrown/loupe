@@ -7,7 +7,7 @@ public sealed class SessionCsrfMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context, IAntiforgery antiforgery, IOptions<BrowserOptions> options)
     {
-        if (context.Request.Path.StartsWithSegments("/api") && context.User.Identity?.IsAuthenticated == true
+        if (context.Request.Path.StartsWithSegments("/api") && (context.User.Identity?.IsAuthenticated == true || context.Request.Path == "/api/session/sign-in")
             && !HttpMethods.IsGet(context.Request.Method) && !HttpMethods.IsHead(context.Request.Method)
             && !HttpMethods.IsOptions(context.Request.Method))
         {
@@ -24,8 +24,8 @@ public sealed class SessionCsrfMiddleware(RequestDelegate next)
                 return;
             }
         }
-        if (context.User.Identity?.IsAuthenticated == true && HttpMethods.IsGet(context.Request.Method)
-            && context.Request.Path == "/api/session")
+        if (HttpMethods.IsGet(context.Request.Method) && (context.Request.Path == "/api/session/csrf" ||
+            (context.User.Identity?.IsAuthenticated == true && context.Request.Path == "/api/session")))
             context.Response.Headers["X-CSRF-Token"] = antiforgery.GetAndStoreTokens(context).RequestToken;
         await next(context);
     }

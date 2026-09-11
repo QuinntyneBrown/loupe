@@ -17,8 +17,8 @@ public sealed class DeletionRetentionTests(PostgreSqlFixture database) : IClassF
     public async Task L2_031_5_032_1_Expired_completed_records_are_pruned_but_recent_and_pending_records_survive(int days, bool blocked, bool retained)
     {
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot);
-        using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         factory.Clock.Advance(-TimeSpan.FromDays(days));
+        using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         var before = Directory.Exists(database.MediaRoot) ? Directory.GetFiles(database.MediaRoot) : [];
         var photo = await PhotographFixture.UploadAsync(client);
         var files = Directory.GetFiles(database.MediaRoot).Except(before).ToArray();

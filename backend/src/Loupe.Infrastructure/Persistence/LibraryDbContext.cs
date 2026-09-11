@@ -9,6 +9,7 @@ namespace Loupe.Infrastructure.Persistence;
 
 public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options) : DbContext(options)
 {
+    public DbSet<Loupe.Domain.Users.User> Users => Set<Loupe.Domain.Users.User>();
     public DbSet<ApplicationSession> Sessions => Set<ApplicationSession>();
     public DbSet<Photograph> Photographs => Set<Photograph>();
     public DbSet<Reference> References => Set<Reference>();
@@ -18,6 +19,10 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
     public DbSet<AnalysisDispatchCursor> AnalysisDispatchCursors => Set<AnalysisDispatchCursor>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Loupe.Domain.Users.User>().ToTable("users").HasKey(u => u.Id);
+        modelBuilder.Entity<Loupe.Domain.Users.User>().HasIndex(u => u.NormalizedEmail).IsUnique();
+        modelBuilder.Entity<Loupe.Domain.Users.User>().Property(u => u.NormalizedEmail).HasMaxLength(254);
+        modelBuilder.Entity<Loupe.Domain.Users.User>().Property(u => u.PasswordVersion).HasDefaultValue("");
         modelBuilder.Entity<Reference>().ToTable("references").HasKey(reference => reference.Id);
         modelBuilder.Entity<Reference>().HasIndex(reference => new { reference.OwnerId, reference.CreatedAt, reference.Id });
         modelBuilder.Entity<Reference>().Property(reference => reference.Revision).HasDefaultValue(1L).IsConcurrencyToken();

@@ -24,7 +24,8 @@ public sealed class CritiqueReuseTests(PostgreSqlFixture database) : IClassFixtu
     {
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
         { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" } };
-        using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        var subject = Guid.NewGuid().ToString();
+        using var client = await factory.CreateAuthenticatedClientAsync(subject);
         var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
         using var original = await SubmitAsync(client, id);
         Assert.Equal(HttpStatusCode.Accepted, original.StatusCode);
@@ -36,6 +37,7 @@ public sealed class CritiqueReuseTests(PostgreSqlFixture database) : IClassFixtu
             var migrator = context.GetService<IMigrator>();
             await migrator.MigrateAsync("20260907235700_CritiqueAttempts");
             await migrator.MigrateAsync();
+            await factory.ReauthenticateAsync(client, subject);
         }
         using var repeated = await SubmitAsync(client, id);
         Assert.Equal(HttpStatusCode.Accepted, repeated.StatusCode);

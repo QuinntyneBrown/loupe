@@ -21,8 +21,8 @@ public sealed class SessionLifetimeTests(PostgreSqlFixture database) : IClassFix
         await using (var scope = factory.Services.CreateAsyncScope())
             await scope.ServiceProvider.GetRequiredService<LibraryDbContext>().Database.MigrateAsync();
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, BaseAddress = new Uri("https://localhost") });
-        using var callback = await OidcFlow.CompleteAsync(factory, client);
-        Assert.Equal(HttpStatusCode.Redirect, callback.StatusCode);
+        using var callback = await LocalSignInFlow.CompleteAsync(factory, client);
+        Assert.Equal(HttpStatusCode.OK, callback.StatusCode);
         for (var interval = 0; interval < 24; interval++)
         {
             factory.Clock.Advance(TimeSpan.FromMinutes(29));
@@ -44,9 +44,9 @@ public sealed class SessionLifetimeTests(PostgreSqlFixture database) : IClassFix
         await using (var scope = factory.Services.CreateAsyncScope())
             await scope.ServiceProvider.GetRequiredService<LibraryDbContext>().Database.MigrateAsync();
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, BaseAddress = new Uri("https://localhost") });
-        using var first = await OidcFlow.CompleteAsync(factory, client);
+        using var first = await LocalSignInFlow.CompleteAsync(factory, client);
         var oldCookie = Assert.Single(first.Headers.GetValues("Set-Cookie"), value => value.StartsWith("__Host-loupe-session=", StringComparison.Ordinal)).Split(';')[0];
-        using var second = await OidcFlow.CompleteAsync(factory, client);
+        using var second = await LocalSignInFlow.CompleteAsync(factory, client);
         var newCookie = Assert.Single(second.Headers.GetValues("Set-Cookie"), value => value.StartsWith("__Host-loupe-session=", StringComparison.Ordinal)).Split(';')[0];
         Assert.NotEqual(oldCookie, newCookie);
         await using var another = new ApiFactory(database.ConnectionString);
@@ -67,9 +67,8 @@ public sealed class SessionLifetimeTests(PostgreSqlFixture database) : IClassFix
         await using (var scope = factory.Services.CreateAsyncScope())
             await scope.ServiceProvider.GetRequiredService<LibraryDbContext>().Database.MigrateAsync();
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, BaseAddress = new Uri("https://localhost") });
-        using var callback = await OidcFlow.CompleteAsync(factory, client);
-        Assert.True(callback.StatusCode == HttpStatusCode.Redirect, factory.Failure.Exception?.ToString());
-        Assert.Equal("/my-work", callback.Headers.Location?.OriginalString);
+        using var callback = await LocalSignInFlow.CompleteAsync(factory, client);
+        Assert.True(callback.StatusCode == HttpStatusCode.OK, factory.Failure.Exception?.ToString());
         var cookie = Assert.Single(callback.Headers.GetValues("Set-Cookie"), value => value.StartsWith("__Host-loupe-session=", StringComparison.Ordinal));
         Assert.Contains("secure", cookie, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("httponly", cookie, StringComparison.OrdinalIgnoreCase);

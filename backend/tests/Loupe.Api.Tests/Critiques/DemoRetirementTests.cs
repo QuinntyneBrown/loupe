@@ -37,7 +37,8 @@ public sealed class DemoRetirementTests(PostgreSqlFixture database) : IClassFixt
     {
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
         { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" } };
-        using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        var subject = Guid.NewGuid().ToString();
+        using var client = await factory.CreateAuthenticatedClientAsync(subject);
         var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
         using var notes = await client.PutAsJsonAsync($"/api/photographs/{id}/notes", new { revision = 1, notes = "Keep my personal journal." });
         notes.EnsureSuccessStatusCode();
@@ -62,10 +63,19 @@ public sealed class DemoRetirementTests(PostgreSqlFixture database) : IClassFixt
             var pending = await context.BackgroundOperations.AsNoTracking().SingleAsync(item => item.Id == pendingId);
             oldLease = new BackgroundOperation
             {
-                Id = pending.Id, OwnerId = pending.OwnerId, ResourceId = pending.ResourceId, Type = pending.Type,
-                Mode = ExecutionMode.Demo, Model = pending.Model, PromptVersion = pending.PromptVersion,
-                InputJson = pending.InputJson, CreatedAt = pending.CreatedAt, UpdatedAt = pending.UpdatedAt,
-                Status = OperationStatus.Running, LeaseToken = leaseToken, LeaseExpiresAt = later
+                Id = pending.Id,
+                OwnerId = pending.OwnerId,
+                ResourceId = pending.ResourceId,
+                Type = pending.Type,
+                Mode = ExecutionMode.Demo,
+                Model = pending.Model,
+                PromptVersion = pending.PromptVersion,
+                InputJson = pending.InputJson,
+                CreatedAt = pending.CreatedAt,
+                UpdatedAt = pending.UpdatedAt,
+                Status = OperationStatus.Running,
+                LeaseToken = leaseToken,
+                LeaseExpiresAt = later
             };
             var migrator = context.GetService<IMigrator>();
             await migrator.MigrateAsync("20260908065341_CurrentReferenceImport");
@@ -93,6 +103,7 @@ public sealed class DemoRetirementTests(PostgreSqlFixture database) : IClassFixt
             finally { await migrator.MigrateAsync(); }
         }
 
+        await factory.ReauthenticateAsync(client, subject);
         using var critique = await client.GetAsync($"/api/photographs/{id}/critique");
         Assert.Equal(HttpStatusCode.NoContent, critique.StatusCode);
         using var currentOperation = await client.GetAsync($"/api/photographs/{id}/critique/operation");

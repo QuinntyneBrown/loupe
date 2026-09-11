@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../Loupe.Application/Loupe.Application.csproj" />
+    <ProjectReference Include="../Loupe.Infrastructure/Loupe.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

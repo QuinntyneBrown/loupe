@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
 // Records the loupe demo video. Requires the shared demo stack from
-// docs/demo/harness/setup.ps1 (Postgres, demo identity provider, the
+// docs/demo/harness/setup.ps1 (Postgres, local accounts, the
 // loupe-demo-api / loupe-demo-worker containers, and the Angular dev server on
 // https://localhost:4200) to already be running — this config does not start
 // them, since they are long-lived and shared with the loupe-api recording.

@@ -8,20 +8,72 @@
         Develop your eye through thoughtful photo critiques and a library of work that inspires you.
       </p>
     </div>
-    @if (error() === 'authentication_failed') {
-      <div class="lp-notice lp-notice--error" role="alert">
-        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>
-        Sign-in could not be completed. Please try again.
-      </div>
-    }
     @if (error() === 'session_unavailable') {
       <div class="lp-notice lp-notice--error" role="alert">
         <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>
         Your session could not be checked. Please try again.
       </div>
-      <button class="lp-button lp-button--primary lp-button--block" type="button" (click)="retry()">Try again</button>
+      <button class="lp-button lp-button--primary lp-button--block" type="button" (click)="retry()">
+        Try again
+      </button>
     } @else {
-      <button class="lp-button lp-button--primary lp-button--block" type="button" (click)="continue()">Continue to sign in</button>
+      <form class="sign-in-form" (submit)="submit($event)" novalidate [attr.aria-busy]="pending()">
+        @if (failure()) {
+          <div class="lp-notice lp-notice--error" role="alert">{{ failure() }}</div>
+        }
+        <div class="lp-field">
+          <label class="lp-field__label" for="email">Email</label>
+          <input
+            class="lp-input"
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="username"
+            required
+            [value]="email()"
+            #emailInput
+            (input)="email.set(emailInput.value)"
+            [readOnly]="pending()"
+            [attr.aria-invalid]="!!fields()['email']"
+            [attr.aria-describedby]="fields()['email'] ? 'email-error' : null"
+          />
+          @if (fields()['email']) {
+            <span class="lp-field__error" id="email-error" role="alert">{{
+              fields()['email']
+            }}</span>
+          }
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="password">Password</label>
+          <input
+            class="lp-input"
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+            [value]="password()"
+            #passwordInput
+            (input)="password.set(passwordInput.value)"
+            [readOnly]="pending()"
+            [attr.aria-invalid]="!!fields()['password']"
+            [attr.aria-describedby]="fields()['password'] ? 'password-error' : null"
+          />
+          @if (fields()['password']) {
+            <span class="lp-field__error" id="password-error" role="alert">{{
+              fields()['password']
+            }}</span>
+          }
+        </div>
+        <button
+          class="lp-button lp-button--primary lp-button--block"
+          type="submit"
+          [disabled]="pending()"
+        >
+          {{ pending() ? 'Signing in…' : 'Sign in' }}
+        </button>
+        <p class="lp-muted">Contact your Loupe administrator for an account or password reset.</p>
+      </form>
     }
     <p class="lp-auth__foot privacy">
       <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>

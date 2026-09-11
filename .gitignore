@@ -3,6 +3,7 @@
 **/bin/
 **/obj/
 **/test-results/
+**/TestResults/
 **/playwright-report/
 .env
 .env.*

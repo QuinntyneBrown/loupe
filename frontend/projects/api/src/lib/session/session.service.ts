@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ISessionService } from './session.service.contract';
 import { SessionResult } from './session-result';
+import { SignInCredentials } from './sign-in-credentials';
 import { ServiceError } from '../common/service-error';
 
 @Injectable()
@@ -33,8 +34,36 @@ export class SessionService implements ISessionService {
     }
   }
 
-  signIn(returnUrl: string): void {
-    window.location.assign(`/api/session/sign-in?returnUrl=${encodeURIComponent(returnUrl)}`);
+  async signIn(credentials: SignInCredentials): Promise<SessionResult> {
+    this.csrf = null;
+    try {
+      const protection = await firstValueFrom(
+        this.http.get('/api/session/csrf', { observe: 'response' }),
+      );
+      const token = protection.headers.get('X-CSRF-Token');
+      if (!token) throw new ServiceError('sign_in_unavailable');
+      await firstValueFrom(
+        this.http.post<SessionResult>('/api/session/sign-in', credentials, {
+          headers: { 'X-CSRF-Token': token },
+        }),
+      );
+      const session = await this.load();
+      if (!session) throw new ServiceError('sign_in_unavailable');
+      return session;
+    } catch (error) {
+      this.csrf = null;
+      this.session.set(null);
+      if (error instanceof HttpErrorResponse) {
+        throw new ServiceError(
+          error.status === 401
+            ? 'invalid_credentials'
+            : error.status === 429
+              ? 'sign_in_limit'
+              : 'sign_in_unavailable',
+        );
+      }
+      throw error;
+    }
   }
 
   async signOut(): Promise<void> {

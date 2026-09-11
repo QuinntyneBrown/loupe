@@ -35,15 +35,12 @@ test('loupe demo: the real application against the real backend', async ({ page 
   await page.waitForTimeout(4000);
   await hideTitleCard(page);
 
-  // 1. Sign in — real OIDC redirect through the demo identity provider.
-  await showCaption(page, 'Signing in', 'A real OpenID Connect authorization-code + PKCE redirect');
+  // 1. Sign in — local credentials verified by the Loupe backend.
+  await showCaption(page, 'Signing in', 'Email and password, with a JWT issued by Loupe');
   await signIn.openPrivateDestination();
   await signIn.expectSignInRequired();
   await page.waitForTimeout(1500);
   await signIn.continue();
-  await page.waitForURL(/localhost:5444\/authorize/);
-  await page.waitForTimeout(1200);
-  await page.getByRole('button', { name: /Continue as/ }).click();
   await page.waitForURL(/localhost:4200\/my-work/);
   await myWork.expectOpen();
   await page.waitForTimeout(1800);

@@ -49,16 +49,17 @@ writeFileSync(cookieJar, '');
 const API = 'https://localhost:5001';
 const ORIGIN = 'https://localhost:4200';
 
-function run(cmd, args) {
+function run(cmd, args, input) {
   return new Promise((resolve) => {
-    execFile(cmd, args, { windowsHide: true, maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) => {
+    const child = execFile(cmd, args, { windowsHide: true, maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) => {
       resolve({ code: err ? (err.code ?? 1) : 0, stdout: stdout ?? '', stderr: stderr ?? '' });
     });
+    child.stdin.end(input);
   });
 }
 
-function curl(args) {
-  return run('curl', ['-sk', ...args]);
+function curl(args, input) {
+  return run('curl', ['-sk', ...args], input);
 }
 
 async function csrfToken() {
@@ -79,33 +80,18 @@ function truncate(value, max = 44) {
 const steps = [
   {
     name: 'sign-in',
-    caption: 'Sign in as the demo photographer — real OIDC authorization-code + PKCE handshake',
+    caption: 'Sign in as the demo photographer — Loupe validates the password and issues its own JWT',
     async run() {
-      const lines = [];
-      lines.push(`$ curl https://localhost:5001/api/session/sign-in?returnUrl=/my-work`);
-      const challenge = await curl(['-c', cookieJar, '-D', '-', '-o', 'NUL', `${API}/api/session/sign-in?returnUrl=%2Fmy-work`]);
-      const authorizeUrl = extractHeader(challenge.stdout, 'location');
-      lines.push(`302 -> ${truncate(authorizeUrl, 70)}`);
-
-      const confirmUrl = authorizeUrl.replace('/authorize?', '/authorize/confirm?') + '&subject=api-demo';
-      lines.push('');
-      lines.push('$ curl <demo identity provider — continue as api-demo>');
-      const confirm = await curl(['-b', cookieJar, '-c', cookieJar, confirmUrl]);
-      const codeMatch = confirm.stdout.match(/name="code" value="([^"]*)"/);
-      const stateMatch = confirm.stdout.match(/name="state" value="([^"]*)"/);
-      const code = codeMatch ? codeMatch[1] : '';
-      const state = stateMatch ? stateMatch[1] : '';
-      lines.push(`200 -> authorization code issued (${truncate(code, 20)})`);
-
-      lines.push('');
-      lines.push(`$ curl -X POST https://localhost:5001/signin-oidc`);
-      const callback = await curl(['-b', cookieJar, '-c', cookieJar, '-D', '-', '-o', 'NUL', '-X', 'POST', `${API}/signin-oidc`,
-        '--data-urlencode', `code=${code}`, '--data-urlencode', `state=${state}`]);
-      const location = extractHeader(callback.stdout, 'location');
-      lines.push(`302 -> ${location}`);
-      if (location !== '/my-work') return { ok: false, output: lines.join('\n') };
-
-      lines.push('');
+      const lines = ['$ curl https://localhost:5001/api/session/csrf'];
+      const protection = await curl(['-c', cookieJar, '-D', '-', '-o', 'NUL', `${API}/api/session/csrf`]);
+      const csrf = extractHeader(protection.stdout, 'x-csrf-token');
+      lines.push('$ curl -X POST https://localhost:5001/api/session/sign-in --data-binary @-');
+      const login = await curl(['-b', cookieJar, '-c', cookieJar, '--fail-with-body',
+        '-H', `X-CSRF-Token: ${csrf}`, '-H', `Origin: ${ORIGIN}`, '-H', 'Content-Type: application/json',
+        '--data-binary', '@-', `${API}/api/session/sign-in`],
+        JSON.stringify({ email: 'api-demo@example.com', password: 'local acceptance password' }));
+      if (login.code !== 0) return { ok: false, output: 'Local sign-in failed. Check demo account provisioning.' };
+      lines.push('200 — local session created; JWT stays in the HttpOnly cookie');
       lines.push('$ curl https://localhost:5001/api/session');
       const session = await curl(['-b', cookieJar, `${API}/api/session`]);
       lines.push(session.stdout.trim());

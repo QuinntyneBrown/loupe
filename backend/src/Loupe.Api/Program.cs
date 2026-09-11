@@ -60,6 +60,7 @@ public class Program
         app.UseAuthorization();
         app.UseMiddleware<UploadBodyLimitMiddleware>();
         app.UseMiddleware<SessionCsrfMiddleware>();
+        app.UseMiddleware<SignInRateLimitMiddleware>();
         app.MapControllers();
         app.Run();
     }

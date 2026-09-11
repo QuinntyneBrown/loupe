@@ -3,7 +3,7 @@
 Run the complete API acceptance suite from PowerShell with `./backend/Test.ps1`.
 Docker Desktop must be running with Linux containers. The test image starts
 isolated PostgreSQL containers through Testcontainers; the Docker socket is
-mounted only in this acceptance environment. No production identity or AI
+mounted only in this acceptance environment. No production account or AI
 credentials are used. Filter a slice with `-Filter FullyQualifiedName~Photographs`.
 
 The acceptance image pins .NET SDK 10.0.400 on Ubuntu 24.04 by image digest and
@@ -17,11 +17,72 @@ Windows. The repository's local .NET 10 SDK can still build and format the code.
 formatting after restore. MediatR remains pinned to 12.5.0.
 
 Runtime configuration requires `ConnectionStrings:Library`, absolute private
-`Media:Root`, `Identity:Authority` (HTTPS), `Identity:ClientId`,
-`Identity:ClientSecret`, and explicitly enumerated HTTPS
-`Browser:AllowedOrigins`. Browser/API/identity deployment and secret provisioning
-are delivered with the Compose increment. Current behavior and remaining work
-are recorded in `../tasks/evidence.md` and `../tasks/todo.md`.
+`Media:Root`, `Jwt:SigningKey` (base64 encoding of at least 32 cryptographically
+random bytes), and explicitly enumerated HTTPS `Browser:AllowedOrigins`.
+`Jwt:Issuer` and `Jwt:Audience` default to `Loupe`. Keep the issuer stable: it is
+part of the existing ownership-key derivation. Store the signing key in secret
+configuration, share it between API instances, and never commit it or generate a
+new key on each API startup. Changing the key invalidates all issued JWTs.
+
+## Local accounts and authentication
+
+Loupe stores administrator-provisioned users in PostgreSQL and signs its own JWTs.
+Apply migrations before starting the new API. The `LocalUsers` migration deletes
+old sessions, preserves existing content without reassignment, and creates the
+users table. New accounts start with empty libraries. Do not run the old API and
+new API together during cutover. Back up the database, stop old API instances,
+apply migrations, configure the shared signing secret, provision accounts, and
+start the new API instances. Every user must sign in again. A rollback requires
+coordinating the matching application/database backup; it does not restore old
+sessions or migrate new accounts to external identities.
+
+Build/publish `backend/src/Loupe.Admin` with the API. Configure its
+`ConnectionStrings__Library` through secret configuration. It requires neither
+JWT keys nor AI settings. Run:
+
+```text
+dotnet Loupe.Admin.dll create-user photographer@example.com "Photographer Name"
+dotnet Loupe.Admin.dll reset-password photographer@example.com
+```
+
+Both commands prompt twice with input hidden when interactive, or read one password
+line from stdin when redirected. Never pass passwords as command arguments.
+Passwords contain 15–128 Unicode scalar values and are not trimmed. Email addresses
+are trimmed and matched case-insensitively. Duplicate creation fails, including
+concurrent requests. Password reset preserves the user ID and library, and revokes
+all sessions. Credentials are salted and hashed using ASP.NET Core PasswordHasher.
+There is no public registration, password-reset endpoint, or account-deletion flow.
+
+The browser first calls `GET /api/session/csrf`, then sends
+`POST /api/session/sign-in` with JSON `{ "email": "...", "password": "..." }`,
+the `X-CSRF-Token` header and a trusted browser Origin. Successful sign-in returns
+`{ "subject": "...", "name": "..." }` and sets `__Host-loupe-session` to a JWT in
+a Secure, HttpOnly, SameSite=Lax cookie. JWTs are never returned in JSON or kept in
+browser local/session storage. `GET /api/session` refreshes the identity-bound
+antiforgery token; use it for subsequent mutations and `POST /api/session/sign-out`.
+Private media uses the same cookie, so image elements continue to work.
+
+JWT validation enforces the configured issuer, audience, HS256 signature,
+lifetime, subject and session identifier. The database additionally enforces
+30-minute idle and exact 12-hour absolute expiry, user password version, and
+immediate session revocation. Login replaces the previous session. Sign-out
+returns 204 after revocation and cookie removal. Database errors fail closed.
+Failed credentials return generic 401; malformed input returns 400; failed
+browser protection returns 403. Sign-in permits ten protected attempts per client
+IP per minute **per API process**, then returns 429 with `Retry-After`. The current
+host does not trust forwarded IP headers; reverse proxies therefore share their
+upstream address's budget. Multi-instance public ingress must also enforce an
+aggregate sign-in limit and supply a reviewed trusted-proxy configuration if
+individual client IP budgets are required.
+
+For a release smoke check, provision a temporary account, sign in through the
+production Angular composition over HTTPS, open My Work, sign out, and verify
+that a copied prior cookie receives 401. Repeat after a CLI password reset and
+verify that only the replacement password works. Acceptance tests use real local
+accounts and real persistence; no external identity service is required.
+
+Current behavior and remaining work are recorded in `../tasks/evidence.md` and
+`../tasks/todo.md`.
 
 `POST /api/photographs` requires a client-generated `Idempotency-Key` header of
 1–128 visible ASCII characters, in addition to the authenticated session and
@@ -38,7 +99,7 @@ A 200 response acknowledges revoked access and returns a deletion operation;
 
 Run `dotnet run --project backend/src/Loupe.Worker` as a separate process after
 applying migrations. It uses the same `ConnectionStrings:Library` and private
-`Media:Root` as the API, with no browser identity configuration. Supply secrets
+`Media:Root` as the API, with no JWT or browser configuration. Supply secrets
 through deployment configuration. `Cleanup:PollInterval` defaults to one minute
 and must be positive and at most five minutes. Multiple worker instances can
 share the store. Failed media removal stays pending for subsequent iterations;

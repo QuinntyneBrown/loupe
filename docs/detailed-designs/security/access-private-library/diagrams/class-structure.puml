@@ -1,77 +1,35 @@
 @startuml
-skinparam backgroundColor #FFFFFF
 skinparam shadowing false
-skinparam roundcorner 12
-skinparam defaultFontName Arial
-skinparam ArrowColor #344054
-skinparam rectangle {
-  BorderColor #344054
-  FontColor #101828
+title Local users and sessions
+class User {
+  Id: string
+  NormalizedEmail: string
+  PasswordHash: string
+  PasswordVersion: string
 }
-skinparam package {
-  BorderColor #667085
-  FontColor #101828
-  BackgroundColor #F9FAFB
-}
-
-skinparam class {
-  BorderColor #344054
-  FontColor #101828
-  BackgroundColor #F9FAFB
-}
-title Class structure - Sign in and access only the owned library
 class ApplicationSession {
-  +IdHash: string
-  +OwnerId: string
-  +CreatedAt: DateTimeOffset
-  +LastActivityAt: DateTimeOffset
-  +Revoked: bool
-  +IsValid(now: DateTimeOffset): bool
-  +Revoke(): void
+  Id: token hash
+  Subject: user ID
+  UserVersion: string
+  CreatedAt: DateTimeOffset
+  LastSeenAt: DateTimeOffset
 }
-interface ILibraryStore {
-  +ReadOwned(ownerId: string, id: Guid): Task<OwnedState>
-  +Commit(expectedVersion: long): Task<CommitResult>
-}
-class CompleteSignInCommand {
-  +OwnerId: string
-  +Payload: CompleteSignInInput
-}
-class CompleteSignInCommandHandler {
-  +Handle(request: CompleteSignInCommand, cancellation: CancellationToken): Task<Result>
-}
-CompleteSignInCommandHandler ..> CompleteSignInCommand : handles
-CompleteSignInCommandHandler --> ApplicationSession : reads / applies
-CompleteSignInCommandHandler ..> ILibraryStore : persists / queries
-class GetOwnedResourceQuery {
-  +OwnerId: string
-  +Payload: GetOwnedResourceInput
-}
-class GetOwnedResourceQueryHandler {
-  +Handle(request: GetOwnedResourceQuery, cancellation: CancellationToken): Task<Result>
-}
-GetOwnedResourceQueryHandler ..> GetOwnedResourceQuery : handles
-GetOwnedResourceQueryHandler --> ApplicationSession : reads / applies
-GetOwnedResourceQueryHandler ..> ILibraryStore : persists / queries
-interface IIdentityProvider {
-  +ValidateCallback(callback: IdentityCallback): Task<ValidatedIdentity>
-}
-CompleteSignInCommandHandler ..> IIdentityProvider : uses
-interface ISessionStore {
-  +Read(sessionHash: string): Task<ApplicationSession>
-  +Revoke(sessionHash: string): Task
-}
-CompleteSignInCommandHandler ..> ISessionStore : uses
-interface ISessionService {
-  +state: Signal<FeatureState>
-}
-class SessionService {
-  -http: HttpClient
-  +state: Signal<FeatureState>
-}
-SessionService ..|> ISessionService
-class SessionStatus {
-  -service: ISessionService
-}
-SessionStatus ..> ISessionService : inject token
+class SignInCommandHandler
+class CreateUserCommandHandler
+class ResetPasswordCommandHandler
+interface IUserStore
+interface IPasswordService
+interface IJwtService
+interface ISessionStore
+SignInCommandHandler ..> IUserStore
+SignInCommandHandler ..> IPasswordService
+SignInCommandHandler ..> IJwtService
+SignInCommandHandler ..> ISessionStore
+CreateUserCommandHandler ..> IUserStore
+CreateUserCommandHandler ..> IPasswordService
+ResetPasswordCommandHandler ..> IUserStore
+ResetPasswordCommandHandler ..> IPasswordService
+IUserStore ..> User
+ISessionStore ..> ApplicationSession
+ApplicationSession --> User : subject and password version
 @enduml

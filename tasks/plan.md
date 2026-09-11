@@ -8,7 +8,7 @@ and AGENTS.md. Existing mockups are visual seeds, not behavioral specifications.
 - .NET 10, MediatR 12.5.0, Angular 22, Node 24.18.0; lock dependencies.
 - PostgreSQL, EF Core/Npgsql, pgvector; transactional outbox, sessions, quotas,
   operation keys, revisions, and owned relationships.
-- Local Docker Compose; Keycloak OIDC; secure opaque application sessions.
+- Local Docker Compose; administrator-provisioned database accounts; Loupe-issued JWTs in secure HttpOnly cookies with database-backed revocation.
 - Private mounted media, NetVips/libheif; authorized image delivery.
 - Backend image acceptance and deployment use Linux system libvips/libheif with
   HEVC support; NetVips.Native's prebuilt runtime omits that codec. The acceptance

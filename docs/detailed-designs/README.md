@@ -18,7 +18,13 @@ Live embeddings execute inside the trusted deployment through `LocalEmbeddingPro
 
 The mockup token prefix is `--lp-`. Its token file is a seed, not an independent design-system deliverable. `design-system/` becomes the authoritative token source with its own package, tests, build, and deployment, as directed by `AGENTS.md`. Frontend styles mirror and read these tokens. The mockup breakpoints are illustrative; the L2 viewport matrix and the 768-pixel comparison rule take precedence. The [independent reference design](design-system/publish-visual-reference/README.md) covers L2-051 and L2-052.
 
-**Shared request contracts.** Server context supplies owner identity using configured OpenID Connect authentication; no request body can select another owner. Provisioned users, sign-in, sign-out, expiry, and private libraries are the stated baseline. The [session design](security/access-private-library/README.md) uses server-held sessions and opaque Secure/HttpOnly cookies, with 30-minute idle and 12-hour absolute expiry. Identity-provider deployment values remain `<TO SUPPLY>`. Owned queries exclude deleted rows and return the same 404 for absent and foreign identifiers. Image reads authorize the owning record before resolving its object key.
+**Shared request contracts.** Server context supplies owner identity from Loupe-issued
+JWTs backed by database sessions; request bodies cannot choose an owner. Accounts
+are provisioned through the local Admin CLI. The [session design](security/access-private-library/README.md)
+preserves Secure/HttpOnly cookies, immediate revocation, 30-minute idle expiry and
+12-hour absolute expiry. Deployment supplies a shared signing secret. Owned queries
+exclude deleted rows and return the same 404 for absent and foreign identifiers.
+Image reads authorize the owning record before resolving its object key.
 
 Application validators trim input, normalize line endings to LF, and count Unicode scalar values. Titles, names, and attribution allow 1–200; board names 1–80; tags 1–50; genre 1–100; description/summary 0–4,000; intent and requested feedback 0–2,000 each; notes 0–10,000; query 0–500; URLs 1–2,048. Optional emptiness becomes absence. Active tags are capped at 50. Tag and board uniqueness use NFC and invariant case-insensitive comparison with display spelling retained. Plain text is rendered as text rather than HTML.
 
@@ -80,7 +86,7 @@ The following deployment and release inputs remain `<TO SUPPLY>`. They are imple
 | Input | Design boundary |
 | --- | --- |
 | Relational/vector/image storage engines, migrations, and encryption key management | Application ports preserve transaction, ownership, revision, cleanup, and performance contracts |
-| OIDC provider and environment callback values | Server-side validated login and opaque cookie session design |
+| JWT signing secret and administrator account provisioning | Local passwords, signed cookie sessions and database revocation |
 | AI/embedding providers, models, and external retention configuration | Real provider capability adapters and recorded real-provider checks |
 | Licensed evaluation assets, frozen semantic corpus, relevance labels, and named reviewers | Fixed numeric release quality gates; no unexecuted check is reported as passing |
 | Approved token values, visual baselines, exact browser/package versions, and deployment commands | Independent design-system implementation and reproducible release manifest |

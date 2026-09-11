@@ -32,7 +32,8 @@ public sealed class CritiqueAnalysisImageTests(PostgreSqlFixture database) : ICl
         });
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
         { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider };
-        using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        var subject = Guid.NewGuid().ToString();
+        using var client = await factory.CreateAuthenticatedClientAsync(subject);
         using var image = Image.Black(2400, 1200, bands: 3);
         using var upload = new MultipartFormDataContent();
         var part = new ByteArrayContent(image.PngsaveBuffer());
@@ -55,6 +56,7 @@ public sealed class CritiqueAnalysisImageTests(PostgreSqlFixture database) : ICl
             await migrator.MigrateAsync("20260908005942_AnalysisScheduling");
             await store.Database.ExecuteSqlInterpolatedAsync($"UPDATE background_operations SET \"InputJson\" = \"InputJson\" - 'PreviewKey' WHERE \"ResourceId\" = {id}");
             await migrator.MigrateAsync();
+            await factory.ReauthenticateAsync(client, subject);
         }
         await using var scope = factory.Services.CreateAsyncScope();
         Assert.True(await scope.ServiceProvider.GetRequiredService<ISender>().Send(new RunCritiqueCommand()));

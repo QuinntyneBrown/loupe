@@ -1,13 +1,11 @@
-import { inject, Injectable, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { ISessionService, SessionResult } from 'api';
+import { Injectable, signal } from '@angular/core';
+import { ISessionService, SessionResult, SignInCredentials, ServiceError } from 'api';
 
 @Injectable()
 export class MockSessionService implements ISessionService {
   async getRequestToken(): Promise<string> {
     return 'fixture-only-request-token';
   }
-  private readonly router = inject(Router);
   readonly current = signal<SessionResult | null>(null);
   async load(): Promise<SessionResult | null> {
     const fixture = (window as Window & { loupeFixture?: { sessionUnavailable?: boolean } })
@@ -21,8 +19,24 @@ export class MockSessionService implements ISessionService {
   async signOut(): Promise<void> {
     this.current.set(null);
   }
-  signIn(returnUrl: string): void {
-    this.current.set({ subject: 'fixture-owner', name: 'Morgan' });
-    void this.router.navigateByUrl(returnUrl);
+  async signIn(credentials: SignInCredentials): Promise<SessionResult> {
+    const fixture = (
+      window as Window & { loupeFixture?: { signInUnavailable?: boolean; signInDelayMs?: number } }
+    ).loupeFixture;
+    if (fixture?.signInDelayMs)
+      await new Promise((resolve) => setTimeout(resolve, fixture.signInDelayMs));
+    if (fixture?.signInUnavailable) {
+      fixture.signInUnavailable = false;
+      throw new ServiceError('sign_in_unavailable');
+    }
+    if (
+      credentials.email !== 'photographer@example.com' ||
+      credentials.password !== 'local acceptance password'
+    ) {
+      throw new ServiceError('invalid_credentials');
+    }
+    const session = { subject: 'fixture-owner', name: 'Morgan' };
+    this.current.set(session);
+    return session;
   }
 }

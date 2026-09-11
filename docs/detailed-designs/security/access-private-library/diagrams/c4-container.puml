@@ -1,16 +1,18 @@
 @startuml
 !include <C4/C4_Container>
 LAYOUT_WITH_LEGEND()
-title Container - Sign in and access only the owned library
-Person(owner, "Library owner", "Uses this capability")
+title Local account containers
+Person(owner, "Photographer")
+Person(operator, "Administrator")
 System_Boundary(loupe, "Loupe") {
-Container(spa, "Loupe web", "Angular", "SignInPage")
-Container(api, "Loupe API", "ASP.NET Core", "SessionsController")
-ContainerDb(db, "Library store", "Relational storage; engine TO SUPPLY", "Owned records, versions, and durable work")
+Container(web, "Web client", "Angular", "Email/password form and private library")
+Container(api, "API", "ASP.NET Core", "Issues and validates JWT sessions")
+Container(admin, "Admin CLI", ".NET", "Create user and reset password")
+ContainerDb(db, "Library database", "PostgreSQL", "Users, password hashes, sessions, owned content")
 }
-Rel(owner, spa, "Uses", "HTTPS")
-Rel(spa, api, "Calls via interface-bound HTTP adapter", "JSON or multipart / HTTPS")
-Rel(api, db, "Reads or commits owned state", "Infrastructure adapter")
-System_Ext(external, "Configured external services", "Providers or permitted source content")
-Rel(api, external, "Calls bounded adapters", "HTTPS")
+Rel(owner, web, "Uses", "HTTPS")
+Rel(operator, admin, "Runs with hidden password input")
+Rel(web, api, "JSON, HttpOnly cookie, antiforgery", "HTTPS")
+Rel(api, db, "Authenticates and accesses owned data", "EF Core")
+Rel(admin, db, "Provisions accounts and revokes sessions", "EF Core")
 @enduml

@@ -9,7 +9,7 @@ namespace Loupe.Api.Authentication;
 
 public sealed class SessionAuthenticationHandler(IOptionsMonitor<SessionAuthenticationOptions> options,
     ILoggerFactory logger, UrlEncoder encoder, ISender sender)
-    : SignInAuthenticationHandler<SessionAuthenticationOptions>(options, logger, encoder)
+    : AuthenticationHandler<SessionAuthenticationOptions>(options, logger, encoder), IAuthenticationSignOutHandler
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
@@ -21,15 +21,7 @@ public sealed class SessionAuthenticationHandler(IOptionsMonitor<SessionAuthenti
         return AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme.Name));
     }
 
-    protected override async Task HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties? properties)
-    {
-        var subject = user.FindFirst("sub") ?? throw new AuthenticationFailureException("Missing subject.");
-        var token = await sender.Send(new CompleteSignInCommand(subject.Issuer, subject.Value,
-            user.FindFirst("name")?.Value ?? "Photographer", Request.Cookies[Options.CookieName]), Context.RequestAborted);
-        Response.Cookies.Append(Options.CookieName, token, CookieOptions());
-    }
-
-    protected override async Task HandleSignOutAsync(AuthenticationProperties? properties)
+    public async Task SignOutAsync(AuthenticationProperties? properties)
     {
         await sender.Send(new RevokeSessionCommand(Request.Cookies[Options.CookieName]), Context.RequestAborted);
         Response.Cookies.Delete(Options.CookieName, CookieOptions());
@@ -42,7 +34,7 @@ public sealed class SessionAuthenticationHandler(IOptionsMonitor<SessionAuthenti
         return Task.CompletedTask;
     }
 
-    private static CookieOptions CookieOptions() => new()
+    internal static CookieOptions CookieOptions() => new()
     {
         Path = "/",
         HttpOnly = true,

@@ -71,13 +71,15 @@ public sealed class CurrentReferenceImportTests(PostgreSqlFixture database) : IC
     [Fact]
     public async Task L2_029_4_Existing_admission_remains_discoverable_after_status_schema_upgrade()
     {
-        await using var factory = Factory(); using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString()); var id = await SaveAsync(client);
+        var subject = Guid.NewGuid().ToString();
+        await using var factory = Factory(); using var client = await factory.CreateAuthenticatedClientAsync(subject); var id = await SaveAsync(client);
         using var admitted = await SubmitAsync(client, id); Assert.Equal(HttpStatusCode.Accepted, admitted.StatusCode);
         await using (var scope = factory.Services.CreateAsyncScope())
         {
             var migrator = scope.ServiceProvider.GetRequiredService<LibraryDbContext>().GetService<IMigrator>();
             await migrator.MigrateAsync("20260908061754_ReferenceSourceLookup"); await migrator.MigrateAsync();
         }
+        await factory.ReauthenticateAsync(client, subject);
         Assert.Equal(await admitted.Content.ReadAsStringAsync(), await client.GetStringAsync(Location(id)));
     }
     private static string Location(Guid id) => $"/api/references/{id}/imports/operation";
