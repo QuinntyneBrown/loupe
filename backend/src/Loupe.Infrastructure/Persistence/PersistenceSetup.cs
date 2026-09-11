@@ -1,5 +1,6 @@
 using Loupe.Application.ReferenceImports;
 using Loupe.Application.ReferenceAnalysis;
+using Loupe.Application.Photographers;
 using Loupe.Application.Boards;
 using Loupe.Infrastructure.ReferenceImports;
 using Loupe.Application.Sessions;
@@ -27,6 +28,8 @@ public static class PersistenceSetup
         services.AddScoped<ISessionStore, SessionStore>();
         services.AddScoped<IPhotographStore, PhotographStore>();
         services.AddScoped<IReferenceStore, ReferenceStore>();
+        services.AddScoped<IPhotographerStore, PhotographerStore>();
+        services.AddSingleton<IPortfolioUrlPolicy, PortfolioUrlPolicy>();
         services.AddScoped<IReferenceImageStore, ReferenceImageStore>();
         services.AddScoped<IReferenceTextStore, ReferenceTextStore>();
         services.AddScoped<IReferenceAnalysisStore, ReferenceAnalysisStore>();

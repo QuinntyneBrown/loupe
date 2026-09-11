@@ -1,0 +1,22 @@
+using Loupe.Api.Photographers;
+using Loupe.Application.Photographers;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Loupe.Api.Controllers;
+
+[ApiController]
+[Authorize]
+[Route("api/photographers")]
+public sealed class PhotographersController(ISender sender) : ControllerBase
+{
+    [HttpPost]
+    public async Task<ActionResult<SavePhotographerResult>> Save(SavePhotographerRequest request, [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new SavePhotographerCommand(request.Name, request.PortfolioUrl, request.Summary, request.Notes, request.Tags, operationKey), cancellationToken);
+        return result.AlreadySaved ? Ok(result) : Created($"/api/photographers/{result.Photographer.Id}", result);
+    }
+    [HttpGet("{id:guid}")]
+    public Task<PhotographerResult> Get(Guid id, CancellationToken cancellationToken) => sender.Send(new GetPhotographerQuery(id), cancellationToken);
+}

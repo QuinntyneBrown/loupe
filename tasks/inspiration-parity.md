@@ -314,3 +314,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both new workflows failed on missing active-tag edit controls.
 - GREEN: 15 tag/suggestion/text Chromium cases pass. Renaming and optional categorization preserve unchanged tags' provenance. Failed and stale edits retain the draft and require explicit latest-tag review before retry. The saved tag status uses an accessible success token; the edited-tag page passes Axe.
 
+
+### Photographer bookmark foundation
+- RED: eight save/read acceptance cases failed on absent endpoints.
+- GREEN: 26 bookmark/reference URL/tag API cases pass. Private manual bookmarks persist across restart, validate metadata and public URL syntax, and deduplicate normalized URLs under concurrent saves without fetching the portfolio.
+

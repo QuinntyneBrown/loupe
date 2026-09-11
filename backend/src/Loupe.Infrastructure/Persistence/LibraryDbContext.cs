@@ -5,12 +5,14 @@ using Loupe.Domain.Deletions;
 using Loupe.Domain.References;
 using Microsoft.EntityFrameworkCore;
 using Loupe.Domain.Boards;
+using Loupe.Domain.Photographers;
 
 namespace Loupe.Infrastructure.Persistence;
 
 public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options) : DbContext(options)
 {
     public DbSet<Loupe.Domain.Users.User> Users => Set<Loupe.Domain.Users.User>();
+    public DbSet<Photographer> Photographers => Set<Photographer>();
     public DbSet<Board> Boards => Set<Board>();
     public DbSet<BoardReference> BoardReferences => Set<BoardReference>();
     public DbSet<ApplicationSession> Sessions => Set<ApplicationSession>();
@@ -27,6 +29,16 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Loupe.Domain.Users.User>().HasIndex(u => u.NormalizedEmail).IsUnique();
         modelBuilder.Entity<Loupe.Domain.Users.User>().Property(u => u.NormalizedEmail).HasMaxLength(254);
         modelBuilder.Entity<Loupe.Domain.Users.User>().Property(u => u.PasswordVersion).HasDefaultValue("");
+        modelBuilder.Entity<Photographer>().ToTable("photographers").HasKey(item => item.Id);
+        modelBuilder.Entity<Photographer>().HasAlternateKey(item => new { item.Id, item.OwnerId });
+        modelBuilder.Entity<Photographer>().Property(item => item.Revision).HasDefaultValue(1L).IsConcurrencyToken();
+        modelBuilder.Entity<Photographer>().HasIndex(item => new { item.OwnerId, item.CreatedAt, item.Id });
+        modelBuilder.Entity<Photographer>().Property<string>("PortfolioHash").HasMaxLength(32).HasComputedColumnSql("md5(loupe_normalize_source(\"PortfolioUrl\"))", stored: true);
+        modelBuilder.Entity<Photographer>().HasIndex("OwnerId", "PortfolioHash");
+        modelBuilder.Entity<PhotographerTag>().ToTable("photographer_tags").HasKey(tag => new { tag.PhotographerId, tag.NormalizedName });
+        modelBuilder.Entity<PhotographerTag>().HasIndex(tag => new { tag.OwnerId, tag.NormalizedName });
+        modelBuilder.Entity<PhotographerTag>().HasOne<Photographer>().WithMany(item => item.Tags)
+            .HasForeignKey(tag => new { tag.PhotographerId, tag.OwnerId }).HasPrincipalKey(item => new { item.Id, item.OwnerId }).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ReferenceDraft>().ToTable("reference_drafts").HasKey(draft => draft.Id);
         modelBuilder.Entity<ReferenceDraft>().HasIndex(draft => new { draft.OwnerId, draft.ExpiresAt });
         modelBuilder.Entity<ReferenceDraft>().Property(draft => draft.Revision).IsConcurrencyToken();
