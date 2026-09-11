@@ -44,7 +44,7 @@ public sealed class BoardStore(LibraryDbContext database) : IBoardStore
     public async Task<Reference> SetMembershipsAsync(string ownerId, Guid referenceId, long revision, Guid[] boardIds, CancellationToken cancellationToken)
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
-        var reference = await database.References.Include(item => item.Boards)
+        var reference = await database.References.Include(item => item.Boards).Include(item => item.Tags)
             .SingleOrDefaultAsync(item => item.Id == referenceId && item.OwnerId == ownerId, cancellationToken)
             ?? throw new ResourceNotFoundException();
         if (reference.Revision != revision) throw new RevisionConflictException();

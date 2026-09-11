@@ -26,6 +26,10 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Loupe.Domain.Users.User>().HasIndex(u => u.NormalizedEmail).IsUnique();
         modelBuilder.Entity<Loupe.Domain.Users.User>().Property(u => u.NormalizedEmail).HasMaxLength(254);
         modelBuilder.Entity<Loupe.Domain.Users.User>().Property(u => u.PasswordVersion).HasDefaultValue("");
+        modelBuilder.Entity<ReferenceTag>().ToTable("reference_tags").HasKey(tag => new { tag.ReferenceId, tag.NormalizedName });
+        modelBuilder.Entity<ReferenceTag>().HasIndex(tag => new { tag.OwnerId, tag.NormalizedName });
+        modelBuilder.Entity<ReferenceTag>().HasOne<Reference>().WithMany(reference => reference.Tags)
+            .HasForeignKey(tag => new { tag.ReferenceId, tag.OwnerId }).HasPrincipalKey(reference => new { reference.Id, reference.OwnerId }).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Board>().ToTable("boards").HasKey(board => board.Id);
         modelBuilder.Entity<Board>().HasAlternateKey(board => new { board.Id, board.OwnerId });
         modelBuilder.Entity<Board>().HasIndex(board => new { board.OwnerId, board.NormalizedName }).IsUnique();

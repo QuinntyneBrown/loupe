@@ -14,6 +14,9 @@ namespace Loupe.Api.Controllers;
 [Route("api/references")]
 public sealed class ReferencesController(ISender sender) : ControllerBase
 {
+    [HttpPut("{id:guid}/tags")]
+    public Task<ReferenceResult> SetTags(Guid id, SetReferenceTagsRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new SetReferenceTagsCommand(id, request.Revision, request.Tags), cancellationToken);
     [HttpPut("{id:guid}/boards")]
     public Task<ReferenceResult> SetBoards(Guid id, SetReferenceBoardsRequest request, CancellationToken cancellationToken) =>
         sender.Send(new SetReferenceBoardsCommand(id, request.Revision, request.BoardIds), cancellationToken);

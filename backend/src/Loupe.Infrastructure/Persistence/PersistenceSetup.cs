@@ -26,6 +26,7 @@ public static class PersistenceSetup
         services.AddScoped<ISessionStore, SessionStore>();
         services.AddScoped<IPhotographStore, PhotographStore>();
         services.AddScoped<IReferenceStore, ReferenceStore>();
+        services.AddScoped<IReferenceTagStore, ReferenceTagStore>();
         services.AddScoped<IBoardStore, BoardStore>();
         services.AddScoped<IReferenceImportStore, ReferenceImportStore>();
         services.AddSingleton<IReferenceImportConfiguration, ReferenceImportConfiguration>();

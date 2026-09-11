@@ -17,7 +17,7 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
         var existing = await database.References.FromSqlInterpolated($"""
             SELECT * FROM "references" WHERE "OwnerId" = {reference.OwnerId} AND "SourceHash" = {source.Hash}
               AND loupe_normalize_source("SourceUrl") = {source.NormalizedSource}
-            """).Include(item => item.Boards).OrderBy(item => item.CreatedAt).ThenBy(item => item.Id).FirstOrDefaultAsync(cancellationToken);
+            """).Include(item => item.Boards).Include(item => item.Tags).OrderBy(item => item.CreatedAt).ThenBy(item => item.Id).FirstOrDefaultAsync(cancellationToken);
         if (existing is not null) return existing;
         database.References.Add(reference);
         await database.SaveChangesAsync(cancellationToken);
@@ -41,7 +41,7 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         await LockSourceAsync(ownerId, metadata.SourceUrl, cancellationToken);
-        var reference = await database.References.Include(item => item.Boards).SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken)
+        var reference = await database.References.Include(item => item.Boards).Include(item => item.Tags).SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken)
             ?? throw new ResourceNotFoundException();
         if (reference.Revision != revision) throw new RevisionConflictException();
         reference.Title = metadata.Title;
@@ -78,5 +78,5 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
         await database.SaveChangesAsync(cancellationToken);
     }
     public Task<Reference?> FindOwnedAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>
-        database.References.AsNoTracking().Include(item => item.Boards).SingleOrDefaultAsync(reference => reference.Id == id && reference.OwnerId == ownerId, cancellationToken);
+        database.References.AsNoTracking().Include(item => item.Boards).Include(item => item.Tags).SingleOrDefaultAsync(reference => reference.Id == id && reference.OwnerId == ownerId, cancellationToken);
 }

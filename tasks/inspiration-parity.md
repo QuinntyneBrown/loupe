@@ -88,3 +88,11 @@ be established without printing credentials. Live quality checks are mandatory.
   columns and two mobile columns render without horizontal page overflow.
 - Remaining visual work includes tag-row spacing, the unified save control, and
   the shared shell. These screenshots are intermediate, not parity approval.
+
+### Active manual tags API
+- Given an owned reference, valid manual tag changes normalize NFC/case identity,
+  preserve notes/media/boards, record manual provenance, and persist on reread.
+  Invalid names/categories/limits and stale revisions must leave it unchanged.
+- RED: both API scenarios failed on the missing tags endpoint (404).
+- GREEN: 27 tag, board-membership, list and metadata-update integration cases passed.
+- Added an additive tag migration with owner-matched cascading foreign keys.
