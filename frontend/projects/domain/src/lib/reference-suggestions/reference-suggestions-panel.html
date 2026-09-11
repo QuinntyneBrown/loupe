@@ -98,7 +98,7 @@
           class="lp-textarea"
           rows="3"
           [value]="description()"
-          [disabled]="busy() || !!decision()"
+          [disabled]="busy() || !!decision() || !!editingTag()"
           (input)="description.set($any($event.target).value)"
           [attr.aria-invalid]="descriptionInvalid()"
           aria-describedby="suggested-description-hint"
@@ -113,7 +113,7 @@
           <button
             type="button"
             class="lp-button lp-button--secondary lp-button--sm"
-            [disabled]="blocked() || descriptionInvalid()"
+            [disabled]="blocked() || !!editingTag() || descriptionInvalid()"
             (click)="review('description', 'accept')"
           >
             Accept description
@@ -121,7 +121,7 @@
           <button
             type="button"
             class="lp-button lp-button--ghost lp-button--sm"
-            [disabled]="blocked()"
+            [disabled]="blocked() || !!editingTag()"
             (click)="review('description', 'dismiss')"
           >
             Dismiss description
@@ -283,7 +283,7 @@
         <button
           type="button"
           class="lp-button lp-button--ghost lp-button--sm"
-          [disabled]="busy() || metadataDirty()"
+          [disabled]="dirty() || metadataDirty()"
           (click)="undo()"
         >
           Undo

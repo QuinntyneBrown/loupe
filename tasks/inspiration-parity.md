@@ -286,3 +286,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - GREEN: 19 suggestions/text/tags/replacement/deletion Chromium cases pass. Tag names and categories edit before acceptance, failed drafts remain visible, and success records edited-AI provenance and restores heading focus.
 - Axe/overflow pass at 1440, 768 and 375px. Desktop suggestions and mobile tag editor screenshots inspected. Protection against overlapping review actions follows.
 
+
+### Overlapping review protection
+- RED: Accept description stayed enabled during a tag draft.
+- GREEN: all 9 suggestion Chromium cases pass. An open tag draft disables description/bulk review and Undo; cancel restores those actions without losing previously reviewed metadata.
+

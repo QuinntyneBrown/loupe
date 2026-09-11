@@ -64,3 +64,13 @@ for (const width of [1440, 768, 375]) test(`Suggestion review is accessible at $
   await page.setViewportSize({ width, height: 900 });
   const { detail } = await setup(page); await detail.expectPendingTag('soft light'); await detail.expectSuggestionsAccessible();
 });
+
+test('An open tag draft blocks overlapping review and Undo until it is saved or canceled', async ({ page }) => {
+  const { detail, item } = await setup(page);
+  await detail.reviewSuggestions('Accept tag quiet');
+  await detail.editSuggestedTag('soft light', 'My draft', 'lighting');
+  await detail.expectSuggestionActionDisabled('Accept description'); await detail.expectSuggestionActionDisabled('Dismiss description');
+  await detail.expectSuggestionActionDisabled('Accept all'); await detail.expectSuggestionActionDisabled('Dismiss all'); await detail.expectSuggestionActionDisabled('Undo');
+  await detail.reviewSuggestions('Cancel tag edit'); await detail.expectSuggestionActionDisabled('Undo', false);
+  await detail.undoSuggestions(); await detail.expectPendingTag('quiet'); expect(item.tags).toEqual([]);
+});

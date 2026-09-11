@@ -11,6 +11,7 @@ export class ReferenceDetailPage {
   async expectPendingTag(name, visible = true) { await expect(this.suggestions().getByRole('button', { name: 'Accept tag ' + name, exact: true })).toHaveCount(visible ? 1 : 0); }
   async editSuggestedTag(name, value, category) { await this.reviewSuggestions('Edit tag ' + name); await this.suggestions().getByLabel('Suggested tag', { exact: true }).fill(value); await this.suggestions().getByLabel('Suggested category', { exact: true }).selectOption(category); }
   async expectSuggestedTagEditor(value) { await expect(this.suggestions().getByLabel('Suggested tag', { exact: true })).toHaveValue(value); }
+  async expectSuggestionActionDisabled(name, disabled = true) { const button = this.suggestions().getByRole('button', { name, exact: true }); if (disabled) await expect(button).toBeDisabled(); else await expect(button).toBeEnabled(); }
   async expectSuggestionsAccessible() { expect((await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]); expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true); }
   constructor(page) { this.page = page; }
   textEditor(field) { return this.page.getByRole('region', { name: field === 'description' ? 'Description' : 'Your notes', exact: true }); }

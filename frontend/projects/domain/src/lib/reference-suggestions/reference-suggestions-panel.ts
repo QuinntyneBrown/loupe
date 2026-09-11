@@ -305,7 +305,7 @@ export class ReferenceSuggestionsPanel {
   }
   async undo(): Promise<void> {
     const revision = this.undoRevision();
-    if (!revision || this.busy() || this.metadataDirty()) return;
+    if (!revision || this.dirty() || this.metadataDirty()) return;
     const generation = this.generation;
     this.busy.set(true);
     this.error.set('');
