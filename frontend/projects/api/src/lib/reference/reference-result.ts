@@ -9,6 +9,8 @@ export interface ReferenceSummary {
   attribution: string | null;
 }
 export interface ReferenceResult extends ReferenceSummary {
+  description: string | null;
+  descriptionProvenance: 'manual' | 'ai-accepted' | null;
   tags: ReferenceTag[];
   boardIds: string[];
   notes: string | null;

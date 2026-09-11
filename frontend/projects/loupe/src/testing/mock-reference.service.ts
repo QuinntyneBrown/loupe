@@ -6,6 +6,14 @@ import { ReferenceTag, ReferenceTagFacet } from 'api';
 
 @Injectable()
 export class MockReferenceService implements IReferenceService {
+  updateText(
+    id: string,
+    revision: number,
+    field: 'description' | 'notes',
+    text: string,
+  ): Promise<ReferenceResult> {
+    return this.call('updateText', { id, revision, field, text });
+  }
   async replaceImage(
     id: string,
     revision: number,

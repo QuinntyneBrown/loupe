@@ -2,6 +2,7 @@ import { ReferenceImportPanel } from '../reference-import/reference-import-panel
 import { ReferenceMetadataEditor } from '../reference-metadata/reference-metadata-editor';
 import { ReferenceTags } from '../reference-tags/reference-tags';
 import { ReferenceBoards } from '../reference-boards/reference-boards';
+import { ReferenceTextEditor } from '../reference-text/reference-text-editor';
 import { computed, output } from '@angular/core';
 import {
   afterNextRender,
@@ -13,6 +14,7 @@ import {
   input,
   signal,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { REFERENCE_SERVICE, ReferenceResult, ServiceError } from 'api';
@@ -25,6 +27,7 @@ import { REFERENCE_SERVICE, ReferenceResult, ServiceError } from 'api';
     ReferenceImportPanel,
     ReferenceTags,
     ReferenceBoards,
+    ReferenceTextEditor,
   ],
   templateUrl: './reference-detail-panel.html',
   styleUrl: './reference-detail-panel.css',
@@ -52,10 +55,24 @@ export class ReferenceDetailPanel {
   readonly discardRequested = output<() => void>();
   private readonly editor = viewChild(ReferenceMetadataEditor);
   private readonly tags = viewChild(ReferenceTags);
+  private readonly texts = viewChildren(ReferenceTextEditor);
   readonly dirty = computed(
-    () => !!(this.editor()?.dirty() || this.editor()?.busy() || this.tags()?.dirty()),
+    () =>
+      !!(
+        this.editor()?.dirty() ||
+        this.editor()?.busy() ||
+        this.tags()?.dirty() ||
+        this.texts().some((editor) => editor.dirty() || editor.busy())
+      ),
   );
-  readonly saving = computed(() => !!(this.editor()?.saving() || this.tags()?.busy()));
+  readonly saving = computed(
+    () =>
+      !!(
+        this.editor()?.saving() ||
+        this.tags()?.busy() ||
+        this.texts().some((editor) => editor.busy())
+      ),
+  );
   readonly id = input.required<string>();
   private readonly service = inject(REFERENCE_SERVICE);
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');

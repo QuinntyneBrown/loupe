@@ -4,6 +4,7 @@ export class ReferenceLibrary {
     this.items = Array.from({ length: count }, (_, index) => ({
       id: `10000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
       title: `Reference ${String(index + 1).padStart(2, '0')}`, createdAt: '2026-09-08T12:00:00Z',
+      description: null, descriptionProvenance: null,
       width: 800, height: 600, imageUrl, previewUrl: imageUrl, revision: 1, boardIds: [], tags: [],
       sourceUrl: 'https://source.example/photo', attribution: 'Supplied photographer', notes: 'Study the separation.\nKeep the source context.',
     }));
@@ -133,6 +134,14 @@ export class ReferenceLibrary {
         item.revision++;
         if(this.lostUpdateResponses>0) {this.lostUpdateResponses--;return {error:'request_failed'};}
         return {data:item};
+      }
+      if (operation === 'updateText') {
+        const item = this.items.find(item => item.id === input.id);
+        if (!item) return { error: 'item_unavailable' };
+        if (item.revision !== input.revision) return { error: 'revision_conflict' };
+        item[input.field] = input.text.replace(/\r\n?/g, '\n').trim() || null;
+        if (input.field === 'description') item.descriptionProvenance = item.description ? 'manual' : null;
+        item.revision++; return { data: item };
       }
       if (operation === 'replaceImage') {
         const item = this.items.find(item => item.id === input.id);

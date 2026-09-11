@@ -2,6 +2,13 @@ import { expect } from '@playwright/test';
 
 export class ReferenceDetailPage {
   constructor(page) { this.page = page; }
+  textEditor(field) { return this.page.getByRole('region', { name: field === 'description' ? 'Description' : 'Your notes', exact: true }); }
+  async editText(field, value) { await this.textEditor(field).getByRole('textbox').fill(value); }
+  async saveText(field) { await this.textEditor(field).getByRole('button', { name: 'Save', exact: true }).click(); }
+  async expectText(field, value) { await expect(this.textEditor(field).getByRole('textbox')).toHaveValue(value); }
+  async expectTextSaved(field) { await expect(this.textEditor(field).getByText('Saved', { exact: true })).toBeVisible(); await expect(this.textEditor(field).getByRole('button', { name: 'Save', exact: true })).toBeDisabled(); }
+  async expectTextError(field, message) { await expect(this.textEditor(field).getByRole('alert')).toHaveText(message); }
+  async reviewText(field) { await this.textEditor(field).getByRole('button', { name: 'Review latest value', exact: true }).click(); }
   async openBoards() { await this.page.getByRole('button', { name: 'Add to boards', exact: true }).click(); }
   async selectPickerBoard(name) { await this.page.getByRole('dialog', { name: 'Add to boards', exact: true }).getByRole('checkbox', { name, exact: true }).check(); }
   async expectBoardLink(name) { await expect(this.page.getByRole('region', { name: 'Boards', exact: true }).getByRole('link', { name, exact: true })).toBeVisible(); }
@@ -73,7 +80,7 @@ export class ReferenceDetailPage {
       const box = await image.boundingBox(); expect(Math.abs(box.width / box.height - item.width / item.height)).toBeLessThan(0.02);
     } else { await expect(main.getByRole('img')).toHaveCount(0); await expect(main.getByText('Link-only reference', { exact: true })).toBeVisible(); }
     await expect(main).toContainText(item.attribution || 'Attribution unknown');
-    await expect(main).toContainText(item.notes || 'No notes saved.');
+    await this.expectText('notes', item.notes || '');
     if (item.sourceUrl) await expect(main.getByRole('link', { name: 'Open source', exact: true })).toHaveAttribute('href', item.sourceUrl);
     else await expect(main).toContainText('Source unknown');
     await expect(main.locator('time')).toHaveAttribute('datetime', item.createdAt);

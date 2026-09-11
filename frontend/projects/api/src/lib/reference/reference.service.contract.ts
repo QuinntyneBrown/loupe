@@ -7,6 +7,12 @@ import { ReferencePage, ReferenceResult } from './reference-result';
 import { ReferenceTag, ReferenceTagFacet } from './reference-tag';
 
 export interface IReferenceService {
+  updateText(
+    id: string,
+    revision: number,
+    field: 'description' | 'notes',
+    text: string,
+  ): Promise<ReferenceResult>;
   replaceImage(
     id: string,
     revision: number,

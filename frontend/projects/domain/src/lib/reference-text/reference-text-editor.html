@@ -1,0 +1,70 @@
+<section class="lp-block" [attr.aria-label]="label()">
+  <div class="lp-block__head">
+    <label class="lp-subheading" [for]="field()">{{ label() }}</label
+    ><span
+      class="save-status"
+      [class.saved]="status() === 'Saved'"
+      [class.failed]="failed()"
+      aria-live="polite"
+      >{{ status() }}</span
+    >
+  </div>
+  <textarea
+    class="lp-textarea"
+    [id]="field()"
+    [name]="field()"
+    [rows]="field() === 'notes' ? 4 : 3"
+    [placeholder]="field() === 'notes' ? 'What drew you to it? What would you try?' : ''"
+    [ngModel]="draft()"
+    (ngModelChange)="draft.set($event)"
+    [disabled]="busy() || reviewing()"
+    [attr.aria-invalid]="invalid()"
+    [attr.aria-describedby]="invalid() ? field() + '-length-error' : null"
+  ></textarea>
+  @if (field() === 'description') {
+    <p class="lp-field__hint">
+      {{
+        reference().descriptionProvenance === 'ai-accepted'
+          ? 'Started from the AI suggestion. Used for search.'
+          : 'Used for search.'
+      }}
+    </p>
+  }
+  @if (invalid()) {
+    <p [id]="field() + '-length-error'" role="alert">
+      Use {{ maximum().toLocaleString('en-US') }} characters or fewer.
+    </p>
+  }
+  @if (error()) {
+    <p role="alert">{{ error() }}</p>
+  }
+  @if (conflict() && !unavailable()) {
+    <button
+      class="lp-button lp-button--secondary lp-button--sm"
+      type="button"
+      [disabled]="reviewing()"
+      (click)="review()"
+    >
+      Review latest value
+    </button>
+  }
+  @if (reviewing()) {
+    <p role="status">Loading latest value…</p>
+  }
+  @if (latest(); as item) {
+    <div class="latest">
+      <h3>Latest saved {{ field() }}</h3>
+      <p>{{ item[field()] || 'Not provided' }}</p>
+    </div>
+  }
+  <div class="foot">
+    <button
+      type="button"
+      class="lp-button lp-button--secondary lp-button--sm"
+      [disabled]="!dirty() || busy() || reviewing() || conflict() || unavailable() || invalid()"
+      (click)="save()"
+    >
+      Save
+    </button>
+  </div>
+</section>

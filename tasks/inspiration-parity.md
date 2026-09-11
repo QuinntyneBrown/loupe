@@ -238,3 +238,8 @@ be established without printing credentials. Live quality checks are mandatory.
 ### Independent description and notes API
 - RED: all 3 text cases failed on absent description/notes endpoints.
 - GREEN: 23 text/metadata/replacement/deletion/tag API cases pass. Description and notes save independently with revision checks, description provenance is manual, clearing remains absent, and the 4,000/10,000 character limits are enforced.
+
+### Inline description and notes editors
+- RED: both Chromium cases failed on the missing inline text fields.
+- GREEN: all 27 text/metadata/image/tag/board-detail cases pass. Independent explicit saves, persistence, clearing, draft retention, latest-value review and unload protection are covered.
+- Notes assertions now read the editable textarea's value instead of the retired read-only paragraph. Both editors use the mock's labeled field, Save footer and status indicator.

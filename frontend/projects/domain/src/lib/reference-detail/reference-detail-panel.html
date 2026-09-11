@@ -88,11 +88,13 @@
         }
         <p class="plain-text">{{ item.attribution || 'Attribution unknown' }}</p>
       </section>
-      <section>
-        <h2 class="lp-kicker">Notes</h2>
-        <p class="plain-text">{{ item.notes || 'No notes saved.' }}</p>
-      </section>
+      <lp-reference-text-editor
+        [reference]="item"
+        field="description"
+        (saved)="reference.set($event)"
+      />
       <lp-reference-tags [reference]="item" (saved)="reference.set($event)" />
+      <lp-reference-text-editor [reference]="item" field="notes" (saved)="reference.set($event)" />
     </div>
   </div>
 }
