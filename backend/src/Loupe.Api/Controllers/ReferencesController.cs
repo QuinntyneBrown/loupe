@@ -1,4 +1,5 @@
 using Loupe.Api.References;
+using Loupe.Application.Deletions;
 using Loupe.Api.Boards;
 using Loupe.Application.Boards;
 using Loupe.Application.Images;
@@ -14,6 +15,9 @@ namespace Loupe.Api.Controllers;
 [Route("api/references")]
 public sealed class ReferencesController(ISender sender) : ControllerBase
 {
+    [HttpDelete("{id:guid}")]
+    public Task<DeletionResult> Delete(Guid id, [FromQuery] long revision, CancellationToken cancellationToken) =>
+        sender.Send(new DeleteReferenceCommand(id, revision), cancellationToken);
     [HttpGet("tags")]
     public Task<IReadOnlyList<ReferenceTagFacet>> Tags(CancellationToken cancellationToken, [FromQuery] Guid? boardId = null) =>
         sender.Send(new ListReferenceTagsQuery(boardId), cancellationToken);

@@ -219,3 +219,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: all 4 Chromium cases failed on the missing More actions control.
 - GREEN: 24 replacement/metadata/tag cases pass. Save is explicit, Cancel writes nothing, unsupported files are rejected, failed saves retain the file, and stale revisions require latest-reference review.
 - Desktop and 375px dialog screenshots were inspected; Axe and overflow checks pass at both sizes. The drop area uses the mock's spacing, type, border and radius tokens.
+
+### Reference deletion API
+- Given an owned reference, deletion removes its tags and board memberships, revokes media access, cancels source work and leaves boards/other references intact. Stale and foreign requests leave it unchanged, and a retry after restart returns its deletion journal entry.
+- RED: all 3 deletion cases returned 405.
+- GREEN: 19 reference deletion/replacement/import/membership cases and 10 existing photograph deletion/cleanup regressions pass.
