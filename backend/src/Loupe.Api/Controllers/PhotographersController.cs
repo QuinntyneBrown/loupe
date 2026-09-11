@@ -19,4 +19,8 @@ public sealed class PhotographersController(ISender sender) : ControllerBase
     }
     [HttpGet("{id:guid}")]
     public Task<PhotographerResult> Get(Guid id, CancellationToken cancellationToken) => sender.Send(new GetPhotographerQuery(id), cancellationToken);
+
+    [HttpPut("{id:guid}")]
+    public Task<PhotographerResult> Update(Guid id, UpdatePhotographerRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new UpdatePhotographerCommand(id, request.Revision, request.Name, request.PortfolioUrl, request.Summary, request.Notes, request.Tags), cancellationToken);
 }

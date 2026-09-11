@@ -319,3 +319,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: eight save/read acceptance cases failed on absent endpoints.
 - GREEN: 26 bookmark/reference URL/tag API cases pass. Private manual bookmarks persist across restart, validate metadata and public URL syntax, and deduplicate normalized URLs under concurrent saves without fetching the portfolio.
 
+
+### Photographer metadata editing
+- RED: both edit workflows failed with MethodNotAllowed.
+- GREEN: all 10 save/edit API cases pass. Revision checks preserve concurrent edits, portfolio URL conflicts leave both records intact, and unchanged tag provenance is retained.
+
