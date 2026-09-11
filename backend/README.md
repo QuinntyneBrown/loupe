@@ -56,7 +56,9 @@ Completed deletion records are pruned after 35 days. Pending cleanup records are
 retained until their files are removed, even if that takes longer. Repeating a
 delete after its record expires returns the normal unavailable response.
 
-Explicit `Ai:Mode=Demo` enables the critique worker with illustrative results.
+Only `Ai:Mode=Live` is supported. Omit the mode to disable AI processing;
+missing credentials return `integration_not_configured`, never sample output.
+`Imports:Mode=Live` independently enables real URL retrieval.
 `Ai:MaxConcurrentCalls` defaults to four and accepts 1–64. Set the same value on
 every API/worker instance in a deployment. Each worker can fill that capacity;
 shared database leases enforce the deployment total and two calls per owner,
@@ -72,3 +74,26 @@ deadline and durable retry policy. HTTP redirects and client request logging are
 disabled. Stored critiques identify their model, prompt version and execution
 mode. Controlled transport tests do not replace the required real-model quality
 evaluation or provider account/data-retention review before deployment.
+
+
+### Retiring historical samples
+
+Stop API/worker processes before applying `20260910000000_ArchiveDemoCritiques`,
+then restart with Live configuration. The migration moves current sample JSON
+into the photograph's private `ArchivedDemoCritiqueJson`, preserves its original
+provenance and historical operation output, clears sample operation pointers,
+and cancels queued/running Demo work and leases. Live critiques are unchanged.
+Photos, briefs, notes, and media remain intact; comparison eligibility uses only
+current critiques. No replacement analysis is automatically submitted. The photo
+screen explains the archive and offers a real request. Deleting a photograph
+also deletes its archive under the normal deletion policy.
+
+The migration's rollback restores an archived sample only if no newer critique
+exists; canceled jobs are not restarted. Back up the database before deployment.
+`ExecutionMode.Demo = 0` remains solely for persisted historical compatibility.
+Test fixtures use injected controlled providers with Live provenance, never a
+production simulation adapter.
+
+Evidence coordinates use normalized positions on the oriented analysis image.
+The strict provider schema requires a nullable region; uncertain or global
+statements use null. Existing critiques without coordinates remain readable.

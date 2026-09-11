@@ -119,6 +119,12 @@
       </section>
     </div>
     <div class="lp-detail__body">
+      @if (item.hasArchivedDemoCritique && !hasCritique()) {
+        <p class="lp-notice" role="status">
+          Your previous sample critique has been archived. Request a critique to analyse this
+          photograph.
+        </p>
+      }
       <lp-photograph-critique
         [id]="item.id"
         [operationId]="completedCritiqueId()"

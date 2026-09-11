@@ -31,7 +31,7 @@ public static class PersistenceSetup
         services.AddScoped<IReferenceImportStore, ReferenceImportStore>();
         services.AddSingleton<IReferenceImportConfiguration, ReferenceImportConfiguration>();
         services.AddOptions<ReferenceImportOptions>().BindConfiguration("Imports")
-            .Validate(options => options.Mode is null or "Demo" or "Live", "Imports:Mode must be Demo or Live when configured.").ValidateOnStart();
+            .Validate(options => options.Mode is null or "Live", "Imports:Mode must be Live when configured; Demo execution has been retired.").ValidateOnStart();
         services.AddSingleton<IDnsResolver, DnsResolver>();
         services.AddSingleton<ISourceConnector, SocketSourceConnector>();
         services.AddScoped<IRestrictedPageFetcher, RestrictedPageFetcher>();
@@ -61,16 +61,13 @@ public static class PersistenceSetup
         services.AddSingleton<ICritiqueConfiguration, CritiqueConfiguration>();
         services.AddScoped<ICritiqueWorkStore, CritiqueWorkStore>();
         services.AddScoped<IOperationLeaseStore, OperationLeaseStore>();
-        services.AddSingleton<DemoCritiqueProvider>();
-        services.AddScoped<OpenAiCritiqueProvider>();
-        services.AddScoped<ICritiqueProvider>(provider => provider.GetRequiredService<IOptions<AiOptions>>().Value.Mode == "Demo"
-            ? provider.GetRequiredService<DemoCritiqueProvider>() : provider.GetRequiredService<OpenAiCritiqueProvider>());
+        services.AddScoped<ICritiqueProvider, OpenAiCritiqueProvider>();
         services.AddHttpClient("openai", client => client.Timeout = Timeout.InfiniteTimeSpan)
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false, UseCookies = false, ConnectTimeout = TimeSpan.FromSeconds(10) })
             .RemoveAllLoggers();
         services.AddOptions<AiOptions>().BindConfiguration("Ai")
             .Validate(options => options.MaxConcurrentCalls is >= 1 and <= 64, "Ai:MaxConcurrentCalls must be between one and 64.")
-            .Validate(options => options.Mode is null or "Demo" or "Live", "Ai:Mode must be Demo or Live when configured.")
+            .Validate(options => options.Mode is null or "Live", "Ai:Mode must be Live when configured; Demo execution has been retired.")
             .Validate(options => !string.IsNullOrWhiteSpace(options.Model), "Ai:Model must name a model.").ValidateOnStart();
         services.AddScoped<IDeletionStore, DeletionStore>();
         services.AddScoped<IDeletedContentCleaner, DeletedContentCleaner>();

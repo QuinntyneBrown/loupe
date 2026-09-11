@@ -21,9 +21,9 @@ public sealed class CritiqueSchedulingTests(PostgreSqlFixture database) : IClass
     public async Task L2_035_4_Workers_share_capacity_and_rotate_eligible_owners(int owners, bool concurrent)
     {
         await using var first = new ApiFactory(database.ConnectionString, database.MediaRoot)
-        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" } };
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" } };
         await using var second = new ApiFactory(database.ConnectionString, database.MediaRoot)
-        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" } };
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" } };
         var photographs = new List<(HttpClient Client, Guid Id)>();
         var clients = new List<HttpClient>();
         try
@@ -48,7 +48,7 @@ public sealed class CritiqueSchedulingTests(PostgreSqlFixture database) : IClass
             async Task<BackgroundOperation?> Claim(int index)
             {
                 await using var scope = (index % 2 == 0 ? first : second).Services.CreateAsyncScope();
-                return await scope.ServiceProvider.GetRequiredService<ICritiqueWorkStore>().ClaimAsync(ExecutionMode.Demo, default);
+                return await scope.ServiceProvider.GetRequiredService<ICritiqueWorkStore>().ClaimAsync(ExecutionMode.Live, default);
             }
 
             BackgroundOperation?[] attempts;

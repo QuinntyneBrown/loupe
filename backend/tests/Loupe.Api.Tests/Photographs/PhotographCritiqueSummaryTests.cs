@@ -72,7 +72,7 @@ public sealed class PhotographCritiqueSummaryTests(PostgreSqlFixture database) :
     }
 
     private ApiFactory CreateFactory(ICritiqueProvider provider) => new(database.ConnectionString, database.MediaRoot)
-    { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" }, CritiqueProvider = provider };
+    { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider };
 
     private static async Task AssertSummaryAsync(HttpClient client, Guid id, bool hasCritique, string? status)
     {

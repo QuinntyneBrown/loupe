@@ -32,7 +32,7 @@ public sealed class CritiqueRenewalTests(PostgreSqlFixture database) : IClassFix
             catch (OperationCanceledException) { canceled.TrySetResult(); throw; }
         });
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
-        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" }, CritiqueProvider = provider, ClockOverride = clock };
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider, ClockOverride = clock };
         using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
         using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/photographs/{id}/critique")
@@ -51,7 +51,7 @@ public sealed class CritiqueRenewalTests(PostgreSqlFixture database) : IClassFix
                 clock.Advance(TimeSpan.FromSeconds(20));
                 await ExpectRenewalAsync(client, admitted.Headers.Location!, clock.GetUtcNow());
                 await using var competitor = factory.Services.CreateAsyncScope();
-                Assert.Null(await competitor.ServiceProvider.GetRequiredService<ICritiqueWorkStore>().ClaimAsync(ExecutionMode.Demo, default));
+                Assert.Null(await competitor.ServiceProvider.GetRequiredService<ICritiqueWorkStore>().ClaimAsync(ExecutionMode.Live, default));
                 if (delete) break;
             }
             if (delete)

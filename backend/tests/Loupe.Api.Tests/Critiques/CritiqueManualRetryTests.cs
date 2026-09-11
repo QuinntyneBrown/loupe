@@ -106,7 +106,7 @@ public sealed class CritiqueManualRetryTests(PostgreSqlFixture database) : IClas
     }
 
     private ApiFactory CreateFactory(ControlledCritiqueProvider provider) => new(database.ConnectionString, database.MediaRoot)
-    { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" }, CritiqueProvider = provider };
+    { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider };
 
     private static async Task RunAsync(ApiFactory factory)
     {

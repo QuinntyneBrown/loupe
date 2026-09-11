@@ -78,8 +78,7 @@ test('loupe demo: the real application against the real backend', async ({ page 
   // 4. Request a critique — real Loupe.Worker claims the lease and completes it.
   await showCaption(page, 'Request an AI critique', 'A real Loupe.Worker claims the operation lease and produces a structured result');
   await detail.requestCritique();
-  await expect(detail.critique().getByRole('heading', { name: 'Strengths', exact: true })).toBeVisible({ timeout: 20_000 });
-  await expect(detail.critique()).toContainText('Demo example', { timeout: 20_000 });
+  await detail.expectRealCritique();
   await page.waitForTimeout(1200);
   await detail.critique().scrollIntoViewIfNeeded();
   await page.waitForTimeout(3200);
@@ -96,7 +95,7 @@ test('loupe demo: the real application against the real backend', async ({ page 
   await upload.viewCompletedPhotograph();
   await detail.expectImage('Harbor at sunrise');
   await detail.requestCritique();
-  await expect(detail.critique().getByRole('heading', { name: 'Strengths', exact: true })).toBeVisible({ timeout: 20_000 });
+  await detail.expectRealCritique();
   await page.waitForTimeout(1800);
 
   // 6. Compare the two attempts side by side.

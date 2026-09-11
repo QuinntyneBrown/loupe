@@ -63,7 +63,7 @@ public sealed class CritiqueTimeoutTests(PostgreSqlFixture database) : IClassFix
                     Assert.Equal("provider_timeout", status.GetProperty("failureCode").GetString());
                     var wait = TimeSpan.FromSeconds(attempt == 1 ? 5 : 30);
                     Assert.InRange(status.GetProperty("nextAttemptAt").GetDateTimeOffset(), clock.GetUtcNow().Add(wait).AddTicks(-9), clock.GetUtcNow().Add(wait));
-                    Assert.Null(await scope.ServiceProvider.GetRequiredService<ICritiqueWorkStore>().ClaimAsync(ExecutionMode.Demo, default));
+                    Assert.Null(await scope.ServiceProvider.GetRequiredService<ICritiqueWorkStore>().ClaimAsync(ExecutionMode.Live, default));
                     clock.Advance(wait);
                 }
                 else Assert.Equal(succeedsOnThird ? "Succeeded" : "Failed", status.GetProperty("status").GetString());
@@ -115,7 +115,7 @@ public sealed class CritiqueTimeoutTests(PostgreSqlFixture database) : IClassFix
     }
 
     private ApiFactory CreateFactory(ControlledCritiqueProvider provider, FakeTimeProvider clock) => new(database.ConnectionString, database.MediaRoot)
-    { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" }, CritiqueProvider = provider, ClockOverride = clock };
+    { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider, ClockOverride = clock };
 
     private static async Task<Uri> AdmitAsync(HttpClient client, Guid id)
     {

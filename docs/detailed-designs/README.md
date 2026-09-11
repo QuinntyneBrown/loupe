@@ -81,7 +81,7 @@ The following deployment and release inputs remain `<TO SUPPLY>`. They are imple
 | --- | --- |
 | Relational/vector/image storage engines, migrations, and encryption key management | Application ports preserve transaction, ownership, revision, cleanup, and performance contracts |
 | OIDC provider and environment callback values | Server-side validated login and opaque cookie session design |
-| AI/embedding providers, models, and external retention configuration | Explicit Demo/Live capability adapters and recorded real-provider checks |
+| AI/embedding providers, models, and external retention configuration | Real provider capability adapters and recorded real-provider checks |
 | Licensed evaluation assets, frozen semantic corpus, relevance labels, and named reviewers | Fixed numeric release quality gates; no unexecuted check is reported as passing |
 | Approved token values, visual baselines, exact browser/package versions, and deployment commands | Independent design-system implementation and reproducible release manifest |
 | Backup, independent deletion ledger, telemetry/alert sink, and quota-store adapters | Cross-instance and restore acceptance budgets remain binding |

@@ -2,7 +2,7 @@
 
 ## Overview
 
-A **release manifest** — recorded versions, configuration assumptions, commands, and actual validation outcomes — makes deployment repeatable. Setup guidance covers the API, worker, Angular application, and independent static design system in both explicit Demo and configured Live modes.
+A **release manifest** — recorded versions, configuration assumptions, commands, and actual validation outcomes — makes deployment repeatable. Setup guidance covers the API, worker, Angular application, and independent static design system with configured Live providers and honest unavailable states.
 
 This is a proposed design for the defined requirements. Existing files are illustrative HTML mockups; the repository contains no corresponding production implementation.
 

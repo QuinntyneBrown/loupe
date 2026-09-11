@@ -8,7 +8,6 @@ public sealed class ReferenceImportConfiguration(IOptions<ReferenceImportOptions
 {
     public ExecutionMode GetMode() => options.Value.Mode switch
     {
-        "Demo" => ExecutionMode.Demo,
         "Live" => ExecutionMode.Live,
         _ => throw new IntegrationNotConfiguredException()
     };

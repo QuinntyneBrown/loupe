@@ -12,7 +12,6 @@ export interface CritiqueEvidence {
 }
 export interface CritiquePresentation {
   generatedAt: string;
-  demo: boolean;
   model: string;
   promptVersion: string;
   strengths: { explanation: string; evidence: CritiqueEvidence[] }[];

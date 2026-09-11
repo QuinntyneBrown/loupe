@@ -104,7 +104,7 @@ public sealed class GetComparisonTests(PostgreSqlFixture database) : IClassFixtu
     }
 
     private ApiFactory CreateFactory() => new(database.ConnectionString, database.MediaRoot)
-    { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" } };
+    { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" } };
 
     private static string Location(Guid first, Guid second) => $"/api/comparisons?firstId={first}&secondId={second}";
 

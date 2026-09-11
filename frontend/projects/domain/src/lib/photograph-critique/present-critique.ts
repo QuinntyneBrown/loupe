@@ -59,7 +59,6 @@ function presentEvidence(statements: EvidenceStatement[]): CritiqueEvidence[] {
 export function presentCritique(item: SavedCritique): CritiquePresentation {
   return {
     generatedAt: item.generatedAt,
-    demo: item.mode === 'Demo',
     model: item.model,
     promptVersion: item.promptVersion,
     strengths: item.content.strengths.map((value) => ({

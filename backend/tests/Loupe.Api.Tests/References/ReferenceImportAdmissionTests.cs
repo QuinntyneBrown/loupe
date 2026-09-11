@@ -10,8 +10,8 @@ namespace Loupe.Api.Tests.References;
 
 public sealed class ReferenceImportAdmissionTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
 {
-    private ApiFactory Factory(string? mode = "Demo") => new(database.ConnectionString, database.MediaRoot)
-    { Settings = new Dictionary<string, string?> { ["Imports:Mode"] = mode, ["Ai:Mode"] = "Demo" } };
+    private ApiFactory Factory(string? mode = "Live", string? apiKey = "fixture-only-key") => new(database.ConnectionString, database.MediaRoot)
+    { Settings = new Dictionary<string, string?> { ["Imports:Mode"] = mode, ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = apiKey } };
 
     [Fact]
     public async Task L2_010_033_Admission_survives_restart_and_status_does_not_disclose_source_or_notes()
@@ -29,7 +29,7 @@ public sealed class ReferenceImportAdmissionTests(PostgreSqlFixture database) : 
             var operation = JsonSerializer.Deserialize<JsonElement>(original);
             Assert.Equal("ReferenceImport", operation.GetProperty("type").GetString());
             Assert.Equal("Queued", operation.GetProperty("status").GetString());
-            Assert.Equal("Demo", operation.GetProperty("mode").GetString());
+            Assert.Equal("Live", operation.GetProperty("mode").GetString());
             Assert.Equal(reference.GetProperty("id").GetGuid(), operation.GetProperty("resourceId").GetGuid());
             Assert.Equal($"/api/operations/{operation.GetProperty("id").GetGuid()}", location);
             Assert.DoesNotContain("source.example", original);
@@ -145,7 +145,7 @@ public sealed class ReferenceImportAdmissionTests(PostgreSqlFixture database) : 
     [InlineData("Live", HttpStatusCode.Accepted)]
     public async Task L2_036_Import_configuration_is_explicit_and_live_fetching_does_not_require_an_AI_key(string? mode, HttpStatusCode expected)
     {
-        await using var factory = Factory(mode); using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        await using var factory = Factory(mode, apiKey: null); using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         var id = (await SaveAsync(client)).GetProperty("id").GetGuid();
         using var response = await SubmitAsync(client, id); Assert.Equal(expected, response.StatusCode);
         using var saved = await client.GetAsync($"/api/references/{id}"); Assert.Equal(HttpStatusCode.OK, saved.StatusCode);

@@ -1,5 +1,5 @@
 // Given explicit Live configuration and an admitted image/brief snapshot, when
-// the Responses boundary replies, then only valid critiques publish; Demo is offline.
+// the Responses boundary replies, then only valid critiques publish.
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -15,10 +15,9 @@ namespace Loupe.Api.Tests.Critiques;
 public sealed class LiveCritiqueTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
 {
     [Theory]
-    [InlineData("Demo", false)]
-    [InlineData("Live", false)]
-    [InlineData("Live", true)]
-    public async Task L2_006_1_008_4_036_1_041_1_Live_uses_only_admitted_analysis_inputs_and_validated_structured_output(string mode, bool malformed)
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task L2_006_1_008_4_036_1_041_1_Live_uses_only_admitted_analysis_inputs_and_validated_structured_output(bool malformed)
     {
         var calls = 0;
         string? submitted = null;
@@ -44,7 +43,7 @@ public sealed class LiveCritiqueTests(PostgreSqlFixture database) : IClassFixtur
         });
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
         {
-            Settings = new Dictionary<string, string?> { ["Ai:Mode"] = mode, ["Ai:ApiKey"] = "fixture-only-openai-key" },
+            Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-openai-key" },
             AiTransport = transport
         };
         using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
@@ -67,34 +66,30 @@ public sealed class LiveCritiqueTests(PostgreSqlFixture database) : IClassFixtur
             Assert.True(await scope.ServiceProvider.GetRequiredService<ISender>().Send(new RunCritiqueCommand()));
         }
         await Run();
-        if (mode == "Demo") Assert.Equal(0, calls);
-        else
-        {
-            Assert.Equal(1, calls);
-            Assert.NotNull(submitted);
-            Assert.DoesNotContain("Private journal", submitted);
-            Assert.DoesNotContain("Later private intent", submitted);
-            Assert.DoesNotContain("fixture-only-openai-key", submitted);
-            using var payload = JsonDocument.Parse(submitted);
-            var root = payload.RootElement;
-            Assert.Equal("gpt-5.4-mini-2026-03-17", root.GetProperty("model").GetString());
-            Assert.False(root.GetProperty("store").GetBoolean());
-            var content = root.GetProperty("input")[0].GetProperty("content");
-            var image = content.EnumerateArray().Single(item => item.GetProperty("type").GetString() == "input_image");
-            Assert.Equal("data:image/jpeg;base64," + Convert.ToBase64String(preview), image.GetProperty("image_url").GetString());
-            Assert.Equal("high", image.GetProperty("detail").GetString());
-            var inputText = content.EnumerateArray().Single(item => item.GetProperty("type").GetString() == "input_text").GetProperty("text").GetString()!;
-            Assert.Contains("Deliberate soft focus", inputText);
-            Assert.Contains("Keep the quiet mood", inputText);
-            Assert.DoesNotContain("Key", inputText);
-            var format = root.GetProperty("text").GetProperty("format");
-            Assert.Equal("json_schema", format.GetProperty("type").GetString());
-            Assert.True(format.GetProperty("strict").GetBoolean());
-            var schema = format.GetProperty("schema");
-            Assert.False(schema.GetProperty("additionalProperties").GetBoolean());
-            Assert.Equal(15, schema.GetProperty("required").GetArrayLength());
-            Assert.True(schema.GetProperty("properties").TryGetProperty("visualHierarchy", out _));
-        }
+        Assert.Equal(1, calls);
+        Assert.NotNull(submitted);
+        Assert.DoesNotContain("Private journal", submitted);
+        Assert.DoesNotContain("Later private intent", submitted);
+        Assert.DoesNotContain("fixture-only-openai-key", submitted);
+        using var payload = JsonDocument.Parse(submitted);
+        var root = payload.RootElement;
+        Assert.Equal("gpt-5.4-mini-2026-03-17", root.GetProperty("model").GetString());
+        Assert.False(root.GetProperty("store").GetBoolean());
+        var content = root.GetProperty("input")[0].GetProperty("content");
+        var image = content.EnumerateArray().Single(item => item.GetProperty("type").GetString() == "input_image");
+        Assert.Equal("data:image/jpeg;base64," + Convert.ToBase64String(preview), image.GetProperty("image_url").GetString());
+        Assert.Equal("high", image.GetProperty("detail").GetString());
+        var inputText = content.EnumerateArray().Single(item => item.GetProperty("type").GetString() == "input_text").GetProperty("text").GetString()!;
+        Assert.Contains("Deliberate soft focus", inputText);
+        Assert.Contains("Keep the quiet mood", inputText);
+        Assert.DoesNotContain("Key", inputText);
+        var format = root.GetProperty("text").GetProperty("format");
+        Assert.Equal("json_schema", format.GetProperty("type").GetString());
+        Assert.True(format.GetProperty("strict").GetBoolean());
+        var schema = format.GetProperty("schema");
+        Assert.False(schema.GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal(15, schema.GetProperty("required").GetArrayLength());
+        Assert.True(schema.GetProperty("properties").TryGetProperty("visualHierarchy", out _));
         if (malformed)
         {
             var waiting = await client.GetFromJsonAsync<JsonElement>(admitted.Headers.Location);
@@ -110,7 +105,7 @@ public sealed class LiveCritiqueTests(PostgreSqlFixture database) : IClassFixtur
         if (!malformed)
         {
             var critique = await result.Content.ReadFromJsonAsync<JsonElement>();
-            Assert.Equal(mode, critique.GetProperty("mode").GetString());
+            Assert.Equal("Live", critique.GetProperty("mode").GetString());
             Assert.Equal("Deliberate soft focus", critique.GetProperty("brief").GetProperty("intent").GetString());
         }
         var photo = await client.GetFromJsonAsync<JsonElement>($"/api/photographs/{id}");

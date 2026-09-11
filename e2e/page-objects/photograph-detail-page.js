@@ -140,6 +140,10 @@ export class PhotographDetailPage {
       })
       .click();
   }
+  async expectRealCritique() {
+    await expect(this.critique().getByRole('heading', { name: 'What works', exact: true })).toBeVisible({ timeout: 180_000 });
+    await expect(this.critique()).toContainText('AI-generated critique');
+  }
   async expectCritique(mode = 'Live') {
     const critique = this.critique();
     await expect(critique.getByRole('heading', { name: 'What works', exact: true })).toBeVisible();
@@ -163,6 +167,13 @@ export class PhotographDetailPage {
     await expect(critique).toContainText('Make deliberate silhouettes');
     await expect(critique).toContainText('Preserve the strong shapes');
     await expect(critique).not.toContainText('Explore quiet morning light');
+  }
+  async expectArchivedSample() {
+    await expect(this.page.getByText('Your previous sample critique has been archived. Request a critique to analyse this photograph.')).toBeVisible();
+    await expect(this.critiqueStatus().getByRole('button', { name: 'Request critique', exact: true })).toBeEnabled();
+    await expect(this.page.getByRole('button', { name: 'Critique ready', exact: true })).toHaveCount(0);
+    await expect(this.page.getByRole('link', { name: 'Compare with a later attempt' })).toHaveCount(0);
+    await expect(this.page.getByText('Demo · illustrative sample', { exact: true })).toHaveCount(0);
   }
   async expectNoCritique() { await expect(this.critique()).toContainText('No critique saved yet.'); }
   async expectCritiqueLoading() { await expect(this.critique().getByRole('status')).toHaveText('Loading critique…'); }

@@ -31,7 +31,7 @@ public sealed class CritiqueAnalysisImageTests(PostgreSqlFixture database) : ICl
             return Task.FromResult(CritiqueResultFixture.Valid());
         });
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
-        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" }, CritiqueProvider = provider };
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider };
         using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         using var image = Image.Black(2400, 1200, bands: 3);
         using var upload = new MultipartFormDataContent();

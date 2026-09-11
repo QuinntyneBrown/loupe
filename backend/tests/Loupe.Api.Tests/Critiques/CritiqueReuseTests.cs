@@ -5,6 +5,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Loupe.Application.Critiques;
 using Loupe.Api.Tests.Photographs;
+using Loupe.Domain.Critiques;
+using Loupe.Domain.Operations;
 using Loupe.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +23,7 @@ public sealed class CritiqueReuseTests(PostgreSqlFixture database) : IClassFixtu
     public async Task L2_035_1_Upgrading_existing_saved_results_preserves_completed_reuse()
     {
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
-        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" } };
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" } };
         using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
         using var original = await SubmitAsync(client, id);
@@ -46,7 +48,7 @@ public sealed class CritiqueReuseTests(PostgreSqlFixture database) : IClassFixtu
     {
         var provider = new ControlledCritiqueProvider((_, _, _) => Task.FromResult(CritiqueResultFixture.Valid()));
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
-        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" }, CritiqueProvider = provider };
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider };
         using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
         await SaveBriefAsync(client, id, "Original private brief");
@@ -73,6 +75,8 @@ public sealed class CritiqueReuseTests(PostgreSqlFixture database) : IClassFixtu
         Assert.Equal(2, provider.Calls);
         await SaveBriefAsync(client, id, "Original private brief");
         using var restored = await SubmitAsync(client, id);
+        Assert.True(restored.StatusCode == HttpStatusCode.Accepted,
+            $"Restored critique request returned {restored.StatusCode}: {await restored.Content.ReadAsStringAsync()}\n{factory.Failure.Exception}");
         Assert.Equal(first.Headers.Location, restored.Headers.Location);
         Assert.Equal(original, await client.GetStringAsync($"/api/photographs/{id}/critique"));
         Assert.Equal(2, provider.Calls);
@@ -116,12 +120,24 @@ public sealed class CritiqueReuseTests(PostgreSqlFixture database) : IClassFixtu
     public async Task L2_035_5_Different_execution_mode_does_not_reuse_demo_output()
     {
         var subject = Guid.NewGuid().ToString();
-        await using var demo = new ApiFactory(database.ConnectionString, database.MediaRoot)
-        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" } };
-        using var client = await demo.CreateAuthenticatedClientAsync(subject);
+        await using var original = new ApiFactory(database.ConnectionString, database.MediaRoot)
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" } };
+        using var client = await original.CreateAuthenticatedClientAsync(subject);
         var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
         using var first = await SubmitAsync(client, id);
-        await RunAsync(demo);
+        await RunAsync(original);
+        // Seed a historical sample without enabling retired product execution.
+        await using (var scope = original.Services.CreateAsyncScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<LibraryDbContext>();
+            var photo = await context.Photographs.SingleAsync(item => item.Id == id);
+            var sample = JsonSerializer.Deserialize<SavedCritique>(photo.CritiqueJson!)! with { Mode = ExecutionMode.Demo };
+            photo.CritiqueJson = JsonSerializer.Serialize(sample);
+            await context.BackgroundOperations.Where(item => item.Id == sample.OperationId).ExecuteUpdateAsync(setters => setters
+                .SetProperty(item => item.Mode, ExecutionMode.Demo)
+                .SetProperty(item => item.OutputJson, photo.CritiqueJson));
+            await context.SaveChangesAsync();
+        }
         await using var live = new ApiFactory(database.ConnectionString, database.MediaRoot)
         { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-no-external-calls" } };
         using var later = await live.CreateAuthenticatedClientAsync(subject);
@@ -131,6 +147,9 @@ public sealed class CritiqueReuseTests(PostgreSqlFixture database) : IClassFixtu
         var operation = await changed.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal("Live", operation.GetProperty("mode").GetString());
         Assert.Equal("Queued", operation.GetProperty("status").GetString());
+        // Cancel this admitted work before another test uses the shared worker queue.
+        using var cleanup = await later.DeleteAsync($"/api/photographs/{id}?revision={await RevisionAsync(later, id)}");
+        cleanup.EnsureSuccessStatusCode();
     }
 
     private static async Task<long> RevisionAsync(HttpClient client, Guid id) =>

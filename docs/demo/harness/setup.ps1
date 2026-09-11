@@ -48,23 +48,19 @@ Start-Sleep -Seconds 3
 docker exec loupe-demo-postgres pg_isready -U loupe -d loupe_demo
 
 Write-Host "== 3. Apply EF Core migrations ==" -ForegroundColor Cyan
-# dotnet-ef needs a startup project referencing Microsoft.EntityFrameworkCore.Design.
-# Loupe.Api deliberately does not carry that package in its committed csproj, so it
-# is added here only for this command and reverted immediately after via git checkout.
-dotnet tool install --global dotnet-ef 2>$null | Out-Null
-git -C $RepoRoot diff --quiet -- backend/src/Loupe.Api/Loupe.Api.csproj
-if ($LASTEXITCODE -ne 0) { throw "backend/src/Loupe.Api/Loupe.Api.csproj is not clean; aborting before a temporary edit." }
-$csproj = "$RepoRoot/backend/src/Loupe.Api/Loupe.Api.csproj"
-(Get-Content $csproj) -replace `
-  '(<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect".*?/>)', `
-  "`$1`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Design`" Version=`"10.0.0`"><PrivateAssets>all</PrivateAssets></PackageReference>" |
-  Set-Content $csproj
+# Infrastructure owns the design-time factory and EF Design dependency.
+# No temporary source edits or package changes are needed.
+if (-not (Get-Command dotnet-ef -ErrorAction SilentlyContinue)) {
+  dotnet tool install --global dotnet-ef --version 10.0.11
+  if ($LASTEXITCODE -ne 0) { throw 'Could not install the EF migration tool.' }
+}
+$previousConnection = $env:ConnectionStrings__Library
 try {
   $env:ConnectionStrings__Library = 'Host=localhost;Port=5433;Database=loupe_demo;Username=loupe;Password=loupe-demo-only'
-  dotnet ef database update --project "$RepoRoot/backend/src/Loupe.Infrastructure" --startup-project "$RepoRoot/backend/src/Loupe.Api"
+  dotnet ef database update --project "$RepoRoot/backend/src/Loupe.Infrastructure" --startup-project "$RepoRoot/backend/src/Loupe.Infrastructure"
+  if ($LASTEXITCODE -ne 0) { throw 'Database migration failed.' }
 } finally {
-  git -C $RepoRoot checkout -- backend/src/Loupe.Api/Loupe.Api.csproj backend/src/Loupe.Api/packages.lock.json
-  Remove-Item Env:\ConnectionStrings__Library -ErrorAction SilentlyContinue
+  $env:ConnectionStrings__Library = $previousConnection
 }
 
 Write-Host "== 4. Build the demo runtime image (real Api + Worker, Linux libvips) ==" -ForegroundColor Cyan
@@ -92,12 +88,12 @@ docker run -d --name loupe-demo-api --network loupe-demo-net -p 5001:5001 `
   -e Identity__ClientId='loupe-demo' `
   -e Identity__ClientSecret='demo-only-not-a-real-secret' `
   -e Browser__AllowedOrigins__0='https://localhost:4200' `
-  -e Ai__Mode='Demo' -e Imports__Mode='Live' `
+  -e Ai__Mode='Live' -e Ai__ApiKey -e Imports__Mode='Live' `
   --entrypoint dotnet loupe-demo-runtime /app/api/Loupe.Api.dll | Out-Null
 docker run -d --name loupe-demo-worker --network loupe-demo-net `
   -v "${ScratchDir}/demo-media:/data/media" `
   -e ConnectionStrings__Library='Host=loupe-demo-postgres;Port=5432;Database=loupe_demo;Username=loupe;Password=loupe-demo-only' `
-  -e Media__Root='/data/media' -e Ai__Mode='Demo' -e Imports__Mode='Live' -e Cleanup__PollInterval='00:00:15' `
+  -e Media__Root='/data/media' -e Ai__Mode='Live' -e Ai__ApiKey -e Imports__Mode='Live' -e Cleanup__PollInterval='00:00:15' `
   --entrypoint dotnet loupe-demo-runtime /app/worker/Loupe.Worker.dll | Out-Null
 
 Write-Host "== 7. Start the demo identity provider (on the host, port 5444) ==" -ForegroundColor Cyan

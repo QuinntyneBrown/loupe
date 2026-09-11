@@ -13,6 +13,7 @@ using Loupe.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Loupe.Application.Critiques;
+using Loupe.Api.Tests.Critiques;
 
 namespace Loupe.Api.Tests;
 
@@ -73,10 +74,11 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
         }));
         builder.ConfigureTestServices(services =>
         {
-            if (CritiqueProvider is not null)
+            if (CritiqueProvider is not null || AiTransport is null)
             {
                 services.RemoveAll<ICritiqueProvider>();
-                services.AddSingleton(CritiqueProvider);
+                services.AddSingleton<ICritiqueProvider>(CritiqueProvider ??
+                    new ControlledCritiqueProvider((_, _, _) => Task.FromResult(CritiqueResultFixture.Valid())));
             }
             if (SourceDnsResolver is not null)
             {

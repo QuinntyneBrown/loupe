@@ -14,6 +14,7 @@ public sealed class Photograph
     public CritiqueBrief Brief { get; set; } = new();
     public long Revision { get; set; } = 1;
     public string? Notes { get; set; }
+    public string? ArchivedDemoCritiqueJson { get; set; }
     public string? CritiqueJson { get; set; }
     public Guid? CurrentCritiqueOperationId { get; set; }
 }

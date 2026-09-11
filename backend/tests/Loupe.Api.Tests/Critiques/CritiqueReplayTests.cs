@@ -11,10 +11,10 @@ namespace Loupe.Api.Tests.Critiques;
 
 public sealed class CritiqueReplayTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
 {
-    private ApiFactory CreateFactory(string? mode = "Demo", TransientCommitFailure? failure = null) =>
+    private ApiFactory CreateFactory(string? mode = "Live", TransientCommitFailure? failure = null) =>
         new(database.ConnectionString, database.MediaRoot)
         {
-            Settings = new Dictionary<string, string?> { ["Ai:Mode"] = mode },
+            Settings = new Dictionary<string, string?> { ["Ai:Mode"] = mode, ["Ai:ApiKey"] = mode is null ? null : "fixture-only-key" },
             TransactionInterceptor = failure
         };
 
@@ -105,7 +105,7 @@ public sealed class CritiqueReplayTests(PostgreSqlFixture database) : IClassFixt
         Assert.Equal(TimeSpan.FromSeconds(5), failed.Headers.RetryAfter?.Delta);
         Assert.DoesNotContain("Private backend", await failed.Content.ReadAsStringAsync());
         // A committed request must resolve even if new admissions are disabled.
-        await using var second = CreateFactory(committed ? null : "Demo");
+        await using var second = CreateFactory(committed ? null : "Live");
         using var later = await second.CreateAuthenticatedClientAsync(subject);
         using var retry = await SubmitAsync(later, id, key);
         Assert.Equal(HttpStatusCode.Accepted, retry.StatusCode);

@@ -1,13 +1,16 @@
-// Given an admitted Demo critique, when an independent worker runs, then a
+// Given an admitted Live critique, when an independent worker host runs, then a
 // complete result with the original brief is saved durably without changing notes.
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Loupe.Api.Tests.Persistence;
 using Loupe.Api.Tests.Photographs;
+using Loupe.Infrastructure.Ai;
 using Loupe.Infrastructure.Persistence;
+using Loupe.Worker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Loupe.Api.Tests.Critiques;
@@ -15,13 +18,13 @@ namespace Loupe.Api.Tests.Critiques;
 public sealed class CritiqueExecutionTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
 {
     [Fact]
-    public async Task L2_006_1_008_4_036_1_Demo_worker_publishes_complete_critique_with_immutable_brief()
+    public async Task L2_006_1_008_4_036_1_Independent_worker_publishes_complete_critique_with_immutable_brief()
     {
         var subject = Guid.NewGuid().ToString();
         Guid id;
         string saved;
         await using (var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
-        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" } })
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" } })
         {
             using var client = await factory.CreateAuthenticatedClientAsync(subject);
             id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
@@ -36,24 +39,32 @@ public sealed class CritiqueExecutionTests(PostgreSqlFixture database) : IClassF
             edit.EnsureSuccessStatusCode();
             using var notes = await client.PutAsJsonAsync($"/api/photographs/{id}/notes", new { revision = 3, notes = "Private journal" });
             notes.EnsureSuccessStatusCode();
-            await using var worker = new CleanupProcess(database.ConnectionString, database.MediaRoot,
-                new Dictionary<string, string> { ["Ai__Mode"] = "Demo" });
+            // A separate service provider discovers the durable admission; only its
+            // external analysis boundary is replaced with a controlled test provider.
+            await using var workerHost = new ApiFactory(database.ConnectionString, database.MediaRoot)
+            { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" } };
+            using var worker = new CritiqueWorker(workerHost.Services.GetRequiredService<IServiceScopeFactory>(),
+                workerHost.Services.GetRequiredService<IOptions<AiOptions>>(), NullLogger<CritiqueWorker>.Instance);
             JsonElement status = default;
-            var deadline = DateTime.UtcNow.AddSeconds(15);
-            do
+            await worker.StartAsync(default);
+            try
             {
-                await worker.EnsureRunningAsync();
-                status = await client.GetFromJsonAsync<JsonElement>(admitted.Headers.Location);
-                if (status.GetProperty("status").GetString() == "Succeeded") break;
-                await Task.Delay(100);
-            } while (DateTime.UtcNow < deadline);
+                var deadline = DateTime.UtcNow.AddSeconds(15);
+                do
+                {
+                    status = await client.GetFromJsonAsync<JsonElement>(admitted.Headers.Location);
+                    if (status.GetProperty("status").GetString() == "Succeeded") break;
+                    await Task.Delay(100);
+                } while (DateTime.UtcNow < deadline);
+            }
+            finally { await worker.StopAsync(default); }
             Assert.Equal("Succeeded", status.GetProperty("status").GetString());
             Assert.NotEqual(JsonValueKind.Null, status.GetProperty("completedAt").ValueKind);
             using var result = await client.GetAsync($"/api/photographs/{id}/critique");
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
             saved = await result.Content.ReadAsStringAsync();
             var critique = JsonSerializer.Deserialize<JsonElement>(saved);
-            Assert.Equal("Demo", critique.GetProperty("mode").GetString());
+            Assert.Equal("Live", critique.GetProperty("mode").GetString());
             Assert.Equal("Deliberate motion blur", critique.GetProperty("brief").GetProperty("intent").GetString());
             Assert.Equal(status.GetProperty("id").GetGuid(), critique.GetProperty("operationId").GetGuid());
             Assert.True(critique.GetProperty("generatedAt").GetDateTimeOffset() > DateTimeOffset.UtcNow.AddMinutes(-1));
