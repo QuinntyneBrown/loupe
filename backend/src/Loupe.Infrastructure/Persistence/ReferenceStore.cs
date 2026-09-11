@@ -1,4 +1,5 @@
 using Loupe.Application.References;
+using Loupe.Application.ReferenceAnalysis;
 using Loupe.Application.Common;
 using Loupe.Domain.References;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ using System.Text.Json;
 
 namespace Loupe.Infrastructure.Persistence;
 
-public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
+public sealed class ReferenceStore(LibraryDbContext database, IReferenceAnalysisQueue analysis) : IReferenceStore
 {
     public Task<Reference?> FindSourceOwnedAsync(string ownerId, string source, CancellationToken cancellationToken) =>
         database.References.FromSqlInterpolated($"""
@@ -26,6 +27,7 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
             """).Include(item => item.Boards).Include(item => item.Tags).OrderBy(item => item.CreatedAt).ThenBy(item => item.Id).FirstOrDefaultAsync(cancellationToken);
         if (existing is not null) return existing;
         database.References.Add(reference);
+        await analysis.QueueIfConfiguredAsync(reference, cancellationToken);
         await database.SaveChangesAsync(cancellationToken);
         return reference;
     }
@@ -86,6 +88,7 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
     {
         await LockSourceAsync(reference.OwnerId, reference.SourceUrl, cancellationToken);
         database.References.Add(reference);
+        await analysis.QueueIfConfiguredAsync(reference, cancellationToken);
         await database.SaveChangesAsync(cancellationToken);
     }
     public Task<Reference?> FindOwnedAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>

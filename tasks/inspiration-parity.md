@@ -291,3 +291,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: Accept description stayed enabled during a tag draft.
 - GREEN: all 9 suggestion Chromium cases pass. An open tag draft disables description/bulk review and Undo; cancel restores those actions without losing previously reviewed metadata.
 
+
+### Automatic analysis after image saves
+- RED: all 3 automatic-analysis cases returned no current operation after Save.
+- GREEN: 25 of the initial 26 checks passed; the remaining assertion still expected no analysis after replacement. It now verifies automatic replacement admission and explicit-request deduplication. All 29 automatic/admission/worker/import-admission/lease cases then passed.
+- Validated uploads, final draft saves and replacements enqueue once in the save transaction when the provider is configured. Queue saturation records a retryable analysis failure without losing the saved image. Draft preview alone never saves a reference; keyed retries reuse the operation.
+

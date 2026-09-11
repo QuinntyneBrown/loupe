@@ -1,12 +1,13 @@
 using Loupe.Application.Common;
 using Loupe.Application.Images;
 using Loupe.Application.References;
+using Loupe.Application.ReferenceAnalysis;
 using Loupe.Domain.Operations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Loupe.Infrastructure.Persistence;
 
-public sealed class ReferenceImageStore(LibraryDbContext database, IImageStore images, TimeProvider clock) : IReferenceImageStore
+public sealed class ReferenceImageStore(LibraryDbContext database, IImageStore images, TimeProvider clock, IReferenceAnalysisQueue analysis) : IReferenceImageStore
 {
     public async Task ReplaceAsync(Guid id, string ownerId, long revision, ProcessedImage image, CancellationToken cancellationToken)
     {
@@ -37,6 +38,7 @@ public sealed class ReferenceImageStore(LibraryDbContext database, IImageStore i
         reference.SuggestionUndoJson = null;
         reference.Revision++;
         reference.ImageRevision++;
+        await analysis.QueueIfConfiguredAsync(reference, cancellationToken);
         await database.SaveChangesAsync(cancellationToken);
         // Old and uncommitted media are removed by reference-aware orphan cleanup.
     }

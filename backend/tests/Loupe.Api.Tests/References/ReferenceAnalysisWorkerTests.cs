@@ -100,6 +100,11 @@ public sealed class ReferenceAnalysisWorkerTests(PostgreSqlFixture database) : I
         Assert.Equal("Canceled", canceled.GetProperty("status").GetString());
         using var suggestions = await owner.GetAsync($"/api/references/{id}/suggestions");
         Assert.Equal(delete ? HttpStatusCode.NotFound : HttpStatusCode.NoContent, suggestions.StatusCode);
+        if (!delete)
+        {
+            // Replacement automatically queues a new image; keep that job out of later worker scenarios.
+            using var cleanup = await owner.DeleteAsync($"/api/references/{id}?revision=2"); cleanup.EnsureSuccessStatusCode();
+        }
     }
 
     private ApiFactory Factory(HttpMessageHandler transport) => new(database.ConnectionString, database.MediaRoot)

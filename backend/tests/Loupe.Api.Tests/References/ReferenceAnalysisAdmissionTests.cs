@@ -71,9 +71,12 @@ public sealed class ReferenceAnalysisAdmissionTests(PostgreSqlFixture database) 
         Assert.Equal("Canceled", operation.GetProperty("status").GetString());
         if (!delete)
         {
-            using var current = await owner.GetAsync($"/api/references/{id}/analysis"); Assert.Equal(HttpStatusCode.NoContent, current.StatusCode);
+            using var current = await owner.GetAsync($"/api/references/{id}/analysis"); Assert.Equal(HttpStatusCode.OK, current.StatusCode);
+            var automatic = await current.Content.ReadFromJsonAsync<JsonElement>();
+            Assert.Equal("Queued", automatic.GetProperty("status").GetString());
+            Assert.NotEqual(operationId, automatic.GetProperty("id").GetGuid());
             using var replacement = await Submit(owner, id, 2); Assert.Equal(HttpStatusCode.Accepted, replacement.StatusCode);
-            Assert.NotEqual(operationId, (await replacement.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid());
+            Assert.Equal(automatic.GetProperty("id").GetGuid(), (await replacement.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid());
         }
     }
 }
