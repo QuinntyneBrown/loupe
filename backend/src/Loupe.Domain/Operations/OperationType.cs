@@ -1,3 +1,3 @@
 namespace Loupe.Domain.Operations;
 
-public enum OperationType { Critique, ReferenceImport, ReferenceDraftImport }
+public enum OperationType { Critique, ReferenceImport, ReferenceDraftImport, ReferenceAnalysis }

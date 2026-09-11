@@ -243,3 +243,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both Chromium cases failed on the missing inline text fields.
 - GREEN: all 27 text/metadata/image/tag/board-detail cases pass. Independent explicit saves, persistence, clearing, draft retention, latest-value review and unload protection are covered.
 - Notes assertions now read the editable textarea's value instead of the retired read-only paragraph. Both editors use the mock's labeled field, Save footer and status indicator.
+
+### Visual-analysis admission
+- RED: both API cases failed on absent analysis routes.
+- GREEN: 17 analysis/import/text/deletion cases pass. An owned image admits one durable owner-scoped operation; keyed retry and equivalent active requests reuse it, current state survives restart, and active metadata is unchanged.
+- Link-only, stale, foreign and unconfigured requests are rejected. The durable input contains image keys and image revision, never personal notes.
