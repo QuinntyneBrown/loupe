@@ -35,6 +35,13 @@ export class PhotographerPage {
       .getByRole("checkbox", { name: new RegExp("^" + title + " ") })
       .check();
   }
+  async expectAlreadyLinked(title) {
+    const checkbox = this.linkDialog().getByRole("checkbox", {
+      name: new RegExp("^" + title + " "),
+    });
+    await expect(checkbox).toBeChecked();
+    await expect(checkbox).toBeDisabled();
+  }
   async searchReferences(query) {
     await this.linkDialog()
       .getByRole("searchbox", { name: "Search your references", exact: true })

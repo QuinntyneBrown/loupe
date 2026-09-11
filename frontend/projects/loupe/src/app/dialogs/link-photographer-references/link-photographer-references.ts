@@ -168,6 +168,14 @@ export class LinkPhotographerReferences {
     }
   }
   private complete(id: string): void {
+    const { id: photographerId, name, portfolioUrl } = this.photographer();
+    this.items.update((items) =>
+      items.map((item) =>
+        item.id === id
+          ? { ...item, photographer: { id: photographerId, name, portfolioUrl } }
+          : item,
+      ),
+    );
     this.linked.update((count) => count + 1);
     this.selected.update((selected) => {
       const next = new Map(selected);

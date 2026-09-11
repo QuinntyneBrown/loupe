@@ -397,6 +397,7 @@ test("a partial link failure keeps only unfinished selections for retry", async 
   references.errors.setPhotographer = [null, "request_failed"];
   await screen.submitLinks(2);
   await screen.expectLinkFailure("1 linked");
+  await screen.expectAlreadyLinked("Reference 01");
   await screen.expectSelected(1);
   await screen.confirmLinks(1);
   await screen.expectReferences(2);

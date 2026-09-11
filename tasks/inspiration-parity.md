@@ -441,3 +441,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: cancel after an unacknowledged link did not refresh the profile, and retry mistook an already-completed assignment for an unresolved conflict. Partial-failure, explicit stale-review and desktop/mobile Axe cases already passed.
 - GREEN: all 28 profile Chromium cases pass. Closing after any attempted link refreshes the reference view; retry reads a conflicting reference to recognize a completed assignment. Remaining selections are retained after partial failure. Mobile picker screenshot inspected with visible footer and scrollable results.
 
+
+### Completed picker rows
+- RED: a completed row appeared unchecked after a later row failed.
+- GREEN: all eight picker cases pass. Completed rows immediately display their current photographer and become checked/disabled, so retry concerns only unfinished selections.
+
