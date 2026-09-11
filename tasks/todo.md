@@ -369,5 +369,5 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 
 ## Azure OpenAI critique integration
 - [x] L2-036.6–7: Configure Azure and verify the Responses request using failing-first API acceptance tests.
-- [ ] L2-036.8–9: Verify saved-result compatibility and Azure failure handling.
+- [x] L2-036.8–9: Verify saved-result compatibility and Azure failure handling.
 - [ ] L2-041.2 / L2-050: Name Azure in request disclosures; update setup and run regression checks.

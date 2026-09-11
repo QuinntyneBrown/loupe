@@ -752,3 +752,9 @@ Reference sources: [Playwright web servers](https://playwright.dev/docs/test-web
 - RED: Azure configuration and live transport acceptance run failed 14 cases for the expected missing validation/admission guards and old OpenAI URL; 2 existing missing-key cases passed.
 - GREEN: `./backend/Test.ps1 -Filter FullyQualifiedName~Critiques`: 116 passed, 0 failed, 0 skipped (Linux acceptance container).
 - Global formatting verification reports pre-existing whitespace defects in untouched `DemoRetirementTests.cs` (lines 65–68); no formatting suppressions were added.
+
+## Azure OpenAI critiques — compatibility and failures
+
+- RED: `Azure_requests_preserve` failed because the direct-OpenAI operation was reused.
+- GREEN: Introduced `azure-critique-v2` provenance/cache identity. The 27 targeted reuse, Azure transport failure, strict response, and timeout tests passed; no existing result is deleted or relabeled.
+- Changed-file C# formatting verification passed. Global formatting has the unrelated baseline issue recorded above.
