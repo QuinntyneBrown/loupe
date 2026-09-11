@@ -16,7 +16,7 @@ namespace Loupe.Api.Tests.References;
 public sealed class CurrentReferenceImportTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
 {
     private ApiFactory Factory() => new(database.ConnectionString, database.MediaRoot)
-    { Settings = new Dictionary<string, string?> { ["Imports:Mode"] = "Demo" } };
+    { Settings = new Dictionary<string, string?> { ["Imports:Mode"] = "Live" } };
     [Fact]
     public async Task L2_033_5_No_import_is_distinct_from_foreign_missing_and_anonymous_status()
     {

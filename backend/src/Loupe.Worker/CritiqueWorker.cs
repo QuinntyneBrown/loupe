@@ -12,8 +12,8 @@ public sealed class CritiqueWorker(IServiceScopeFactory scopes, IOptions<AiOptio
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        if (options.Value.Mode is not ("Demo" or "Live")) return;
-        if (options.Value.Mode == "Live" && string.IsNullOrWhiteSpace(options.Value.ApiKey))
+        if (options.Value.Mode != "Live") return;
+        if (string.IsNullOrWhiteSpace(options.Value.ApiKey))
         {
             logger.LogWarning("Live critique processing requires configured analysis credentials");
             return;

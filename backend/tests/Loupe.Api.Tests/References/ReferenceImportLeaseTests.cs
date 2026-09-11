@@ -16,9 +16,9 @@ namespace Loupe.Api.Tests.References;
 
 public sealed class ReferenceImportLeaseTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
 {
-    private static readonly OperationCapability[] Both = [new(OperationType.Critique, ExecutionMode.Demo), new(OperationType.ReferenceImport, ExecutionMode.Demo)];
-    private ApiFactory Factory(TestClock clock, string imports = "Demo") => new(database.ConnectionString, database.MediaRoot)
-    { ClockOverride = clock, Settings = new Dictionary<string, string?> { ["Imports:Mode"] = imports, ["Ai:Mode"] = "Demo" } };
+    private static readonly OperationCapability[] Both = [new(OperationType.Critique, ExecutionMode.Live), new(OperationType.ReferenceImport, ExecutionMode.Live)];
+    private ApiFactory Factory(TestClock clock, string imports = "Live") => new(database.ConnectionString, database.MediaRoot)
+    { ClockOverride = clock, Settings = new Dictionary<string, string?> { ["Imports:Mode"] = imports, ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" } };
 
     [Fact]
     public async Task L2_033_Import_claim_is_visible_and_renewal_prevents_premature_recovery()
@@ -83,9 +83,9 @@ public sealed class ReferenceImportLeaseTests(PostgreSqlFixture database) : ICla
         try
         {
             using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString()); ids.Add(await AdmitAsync(client, false)); ids.Add(await AdmitAsync(client, true));
-            Assert.Null(await ClaimAsync(factory, [new(OperationType.Critique, ExecutionMode.Live), new(OperationType.ReferenceImport, ExecutionMode.Demo)]));
+            Assert.Null(await ClaimAsync(factory, [new(OperationType.Critique, ExecutionMode.Demo), new(OperationType.ReferenceImport, ExecutionMode.Demo)]));
             var import = await ClaimAsync(factory, [new(OperationType.ReferenceImport, ExecutionMode.Live)]); Assert.NotNull(import); Assert.Equal(ids[0], import.Id);
-            var critique = await ClaimAsync(factory, [new(OperationType.Critique, ExecutionMode.Demo)]); Assert.NotNull(critique); Assert.Equal(ids[1], critique.Id);
+            var critique = await ClaimAsync(factory, [new(OperationType.Critique, ExecutionMode.Live)]); Assert.NotNull(critique); Assert.Equal(ids[1], critique.Id);
         }
         finally { await CleanupAsync(factory, ids); }
     }

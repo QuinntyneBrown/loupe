@@ -46,7 +46,7 @@ public sealed class CritiqueWorkerCapacityTests(PostgreSqlFixture database) : IC
             }
             finally { lock (gate) { active--; owners[owner]--; } }
         });
-        var settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo", ["Ai:MaxConcurrentCalls"] = capacity.ToString() };
+        var settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key", ["Ai:MaxConcurrentCalls"] = capacity.ToString() };
         await using var first = new ApiFactory(database.ConnectionString, database.MediaRoot) { Settings = settings, CritiqueProvider = provider };
         await using var second = new ApiFactory(database.ConnectionString, database.MediaRoot) { Settings = settings, CritiqueProvider = provider };
         var clients = new List<HttpClient>();

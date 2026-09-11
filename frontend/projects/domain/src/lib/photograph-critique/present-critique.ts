@@ -24,7 +24,7 @@ const exifLabels: Record<string, string> = {
 };
 const aspectGroups = [
   {
-    label: 'Technical observations',
+    label: 'Technical',
     fields: [
       { key: 'exposure', label: 'Exposure' },
       { key: 'focus', label: 'Focus' },
@@ -36,7 +36,7 @@ const aspectGroups = [
     ],
   },
   {
-    label: 'Composition and expression',
+    label: 'Composition and story',
     fields: [
       { key: 'framing', label: 'Framing' },
       { key: 'subjectSeparation', label: 'Subject separation' },
@@ -50,6 +50,7 @@ const aspectGroups = [
 function presentEvidence(statements: EvidenceStatement[]): CritiqueEvidence[] {
   return statements.map((item) => ({
     label: evidenceLabels[item.kind],
+    region: item.kind === 'VisibleObservation' ? (item.region ?? null) : null,
     statement: item.statement,
     fact: item.exifField ? `${exifLabels[item.exifField]}: ${item.exifValue}` : null,
   }));
@@ -58,7 +59,6 @@ function presentEvidence(statements: EvidenceStatement[]): CritiqueEvidence[] {
 export function presentCritique(item: SavedCritique): CritiquePresentation {
   return {
     generatedAt: item.generatedAt,
-    demo: item.mode === 'Demo',
     model: item.model,
     promptVersion: item.promptVersion,
     strengths: item.content.strengths.map((value) => ({

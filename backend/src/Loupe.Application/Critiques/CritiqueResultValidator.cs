@@ -25,6 +25,9 @@ public static class CritiqueResultValidator
     private static bool ValidEvidence(EvidenceStatement[]? evidence, CaptureMetadata exif) => evidence is not null && evidence.All(statement =>
     {
         if (statement is null || Blank(statement.Statement) || !Enum.IsDefined(statement.Kind)) return false;
+        if (statement.Region is { } region && (statement.Kind != EvidenceKind.VisibleObservation
+            || !double.IsFinite(region.X) || !double.IsFinite(region.Y) || !double.IsFinite(region.Size)
+            || region.X is < 0 or > 1 || region.Y is < 0 or > 1 || region.Size is <= 0 or > 1)) return false;
         if (statement.Kind != EvidenceKind.ExifFact) return statement.ExifField is null && statement.ExifValue is null;
         var supplied = statement.ExifField switch
         {

@@ -11,4 +11,5 @@ export interface PhotographResult extends Omit<
   exif: CaptureMetadata;
   revision: number;
   notes: string | null;
+  hasArchivedDemoCritique?: boolean;
 }

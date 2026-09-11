@@ -36,7 +36,7 @@ public sealed class CritiqueProviderFailureTests(PostgreSqlFixture database) : I
             : Task.FromException<CritiqueResult>(new ProviderFailureException(Enum.Parse<ProviderFailureKind>(kind),
                 retryAfter == 0 ? null : TimeSpan.FromSeconds(retryAfter))));
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
-        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" }, CritiqueProvider = provider };
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider };
         using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
         using var original = await SubmitAsync(client, id, 1);
@@ -82,7 +82,7 @@ public sealed class CritiqueProviderFailureTests(PostgreSqlFixture database) : I
         var provider = new ControlledCritiqueProvider((call, _, _) => call == 1 ? Task.FromResult(CritiqueResultFixture.Valid())
             : Task.FromException<CritiqueResult>(new ProviderFailureException(Enum.Parse<ProviderFailureKind>(kinds[call - 2]))));
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
-        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" }, CritiqueProvider = provider };
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider };
         using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
         using var original = await SubmitAsync(client, id, 1);

@@ -53,6 +53,8 @@
   --lp-detail-columns: minmax(0, 1fr);
   --lp-comparison-columns: minmax(0, 1fr);
   --lp-full: 100%;
+  --lp-full-viewport: 100vw;
+  --lp-sr-clip: inset(50%);
   --lp-heading-fluid: 5vw;
   --lp-heading-max: 4rem;
   --lp-skip-hidden: -200%;
@@ -174,6 +176,9 @@
   --lp-tile-min: 220px;
   --lp-card-min: 300px;
   --lp-loupe-size: 56px;
+  --lp-region-shadow-spread: 100vmax;
+  --lp-region-centre: -50%;
+  --lp-circle-ratio: 1;
   --lp-loupe-zoom: 320%;
   --lp-z-topbar: 20;
   --lp-z-menu: 30;

@@ -11,7 +11,7 @@ namespace Loupe.Api.Tests.Critiques;
 public sealed class CritiqueDeduplicationTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
 {
     private ApiFactory CreateFactory() => new(database.ConnectionString, database.MediaRoot)
-    { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" } };
+    { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" } };
 
     [Fact]
     public async Task L2_035_1_Equivalent_active_requests_reuse_one_job_including_regenerate_and_notes_edits()

@@ -1,12 +1,9 @@
 :host {
   display: block;
-  margin-top: var(--lp-space-8);
-}
-:host > section {
-  border-top: var(--lp-hairline) solid var(--lp-color-border);
+  min-width: var(--lp-zero);
 }
 h2 {
-  font-size: var(--lp-text-2xl);
+  font-size: var(--lp-text-sm);
 }
 [role='alert'] {
   color: var(--lp-color-danger);

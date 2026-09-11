@@ -110,10 +110,14 @@ delivered) Compose/deployment story; see `backend/README.md`.
   (`ControlledIdentityProvider` in `backend/tests/Loupe.Api.Tests/Security/`)
   is an in-process `HttpMessageHandler` a real browser cannot be redirected to.
   It is never a real login and must never be deployed.
-- **AI critique.** `Ai:Mode=Demo` — the product's own existing, disclosed
-  local adapter (`DemoCritiqueProvider`). No AI credentials are configured and
-  no third-party AI network traffic occurs, matching L2-036. Every critique
-  shown is labeled "Demo · illustrative sample" on screen.
+- **AI critique.** Historical recordings used a deterministic sample adapter,
+  which has now been removed. New runs use `Ai:Mode=Live`; supply `Ai__ApiKey`
+  in the calling environment to enable real analysis. The harness passes the
+  variable by name without printing it. Without it, AI requests report
+  Integration not configured; manual library work remains available. Existing
+  sample critiques are archived by the retirement migration. Historical videos
+  are not evidence of real-provider analysis or the current critique layout.
+
 - **Reference-URL import never reaches `Completed` in these recordings.**
   This is a real product gap, discovered while building this harness, not a
   recording limitation: `Loupe.Worker`'s `Program.cs` registers only
@@ -212,10 +216,8 @@ docker exec loupe-demo-postgres psql -U loupe -d loupe_demo \
   the image family `backend/tests/Loupe.Api.Tests/PostgreSqlFixture.cs` uses)
   and applies the real EF Core migrations from
   `backend/src/Loupe.Infrastructure/Persistence/Migrations`. Applying
-  migrations needs `Microsoft.EntityFrameworkCore.Design`, which
-  `Loupe.Api.csproj` deliberately does not carry — the script adds it
-  temporarily and reverts the file via `git checkout` immediately after,
-  never leaving a diff.
+  migrations uses Infrastructure's existing design-time factory and EF Design
+  dependency. The script makes no temporary source or package edits.
 - Builds `docs/demo/harness/Dockerfile.demo-runtime` and runs the real
   `Loupe.Api` and `Loupe.Worker` from it, networked with Postgres and reaching
   the host-side demo identity provider via `host.docker.internal`.

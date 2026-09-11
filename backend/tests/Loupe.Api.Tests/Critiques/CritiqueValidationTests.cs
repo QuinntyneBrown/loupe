@@ -22,7 +22,7 @@ public sealed class CritiqueValidationTests(PostgreSqlFixture database) : IClass
         var valid = CritiqueResultFixture.Valid();
         var provider = new ControlledCritiqueProvider((call, _, _) => Task.FromResult(call == 1 ? valid with { Exposure = null! } : valid));
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
-        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" }, CritiqueProvider = provider };
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider };
         using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
         using var admitted = await SubmitAsync(client, id, 1);
@@ -75,7 +75,7 @@ public sealed class CritiqueValidationTests(PostgreSqlFixture database) : IClass
         };
         var provider = new ControlledCritiqueProvider((call, _, _) => Task.FromResult(call == 1 ? valid : invalid));
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
-        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" }, CritiqueProvider = provider };
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider };
         using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
         using var original = await SubmitAsync(client, id, 1);

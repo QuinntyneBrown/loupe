@@ -23,7 +23,15 @@ public static class CritiqueResponseFormat
     private static JsonObject Array(JsonNode item) => new() { ["type"] = "array", ["items"] = item };
     private static JsonObject Evidence() => Array(Object(
         ("kind", new JsonObject { ["type"] = "string", ["enum"] = new JsonArray("VisibleObservation", "ExifFact", "Hypothesis", "StylisticPreference") }),
-        ("statement", Text()), ("exifField", Text(true)), ("exifValue", Text(true))));
+        ("statement", Text()), ("exifField", Text(true)), ("exifValue", Text(true)), ("region", Region())));
+
+    private static JsonObject Region()
+    {
+        var region = Object(("x", new JsonObject { ["type"] = "number" }),
+            ("y", new JsonObject { ["type"] = "number" }), ("size", new JsonObject { ["type"] = "number" }));
+        region["type"] = new JsonArray("object", "null");
+        return region;
+    }
 
     private static JsonObject Object(params (string Name, JsonNode Schema)[] fields)
     {

@@ -1,11 +1,17 @@
+export interface EvidenceRegion {
+  x: number;
+  y: number;
+  size: number;
+}
+
 export interface CritiqueEvidence {
+  region: EvidenceRegion | null;
   label: string;
   statement: string;
   fact: string | null;
 }
 export interface CritiquePresentation {
   generatedAt: string;
-  demo: boolean;
   model: string;
   promptVersion: string;
   strengths: { explanation: string; evidence: CritiqueEvidence[] }[];

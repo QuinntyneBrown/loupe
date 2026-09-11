@@ -124,7 +124,7 @@ public sealed class CurrentCritiqueOperationTests(PostgreSqlFixture database) : 
     }
 
     private ApiFactory CreateFactory(ICritiqueProvider? provider = null) => new(database.ConnectionString, database.MediaRoot)
-    { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Demo" }, CritiqueProvider = provider };
+    { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider };
 
     private static string Location(Guid id) => $"/api/photographs/{id}/critique/operation";
 

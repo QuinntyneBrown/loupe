@@ -397,7 +397,8 @@ button:disabled {
   .lp-dialog__footer {
     flex-direction: column-reverse;
     align-items: stretch;
-    padding: var(--lp-space-2) var(--lp-space-5) calc(var(--lp-space-5) + env(safe-area-inset-bottom));
+    padding: var(--lp-space-2) var(--lp-space-5)
+      calc(var(--lp-space-5) + env(safe-area-inset-bottom));
   }
   .lp-dialog__footer .lp-button {
     width: 100%;
@@ -700,7 +701,8 @@ body:has(dialog[open]) {
   }
 }
 @keyframes lp-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -799,4 +801,21 @@ body:has(dialog[open]) {
   align-items: center;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: var(--lp-hairline);
+  height: var(--lp-hairline);
+  padding: var(--lp-zero);
+  overflow: hidden;
+  clip-path: var(--lp-sr-clip);
+  white-space: nowrap;
+}
+.visually-hidden:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  white-space: normal;
 }

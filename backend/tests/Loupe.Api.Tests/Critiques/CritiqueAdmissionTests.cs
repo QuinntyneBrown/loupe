@@ -10,9 +10,9 @@ namespace Loupe.Api.Tests.Critiques;
 
 public sealed class CritiqueAdmissionTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
 {
-    private ApiFactory CreateFactory(string? mode = "Demo") => new(database.ConnectionString, database.MediaRoot)
+    private ApiFactory CreateFactory(string? mode = "Live", string? apiKey = "fixture-only-key") => new(database.ConnectionString, database.MediaRoot)
     {
-        Settings = new Dictionary<string, string?> { ["Ai:Mode"] = mode }
+        Settings = new Dictionary<string, string?> { ["Ai:Mode"] = mode, ["Ai:ApiKey"] = mode is null ? null : apiKey }
     };
 
     [Fact]
@@ -37,7 +37,7 @@ public sealed class CritiqueAdmissionTests(PostgreSqlFixture database) : IClassF
             Assert.Equal(id, operation.GetProperty("resourceId").GetGuid());
             Assert.Equal("Critique", operation.GetProperty("type").GetString());
             Assert.Equal("Queued", operation.GetProperty("status").GetString());
-            Assert.Equal("Demo", operation.GetProperty("mode").GetString());
+            Assert.Equal("Live", operation.GetProperty("mode").GetString());
             Assert.Equal("Waiting to start.", operation.GetProperty("message").GetString());
             Assert.True(operation.GetProperty("createdAt").GetDateTimeOffset() <= factory.Clock.GetUtcNow());
             Assert.DoesNotContain("Private notes", original);
@@ -81,7 +81,7 @@ public sealed class CritiqueAdmissionTests(PostgreSqlFixture database) : IClassF
     [InlineData("Live")]
     public async Task L2_036_2_Unconfigured_analysis_does_not_admit_or_prevent_manual_library_work(string? mode)
     {
-        await using var factory = CreateFactory(mode);
+        await using var factory = CreateFactory(mode, apiKey: null);
         using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
         using var unavailable = await SubmitAsync(client, id, 1);

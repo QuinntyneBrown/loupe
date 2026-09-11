@@ -1,62 +1,82 @@
 <section [attr.aria-labelledby]="'critique-status-' + id()">
-  <h2 #heading [id]="'critique-status-' + id()" tabindex="-1" class="lp-kicker">Critique status</h2>
-  @if (operation(); as item) {
-    <p role="status">
-      <strong>{{ item.status }}</strong> · {{ item.message }}
-    </p>
-    <p><span class="lp-pill lp-pill--ai">{{ item.mode === 'Demo' ? 'Demo · illustrative sample' : 'AI image analysis' }}</span></p>
-    <p class="timestamp">
-      Updated <time [attr.datetime]="item.updatedAt">{{ item.updatedAt | date: 'medium' }}</time>
-    </p>
-    @if (item.nextAttemptAt) {
-      <p>
-        Automatic retry after
-        <time data-retry [attr.datetime]="item.nextAttemptAt">{{
-          item.nextAttemptAt | date: 'medium'
-        }}</time
-        >.
-      </p>
-    }
-    @if (item.retryAvailableAt) {
-      <p>
-        Retry available after
-        <time [attr.datetime]="item.retryAvailableAt">{{
-          item.retryAvailableAt | date: 'medium'
-        }}</time
-        >.
-      </p>
-    }
-  } @else if (loading()) {
-    <p role="status">Loading critique status…</p>
-  } @else if (!error()) {
-    <p>No critique requested yet.</p>
+  @if (compact()) {
+    <button
+      class="ready-status"
+      type="button"
+      [attr.aria-expanded]="showDetails()"
+      (click)="expanded.set(!expanded())"
+    >
+      Critique ready
+    </button>
   }
-  <lp-request-critique
-    [hidden]="!!operation() || loading() || !!error()"
-    [photograph]="photograph()"
-    [briefDirty]="briefDirty()"
-    (started)="focus()"
-    (reviewed)="reviewed.emit($event)"
-    (admitted)="admitted.set($event)"
-  />
-  @if (retryable()) {
+  <div [hidden]="!showDetails()">
+    <h2 #heading [id]="'critique-status-' + id()" tabindex="-1" class="lp-kicker">
+      Critique status
+    </h2>
+    @if (operation(); as item) {
+      <p role="status">
+        <strong>{{ item.status }}</strong> · {{ item.message }}
+      </p>
+      <p>
+        <span class="lp-pill lp-pill--ai">{{
+          item.mode === 'Demo' ? 'Archived sample operation' : 'AI image analysis'
+        }}</span>
+      </p>
+      <p class="timestamp">
+        Updated <time [attr.datetime]="item.updatedAt">{{ item.updatedAt | date: 'medium' }}</time>
+      </p>
+      @if (item.nextAttemptAt) {
+        <p>
+          Automatic retry after
+          <time data-retry [attr.datetime]="item.nextAttemptAt">{{
+            item.nextAttemptAt | date: 'medium'
+          }}</time
+          >.
+        </p>
+      }
+      @if (item.retryAvailableAt) {
+        <p>
+          Retry available after
+          <time [attr.datetime]="item.retryAvailableAt">{{
+            item.retryAvailableAt | date: 'medium'
+          }}</time
+          >.
+        </p>
+      }
+    } @else if (loading()) {
+      <p role="status">Loading critique status…</p>
+    } @else if (!error()) {
+      <p>No critique requested yet.</p>
+    }
     <lp-request-critique
+      [hidden]="!!operation() || loading() || !!error()"
       [photograph]="photograph()"
       [briefDirty]="briefDirty()"
-      [retryOperation]="operation()"
       (started)="focus()"
       (reviewed)="reviewed.emit($event)"
       (admitted)="admitted.set($event)"
     />
-  }
-  @if (error() === 'item_unavailable') {
-    <p role="alert">Critique status unavailable. The photograph may have been removed.</p>
-  } @else {
-    @if (error()) {
-      <p role="alert">
-        Critique status could not be updated. Your saved content is still available.
-      </p>
+    @if (retryable()) {
+      <lp-request-critique
+        [photograph]="photograph()"
+        [briefDirty]="briefDirty()"
+        [retryOperation]="operation()"
+        (started)="focus()"
+        (reviewed)="reviewed.emit($event)"
+        (admitted)="admitted.set($event)"
+      />
     }
-    <button type="button" class="lp-button lp-button--secondary" (click)="check()">Check critique status</button>
-  }
+    @if (error() === 'item_unavailable') {
+      <p role="alert">Critique status unavailable. The photograph may have been removed.</p>
+    } @else {
+      @if (error()) {
+        <p role="alert">
+          Critique status could not be updated. Your saved content is still available.
+        </p>
+      }
+      <button type="button" class="lp-button lp-button--secondary" (click)="check()">
+        Check critique status
+      </button>
+    }
+  </div>
 </section>

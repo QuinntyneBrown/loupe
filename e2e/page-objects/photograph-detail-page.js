@@ -54,7 +54,8 @@ export class PhotographDetailPage {
     });
   }
   async regenerateCritique() {
-    await this.critique()
+    await this.openActionsMenu();
+    await this.page.getByRole('main')
       .getByRole('button', { name: 'Regenerate critique', exact: true })
       .click();
   }
@@ -77,7 +78,7 @@ export class PhotographDetailPage {
   async expectRegenerationCancelled() {
     await expect(this.regeneration()).not.toBeVisible();
     await expect(
-      this.critique().getByRole('button', {
+      this.page.getByRole('main').getByRole('button', {
         name: 'Regenerate critique',
         exact: true,
       }),
@@ -107,8 +108,9 @@ export class PhotographDetailPage {
       .click();
   }
   async expectRegenerateDisabled() {
+    await this.openActionsMenu();
     await expect(
-      this.critique().getByRole('button', {
+      this.page.getByRole('main').getByRole('button', {
         name: 'Regenerate critique',
         exact: true,
       }),
@@ -138,9 +140,13 @@ export class PhotographDetailPage {
       })
       .click();
   }
+  async expectRealCritique() {
+    await expect(this.critique().getByRole('heading', { name: 'What works', exact: true })).toBeVisible({ timeout: 180_000 });
+    await expect(this.critique()).toContainText('AI-generated critique');
+  }
   async expectCritique(mode = 'Live') {
     const critique = this.critique();
-    await expect(critique.getByRole('heading', { name: 'Strengths', exact: true })).toBeVisible();
+    await expect(critique.getByRole('heading', { name: 'What works', exact: true })).toBeVisible();
     await expect(critique).toContainText('The shape communicates the intended quiet mood.');
     for (const heading of ['Exposure', 'Focus', 'Depth of field', 'Motion', 'Lighting', 'Color', 'Processing', 'Framing', 'Subject separation', 'Balance', 'Visual hierarchy', 'Mood'])
       await expect(critique.getByRole('heading', { name: heading, exact: true })).toBeVisible();
@@ -162,13 +168,20 @@ export class PhotographDetailPage {
     await expect(critique).toContainText('Preserve the strong shapes');
     await expect(critique).not.toContainText('Explore quiet morning light');
   }
+  async expectArchivedSample() {
+    await expect(this.page.getByText('Your previous sample critique has been archived. Request a critique to analyse this photograph.')).toBeVisible();
+    await expect(this.critiqueStatus().getByRole('button', { name: 'Request critique', exact: true })).toBeEnabled();
+    await expect(this.page.getByRole('button', { name: 'Critique ready', exact: true })).toHaveCount(0);
+    await expect(this.page.getByRole('link', { name: 'Compare with a later attempt' })).toHaveCount(0);
+    await expect(this.page.getByText('Demo · illustrative sample', { exact: true })).toHaveCount(0);
+  }
   async expectNoCritique() { await expect(this.critique()).toContainText('No critique saved yet.'); }
   async expectCritiqueLoading() { await expect(this.critique().getByRole('status')).toHaveText('Loading critique…'); }
   async expectCritiqueFailure() { await expect(this.critique().getByRole('alert')).toHaveText('The saved critique could not be loaded. Try again.'); }
   async retryCritique() { await this.critique().getByRole('button', { name: 'Retry loading critique', exact: true }).click(); }
   async expectCritiqueFocus() { await expect(this.critique().getByRole('heading', { name: 'Photo critique', exact: true })).toBeFocused(); }
   deleteDialog() { return this.page.getByRole('dialog', { name: 'Delete “Study 01”?', exact: true }); }
-  async deletePhotograph() { await this.page.getByRole('button', { name: 'Delete photograph', exact: true }).click(); }
+  async deletePhotograph() { await this.openActionsMenu(); await this.page.getByRole('button', { name: 'Delete photograph', exact: true }).click(); }
   async expectDeleteConfirmation() {
     await expect(this.deleteDialog()).toBeVisible();
     await expect(this.deleteDialog()).toContainText('images, critique, notes, and capture settings');
@@ -256,6 +269,28 @@ export class PhotographDetailPage {
     await expect(this.page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();
     await expect(this.page.getByRole('img', { name: title, exact: true })).toBeVisible();
   }
+  async expectContentFitsViewport(title) {
+    await this.expectImage(title);
+    await this.page.evaluate(() => document.fonts.ready);
+    await expect.poll(() => this.page.evaluate(() =>
+      Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
+    ), { message: 'Photograph detail must not require horizontal scrolling' }).toBeLessThanOrEqual(0);
+    const heading = this.page.getByRole('heading', { level: 1, name: title, exact: true });
+    const titleBounds = await heading.evaluate(element => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      return [...range.getClientRects()].map(rect => ({ left: rect.left, right: rect.right }));
+    });
+    for (const bounds of titleBounds) {
+      expect(bounds.left, 'Title text must remain inside the viewport').toBeGreaterThanOrEqual(0);
+      expect(bounds.right, 'Title text must wrap without being clipped').toBeLessThanOrEqual(this.page.viewportSize().width);
+    }
+    for (const control of await this.page.getByRole('main').locator('button:visible, input:visible, textarea:visible, select:visible').all()) {
+      const box = await control.boundingBox();
+      expect(box.x, 'Detail controls must remain reachable without horizontal scrolling').toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(this.page.viewportSize().width);
+    }
+  }
   async openMissing() { await this.page.goto('/my-work/00000000-0000-4000-8000-999999999999'); }
   async expectSaved(title = 'Study 01') {
     await expect(this.page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible();
@@ -279,8 +314,10 @@ export class PhotographDetailPage {
   async expectAccessibleLayout(sideBySide) {
     const image = await this.page.getByRole('img', { name: 'Study 01', exact: true }).boundingBox();
     const context = await this.page.getByRole('region', { name: 'Critique brief', exact: true }).boundingBox();
-    if (sideBySide) expect(context.x).toBeGreaterThanOrEqual(image.x + image.width);
-    else expect(context.y).toBeGreaterThanOrEqual(image.y + image.height);
+    expect(context.y).toBeGreaterThanOrEqual(image.y + image.height);
+    const critique = await this.critique().boundingBox();
+    if (sideBySide) expect(critique.x).toBeGreaterThanOrEqual(image.x + image.width);
+    else expect(critique.y).toBeGreaterThanOrEqual(context.y + context.height);
     expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const audit = await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
     expect(audit.violations).toEqual([]);
@@ -381,5 +418,93 @@ export class PhotographDetailPage {
     expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
     expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
     await this.expectAccessibleBrief();
+  }
+  async openActionsMenu() {
+    if (!(await this.page.getByRole('main').getByRole('button', { name: 'Delete photograph', exact: true }).isVisible())) await this.page.getByRole('button', { name: 'More actions', exact: true }).click();
+  }
+  async expectMockCritiqueHierarchy() {
+    let previousBottom = 0;
+    for (const name of ['What works', 'Technical', 'Composition and story', 'Top three improvements', 'Practice exercise']) {
+      const heading = this.page.getByRole('heading', { name, exact: true });
+      await expect(heading).toBeVisible();
+      const box = await heading.boundingBox();
+      expect(box.y, `${name} must follow the preceding critique section`).toBeGreaterThanOrEqual(previousBottom);
+      previousBottom = box.y + box.height;
+    }
+    const notes = this.page.getByRole('heading', { name: 'Your notes', exact: true });
+    await expect(notes).toBeVisible();
+    expect((await notes.boundingBox()).y).toBeGreaterThanOrEqual(previousBottom);
+  }
+  async expectMockMediaAndBriefLayout(sideBySide) {
+    const image = await this.page.getByRole('img', { name: 'Study 01', exact: true }).boundingBox();
+    const briefHeading = this.page.getByRole('heading', { name: 'Your brief', exact: true });
+    await expect(briefHeading).toBeVisible();
+    const brief = await briefHeading.boundingBox();
+    const firstSection = await this.page.getByRole('heading', { name: 'What works', exact: true }).boundingBox();
+    expect(brief.y, 'The saved brief belongs beneath the photograph').toBeGreaterThanOrEqual(image.y + image.height);
+    if (sideBySide) {
+      expect(firstSection.x, 'The desktop critique sits to the right of the photograph').toBeGreaterThanOrEqual(image.x + image.width);
+      expect(brief.x).toBeLessThan(firstSection.x);
+    } else {
+      expect(firstSection.y, 'The mobile critique follows the photograph and brief').toBeGreaterThanOrEqual(brief.y + brief.height);
+    }
+  }
+  async expectHeaderCompareDestination(id) {
+    const compare = this.page.getByRole('link', { name: 'Compare with a later attempt', exact: true });
+    await expect(compare).toBeVisible();
+    await expect(compare).toHaveAttribute('href', `/compare?firstId=${id}`);
+    const firstSection = await this.page.getByRole('heading', { name: 'What works', exact: true }).boundingBox();
+    const action = await compare.boundingBox();
+    expect(action.y + action.height, 'Compare is available in the detail header').toBeLessThanOrEqual(firstSection.y);
+  }
+  async expectDetailActionsMenu() {
+    const regenerate = this.page.getByRole('button', { name: 'Regenerate critique', exact: true });
+    const remove = this.page.getByRole('button', { name: 'Delete photograph', exact: true });
+    await expect(regenerate).not.toBeVisible();
+    await expect(remove).not.toBeVisible();
+    const more = this.page.getByRole('button', { name: 'More actions', exact: true });
+    await more.click();
+    await expect(regenerate).toBeVisible();
+    await expect(remove).toBeVisible();
+    await more.click();
+    await expect(regenerate).not.toBeVisible();
+    await expect(remove).not.toBeVisible();
+  }
+  async followHeaderCompare(id) {
+    await this.page.getByRole('link', { name: 'Compare with a later attempt', exact: true }).click();
+    await expect(this.page).toHaveURL(new RegExp(`/compare\\?firstId=${id}$`));
+  }
+  evidenceArea(statement) { return this.page.getByRole('button', { name: `Show image area: ${statement}`, exact: true }); }
+  async hoverEvidence(statement) { await this.evidenceArea(statement).hover(); }
+  async leaveEvidence() { await this.page.mouse.move(0, 0); }
+  async focusEvidenceWithKeyboard(statement) {
+    await this.evidenceArea(statement).focus();
+    await this.page.keyboard.press('Shift+Tab');
+    await this.page.keyboard.press('Tab');
+    await expect(this.evidenceArea(statement)).toBeFocused();
+  }
+  async activateEvidenceWithKeyboard() { await this.page.keyboard.press('Enter'); }
+  async blurEvidence() { await this.page.keyboard.press('Tab'); }
+  async clickEvidence(statement) { await this.evidenceArea(statement).click(); }
+  async tapEvidence(statement) { await this.evidenceArea(statement).tap(); }
+  async dismissEvidence() { await this.page.keyboard.press('Escape'); }
+  async expectNoEvidenceHighlight() { await expect(this.page.locator('[data-evidence-region]')).not.toBeVisible(); }
+  async expectEvidenceRegion(region) {
+    const spotlight = this.page.locator('[data-evidence-region]');
+    await expect(spotlight).toBeVisible();
+    const image = await this.page.getByRole('img', { name: 'Study 01', exact: true }).boundingBox();
+    const spot = await spotlight.boundingBox();
+    expect(Math.abs(spot.width - image.width * region.size), 'Region diameter follows image width').toBeLessThanOrEqual(1);
+    expect(Math.abs(spot.height - spot.width), 'Evidence regions remain circular').toBeLessThanOrEqual(1);
+    expect(Math.abs(spot.x + spot.width / 2 - image.x - image.width * region.x), 'Region horizontal center stays aligned to image evidence').toBeLessThanOrEqual(1);
+    expect(Math.abs(spot.y + spot.height / 2 - image.y - image.height * region.y), 'Region vertical center stays aligned to image evidence').toBeLessThanOrEqual(1);
+    const radius = await spotlight.evaluate(element => getComputedStyle(element).borderTopLeftRadius);
+    const radiusPixels = radius.endsWith('%') ? parseFloat(radius) * spot.width / 100 : parseFloat(radius);
+    expect(radiusPixels, 'The highlight has a circular boundary').toBeGreaterThanOrEqual(spot.width / 2 - 1);
+  }
+  async expectNoEvidenceLoupes(statement) {
+    await this.expectCritiqueText(statement);
+    await expect(this.page.getByRole('button', { name: /^Show image area:/ })).toHaveCount(0);
+    await this.expectNoEvidenceHighlight();
   }
 }

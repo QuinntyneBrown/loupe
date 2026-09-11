@@ -1,9 +1,9 @@
 :host {
   display: block;
-  margin-top: var(--lp-space-8);
+  min-width: var(--lp-zero);
 }
 h2 {
-  font-size: var(--lp-text-2xl);
+  font-size: var(--lp-text-sm);
 }
 p {
   max-width: var(--lp-measure);
@@ -15,4 +15,15 @@ p {
 }
 [role='alert'] {
   color: var(--lp-color-danger);
+}
+
+.ready-status {
+  min-height: var(--lp-control-height-xs);
+  padding: var(--lp-zero);
+  border: none;
+  border-radius: var(--lp-zero);
+  background: transparent;
+  color: var(--lp-color-success);
+  font: var(--lp-text-xs) var(--lp-font-mono);
+  text-transform: uppercase;
 }

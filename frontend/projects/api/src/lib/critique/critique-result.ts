@@ -1,6 +1,13 @@
 import { CritiqueBrief } from '../photograph/critique-brief';
 
+export interface ImageRegion {
+  x: number;
+  y: number;
+  size: number;
+}
+
 export interface EvidenceStatement {
+  region?: ImageRegion | null;
   kind: 'VisibleObservation' | 'ExifFact' | 'Hypothesis' | 'StylisticPreference';
   statement: string;
   exifField: string | null;
