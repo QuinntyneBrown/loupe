@@ -53,3 +53,4 @@ export * from './lib/reference-analysis/reference-analysis.service.contract';
 export * from './lib/reference-analysis/reference-analysis.service';
 export * from './lib/reference-analysis/reference-suggestions';
 export * from './lib/reference-analysis/reference-suggestion-review';
+export * from './lib/reference/create-reference-photographer';

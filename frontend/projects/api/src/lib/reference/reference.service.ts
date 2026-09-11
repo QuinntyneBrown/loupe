@@ -1,4 +1,5 @@
 import { ReferenceLink, ReferenceLinkResult } from './reference-link';
+import { CreateReferencePhotographer } from './create-reference-photographer';
 import { ReferenceMetadata } from './reference-metadata';
 import { SESSION_SERVICE } from '../session/session.service.contract';
 import { UploadProgress } from '../common/upload-progress';
@@ -13,6 +14,32 @@ import { ServiceError } from '../common/service-error';
 
 @Injectable()
 export class ReferenceService implements IReferenceService {
+  async createPhotographer(
+    id: string,
+    input: CreateReferencePhotographer,
+  ): Promise<ReferenceResult> {
+    try {
+      return await firstValueFrom(
+        this.http.post<ReferenceResult>(
+          `/api/references/${encodeURIComponent(id)}/photographer`,
+          { revision: input.revision, name: input.name, portfolioUrl: input.portfolioUrl },
+          {
+            headers: {
+              'X-CSRF-Token': await this.session.getRequestToken(),
+              'Idempotency-Key': input.operationKey,
+            },
+            timeout: 15000,
+          },
+        ),
+      );
+    } catch (error) {
+      throw new ServiceError(
+        error instanceof HttpErrorResponse && typeof error.error?.code === 'string'
+          ? error.error.code
+          : 'request_failed',
+      );
+    }
+  }
   async setPhotographer(
     id: string,
     revision: number,

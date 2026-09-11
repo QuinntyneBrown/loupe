@@ -24,6 +24,8 @@ export class ReferenceDetailPage {
   async expectPhotographer(name,id) {await expect(this.page.getByRole('link',{name,exact:true}).first()).toHaveAttribute('href','/photographers/'+id);await expect(this.photographerDialog()).not.toBeVisible();}
   async expectPhotographerFailure() {await expect(this.photographerDialog().getByRole('alert')).toBeVisible();}
   async reviewPhotographer() {await this.photographerDialog().getByRole('button',{name:'Review latest reference',exact:true}).click();}
+  async newPhotographer(name,url) {await this.photographerDialog().getByRole('textbox',{name:'New photographer name',exact:true}).fill(name);if(url!==undefined)await this.photographerDialog().getByRole('textbox',{name:'Portfolio URL',exact:true}).fill(url);}
+  async expectNewPhotographer(name,url) {await expect(this.photographerDialog().getByRole('textbox',{name:'New photographer name',exact:true})).toHaveValue(name);await expect(this.photographerDialog().getByRole('textbox',{name:'Portfolio URL',exact:true})).toHaveValue(url);}
   textEditor(field) { return this.page.getByRole('region', { name: field === 'description' ? 'Description' : 'Your notes', exact: true }); }
   async editText(field, value) { await this.textEditor(field).getByRole('textbox').fill(value); }
   async saveText(field) { await this.textEditor(field).getByRole('button', { name: 'Save', exact: true }).click(); }

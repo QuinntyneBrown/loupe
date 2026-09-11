@@ -17,6 +17,7 @@ import {
   PhotographerSummary,
   ReferenceResult,
   ServiceError,
+  CreateReferencePhotographer,
 } from 'api';
 @Component({
   selector: 'lp-reference-photographer',
@@ -31,6 +32,9 @@ export class ReferencePhotographer {
   readonly reviewed = output<ReferenceResult>();
   readonly baseline = signal<ReferenceResult | null>(null);
   readonly selected = signal<ReferenceResult['photographer']>(null);
+  readonly newName = signal('');
+  readonly newUrl = signal('');
+  readonly createAttempt = signal<CreateReferencePhotographer | null>(null);
   readonly query = signal('');
   readonly items = signal<PhotographerSummary[]>([]);
   readonly cursor = signal<string | null>(null);
@@ -43,7 +47,10 @@ export class ReferencePhotographer {
   readonly error = signal('');
   readonly latest = signal<ReferenceResult | null>(null);
   readonly dirty = computed(
-    () => this.busy() || this.selected()?.id !== this.baseline()?.photographer?.id,
+    () =>
+      this.busy() ||
+      !!this.newName().trim() ||
+      this.selected()?.id !== this.baseline()?.photographer?.id,
   );
   private readonly photographers = inject(PHOTOGRAPHER_SERVICE);
   private readonly references = inject(REFERENCE_SERVICE);
@@ -82,7 +89,15 @@ export class ReferencePhotographer {
     this.timer = setTimeout(() => void this.load(), 200);
   }
   choose(item: PhotographerSummary): void {
+    this.newName.set('');
+    this.newUrl.set('');
     this.selected.set(item);
+    this.unavailable.set(false);
+    if (!this.stale()) this.error.set('');
+  }
+  enterName(value: string): void {
+    this.newName.set(value);
+    if (value.trim()) this.selected.set(null);
     this.unavailable.set(false);
     if (!this.stale()) this.error.set('');
   }
@@ -123,6 +138,7 @@ export class ReferencePhotographer {
       const latest = await this.references.get(this.reference().id);
       if (this.destroy.destroyed) return;
       this.baseline.set(latest);
+      this.createAttempt.set(null);
       this.latest.set(latest);
       this.reviewed.emit(latest);
       this.stale.set(false);
@@ -143,11 +159,52 @@ export class ReferencePhotographer {
   async save(): Promise<void> {
     const base = this.baseline(),
       selected = this.selected();
-    if (!base || !selected || this.busy() || this.stale() || this.unavailable()) return;
+    if (
+      !base ||
+      (!selected && !this.newName().trim()) ||
+      this.busy() ||
+      this.stale() ||
+      this.unavailable()
+    )
+      return;
+    if (this.newName().trim() && !this.createAttempt()) {
+      const name = this.newName().trim(),
+        portfolioUrl = this.newUrl().trim();
+      if (Array.from(name).length > 200 || name.includes('\0')) {
+        this.error.set('Enter a name using 200 characters or fewer, without null characters.');
+        return;
+      }
+      try {
+        const url = new URL(portfolioUrl);
+        if (
+          !['http:', 'https:'].includes(url.protocol) ||
+          url.username ||
+          url.password ||
+          url.port ||
+          /[\s\\]/u.test(portfolioUrl) ||
+          Array.from(portfolioUrl).length > 2048
+        )
+          throw new Error();
+      } catch {
+        this.error.set(
+          'Enter a public HTTP or HTTPS portfolio URL without credentials or a custom port.',
+        );
+        return;
+      }
+      this.createAttempt.set({
+        revision: base.revision,
+        name,
+        portfolioUrl,
+        operationKey: crypto.randomUUID(),
+      });
+    }
     this.busy.set(true);
     this.error.set('');
     try {
-      const result = await this.references.setPhotographer(base.id, base.revision, selected.id);
+      const attempt = this.createAttempt();
+      const result = attempt
+        ? await this.references.createPhotographer(base.id, attempt)
+        : await this.references.setPhotographer(base.id, base.revision, selected!.id);
       if (!this.destroy.destroyed) this.finish(result);
     } catch (error) {
       if (this.destroy.destroyed) return;
@@ -155,7 +212,7 @@ export class ReferencePhotographer {
         try {
           const latest = await this.references.get(base.id);
           if (this.destroy.destroyed) return;
-          if (latest.photographer?.id === selected.id) {
+          if (selected && latest.photographer?.id === selected.id) {
             this.finish(latest);
             return;
           }
@@ -163,6 +220,11 @@ export class ReferencePhotographer {
           if (this.destroy.destroyed) return;
         }
         this.stale.set(true);
+      }
+      if (error instanceof ServiceError && error.code === 'invalid_request') {
+        this.createAttempt.set(null);
+        this.error.set('Check the name and public portfolio URL. Nothing was added.');
+        return;
       }
       this.unavailable.set(error instanceof ServiceError && error.code === 'item_unavailable');
       this.error.set(

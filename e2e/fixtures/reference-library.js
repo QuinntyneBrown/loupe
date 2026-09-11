@@ -14,6 +14,7 @@ export class ReferenceLibrary {
     this.linkReceipts=new Map(); this.lostLinkResponses=0;
     this.updates = []; this.lostUpdateResponses = 0;
     this.imageReceipts = new Map();
+    this.photographerReceipts = new Map();
     this.deletions = new Map();
     this.uploadReceipts = new Map(); this.lostUploadResponses = 0;
     this.calls = []; this.failures = {}; this.errors = {}; this.gates = {};
@@ -145,6 +146,19 @@ export class ReferenceLibrary {
         item[input.field] = input.text.replace(/\r\n?/g, '\n').trim() || null;
         if (input.field === 'description') item.descriptionProvenance = item.description ? 'manual' : null;
         item.revision++; return { data: item };
+      }
+      if(operation==='createPhotographer') {
+        const item=this.items.find(item=>item.id===input.id);if(!item)return {error:'item_unavailable'};
+        const hash=JSON.stringify(input),receipt=this.photographerReceipts.get(input.operationKey);
+        if(receipt)return receipt===hash?{data:item}:{error:'operation_conflict'};
+        if(item.revision!==input.revision)return {error:'revision_conflict'};
+        const normalized=value=>{const url=new URL(value);url.hash='';return url.href;};
+        let photographer=this.photographerLibrary.items.find(item=>normalized(item.portfolioUrl)===normalized(input.portfolioUrl));
+        if(!photographer){photographer={id:crypto.randomUUID(),name:input.name,portfolioUrl:input.portfolioUrl,createdAt:new Date().toISOString(),revision:1,summary:null,notes:null,tags:[],referenceCount:1,references:[]};this.photographerLibrary.items.unshift(photographer);}
+        item.photographer={id:photographer.id,name:photographer.name,portfolioUrl:photographer.portfolioUrl};if(!item.attribution?.trim())item.attribution=photographer.name;item.revision++;
+        this.photographerReceipts.set(input.operationKey,hash);
+        if(this.lostCreatePhotographerResponses>0){this.lostCreatePhotographerResponses--;return {error:'request_failed'};}
+        return {data:item};
       }
       if(operation==='setPhotographer') {
         const item=this.items.find(item=>item.id===input.id);if(!item)return {error:'item_unavailable'};if(item.revision!==input.revision)return {error:'revision_conflict'};

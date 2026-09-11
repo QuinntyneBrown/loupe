@@ -5,6 +5,12 @@
   border: var(--lp-hairline) solid var(--lp-color-border);
   border-radius: var(--lp-radius-md);
 }
+.new-photographer {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-2);
+  padding: var(--lp-space-3);
+}
 .candidate {
   display: flex;
   align-items: center;

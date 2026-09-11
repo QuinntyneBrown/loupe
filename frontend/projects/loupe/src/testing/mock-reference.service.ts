@@ -1,4 +1,9 @@
-import { ReferenceMetadata, ReferenceLink, ReferenceLinkResult } from 'api';
+import {
+  ReferenceMetadata,
+  ReferenceLink,
+  ReferenceLinkResult,
+  CreateReferencePhotographer,
+} from 'api';
 import { ReferenceUpload, UploadProgress } from 'api';
 import { Injectable } from '@angular/core';
 import { IReferenceService, ReferencePage, ReferenceResult, ServiceError } from 'api';
@@ -6,6 +11,9 @@ import { ReferenceTag, ReferenceTagFacet } from 'api';
 
 @Injectable()
 export class MockReferenceService implements IReferenceService {
+  createPhotographer(id: string, input: CreateReferencePhotographer): Promise<ReferenceResult> {
+    return this.call('createPhotographer', { id, ...input });
+  }
   setPhotographer(
     id: string,
     revision: number,

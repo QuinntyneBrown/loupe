@@ -466,3 +466,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: two API cases received 405 for the missing endpoint.
 - GREEN: all 35 photographer API cases pass. The final Link transaction creates/reuses a private portfolio and links the reference together, with revision rollback and keyed retry. Existing metadata and supplied attribution survive.
 
+
+### Inline photographer creation in the reference picker
+- RED: three Chromium cases failed on the absent New photographer name field.
+- GREEN: all 39 reference-picker and photographer-detail cases pass. Entering a name reveals the required portfolio URL; final Link creates and links atomically, Cancel creates nothing, and lost-response retry retains one keyed request. Inspected desktop and 320px captures; picker results scroll and footer actions remain reachable.
+

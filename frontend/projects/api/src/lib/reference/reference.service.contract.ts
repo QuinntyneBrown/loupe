@@ -1,4 +1,5 @@
 import { ReferenceLink, ReferenceLinkResult } from './reference-link';
+import { CreateReferencePhotographer } from './create-reference-photographer';
 import { ReferenceMetadata } from './reference-metadata';
 import { ReferenceUpload } from './reference-upload';
 import { UploadProgress } from '../common/upload-progress';
@@ -7,6 +8,7 @@ import { ReferencePage, ReferenceResult } from './reference-result';
 import { ReferenceTag, ReferenceTagFacet } from './reference-tag';
 
 export interface IReferenceService {
+  createPhotographer(id: string, input: CreateReferencePhotographer): Promise<ReferenceResult>;
   setPhotographer(
     id: string,
     revision: number,

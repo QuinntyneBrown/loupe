@@ -26,3 +26,12 @@ test('retry reconciles a completed link whose response was lost',async ({page})=
 for(const width of [1280,320])test(`photographer picker remains accessible at ${width}px`,async ({page})=>{
  await page.setViewportSize({width,height:800});const {screen}=await setup(page);await screen.linkPhotographer();await screen.choosePhotographer('Photographer 01');await screen.expectSuggestionsAccessible();
 });
+test('inline creation requires a portfolio and creates nothing until Link',async ({page})=>{
+ const {screen,photographers}=await setup(page);await screen.linkPhotographer();await screen.newPhotographer('New Artist');await screen.confirmPhotographer();await screen.expectPhotographerFailure();expect(photographers.items).toHaveLength(26);await screen.newPhotographer('New Artist','https://new.example/');await screen.expectSuggestionsAccessible();await screen.confirmPhotographer();await screen.expectPhotographer('New Artist',photographers.items[0].id);expect(photographers.items).toHaveLength(27);
+});
+test('canceling inline creation does not save a bookmark',async ({page})=>{
+ const {screen,photographers}=await setup(page);await screen.linkPhotographer();await screen.newPhotographer('New Artist','https://new.example/');await screen.cancelPhotographer();expect(photographers.items).toHaveLength(26);
+});
+test('inline creation retains its keyed request after a lost response',async ({page})=>{
+ const {screen,photographers,references}=await setup(page);references.lostCreatePhotographerResponses=1;await screen.linkPhotographer();await screen.newPhotographer('New Artist','https://new.example/');await screen.confirmPhotographer();await screen.expectPhotographerFailure();await screen.expectNewPhotographer('New Artist','https://new.example/');await screen.confirmPhotographer();await screen.expectPhotographer('New Artist',photographers.items[0].id);expect(photographers.items).toHaveLength(27);expect(references.items[0].revision).toBe(2);
+});
