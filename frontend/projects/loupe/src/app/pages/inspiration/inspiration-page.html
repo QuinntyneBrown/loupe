@@ -51,13 +51,23 @@
       (loaded)="boards.set($event)"
       (newBoard)="editBoard()"
     />
-    <lp-reference-collection
-      [boardId]="boardId()"
-      [busy]="busy()"
-      (libraryCount)="libraryCount.set($event)"
-      (boardsRequested)="picker.set($event)"
-      (removeRequested)="remove($event)"
-    />
+    <div class="reference-content">
+      <lp-reference-filters
+        [boardId]="boardId()"
+        [selected]="tags()"
+        (changed)="filterTags($event)"
+        (more)="tagDialog.set($event)"
+      />
+      <lp-reference-collection
+        [boardId]="boardId()"
+        [tags]="tags()"
+        (clearTags)="filterTags([])"
+        [busy]="busy()"
+        (libraryCount)="libraryCount.set($event)"
+        (boardsRequested)="picker.set($event)"
+        (removeRequested)="remove($event)"
+      />
+    </div>
   </div>
   @if (editor(); as editor) {
     <lp-board-dialog
@@ -72,6 +82,15 @@
       [reference]="reference"
       (closed)="picker.set(null)"
       (saved)="membershipSaved($event)"
+    />
+  }
+  @if (tagDialog(); as choices) {
+    <lp-tag-filters-dialog
+      [tags]="choices"
+      [selected]="tags()"
+      [boardId]="boardId()"
+      (applied)="filterTags($event)"
+      (closed)="tagDialog.set(null)"
     />
   }
   @if (failure()) {

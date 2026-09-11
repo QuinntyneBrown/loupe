@@ -4,7 +4,7 @@ export class ReferenceLibrary {
     this.items = Array.from({ length: count }, (_, index) => ({
       id: `10000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
       title: `Reference ${String(index + 1).padStart(2, '0')}`, createdAt: '2026-09-08T12:00:00Z',
-      width: 800, height: 600, imageUrl, previewUrl: imageUrl, revision: 1, boardIds: [],
+      width: 800, height: 600, imageUrl, previewUrl: imageUrl, revision: 1, boardIds: [], tags: [],
       sourceUrl: 'https://source.example/photo', attribution: 'Supplied photographer', notes: 'Study the separation.\nKeep the source context.',
     }));
     this.importCalls=[];this.importOperations=new Map();this.importReceipts=new Map();this.importFailures={};this.importErrors={};this.lostImportResponses=0;
@@ -105,9 +105,19 @@ export class ReferenceLibrary {
         if(this.lostUploadResponses>0) { this.lostUploadResponses--; return {error:'request_failed'}; }
         return {data:item};
       }
+      if (operation === 'tags') {
+        const items = input.boardId ? this.items.filter(item => item.boardIds.includes(input.boardId)) : this.items;
+        const tags = new Map();
+        for (const item of items) for (const tag of item.tags) {
+          const key = tag.name.normalize('NFC').toUpperCase();
+          const current = tags.get(key) ?? { name: tag.name, referenceCount: 0 };
+          current.referenceCount++; tags.set(key, current);
+        }
+        return { data: [...tags.values()].sort((a,b) => b.referenceCount-a.referenceCount || a.name.localeCompare(b.name)) };
+      }
       if (operation === 'list') {
         if (input.boardId && !this.boards.some(board => board.id === input.boardId)) return { error: 'item_unavailable' };
-        const items = input.boardId ? this.items.filter(item => item.boardIds?.includes(input.boardId)) : this.items;
+        const items = this.items.filter(item => (!input.boardId || item.boardIds?.includes(input.boardId)) && (input.tags ?? []).every(tag => item.tags.some(active => active.name.normalize('NFC').toUpperCase() === tag.normalize('NFC').toUpperCase())));
         const start = Number(input.cursor ?? 0), end = Math.min(start + 24, items.length);
         return { data: { items: items.slice(start, end), nextCursor: end < items.length ? String(end) : null, totalCount: items.length, libraryCount: this.items.length } };
       }

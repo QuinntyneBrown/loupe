@@ -6,8 +6,8 @@ namespace Loupe.Application.References;
 
 public static class ReferenceListCursor
 {
-    public static string Scope(string ownerId, Guid? boardId, int pageSize) =>
-        Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { ownerId, boardId, pageSize })));
+    public static string Scope(string ownerId, Guid? boardId, int pageSize, string[] tags) =>
+        Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { ownerId, boardId, pageSize, tags })));
 
     public static string Encode(CreatedCursor position, string scope) => scope + "." + position.Encode();
 

@@ -7,6 +7,13 @@ namespace Loupe.Infrastructure.Persistence;
 
 public sealed class ReferenceTagStore(LibraryDbContext database) : IReferenceTagStore
 {
+    public async Task<IReadOnlyList<ReferenceTagFacet>> ListAsync(string ownerId, Guid? boardId, CancellationToken cancellationToken) =>
+        await database.References.AsNoTracking().Where(reference => reference.OwnerId == ownerId
+                && (boardId == null || reference.Boards.Any(item => item.BoardId == boardId)))
+            .SelectMany(reference => reference.Tags).GroupBy(tag => tag.NormalizedName)
+            .OrderByDescending(group => group.Count()).ThenBy(group => group.Key)
+            .Select(group => new ReferenceTagFacet(group.Min(tag => tag.Name)!, group.Count()))
+            .ToListAsync(cancellationToken);
     public async Task<Reference> ReplaceAsync(string ownerId, Guid referenceId, long revision, IReadOnlyList<ReferenceTagInput> tags, CancellationToken cancellationToken)
     {
         var reference = await database.References.Include(item => item.Boards).Include(item => item.Tags)
@@ -22,8 +29,15 @@ public sealed class ReferenceTagStore(LibraryDbContext database) : IReferenceTag
         {
             var existing = reference.Tags.SingleOrDefault(tag => tag.NormalizedName == key);
             if (existing is null)
-                reference.Tags.Add(new ReferenceTag { ReferenceId = referenceId, OwnerId = ownerId, NormalizedName = key,
-                    Name = input.Name!, Category = input.Category, Provenance = "manual" });
+                reference.Tags.Add(new ReferenceTag
+                {
+                    ReferenceId = referenceId,
+                    OwnerId = ownerId,
+                    NormalizedName = key,
+                    Name = input.Name!,
+                    Category = input.Category,
+                    Provenance = "manual"
+                });
             else if (existing.Name != input.Name || existing.Category != input.Category)
             {
                 existing.Name = input.Name!;

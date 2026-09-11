@@ -49,6 +49,14 @@ export class InspirationPage {
     await this.card(title).getByRole('button', { name: 'Remove from this board', exact: true }).click();
   }
   async undoRemoval() { await this.page.getByRole('button', { name: 'Undo', exact: true }).click(); }
+  async filterTag(name) { await this.page.getByRole('group', { name: 'Filter by tag', exact: true }).getByRole('button', { name, exact: true }).click(); }
+  async expectSelectedTag(name) { await expect(this.page.getByRole('group', { name: 'Filter by tag', exact: true }).getByRole('button', { name, exact: true })).toHaveAttribute('aria-pressed','true'); }
+  async clearTags() { await this.page.getByRole('button', { name: 'Clear tags', exact: true }).click(); }
+  async expectFilteredEmpty() { await expect(this.page.getByRole('heading', { name: 'Nothing matches these tags.', exact: true })).toBeVisible(); }
+  async openTagDialog() { await this.page.getByRole('button', { name: 'Filter by tag', exact: true }).click(); }
+  async selectDialogTag(name) { await this.page.getByRole('dialog', { name: 'Filter by tag', exact: true }).getByRole('button', { name, exact: true }).click(); }
+  async applyTagDialog(count) { await this.page.getByRole('dialog').getByRole('button', { name: `Show ${count} references`, exact: true }).click(); }
+  async closeTagDialog() { await this.page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click(); }
   async expectBoardActionFocus(title) { await expect(this.card(title).getByRole('button', { name: 'Add to boards', exact: true })).toBeFocused(); }
   async expectBoardError(message) { await expect(this.page.getByRole('dialog').getByRole('alert')).toHaveText(message); }
   async cancelBoardDialog() { await this.page.getByRole('dialog').getByRole('button', { name: 'Cancel', exact: true }).click(); }

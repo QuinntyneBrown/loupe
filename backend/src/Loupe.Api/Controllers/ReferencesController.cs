@@ -14,6 +14,9 @@ namespace Loupe.Api.Controllers;
 [Route("api/references")]
 public sealed class ReferencesController(ISender sender) : ControllerBase
 {
+    [HttpGet("tags")]
+    public Task<IReadOnlyList<ReferenceTagFacet>> Tags(CancellationToken cancellationToken, [FromQuery] Guid? boardId = null) =>
+        sender.Send(new ListReferenceTagsQuery(boardId), cancellationToken);
     [HttpPut("{id:guid}/tags")]
     public Task<ReferenceResult> SetTags(Guid id, SetReferenceTagsRequest request, CancellationToken cancellationToken) =>
         sender.Send(new SetReferenceTagsCommand(id, request.Revision, request.Tags), cancellationToken);
@@ -29,8 +32,8 @@ public sealed class ReferencesController(ISender sender) : ControllerBase
     }
 
     [HttpGet]
-    public Task<ReferencePage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null, [FromQuery] Guid? boardId = null) =>
-        sender.Send(new ListReferencesQuery(pageSize, cursor, boardId), cancellationToken);
+    public Task<ReferencePage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null, [FromQuery] Guid? boardId = null, [FromQuery] string[]? tags = null) =>
+        sender.Send(new ListReferencesQuery(pageSize, cursor, boardId, tags), cancellationToken);
 
     [HttpPost("images")]
     [RequestSizeLimit(UploadLimits.RequestBytes)]

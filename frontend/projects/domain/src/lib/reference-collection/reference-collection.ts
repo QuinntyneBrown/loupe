@@ -36,6 +36,8 @@ export class ReferenceCollection {
   readonly nextCursor = signal<string | null>(null);
   readonly skeletonTiles = Array.from({ length: 8 }, (_, index) => index);
   readonly boardId = input<string | null>(null);
+  readonly tags = input<string[]>([]);
+  readonly clearTags = output<void>();
   readonly busy = input(false);
   readonly boardsRequested = output<ReferenceSummary>();
   readonly removeRequested = output<ReferenceSummary>();
@@ -44,6 +46,7 @@ export class ReferenceCollection {
   constructor() {
     effect(() => {
       this.boardId();
+      this.tags();
       untracked(() => this.refresh());
     });
   }
@@ -65,6 +68,7 @@ export class ReferenceCollection {
       const page = await this.service.list(
         this.nextCursor() ?? undefined,
         this.boardId() ?? undefined,
+        this.tags(),
       );
       if (this.destroyed.destroyed || generation !== this.generation) return;
       this.items.update((items) => [

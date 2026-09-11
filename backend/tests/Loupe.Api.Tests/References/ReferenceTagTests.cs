@@ -17,9 +17,13 @@ public sealed class ReferenceTagTests(PostgreSqlFixture database) : IClassFixtur
         using var uploaded = await ReferenceFixture.SubmitAsync(owner);
         var original = await uploaded.Content.ReadFromJsonAsync<JsonElement>();
         var id = original.GetProperty("id").GetGuid();
-        using var saved = await owner.PutAsJsonAsync($"/api/references/{id}/tags", new { revision = 1, tags = new[] {
+        using var saved = await owner.PutAsJsonAsync($"/api/references/{id}/tags", new
+        {
+            revision = 1,
+            tags = new[] {
             new { name = " Cafe\u0301 ", category = "subject" }, new { name = "CAFÉ", category = "subject" },
-            new { name = "soft light", category = "lighting" } } });
+            new { name = "soft light", category = "lighting" } }
+        });
         Assert.Equal(HttpStatusCode.OK, saved.StatusCode);
         var result = await owner.GetFromJsonAsync<JsonElement>($"/api/references/{id}");
         Assert.Equal(2, result.GetProperty("revision").GetInt64());

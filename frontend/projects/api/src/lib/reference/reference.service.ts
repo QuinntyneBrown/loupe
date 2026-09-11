@@ -8,6 +8,7 @@ import { HttpClient, HttpErrorResponse, HttpEventType, HttpResponse } from '@ang
 import { filter, firstValueFrom, map, tap } from 'rxjs';
 import { IReferenceService } from './reference.service.contract';
 import { ReferencePage, ReferenceResult } from './reference-result';
+import { ReferenceTagFacet } from './reference-tag';
 import { ServiceError } from '../common/service-error';
 
 @Injectable()
@@ -98,8 +99,12 @@ export class ReferenceService implements IReferenceService {
       );
     }
   }
-  list(cursor?: string, boardId?: string): Promise<ReferencePage> {
+  tags(boardId?: string): Promise<ReferenceTagFacet[]> {
+    return this.read('/api/references/tags', boardId ? { boardId } : {});
+  }
+  list(cursor?: string, boardId?: string, tags: string[] = []): Promise<ReferencePage> {
     return this.read('/api/references', {
+      tags,
       ...(cursor ? { cursor } : {}),
       ...(boardId ? { boardId } : {}),
     });
@@ -107,7 +112,7 @@ export class ReferenceService implements IReferenceService {
   get(id: string): Promise<ReferenceResult> {
     return this.read('/api/references/' + encodeURIComponent(id));
   }
-  private async read<T>(url: string, params: Record<string, string> = {}): Promise<T> {
+  private async read<T>(url: string, params: Record<string, string | string[]> = {}): Promise<T> {
     try {
       return await firstValueFrom(this.http.get<T>(url, { params, timeout: 15000 }));
     } catch (error) {

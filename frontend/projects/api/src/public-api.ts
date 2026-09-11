@@ -37,3 +37,4 @@ export * from './lib/reference-import/reference-import.service';
 export * from './lib/board/board-result';
 export * from './lib/board/board.service.contract';
 export * from './lib/board/board.service';
+export * from './lib/reference/reference-tag';

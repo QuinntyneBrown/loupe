@@ -11,12 +11,14 @@ public sealed class ListReferencesQueryHandler(ICurrentOwner owner, IReferenceSt
     {
         if (request.PageSize is < 1 or > 100) throw new RequestValidationException("pageSize", "Choose between 1 and 100 items.");
         if (request.BoardId is { } boardId) await boards.RequireOwnedAsync(owner.Id, boardId, cancellationToken);
-        var scope = ReferenceListCursor.Scope(owner.Id, request.BoardId, request.PageSize);
-        var found = await references.ListAsync(owner.Id, request.PageSize + 1, ReferenceListCursor.Parse(request.Cursor, scope), request.BoardId, cancellationToken);
+        if (request.Tags?.Length > 10) throw new RequestValidationException("tags", "Choose up to 10 tags.");
+        var tags = (request.Tags ?? []).Select(tag => TagName.Validate(tag).ToUpperInvariant()).Distinct().Order(StringComparer.Ordinal).ToArray();
+        var scope = ReferenceListCursor.Scope(owner.Id, request.BoardId, request.PageSize, tags);
+        var found = await references.ListAsync(owner.Id, request.PageSize + 1, ReferenceListCursor.Parse(request.Cursor, scope), request.BoardId, tags, cancellationToken);
         var items = found.Take(request.PageSize).ToArray();
         var next = found.Count > request.PageSize ? ReferenceListCursor.Encode(new CreatedCursor(items[^1].CreatedAt, items[^1].Id), scope) : null;
-        var totalCount = await references.CountAsync(owner.Id, request.BoardId, cancellationToken);
-        var libraryCount = request.BoardId is null ? totalCount : await references.CountAsync(owner.Id, null, cancellationToken);
+        var totalCount = await references.CountAsync(owner.Id, request.BoardId, tags, cancellationToken);
+        var libraryCount = request.BoardId is null && tags.Length == 0 ? totalCount : await references.CountAsync(owner.Id, null, [], cancellationToken);
         return new ReferencePage(items, next, totalCount, libraryCount);
     }
 }

@@ -1,0 +1,44 @@
+<dialog #modal class="lp-dialog" aria-labelledby="tag-filters-title" (cancel)="cancel($event)">
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <h2 id="tag-filters-title" class="lp-dialog__title">Filter by tag</h2>
+      <button type="button" class="lp-icon-button" aria-label="Close" (click)="cancel()">
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body">
+      <div class="chips" role="group" aria-label="Tags">
+        @for (tag of choices(); track tag) {
+          <button
+            class="lp-chip"
+            type="button"
+            [attr.aria-pressed]="isSelected(tag)"
+            (click)="toggle(tag)"
+          >
+            {{ tag }}
+          </button>
+        }
+      </div>
+      @if (error()) {
+        <p role="alert">{{ error() }}</p>
+      }
+      @if (failed()) {
+        <p role="alert">The reference count could not be loaded.</p>
+        <button type="button" class="lp-button lp-button--secondary" (click)="preview()">
+          Retry reference count
+        </button>
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      <button type="button" class="lp-button lp-button--ghost" (click)="clear()">Clear</button
+      ><button
+        type="button"
+        class="lp-button lp-button--primary"
+        [disabled]="count() === null"
+        (click)="apply()"
+      >
+        {{ count() === null ? 'Counting references…' : 'Show ' + count() + ' references' }}
+      </button>
+    </footer>
+  </div>
+</dialog>

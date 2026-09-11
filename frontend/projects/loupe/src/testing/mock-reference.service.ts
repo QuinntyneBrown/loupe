@@ -2,6 +2,7 @@ import { ReferenceMetadata, ReferenceLink, ReferenceLinkResult } from 'api';
 import { ReferenceUpload, UploadProgress } from 'api';
 import { Injectable } from '@angular/core';
 import { IReferenceService, ReferencePage, ReferenceResult, ServiceError } from 'api';
+import { ReferenceTagFacet } from 'api';
 
 @Injectable()
 export class MockReferenceService implements IReferenceService {
@@ -44,8 +45,11 @@ export class MockReferenceService implements IReferenceService {
   update(id: string, revision: number, metadata: ReferenceMetadata): Promise<ReferenceResult> {
     return this.call('update', { id, revision, ...metadata });
   }
-  list(cursor?: string, boardId?: string): Promise<ReferencePage> {
-    return this.call('list', { cursor, boardId });
+  tags(boardId?: string): Promise<ReferenceTagFacet[]> {
+    return this.call('tags', { boardId });
+  }
+  list(cursor?: string, boardId?: string, tags: string[] = []): Promise<ReferencePage> {
+    return this.call('list', { cursor, boardId, tags });
   }
   get(id: string): Promise<ReferenceResult> {
     return this.call('get', { id });

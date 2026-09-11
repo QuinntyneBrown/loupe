@@ -3,6 +3,8 @@
   <nav aria-label="Boards" class="board-list">
     <a
       routerLink="/inspiration"
+      [queryParams]="{ boardId: null }"
+      queryParamsHandling="merge"
       [attr.aria-current]="!selectedId() ? 'page' : null"
       aria-label="All references"
     >
@@ -12,6 +14,7 @@
       <a
         routerLink="/inspiration"
         [queryParams]="{ boardId: board.id }"
+        queryParamsHandling="merge"
         [attr.aria-label]="board.name"
         [attr.aria-current]="selectedId() === board.id ? 'page' : null"
       >

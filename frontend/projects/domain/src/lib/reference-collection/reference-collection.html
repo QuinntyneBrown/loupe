@@ -25,15 +25,28 @@
   @if (loaded() && !items().length && !failed()) {
     <div class="lp-empty">
       <h2 class="lp-empty__title" #emptyHeading tabindex="-1">
-        {{ boardId() ? 'Nothing on this board yet.' : 'No references yet' }}
+        {{
+          tags().length
+            ? 'Nothing matches these tags.'
+            : boardId()
+              ? 'Nothing on this board yet.'
+              : 'No references yet'
+        }}
       </h2>
       <p class="lp-empty__text">
-        {{
-          boardId()
-            ? 'Save a new reference straight to it, or add existing ones from their detail view.'
-            : 'Your saved inspiration will appear here.'
-        }}
+        @if (tags().length) {
+          Try fewer tags, or describe what you're after in Search.
+        } @else if (boardId()) {
+          Save a new reference straight to it, or add existing ones from their detail view.
+        } @else {
+          Your saved inspiration will appear here.
+        }
       </p>
+      @if (tags().length) {
+        <button type="button" class="lp-button lp-button--secondary" (click)="clearTags.emit()">
+          Clear tags
+        </button>
+      }
     </div>
   }
   @if (failed()) {

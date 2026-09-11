@@ -10,3 +10,4 @@ export * from './lib/reference-detail/reference-detail-panel';
 export * from './lib/reference-upload/reference-image-panel';
 export * from './lib/reference-link/reference-link-panel';
 export * from './lib/board-navigation/board-navigation';
+export * from './lib/reference-filters/reference-filters';

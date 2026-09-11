@@ -1,0 +1,8 @@
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lp-space-2);
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}

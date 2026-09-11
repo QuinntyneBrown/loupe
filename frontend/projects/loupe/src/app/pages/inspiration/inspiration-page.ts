@@ -1,23 +1,44 @@
 import { RouterLink } from '@angular/router';
 import { Component, computed, DestroyRef, inject, input, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { BoardNavigation, ReferenceCollection } from 'domain';
+import { BoardNavigation, ReferenceCollection, ReferenceFilters } from 'domain';
 import {
   BOARD_SERVICE,
   BoardResult,
   REFERENCE_SERVICE,
   ReferenceResult,
   ReferenceSummary,
+  ReferenceTagFacet,
 } from 'api';
 import { BoardDialog } from '../../dialogs/board/board-dialog';
 import { BoardPicker } from '../../dialogs/board-picker/board-picker';
+import { TagFiltersDialog } from '../../dialogs/tag-filters/tag-filters-dialog';
 @Component({
   selector: 'lp-inspiration-page',
-  imports: [ReferenceCollection, RouterLink, BoardNavigation, BoardDialog, BoardPicker],
+  imports: [
+    ReferenceCollection,
+    RouterLink,
+    BoardNavigation,
+    BoardDialog,
+    BoardPicker,
+    ReferenceFilters,
+    TagFiltersDialog,
+  ],
   templateUrl: './inspiration-page.html',
   styleUrl: './inspiration-page.css',
 })
 export class InspirationPage {
+  readonly tags = input<string[], string | string[] | undefined>([], {
+    transform: (value) => (value === undefined ? [] : Array.isArray(value) ? value : [value]),
+  });
+  readonly tagDialog = signal<ReferenceTagFacet[] | null>(null);
+  async filterTags(tags: string[]): Promise<void> {
+    this.tagDialog.set(null);
+    await this.router.navigate([], {
+      queryParams: { tags: tags.length ? tags : null },
+      queryParamsHandling: 'merge',
+    });
+  }
   readonly boardId = input<string | null, string | undefined>(null, {
     transform: (value) => value ?? null,
   });

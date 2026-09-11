@@ -55,14 +55,19 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
         return reference;
     }
 
-    private IQueryable<Reference> Filtered(string ownerId, Guid? boardId) => database.References.AsNoTracking()
-        .Where(reference => reference.OwnerId == ownerId && (boardId == null || reference.Boards.Any(item => item.BoardId == boardId)));
-
-    public Task<int> CountAsync(string ownerId, Guid? boardId, CancellationToken cancellationToken) => Filtered(ownerId, boardId).CountAsync(cancellationToken);
-
-    public async Task<IReadOnlyList<ReferenceSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, Guid? boardId, CancellationToken cancellationToken)
+    private IQueryable<Reference> Filtered(string ownerId, Guid? boardId, string[] tags)
     {
-        var query = Filtered(ownerId, boardId);
+        var query = database.References.AsNoTracking()
+            .Where(reference => reference.OwnerId == ownerId && (boardId == null || reference.Boards.Any(item => item.BoardId == boardId)));
+        foreach (var tag in tags) query = query.Where(reference => reference.Tags.Any(item => item.NormalizedName == tag));
+        return query;
+    }
+
+    public Task<int> CountAsync(string ownerId, Guid? boardId, string[] tags, CancellationToken cancellationToken) => Filtered(ownerId, boardId, tags).CountAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<ReferenceSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, Guid? boardId, string[] tags, CancellationToken cancellationToken)
+    {
+        var query = Filtered(ownerId, boardId, tags);
         if (cursor is not null) query = query.Where(reference => reference.CreatedAt < cursor.CreatedAt
             || reference.CreatedAt == cursor.CreatedAt && reference.Id.CompareTo(cursor.Id) > 0);
         return await query.OrderByDescending(reference => reference.CreatedAt).ThenBy(reference => reference.Id).Take(count)

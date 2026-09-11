@@ -96,3 +96,19 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both API scenarios failed on the missing tags endpoint (404).
 - GREEN: 27 tag, board-membership, list and metadata-update integration cases passed.
 - Added an additive tag migration with owner-matched cascading foreign keys.
+
+### Collection tag filters
+- RED: API filtering returned 3 board members instead of 2 tag matches and
+  accepted an excessive filter list. Desktop/mobile Chromium cases failed on
+  the absent filter controls.
+- Fixed an EF translation failure in the tag-facet query: order grouped values
+  before constructing response records; captured the exception in the API test.
+- GREEN: 16 API filter/tag/membership/list cases and 20 Chromium collection/board/
+  filter cases passed. Matching happens before pagination; multiple tags use AND,
+  counts remain private, cursor scope includes filters, and unknown tags return
+  an empty result. Null tag entries produce a validation response.
+- Mobile changes preview the count and apply explicitly; closing discards them.
+  Selections survive URL reload. Updated two older read-only request assertions
+  to include the newly required tag-facet request without allowing writes.
+- Inspected 1440px collection and 375px filter-sheet screenshots; no page overflow.
+  Production Angular build passed with the existing initial-bundle warning.

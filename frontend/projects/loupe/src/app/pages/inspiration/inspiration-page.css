@@ -87,3 +87,8 @@ p {
     bottom: calc(var(--lp-tabbar-height) + var(--lp-space-4));
   }
 }
+.reference-content {
+  display: grid;
+  gap: var(--lp-space-5);
+  min-width: var(--lp-zero);
+}

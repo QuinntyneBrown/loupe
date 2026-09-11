@@ -16,7 +16,7 @@ test('reference cards expose attribution and a safe source action on keyboard fo
   const { inspiration } = await setup(page, 1);
   await inspiration.open();
   await inspiration.expectSourceOverlay('Reference 01', 'Supplied photographer', 'https://source.example/photo');
-  expect(inspiration.library.calls).toEqual(['list']);
+  expect([...inspiration.library.calls].sort()).toEqual(['list', 'tags']);
 });
 
 test('reference cards never invent missing attribution, source, or image', async ({ page }) => {
@@ -46,7 +46,7 @@ test('L2-009.1/L2-012.1/3/4: page references and reopen a full image with a safe
   await inspiration.openReference('Reference 25'); await detail.expectSaved(inspiration.library.items[24]);
   await page.reload(); await signIn.continue(); await detail.expectSaved(inspiration.library.items[24]);
   await detail.openSourceSafely(inspiration.library.items[24].sourceUrl);
-  expect(inspiration.library.calls.every(call => ['list', 'get'].includes(call))).toBe(true);
+  expect(inspiration.library.calls.every(call => ['list', 'get', 'tags'].includes(call))).toBe(true);
 });
 
 test('L2-009.2: unknown source and attribution remain explicitly unknown', async ({ page }) => {
