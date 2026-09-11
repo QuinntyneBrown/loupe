@@ -1,0 +1,142 @@
+WEBVTT
+
+00:00:00.092 --> 00:00:02.962
+This is the reference mock for the critique page.
+
+00:00:03.276 --> 00:00:06.987
+The design gives the photograph room to breathe, with the brief below
+
+00:00:06.987 --> 00:00:08.909
+it and feedback alongside it.
+
+00:00:10.545 --> 00:00:14.757
+Here is the working Angular page, using the same shoreline image.
+
+00:00:15.072 --> 00:00:19.466
+All critique text in this recording is a fixture, because no AI key
+
+00:00:19.466 --> 00:00:20.534
+is configured.
+
+00:00:20.848 --> 00:00:25.611
+The large image, compact status, restrained type, and comparison action
+
+00:00:25.611 --> 00:00:26.692
+follow the mock.
+
+00:00:28.265 --> 00:00:29.872
+What works comes first.
+
+00:00:30.186 --> 00:00:34.293
+Hovering an evidence loupe reveals the matching area of the photograph.
+
+00:00:34.607 --> 00:00:38.857
+The circular thumbnail is a real crop, and the spotlight helps connect
+
+00:00:38.857 --> 00:00:41.267
+each observation to visible detail.
+
+00:00:42.852 --> 00:00:45.722
+Click to pin a region while the pointer moves away.
+
+00:00:46.036 --> 00:00:47.906
+Escape clears the selection.
+
+00:00:48.207 --> 00:00:52.852
+Keyboard focus reveals the same evidence, so this interaction is available
+
+00:00:52.852 --> 00:00:53.985
+without a mouse.
+
+00:00:55.572 --> 00:00:58.074
+Technical feedback follows the strengths.
+
+00:00:58.375 --> 00:01:02.403
+Exposure, focus, light, and colour stay grouped together.
+
+00:01:02.717 --> 00:01:06.205
+The image remains alongside the discussion as we scroll.
+
+00:01:06.506 --> 00:01:11.205
+Evidence without a location stays readable without an invented crop.
+
+00:01:12.812 --> 00:01:17.299
+Composition and story comes next, covering framing, separation,
+
+00:01:17.299 --> 00:01:19.590
+balance, hierarchy, and mood.
+
+00:01:19.891 --> 00:01:23.958
+The single column of observations keeps the critique easy to scan,
+
+00:01:24.378 --> 00:01:25.998
+matching the mock hierarchy.
+
+00:01:27.625 --> 00:01:31.403
+The top three improvements turn observations into actions.
+
+00:01:31.704 --> 00:01:36.127
+Each item explains what is visible, why it matters, and what to try.
+
+00:01:36.441 --> 00:01:40.114
+Evidence loupes still connect these priorities back to the frame.
+
+00:01:41.705 --> 00:01:45.773
+A boxed practice exercise suggests the next experiment.
+
+00:01:46.087 --> 00:01:49.615
+Personal notes remain separate from generated feedback.
+
+00:01:49.929 --> 00:01:53.916
+Here, saving a note updates the saved state without replacing the
+
+00:01:53.916 --> 00:01:54.694
+critique.
+
+00:01:56.292 --> 00:01:58.952
+Secondary actions live in the more menu.
+
+00:01:59.266 --> 00:02:03.239
+Regeneration requires confirmation, and the current critique stays
+
+00:02:03.239 --> 00:02:06.123
+available while a replacement runs or fails.
+
+00:02:06.424 --> 00:02:09.149
+Cancelling leaves the saved critique untouched.
+
+00:02:10.732 --> 00:02:15.457
+The primary action opens comparison with this photograph already selected.
+
+00:02:15.772 --> 00:02:19.456
+We choose a second fixture attempt to read both saved critiques side
+
+00:02:19.456 --> 00:02:22.615
+by side, without requesting new analysis.
+
+00:02:24.212 --> 00:02:28.409
+At mobile width, the heading, photograph, brief, and critique stack
+
+00:02:28.409 --> 00:02:29.845
+into one reading flow.
+
+00:02:30.146 --> 00:02:34.646
+The page fits the viewport without horizontal scrolling, and the circular
+
+00:02:34.646 --> 00:02:36.872
+evidence controls remain available.
+
+00:02:38.465 --> 00:02:42.399
+This tour demonstrated the real interface with clearly labelled fixture
+
+00:02:42.399 --> 00:02:43.256
+content.
+
+00:02:43.557 --> 00:02:47.899
+No AI request was made, and production Demo execution stays
+
+00:02:47.899 --> 00:02:48.638
+removed.
+
+00:02:48.939 --> 00:02:52.217
+A configured provider key enables real critiques.

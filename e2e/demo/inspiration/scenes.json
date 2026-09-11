@@ -1,0 +1,47 @@
+[
+  {
+    "id": "reference",
+    "title": "The Inspiration mock",
+    "text": "The Inspiration mock puts the image collection beside a boards sidebar, with tag filters above it. Card overlays show titles and photographer labels. These names and images are demonstration placeholders."
+  },
+  {
+    "id": "layout",
+    "title": "The working Inspiration page",
+    "text": "Here is the real Angular interface with the same first twelve images. The heading, navigation, restrained colours, and image grid carry through. This recording uses in-memory fixtures, with no production writes or AI requests."
+  },
+  {
+    "id": "comparison",
+    "title": "Mock and implementation side by side",
+    "text": "The difference is visible side by side. The mock has boards, counts, and tag filters. The current page uses the full width for references, with saved status and dates in the card captions. Boards, filtering, and on-card board actions are still mock-only."
+  },
+  {
+    "id": "browse",
+    "title": "Browse the saved collection",
+    "text": "The collection opens with twenty-four references. Load more brings in the remaining item. Titles open each saved reference, keeping browsing separate from the detailed source information and personal study notes."
+  },
+  {
+    "id": "detail",
+    "title": "Keep the source and your notes",
+    "text": "A reference opens into its own detail page. The photograph stays connected to its source, attribution, and notes. Edit metadata lets us record what to study, then save that context back to the fixture library."
+  },
+  {
+    "id": "link",
+    "title": "Save a source for later",
+    "text": "Save link keeps a source URL with an optional title, attribution, and notes. Saving opens a link-only reference. It does not invent a preview or fetch the source. The separate import action is shown here but is not submitted."
+  },
+  {
+    "id": "recovery",
+    "title": "A recoverable loading failure",
+    "text": "This is a deliberately simulated loading failure. The page gives a clear error and a retry action. Retrying restores the image collection. The demonstration verifies the recovery as well as the successful browsing path."
+  },
+  {
+    "id": "mobile",
+    "title": "Inspiration at mobile width",
+    "text": "At three hundred and seventy-five pixels, the working collection reflows to fit the screen without horizontal scrolling. The save and upload entry points remain available, and each reference still opens through its title."
+  },
+  {
+    "id": "close",
+    "title": "What matches, and what remains",
+    "text": "The working page delivers collection browsing, reference details, notes, and saving source links. The mock goes further with boards and tag filtering. This comparison preserves those visible gaps, so the video demonstrates the current product honestly."
+  }
+]

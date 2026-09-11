@@ -1,0 +1,62 @@
+[
+  {
+    "id": "reference",
+    "title": "The reference mock",
+    "text": "This is the reference mock for the critique page. The design gives the photograph room to breathe, with the brief below it and feedback alongside it."
+  },
+  {
+    "id": "layout",
+    "title": "From mock to working page",
+    "text": "Here is the working Angular page, using the same shoreline image. All critique text in this recording is a fixture, because no AI key is configured. The large image, compact status, restrained type, and comparison action follow the mock."
+  },
+  {
+    "id": "evidence",
+    "title": "Evidence that points into the image",
+    "text": "What works comes first. Hovering an evidence loupe reveals the matching area of the photograph. The circular thumbnail is a real crop, and the spotlight helps connect each observation to visible detail."
+  },
+  {
+    "id": "keyboard",
+    "title": "Hover, pin, and clear",
+    "text": "Click to pin a region while the pointer moves away. Escape clears the selection. Keyboard focus reveals the same evidence, so this interaction is available without a mouse."
+  },
+  {
+    "id": "technical",
+    "title": "Technical feedback with context",
+    "text": "Technical feedback follows the strengths. Exposure, focus, light, and colour stay grouped together. The image remains alongside the discussion as we scroll. Evidence without a location stays readable without an invented crop."
+  },
+  {
+    "id": "composition",
+    "title": "Composition and story",
+    "text": "Composition and story comes next, covering framing, separation, balance, hierarchy, and mood. The single column of observations keeps the critique easy to scan, matching the mock hierarchy."
+  },
+  {
+    "id": "priorities",
+    "title": "Three practical improvements",
+    "text": "The top three improvements turn observations into actions. Each item explains what is visible, why it matters, and what to try. Evidence loupes still connect these priorities back to the frame."
+  },
+  {
+    "id": "notes",
+    "title": "Practice, then personal notes",
+    "text": "A boxed practice exercise suggests the next experiment. Personal notes remain separate from generated feedback. Here, saving a note updates the saved state without replacing the critique."
+  },
+  {
+    "id": "regenerate",
+    "title": "Deliberate regeneration",
+    "text": "Secondary actions live in the more menu. Regeneration requires confirmation, and the current critique stays available while a replacement runs or fails. Cancelling leaves the saved critique untouched."
+  },
+  {
+    "id": "compare",
+    "title": "Compare a later attempt",
+    "text": "The primary action opens comparison with this photograph already selected. We choose a second fixture attempt to read both saved critiques side by side, without requesting new analysis."
+  },
+  {
+    "id": "mobile",
+    "title": "A responsive reading order",
+    "text": "At mobile width, the heading, photograph, brief, and critique stack into one reading flow. The page fits the viewport without horizontal scrolling, and the circular evidence controls remain available."
+  },
+  {
+    "id": "close",
+    "title": "Ready for real analysis",
+    "text": "This tour demonstrated the real interface with clearly labelled fixture content. No AI request was made, and production Demo execution stays removed. A configured provider key enables real critiques."
+  }
+]
