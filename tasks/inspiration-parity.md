@@ -248,3 +248,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both API cases failed on absent analysis routes.
 - GREEN: 17 analysis/import/text/deletion cases pass. An owned image admits one durable owner-scoped operation; keyed retry and equivalent active requests reuse it, current state survives restart, and active metadata is unchanged.
 - Link-only, stale, foreign and unconfigured requests are rejected. The durable input contains image keys and image revision, never personal notes.
+
+### Visual-analysis invalidation
+- RED: both replacement/deletion cases left the old analysis Queued.
+- GREEN: all 9 analysis-admission/replacement/deletion cases pass. Replacement serializes with admission, cancels prior work and clears its current pointer; deletion cancels analysis and clears durable input/output.
+- Provider implementation reference checked against official OpenAI [image inputs](https://developers.openai.com/api/docs/guides/images-vision) and [structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs). The existing Azure deployment remains the configured target.

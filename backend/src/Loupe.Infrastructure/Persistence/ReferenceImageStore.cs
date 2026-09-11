@@ -12,10 +12,15 @@ public sealed class ReferenceImageStore(LibraryDbContext database, IImageStore i
     {
         // The receipt owns the transaction and media lock. Lock operations before their resource, as the worker does.
         if (database.Database.CurrentTransaction is null) throw new InvalidOperationException("Image replacement requires a transaction.");
+        await AnalysisAdmissionLock.AcquireAsync(database, ownerId, cancellationToken);
         await database.BackgroundOperations.Where(operation => operation.ResourceId == id && operation.OwnerId == ownerId
-            && operation.Type == OperationType.ReferenceImport && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running))
+            && (operation.Type == OperationType.ReferenceImport || operation.Type == OperationType.ReferenceAnalysis)
+            && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running))
             .ExecuteUpdateAsync(setters => setters.SetProperty(operation => operation.Status, OperationStatus.Canceled)
                 .SetProperty(operation => operation.LeaseToken, (Guid?)null)
+                .SetProperty(operation => operation.InputJson, (string?)null).SetProperty(operation => operation.OutputJson, (string?)null)
+                .SetProperty(operation => operation.NextAttemptAt, (DateTimeOffset?)null).SetProperty(operation => operation.RetryAvailableAt, (DateTimeOffset?)null)
+                .SetProperty(operation => operation.Message, "The image was replaced.")
                 .SetProperty(operation => operation.LeaseExpiresAt, (DateTimeOffset?)null)
                 .SetProperty(operation => operation.CompletedAt, clock.GetUtcNow())
                 .SetProperty(operation => operation.UpdatedAt, clock.GetUtcNow()), cancellationToken);
@@ -27,6 +32,7 @@ public sealed class ReferenceImageStore(LibraryDbContext database, IImageStore i
         reference.Width = image.Width;
         reference.Height = image.Height;
         reference.CurrentImportOperationId = null;
+        reference.CurrentAnalysisOperationId = null;
         reference.Revision++;
         reference.ImageRevision++;
         await database.SaveChangesAsync(cancellationToken);

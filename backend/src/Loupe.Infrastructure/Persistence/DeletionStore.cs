@@ -29,7 +29,8 @@ public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock)
             && item.ResourceType == "reference" && item.ResourceId == id, cancellationToken);
         if (previous is not null) return previous;
         var now = clock.GetUtcNow();
-        await database.BackgroundOperations.Where(item => item.OwnerId == ownerId && item.Type == OperationType.ReferenceImport && item.ResourceId == id)
+        await database.BackgroundOperations.Where(item => item.OwnerId == ownerId
+            && (item.Type == OperationType.ReferenceImport || item.Type == OperationType.ReferenceAnalysis) && item.ResourceId == id)
             .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.Status, item =>
                     item.Status == OperationStatus.Queued || item.Status == OperationStatus.Running ? OperationStatus.Canceled : item.Status)
                 .SetProperty(item => item.InputJson, (string?)null).SetProperty(item => item.OutputJson, (string?)null)

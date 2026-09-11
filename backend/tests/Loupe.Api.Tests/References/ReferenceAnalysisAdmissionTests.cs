@@ -54,4 +54,26 @@ public sealed class ReferenceAnalysisAdmissionTests(PostgreSqlFixture database) 
         using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/references/{id}/analysis") { Content = JsonContent.Create(new { revision }) };
         request.Headers.Add("Idempotency-Key", key ?? Guid.NewGuid().ToString()); return await client.SendAsync(request);
     }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Replacing_or_deleting_cancels_analysis_of_the_old_image(bool delete)
+    {
+        await using var factory = Factory(); using var owner = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        using var upload = await ReferenceFixture.SubmitAsync(owner); var id = (await upload.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        using var admission = await Submit(owner, id, 1); admission.EnsureSuccessStatusCode();
+        var operationId = (await admission.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        using var change = delete ? await owner.DeleteAsync($"/api/references/{id}?revision=1")
+            : await ReferenceFixture.SubmitAsync(owner, new Dictionary<string, string> { ["revision"] = "1" }, path: $"/api/references/{id}/image", method: HttpMethod.Put);
+        change.EnsureSuccessStatusCode();
+        var operation = await owner.GetFromJsonAsync<JsonElement>($"/api/operations/{operationId}");
+        Assert.Equal("Canceled", operation.GetProperty("status").GetString());
+        if (!delete)
+        {
+            using var current = await owner.GetAsync($"/api/references/{id}/analysis"); Assert.Equal(HttpStatusCode.NoContent, current.StatusCode);
+            using var replacement = await Submit(owner, id, 2); Assert.Equal(HttpStatusCode.Accepted, replacement.StatusCode);
+            Assert.NotEqual(operationId, (await replacement.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid());
+        }
+    }
 }
