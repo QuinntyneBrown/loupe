@@ -376,3 +376,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: five Chromium cases failed on the missing Add photographer control.
 - GREEN: all ten Add/collection cases pass. Reading creates a private draft; preview supports edits, tags and final Save. Cancel does not create a bookmark, blocked pages permit manual entry, existing portfolios are detected, and lost save responses retry the retained operation key.
 
+
+### Add photographer mock states and accessibility
+- RED: four new cases exposed the absent manual description, extra preview Cancel action and inappropriate validation Retry. Mobile Axe then caught the wrapped tag input target; the mock optional-label colour also failed contrast.
+- GREEN: all 14 Add/collection Chromium cases pass, including desktop/mobile Axe. Preview follows Back/Add, manual fallback saves an owner-written description, validation asks for corrections, chip input has an adequate hit area, and the modal body scrolls with footer actions visible. Optional text uses the accessible secondary text token.
+

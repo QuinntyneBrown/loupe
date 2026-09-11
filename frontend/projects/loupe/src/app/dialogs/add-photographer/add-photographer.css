@@ -22,10 +22,39 @@
   color: var(--lp-color-danger);
 }
 .lp-chip-input {
+  display: flex;
   flex-wrap: wrap;
+  gap: var(--lp-space-2);
+  align-items: center;
+  min-height: var(--lp-control-height);
+  padding: var(--lp-space-1) var(--lp-space-2);
+  border: var(--lp-hairline) solid var(--lp-color-border-strong);
+  border-radius: var(--lp-radius-md);
+}
+.lp-chip-input:focus-within {
+  border-color: var(--lp-color-focus);
+  box-shadow: var(--lp-zero) var(--lp-zero) var(--lp-zero) var(--lp-ring-width) var(--lp-color-ring);
 }
 .lp-chip-input input {
+  flex: var(--lp-fraction);
   min-width: var(--lp-zero);
+  height: var(--lp-control-height-xs);
+  border: var(--lp-zero);
+  background: none;
+  padding: var(--lp-zero) var(--lp-space-1);
+  font: inherit;
+  font-size: var(--lp-text-sm);
+}
+.lp-field__label--row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--lp-space-3);
+}
+.lp-field__optional {
+  font-weight: var(--lp-weight-regular);
+  color: var(--lp-color-text-2);
+  font-size: var(--lp-text-xs);
 }
 @media (width < 640px) {
   .fields {

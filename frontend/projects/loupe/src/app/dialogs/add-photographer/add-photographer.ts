@@ -45,6 +45,7 @@ export class AddPhotographer {
   readonly saving = signal(false);
   readonly closing = signal(false);
   readonly error = signal('');
+  readonly retryable = signal(false);
   readonly conflict = signal(false);
   readonly saveAttempt = signal<SavePhotographerDraftInput | null>(null);
   readonly locked = computed(() => this.saving() || this.closing() || !!this.saveAttempt());
@@ -100,6 +101,7 @@ export class AddPhotographer {
     this.description.set(value);
   }
   addTag(event: Event): void {
+    this.retryable.set(false);
     event.preventDefault();
     const name = this.tag().trim().normalize('NFC');
     if (!name) return;
@@ -122,6 +124,7 @@ export class AddPhotographer {
   }
   async read(): Promise<void> {
     if (this.closing()) return;
+    this.retryable.set(false);
     if (this.phase() === 'form') {
       if (!this.validUrl()) return;
       if (Array.from(this.name().trim()).length > 200) {
@@ -145,8 +148,10 @@ export class AddPhotographer {
       const result = await this.pendingRead;
       if (this.active(generation)) this.consume(result, generation);
     } catch {
-      if (this.active(generation))
+      if (this.active(generation)) {
+        this.retryable.set(true);
         this.error.set("Couldn't read the page. Try again; your details are kept.");
+      }
     }
   }
   private consume(result: PhotographerDraftResult, generation: number): void {
@@ -175,6 +180,7 @@ export class AddPhotographer {
     } catch {
       if (this.active(generation)) {
         this.retryAction = 'read';
+        this.retryable.set(true);
         this.error.set("Couldn't check the page. Try again; your details are kept.");
       }
     }
@@ -212,6 +218,7 @@ export class AddPhotographer {
   async save(): Promise<void> {
     const draft = this.draft();
     if (!draft || this.saving() || this.closing()) return;
+    this.retryable.set(false);
     const retrying = !!this.saveAttempt();
     if (!this.saveAttempt()) {
       if (!this.name().trim() || Array.from(this.name().trim()).length > 200) {
@@ -260,10 +267,12 @@ export class AddPhotographer {
       } else if (code === 'invalid_request') {
         this.saveAttempt.set(null);
         this.error.set('Check the name, website, and field lengths. Nothing was added.');
-      } else
+      } else {
+        this.retryable.set(true);
         this.error.set(
           "Couldn't add this photographer. Your details are kept. Try again to check the same save.",
         );
+      }
     } finally {
       if (!this.destroy.destroyed) this.saving.set(false);
     }
@@ -291,6 +300,7 @@ export class AddPhotographer {
   async cancel(back = false): Promise<boolean> {
     if (this.saving() || this.closing()) return false;
     this.closing.set(true);
+    this.retryable.set(false);
     this.error.set('');
     this.retryAction = 'cancel';
     ++this.generation;
@@ -328,8 +338,10 @@ export class AddPhotographer {
       } else this.closed.emit(uncertainSave);
       return true;
     } catch {
-      if (!this.destroy.destroyed)
+      if (!this.destroy.destroyed) {
+        this.retryable.set(true);
         this.error.set("Couldn't close this preview. Try again to cancel the page read.");
+      }
       return false;
     } finally {
       if (!this.destroy.destroyed) this.closing.set(false);
