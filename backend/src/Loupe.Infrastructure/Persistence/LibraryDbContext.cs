@@ -41,6 +41,7 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Photographer>().Property(item => item.SourceRevision).HasDefaultValue(1L);
         modelBuilder.Entity<Photographer>().Property(item => item.SourceJson).HasColumnType("jsonb");
         modelBuilder.Entity<Photographer>().Property(item => item.SuggestionsJson).HasColumnType("jsonb");
+        modelBuilder.Entity<Photographer>().Property(item => item.SuggestionUndoJson).HasColumnType("jsonb");
         modelBuilder.Entity<Photographer>().HasIndex(item => new { item.OwnerId, item.CreatedAt, item.Id });
         modelBuilder.Entity<Photographer>().Property<string>("PortfolioHash").HasMaxLength(32).HasComputedColumnSql("md5(loupe_normalize_source(\"PortfolioUrl\"))", stored: true);
         modelBuilder.Entity<Photographer>().HasIndex("OwnerId", "PortfolioHash");

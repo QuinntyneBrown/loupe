@@ -90,11 +90,44 @@ public sealed class PhotographerSummaryWorkerTests(PostgreSqlFixture database) :
         await using var scope = factory.Services.CreateAsyncScope();
         return await scope.ServiceProvider.GetRequiredService<ISender>().Send(new RunPhotographerSummaryCommand());
     }
+
+    [Theory]
+    [InlineData("summary", "accept")]
+    [InlineData("tag", "accept")]
+    [InlineData("all", "accept")]
+    [InlineData("all", "dismiss")]
+    public async Task Reviewing_suggestions_changes_only_explicitly_accepted_fields_and_can_be_undone(string target, string decision)
+    {
+        using var pages = new ControlledSourceTransport((request, _) => Task.FromResult(request.RequestUri!.AbsolutePath == "/robots.txt"
+            ? new HttpResponseMessage(HttpStatusCode.NotFound)
+            : new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("<main>Casey makes portraits.</main>", Encoding.UTF8, "text/html") }));
+        using var ai = new ControlledSourceTransport((_, _) => Task.FromResult(Output("{\"summary\":\"Casey makes portraits.\",\"tags\":[{\"name\":\"portrait\",\"category\":\"genre\"}],\"unavailableReason\":null}")));
+        await using var factory = Factory(pages, ai); using var owner = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        var id = await SaveAndAdmit(owner); await Process(factory, owner, id);
+        var suggestions = await owner.GetFromJsonAsync<JsonElement>($"/api/photographers/{id}/suggestions");
+        var before = await owner.GetFromJsonAsync<JsonElement>($"/api/photographers/{id}");
+        var revision = before.GetProperty("revision").GetInt64(); var operationId = suggestions.GetProperty("operationId").GetGuid();
+        var input = new { revision, operationId, target, decision, name = "portrait", value = target == "summary" ? "Edited summary" : target == "tag" ? "Portrait practice" : null, category = target == "tag" ? "technique" : null };
+        using var stranger = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString()); using var foreign = await stranger.PutAsJsonAsync($"/api/photographers/{id}/suggestions", input); Assert.Equal(HttpStatusCode.NotFound, foreign.StatusCode);
+        using var reviewed = await owner.PutAsJsonAsync($"/api/photographers/{id}/suggestions", input); reviewed.EnsureSuccessStatusCode();
+        var result = await reviewed.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("Private notes", result.GetProperty("notes").GetString());
+        Assert.Equal(target == "summary" ? "Edited summary" : target == "all" && decision == "accept" ? "Casey makes portraits." : "Manual summary", result.GetProperty("summary").GetString());
+        if (target == "summary") Assert.Equal("edited-ai", result.GetProperty("summaryProvenance").GetString());
+        var tags = result.GetProperty("tags").EnumerateArray().ToArray();
+        Assert.Contains(tags, tag => tag.GetProperty("name").GetString() == "study" && tag.GetProperty("provenance").GetString() == "manual");
+        Assert.Equal(decision == "accept" && target != "summary" ? 2 : 1, tags.Length);
+        if (target == "tag") Assert.Contains(tags, tag => tag.GetProperty("name").GetString() == "Portrait practice" && tag.GetProperty("provenance").GetString() == "edited-ai");
+        using var stale = await owner.PutAsJsonAsync($"/api/photographers/{id}/suggestions", input); Assert.Equal(HttpStatusCode.Conflict, stale.StatusCode);
+        using var undone = await owner.PostAsJsonAsync($"/api/photographers/{id}/suggestions/undo", new { revision = result.GetProperty("revision").GetInt64() }); undone.EnsureSuccessStatusCode();
+        var original = await undone.Content.ReadFromJsonAsync<JsonElement>(); Assert.Equal("Manual summary", original.GetProperty("summary").GetString()); Assert.Equal("manual", original.GetProperty("summaryProvenance").GetString()); Assert.Single(original.GetProperty("tags").EnumerateArray());
+        var pending = await owner.GetFromJsonAsync<JsonElement>($"/api/photographers/{id}/suggestions"); Assert.Equal("pending", pending.GetProperty("summaryStatus").GetString());
+    }
     private static HttpResponseMessage Output(string text) => new(HttpStatusCode.OK)
     { Content = JsonContent.Create(new { status = "completed", output = new[] { new { type = "message", content = new[] { new { type = "output_text", text } } } } }) };
     private static async Task<Guid> SaveAndAdmit(HttpClient owner)
     {
-        using var save = new HttpRequestMessage(HttpMethod.Post, "/api/photographers") { Content = JsonContent.Create(new { name = "Casey", portfolioUrl = "https://portfolio.example/", summary = "Manual summary", notes = "Private notes" }) };
+        using var save = new HttpRequestMessage(HttpMethod.Post, "/api/photographers") { Content = JsonContent.Create(new { name = "Casey", portfolioUrl = "https://portfolio.example/", summary = "Manual summary", notes = "Private notes", tags = new[] { new { name = "study", category = "mood" } } }) };
         save.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString()); using var saved = await owner.SendAsync(save); saved.EnsureSuccessStatusCode();
         var id = (await saved.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("photographer").GetProperty("id").GetGuid();
         using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/photographers/{id}/summary-analysis") { Content = JsonContent.Create(new { revision = 1 }) };

@@ -43,6 +43,7 @@ public sealed class PhotographerSummaryWorkStore(LibraryDbContext database, IOpe
             var json = JsonSerializer.Serialize(saved);
             photographer.SourceJson = JsonSerializer.Serialize(source); photographer.CapturedSourceRevision = input.SourceRevision;
             photographer.SourceFailureCode = null; photographer.SuggestionsJson = json; photographer.Revision++;
+            photographer.SuggestionUndoJson = null;
             current.OutputJson = json;
             Finish(current, OperationStatus.Succeeded, now, result.Summary is null
                 ? "Summary unavailable. This page does not contain enough information."

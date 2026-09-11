@@ -31,6 +31,7 @@ public static class PersistenceSetup
         services.AddScoped<IPhotographerStore, PhotographerStore>();
         services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSummaryStore, PhotographerSummaryStore>();
         services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSummaryQueue, PhotographerSummaryQueue>();
+        services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSuggestionStore, PhotographerSuggestionStore>();
         services.AddSingleton<Loupe.Application.PhotographerSummaries.IPhotographerSummaryConfiguration, PhotographerSummaryConfiguration>();
         services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSummaryProvider, AzureOpenAiPhotographerSummaryProvider>();
         services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSummaryWorkStore, PhotographerSummaryWorkStore>();

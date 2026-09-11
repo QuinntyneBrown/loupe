@@ -495,3 +495,8 @@ be established without printing credentials. Live quality checks are mandatory.
 ### Summary lifecycle edge cases
 - All 10 summary API cases pass, including late model responses after URL changes/deletion and the sixth save at a full five-operation owner queue. Canceled work cannot publish; queue pressure leaves manual content and the new bookmark intact.
 
+
+### Photographer suggestion review and Undo
+- RED: four API cases received 405 for missing review actions.
+- GREEN: all 49 photographer API cases pass. Individual summary/tag and bulk accept/dismiss preserve unrelated manual fields, record accepted/edited provenance, reject stale/foreign review, and support revision-protected Undo. Review writes lock the bookmark to avoid concurrent tag insertion races.
+
