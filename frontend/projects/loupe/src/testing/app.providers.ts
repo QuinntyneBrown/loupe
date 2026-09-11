@@ -12,11 +12,14 @@ import { MockPhotographService } from './mock-photograph.service';
 import { COMPARISON_SERVICE } from 'api';
 import { MockComparisonService } from './mock-comparison.service';
 import { BOARD_SERVICE } from 'api';
+import { PHOTOGRAPHER_SERVICE } from 'api';
+import { MockPhotographerService } from './mock-photographer.service';
 import { MockBoardService } from './mock-board.service';
 import { REFERENCE_DRAFT_SERVICE } from 'api';
 import { MockReferenceDraftService } from './mock-reference-draft.service';
 
 export const appProviders = [
+  { provide: PHOTOGRAPHER_SERVICE, useClass: MockPhotographerService },
   { provide: REFERENCE_ANALYSIS_SERVICE, useClass: MockReferenceAnalysisService },
   { provide: REFERENCE_DRAFT_SERVICE, useClass: MockReferenceDraftService },
   { provide: BOARD_SERVICE, useClass: MockBoardService },

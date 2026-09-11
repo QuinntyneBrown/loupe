@@ -344,3 +344,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: the linked-reference collection returned 404.
 - GREEN: all 19 photographer API cases pass. Linked references page 24 at a time with private scoped cursors. Collection cards include full counts and at most three newest references through bounded projections; unlinking immediately changes the result set.
 
+
+### Photographer collection UI
+- Initial RED encountered the absent page; after implementation the new page object's full navigation reset the in-memory session. Correcting its sign-in flow exposed an additional real RED: portfolio links failed target-size checks.
+- GREEN: five collection Chromium cases pass at 1440, 768 and 375px, including Axe, paging and failure recovery. All 13 Inspiration regressions passed during the first implementation run. Portfolio hit areas now meet the minimum target size.
+- Desktop/mobile mock screenshots and implementation screenshots inspected. The read-only collection is in place; Add photographer, destination detail and shared navigation follow in later slices.
+

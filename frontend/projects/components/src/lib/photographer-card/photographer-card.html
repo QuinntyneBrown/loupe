@@ -1,0 +1,51 @@
+<article>
+  <a class="card-link" [routerLink]="destination()" [attr.aria-label]="'Open ' + name()"></a>
+  <div class="head">
+    <h2>{{ name() }}</h2>
+    @if (portfolio(); as source) {
+      <a
+        class="domain"
+        [href]="source.url"
+        target="_blank"
+        rel="noopener noreferrer"
+        referrerpolicy="no-referrer"
+        [attr.aria-label]="'Open ' + source.host"
+        >{{ source.host
+        }}<svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-external" /></svg
+      ></a>
+    }
+  </div>
+  @if (summary()) {
+    <p class="description">{{ summary() }}</p>
+  }
+  @if (tags().length) {
+    <div class="lp-tags">
+      @for (tag of tags(); track tag) {
+        <span class="lp-tag lp-tag--plain">{{ tag }}</span>
+      }
+    </div>
+  }
+  <div class="foot">
+    <div class="thumbs">
+      @for (reference of references(); track reference.id) {
+        @if (reference.previewUrl && !failedImages().includes(reference.id)) {
+          <img
+            [src]="reference.previewUrl"
+            alt=""
+            loading="lazy"
+            (error)="imageFailed(reference.id)"
+          />
+        } @else {
+          <span class="placeholder" role="img" [attr.aria-label]="reference.title + ': no image'"
+            ><svg class="lp-icon" aria-hidden="true"><use href="#i-image" /></svg
+          ></span>
+        }
+      }
+    </div>
+    <span class="count">{{
+      referenceCount()
+        ? referenceCount() + (referenceCount() === 1 ? ' reference' : ' references')
+        : 'No references yet'
+    }}</span>
+  </div>
+</article>

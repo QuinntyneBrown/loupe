@@ -7,9 +7,11 @@ import { DELETION_SERVICE, DeletionService } from 'api';
 import { CRITIQUE_SERVICE, CritiqueService } from 'api';
 import { COMPARISON_SERVICE, ComparisonService } from 'api';
 import { BOARD_SERVICE, BoardService } from 'api';
+import { PHOTOGRAPHER_SERVICE, PhotographerService } from 'api';
 import { REFERENCE_DRAFT_SERVICE, ReferenceDraftService } from 'api';
 
 export const appProviders = [
+  { provide: PHOTOGRAPHER_SERVICE, useClass: PhotographerService },
   { provide: REFERENCE_ANALYSIS_SERVICE, useClass: ReferenceAnalysisService },
   { provide: REFERENCE_DRAFT_SERVICE, useClass: ReferenceDraftService },
   { provide: BOARD_SERVICE, useClass: BoardService },

@@ -18,6 +18,13 @@ import { ComparePage } from './pages/compare/compare-page';
 
 export const routes: Routes = [
   {
+    path: 'photographers',
+    loadComponent: () =>
+      import('./pages/photographers/photographers-page').then((module) => module.PhotographersPage),
+    canActivate: [sessionGuard],
+    title: 'Photographers · Loupe',
+  },
+  {
     path: 'inspiration',
     component: InspirationPage,
     canActivate: [sessionGuard],
