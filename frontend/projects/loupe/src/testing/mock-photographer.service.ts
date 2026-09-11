@@ -20,8 +20,8 @@ export class MockPhotographerService implements IPhotographerService {
   ): Promise<PhotographerResult> {
     return this.call('update', { id, ...input });
   }
-  async list(cursor?: string): Promise<PhotographerPage> {
-    return this.call('list', { cursor });
+  async list(cursor?: string, query?: string): Promise<PhotographerPage> {
+    return this.call('list', { cursor, query });
   }
   get(id: string): Promise<PhotographerResult> {
     return this.call('get', { id });

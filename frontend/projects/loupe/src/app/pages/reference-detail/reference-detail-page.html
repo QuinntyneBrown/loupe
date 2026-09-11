@@ -8,8 +8,25 @@
     (replaceImageRequested)="replacingImage.set($event)"
     (deleteRequested)="deletingReference.set($event)"
     (boardsRequested)="pickingBoards.set($event)"
+    (photographerRequested)="linkingPhotographer.set($event)"
   />
 </main>
+@if (linkingPhotographer(); as item) {
+  <lp-reference-photographer
+    [reference]="item"
+    (closed)="closePhotographer()"
+    (saved)="closePhotographer($event)"
+  />
+}
+@if (photographerNotice(); as photographer) {
+  <div class="photographer-notice" role="status">
+    <span>Linked to {{ photographer.name }}.</span
+    ><a [routerLink]="'/photographers/' + photographer.id">View</a
+    ><button class="lp-icon-button" aria-label="Dismiss" (click)="photographerNotice.set(null)">
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
+    </button>
+  </div>
+}
 @if (pickingBoards(); as item) {
   <lp-board-picker [reference]="item" (closed)="closeBoards()" (saved)="closeBoards($event)" />
 }

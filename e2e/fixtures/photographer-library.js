@@ -46,13 +46,14 @@ export class PhotographerLibrary {
           return { error: "request_failed" };
         }
         if (operation === "list") {
+          const query=(input.query||'').toLowerCase();const matches=this.items.filter(item=>[item.name,item.portfolioUrl,item.summary,item.notes,...item.tags.map(tag=>tag.name)].some(value=>value?.toLowerCase().includes(query)));
           const offset = Number(input.cursor || 0);
           return {
             data: {
-              items: this.items.slice(offset, offset + 24),
+              items: matches.slice(offset, offset + 24),
               nextCursor:
-                offset + 24 < this.items.length ? String(offset + 24) : null,
-              totalCount: this.items.length,
+                offset + 24 < matches.length ? String(offset + 24) : null,
+              totalCount: matches.length,
             },
           };
         }

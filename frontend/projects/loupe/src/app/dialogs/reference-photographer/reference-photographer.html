@@ -1,0 +1,103 @@
+<dialog
+  #modal
+  class="lp-dialog"
+  aria-labelledby="link-photographer-title"
+  (cancel)="cancel($event)"
+>
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="link-photographer-title">Link a photographer</h2>
+        <p class="lp-dialog__text">Attribution stays with the reference and shows up in search.</p>
+      </div>
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Close"
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body">
+      <input
+        class="lp-input"
+        type="search"
+        aria-label="Search your photographers"
+        placeholder="Search your photographers"
+        autofocus
+        [ngModel]="query()"
+        (ngModelChange)="search($event)"
+        [disabled]="busy()"
+      />
+      <div
+        class="picker-list"
+        role="radiogroup"
+        aria-label="Photographers"
+        [attr.aria-busy]="loading()"
+      >
+        @for (item of items(); track item.id) {
+          <label class="candidate"
+            ><input
+              type="radio"
+              name="photographer"
+              [checked]="selected()?.id === item.id"
+              [disabled]="busy()"
+              (change)="selected.set(item)"
+            /><span class="candidate-text"
+              ><span>{{ item.name }}</span
+              ><span class="meta"
+                >{{ host(item.portfolioUrl) }} · {{ item.referenceCount }} references</span
+              ></span
+            ></label
+          >
+        }
+      </div>
+      @if (loading()) {
+        <p role="status">Loading photographers…</p>
+      }
+      @if (loadFailed()) {
+        <p role="alert">Couldn't load your photographers.</p>
+        <button class="lp-button lp-button--secondary" (click)="load()">Try again</button>
+      } @else if (cursor()) {
+        <button
+          class="lp-button lp-button--secondary"
+          [disabled]="loading() || busy()"
+          (click)="load()"
+        >
+          Load more
+        </button>
+      } @else if (total() === 0) {
+        <p>No photographers match this search.</p>
+      }
+      @if (error()) {
+        <p role="alert">{{ error() }}</p>
+      }
+      @if (stale() && !unavailable()) {
+        <button class="lp-button lp-button--secondary" [disabled]="busy()" (click)="review()">
+          Review latest reference
+        </button>
+      }
+      @if (latest(); as item) {
+        <section aria-label="Latest saved details">
+          <h3>Latest saved details</h3>
+          <p>{{ item.title }}</p>
+          <p>{{ item.photographer?.name || 'No photographer' }}</p>
+          <p>{{ item.notes || 'No notes saved.' }}</p>
+        </section>
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" [disabled]="busy()" (click)="cancel()">
+        Cancel</button
+      ><button
+        class="lp-button lp-button--primary"
+        [disabled]="busy() || stale() || unavailable() || !selected()"
+        (click)="save()"
+      >
+        {{ busy() ? 'Linking…' : 'Link' }}
+      </button>
+    </footer>
+  </div>
+</dialog>

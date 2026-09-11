@@ -148,7 +148,8 @@ export class ReferenceLibrary {
       }
       if(operation==='setPhotographer') {
         const item=this.items.find(item=>item.id===input.id);if(!item)return {error:'item_unavailable'};if(item.revision!==input.revision)return {error:'revision_conflict'};
-        item.photographer=input.photographerId?{id:input.photographerId,name:'Photographer 01',portfolioUrl:'https://portfolio1.example/work'}:null;item.revision++;if(this.lostPhotographerResponses>0){this.lostPhotographerResponses--;return {error:'request_failed'};}return {data:item};
+        const selected=this.photographerLibrary?.items.find(item=>item.id===input.photographerId);if(this.photographerLibrary&&input.photographerId&&!selected)return {error:'item_unavailable'};
+        item.photographer=input.photographerId?{id:input.photographerId,name:selected?.name??'Photographer 01',portfolioUrl:selected?.portfolioUrl??'https://portfolio1.example/work'}:null;item.revision++;if(this.lostPhotographerResponses>0){this.lostPhotographerResponses--;return {error:'request_failed'};}return {data:item};
       }
       if (operation === 'replaceImage') {
         const item = this.items.find(item => item.id === input.id);

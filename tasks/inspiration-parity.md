@@ -451,3 +451,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: the list ignored query text (25 results instead of two) and accepted null-character/oversized queries.
 - GREEN: all 33 photographer API cases pass. Bookmark fields and active tags are searched before paging with literal wildcard handling, owner isolation and query-scoped cursors. Queries are bounded to 200 Unicode scalars.
 
+
+### Reference photographer picker
+- RED: three acceptance cases failed on the absent Link a photographer action.
+- GREEN: the three cases pass. Search reaches bookmarks beyond page one; linking and changing preserve supplied attribution. Cancel does not mutate, and explicit stale review preserves newer reference metadata.
+

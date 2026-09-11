@@ -14,6 +14,16 @@ export class ReferenceDetailPage {
   async expectSuggestionActionDisabled(name, disabled = true) { const button = this.suggestions().getByRole('button', { name, exact: true }); if (disabled) await expect(button).toBeDisabled(); else await expect(button).toBeEnabled(); }
   async expectSuggestionsAccessible() { expect((await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]); expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true); }
   constructor(page) { this.page = page; }
+  photographerDialog() {return this.page.getByRole('dialog',{name:'Link a photographer',exact:true});}
+  async linkPhotographer() {await this.page.getByRole('button',{name:'Link a photographer',exact:true}).click();}
+  async changePhotographer() {await this.page.getByLabel('More actions',{exact:true}).click();await this.page.getByRole('button',{name:'Change photographer',exact:true}).click();}
+  async searchPhotographers(query) {await this.photographerDialog().getByRole('searchbox',{name:'Search your photographers',exact:true}).fill(query);}
+  async choosePhotographer(name) {await this.photographerDialog().getByRole('radio',{name:new RegExp('^'+name+' ')}).check();}
+  async confirmPhotographer() {await this.photographerDialog().getByRole('button',{name:'Link',exact:true}).click();}
+  async cancelPhotographer() {await this.photographerDialog().getByRole('button',{name:'Cancel',exact:true}).click();await expect(this.photographerDialog()).not.toBeVisible();}
+  async expectPhotographer(name,id) {await expect(this.page.getByRole('link',{name,exact:true}).first()).toHaveAttribute('href','/photographers/'+id);await expect(this.photographerDialog()).not.toBeVisible();}
+  async expectPhotographerFailure() {await expect(this.photographerDialog().getByRole('alert')).toBeVisible();}
+  async reviewPhotographer() {await this.photographerDialog().getByRole('button',{name:'Review latest reference',exact:true}).click();}
   textEditor(field) { return this.page.getByRole('region', { name: field === 'description' ? 'Description' : 'Your notes', exact: true }); }
   async editText(field, value) { await this.textEditor(field).getByRole('textbox').fill(value); }
   async saveText(field) { await this.textEditor(field).getByRole('button', { name: 'Save', exact: true }).click(); }

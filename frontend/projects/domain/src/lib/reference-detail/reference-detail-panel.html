@@ -22,6 +22,14 @@
               type="button"
               class="lp-button lp-button--ghost"
               [disabled]="dirty()"
+              (click)="requestPhotographer(menu, item)"
+            >
+              Change photographer
+            </button>
+            <button
+              type="button"
+              class="lp-button lp-button--ghost"
+              [disabled]="dirty()"
               (click)="requestImage(menu, item)"
             >
               Replace image
@@ -37,6 +45,23 @@
           </div>
         </details>
       </div>
+      <p class="lp-detail__meta">
+        @if (item.photographer; as photographer) {
+          by
+          <a class="lp-link" [routerLink]="'/photographers/' + photographer.id">{{
+            photographer.name
+          }}</a>
+        } @else {
+          <span>No photographer yet.</span
+          ><button
+            class="lp-button lp-button--ghost lp-button--sm"
+            [disabled]="dirty()"
+            (click)="photographerRequested.emit(item)"
+          >
+            Link a photographer
+          </button>
+        }
+      </p>
       <p class="lp-detail__meta">
         Saved
         <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'mediumDate' }}</time>

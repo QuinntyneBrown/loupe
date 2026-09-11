@@ -18,12 +18,14 @@ import {
   viewChildren,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { REFERENCE_SERVICE, ReferenceResult, ServiceError } from 'api';
 
 @Component({
   selector: 'lp-reference-detail-panel',
   imports: [
     DatePipe,
+    RouterLink,
     ReferenceMetadataEditor,
     ReferenceImportPanel,
     ReferenceTags,
@@ -35,6 +37,11 @@ import { REFERENCE_SERVICE, ReferenceResult, ServiceError } from 'api';
   styleUrl: './reference-detail-panel.css',
 })
 export class ReferenceDetailPanel {
+  readonly photographerRequested = output<ReferenceResult>();
+  requestPhotographer(menu: HTMLDetailsElement, item: ReferenceResult): void {
+    menu.open = false;
+    this.photographerRequested.emit(item);
+  }
   readonly boardsRequested = output<ReferenceResult>();
   private readonly boardsPanel = viewChild(ReferenceBoards);
   focusBoards(): void {

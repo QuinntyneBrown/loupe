@@ -12,7 +12,7 @@ export interface PhotographerReferencePage {
 
 export interface IPhotographerService {
   candidates(id: string, query: string, cursor?: string): Promise<ReferenceCandidatePage>;
-  list(cursor?: string): Promise<PhotographerPage>;
+  list(cursor?: string, query?: string): Promise<PhotographerPage>;
   get(id: string): Promise<PhotographerResult>;
   update(
     id: string,

@@ -38,8 +38,8 @@ export class PhotographerService implements IPhotographerService {
       );
     }
   }
-  async list(cursor?: string): Promise<PhotographerPage> {
-    return this.read('/api/photographers', cursor);
+  async list(cursor?: string, query?: string): Promise<PhotographerPage> {
+    return this.read('/api/photographers', cursor, query);
   }
   get(id: string): Promise<PhotographerResult> {
     return this.read(`/api/photographers/${encodeURIComponent(id)}`);
