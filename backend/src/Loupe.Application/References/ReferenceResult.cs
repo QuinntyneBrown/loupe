@@ -7,8 +7,8 @@ public sealed record ReferenceResult(Guid Id, string Title, DateTimeOffset Creat
 {
     public static ReferenceResult From(Reference reference) => new(reference.Id, reference.Title, reference.CreatedAt,
         reference.SourceUrl, reference.Attribution, reference.Notes, reference.Width, reference.Height,
-        reference.ImageKey is null ? null : $"/api/references/{reference.Id}/image",
-        reference.PreviewKey is null ? null : $"/api/references/{reference.Id}/preview", reference.Revision,
+        reference.ImageKey is null ? null : $"/api/references/{reference.Id}/image" + (reference.ImageRevision > 1 ? $"?v={reference.ImageRevision}" : ""),
+        reference.PreviewKey is null ? null : $"/api/references/{reference.Id}/preview" + (reference.ImageRevision > 1 ? $"?v={reference.ImageRevision}" : ""), reference.Revision,
         reference.Boards.Select(item => item.BoardId).Order().ToArray(),
         reference.Tags.OrderBy(tag => tag.Name, StringComparer.OrdinalIgnoreCase).Select(tag => new ReferenceTagResult(tag.Name, tag.Category, tag.Provenance)).ToArray());
 }

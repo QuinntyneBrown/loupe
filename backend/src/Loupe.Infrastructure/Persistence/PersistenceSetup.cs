@@ -26,6 +26,7 @@ public static class PersistenceSetup
         services.AddScoped<ISessionStore, SessionStore>();
         services.AddScoped<IPhotographStore, PhotographStore>();
         services.AddScoped<IReferenceStore, ReferenceStore>();
+        services.AddScoped<IReferenceImageStore, ReferenceImageStore>();
         services.AddScoped<Loupe.Application.ReferenceDrafts.IReferenceDraftStore, ReferenceDraftStore>();
         services.AddScoped<IReferenceTagStore, ReferenceTagStore>();
         services.AddScoped<IBoardStore, BoardStore>();

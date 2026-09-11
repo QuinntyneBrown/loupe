@@ -208,3 +208,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - GREEN: all 21 board/filter/collection cases pass. Remove keeps 47 displayed entries, Undo restores 48 and keyboard focus, and the existing cursor loads the remaining entries without duplication.
 - Membership success updates the displayed collection and board counts without resetting its pages; restoration respects the current board and tags.
 
+
+### Reference image replacement API
+- Given an owned reference, replacing its image preserves metadata, boards and tags; stale/foreign/unsupported replacements leave it unchanged, and retrying one operation does not apply it twice.
+- RED: both cases returned 405 because replacement was absent.
+- GREEN: all 42 replacement/upload/metadata/membership/source-worker cases pass. Separate image revision invalidates image and preview URLs without changing them for editorial updates.
+- The invalid-byte assertion follows the existing 415 unsupported-media contract; successful decoding and unchanged saved content remain asserted. Initial regression caught metadata URL churn and SQL identifier quoting; both were corrected.

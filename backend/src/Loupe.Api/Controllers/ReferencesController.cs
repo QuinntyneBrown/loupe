@@ -53,6 +53,14 @@ public sealed class ReferencesController(ISender sender) : ControllerBase
     public Task<ReferenceResult> Update(Guid id, UpdateReferenceRequest request, CancellationToken cancellationToken) =>
         sender.Send(new UpdateReferenceCommand(id, request.Revision, request.Title, request.SourceUrl, request.Attribution, request.Notes), cancellationToken);
 
+    [HttpPut("{id:guid}/image")]
+    [RequestSizeLimit(UploadLimits.RequestBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = UploadLimits.RequestBytes)]
+    public Task<ReferenceResult> ReplaceImage(Guid id, [FromForm] ReplaceReferenceImageRequest request,
+        [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken) =>
+        sender.Send(new ReplaceReferenceImageCommand(id, request.Revision, new ImageUpload(request.Image.OpenReadStream,
+            request.Image.FileName, request.Image.ContentType, request.Image.Length), operationKey, Request.Form.Files.Count), cancellationToken);
+
     [HttpGet("{id:guid}/image")]
     public async Task<IActionResult> Image(Guid id, CancellationToken cancellationToken)
     {
