@@ -80,7 +80,7 @@
     </div>
     <section aria-labelledby="references-title" [attr.aria-busy]="referenceLoading()">
       <div class="section-head">
-        <h2 id="references-title" class="lp-subheading">References</h2>
+        <h2 #linkedHeading tabindex="-1" id="references-title" class="lp-subheading">References</h2>
         @if (referenceCount() !== null) {
           <span>{{ referenceCount() }} references</span>
         }
@@ -89,6 +89,7 @@
         @for (reference of references(); track reference.id) {
           <article class="tile">
             <a
+              #referenceLink
               [routerLink]="'/inspiration/' + reference.id"
               [attr.aria-label]="'Open ' + reference.title"
             >

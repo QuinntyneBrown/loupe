@@ -421,3 +421,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: two cases failed on the missing Unlink action.
 - GREEN: 30 profile/Inspiration Chromium cases pass. Unlink preserves saved attribution and library content, adjusts the visible linked count, and offers Undo using the returned reference revision. A newer photographer assignment prevents Undo from overwriting it.
 
+
+### Unlink acknowledgement and keyboard recovery
+- RED: lost unlink/Undo responses left the displayed collection inconsistent, and unlink removed the focused control without recovery.
+- GREEN: all 20 profile Chromium cases pass. Retry recognizes the expected completed unlink, Undo checks a conflicting revision for an already-restored link, and focus follows the next/restored card. Newer assignments are still protected.
+

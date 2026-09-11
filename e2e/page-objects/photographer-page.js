@@ -23,6 +23,24 @@ export class PhotographerPage {
   async undoUnlink() {
     await this.page.getByRole("button", { name: "Undo", exact: true }).click();
   }
+  async retryUnlink() {
+    await this.page
+      .getByRole("button", { name: "Retry unlink", exact: true })
+      .click();
+  }
+  async expectUnlinkFailure() {
+    await expect(this.page.getByRole("alert")).toContainText("Couldn't unlink");
+  }
+  async expectUndoFailure() {
+    await expect(this.page.getByRole("alert")).toContainText(
+      "Couldn't restore",
+    );
+  }
+  async expectReferenceFocused(title) {
+    await expect(
+      this.page.getByRole("link", { name: "Open " + title, exact: true }),
+    ).toBeFocused();
+  }
   async expectUnlinked() {
     await expect(this.page.getByRole("status")).toContainText(
       "Reference unlinked",

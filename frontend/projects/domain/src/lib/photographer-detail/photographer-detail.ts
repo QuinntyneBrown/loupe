@@ -11,6 +11,7 @@ import {
   signal,
   output,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { PhotographerNotes } from '../photographer-notes/photographer-notes';
 import { PhotographerTags } from '../photographer-tags/photographer-tags';
@@ -40,6 +41,30 @@ export class PhotographerDetail {
     position: number;
   } | null>(null);
   readonly unlinkRetry = signal<ReferenceSummary | null>(null);
+  private unlinkRevision: { id: string; revision: number } | null = null;
+  private readonly referenceLinks = viewChildren<ElementRef<HTMLAnchorElement>>('referenceLink');
+  private readonly linkedHeading = viewChild<ElementRef<HTMLElement>>('linkedHeading');
+  private focusReference(position: number): void {
+    afterNextRender(
+      () => {
+        if (this.destroy.destroyed) return;
+        const links = this.referenceLinks();
+        (
+          links[Math.max(0, Math.min(position, links.length - 1))]?.nativeElement ??
+          this.linkedHeading()?.nativeElement
+        )?.focus();
+      },
+      { injector: this.injector },
+    );
+  }
+  private finishUnlink(reference: ReferenceSummary, revision: number): void {
+    const position = this.references().findIndex((item) => item.id === reference.id);
+    this.unlinked.set({ reference, revision, position });
+    this.removeReference(reference.id);
+    this.unlinkRetry.set(null);
+    this.unlinkRevision = null;
+    this.focusReference(position);
+  }
   async unlink(reference: ReferenceSummary): Promise<void> {
     if (this.referenceBusy()) return;
     this.referenceBusy.set(true);
@@ -49,21 +74,27 @@ export class PhotographerDetail {
       const current = await this.referenceService.get(reference.id);
       if (this.destroy.destroyed) return;
       if (current.photographer?.id !== this.id()) {
+        if (
+          !current.photographer &&
+          this.unlinkRevision?.id === reference.id &&
+          current.revision === this.unlinkRevision.revision + 1
+        ) {
+          this.finishUnlink(reference, current.revision);
+          return;
+        }
         this.linkError.set('This reference changed. It is no longer linked to this photographer.');
         this.removeReference(reference.id);
         this.unlinkRetry.set(null);
         return;
       }
+      this.unlinkRevision = { id: reference.id, revision: current.revision };
       const result = await this.referenceService.setPhotographer(
         reference.id,
         current.revision,
         null,
       );
       if (this.destroy.destroyed) return;
-      const position = this.references().findIndex((item) => item.id === reference.id);
-      this.unlinked.set({ reference, revision: result.revision, position });
-      this.removeReference(reference.id);
-      this.unlinkRetry.set(null);
+      this.finishUnlink(reference, result.revision);
     } catch (error) {
       if (!this.destroy.destroyed)
         this.linkError.set(
@@ -86,18 +117,30 @@ export class PhotographerDetail {
     this.referenceBusy.set(true);
     this.linkError.set('');
     try {
-      await this.referenceService.setPhotographer(undo.reference.id, undo.revision, this.id());
+      const result = await this.referenceService.setPhotographer(
+        undo.reference.id,
+        undo.revision,
+        this.id(),
+      );
       if (this.destroy.destroyed) return;
-      this.references.update((items) => {
-        const next = items.filter((item) => item.id !== undo.reference.id);
-        next.splice(Math.max(0, undo.position), 0, undo.reference);
-        return next;
-      });
-      this.referenceCount.update((count) => (count === null ? null : count + 1));
-      this.unlinked.set(null);
+      this.finishUndo(result, undo.position);
     } catch (error) {
       if (!this.destroy.destroyed) {
         const stale = error instanceof ServiceError && error.code === 'revision_conflict';
+        if (stale) {
+          try {
+            const latest = await this.referenceService.get(undo.reference.id);
+            if (this.destroy.destroyed) return;
+            if (latest.photographer?.id === this.id()) {
+              this.finishUndo(latest, undo.position);
+              return;
+            }
+          } catch {
+            if (this.destroy.destroyed) return;
+            this.linkError.set("Couldn't check the restored link. Try Undo again.");
+            return;
+          }
+        }
         this.linkError.set(
           stale
             ? 'This reference changed. Undo cannot overwrite the newer assignment.'
@@ -108,6 +151,17 @@ export class PhotographerDetail {
     } finally {
       if (!this.destroy.destroyed) this.referenceBusy.set(false);
     }
+  }
+  private finishUndo(reference: ReferenceSummary, position: number): void {
+    const exists = this.references().some((item) => item.id === reference.id);
+    this.references.update((items) => {
+      const next = items.filter((item) => item.id !== reference.id);
+      next.splice(Math.max(0, position), 0, reference);
+      return next;
+    });
+    if (!exists) this.referenceCount.update((count) => (count === null ? null : count + 1));
+    this.unlinked.set(null);
+    this.focusReference(position);
   }
   private readonly actions = viewChild<ElementRef<HTMLElement>>('actions');
   private readonly injector = inject(Injector);

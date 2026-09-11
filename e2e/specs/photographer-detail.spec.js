@@ -297,3 +297,44 @@ test("Undo never overwrites a newer photographer assignment", async ({
   await screen.expectUndoConflict();
   expect(references.items[0].photographer.id).toBe("another-photographer");
 });
+
+test("lost unlink response retries the completed change and still offers Undo", async ({
+  page,
+}) => {
+  const { screen, references } = await linkedSetup(page);
+  await screen.open();
+  await screen.expectReferences(2);
+  references.lostPhotographerResponses = 1;
+  await screen.unlink("Reference 01");
+  await screen.expectUnlinkFailure();
+  await screen.retryUnlink();
+  await screen.expectUnlinked();
+  await screen.expectReferences(1);
+  await screen.undoUnlink();
+  await screen.expectReferences(2);
+});
+test("lost Undo response retries without leaving an already-restored reference hidden", async ({
+  page,
+}) => {
+  const { screen, references } = await linkedSetup(page);
+  await screen.open();
+  await screen.expectReferences(2);
+  await screen.unlink("Reference 01");
+  await screen.expectUnlinked();
+  references.lostPhotographerResponses = 1;
+  await screen.undoUnlink();
+  await screen.expectUndoFailure();
+  await screen.undoUnlink();
+  await screen.expectReferences(2);
+});
+test("unlink and Undo recover focus on the next and restored reference", async ({
+  page,
+}) => {
+  const { screen } = await linkedSetup(page);
+  await screen.open();
+  await screen.expectReferences(2);
+  await screen.unlink("Reference 01");
+  await screen.expectReferenceFocused("Reference 02");
+  await screen.undoUnlink();
+  await screen.expectReferenceFocused("Reference 01");
+});
