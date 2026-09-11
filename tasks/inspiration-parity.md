@@ -456,3 +456,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: three acceptance cases failed on the absent Link a photographer action.
 - GREEN: the three cases pass. Search reaches bookmarks beyond page one; linking and changing preserve supplied attribution. Cancel does not mutate, and explicit stale review preserves newer reference metadata.
 
+
+### Reference picker recovery
+- RED: selecting another photographer after an unavailable choice left Link disabled; cancel after stale review displayed old notes.
+- GREEN: all 13 picker, text and deletion Chromium cases pass, including lost-response reconciliation and desktop/320px Axe checks. A new selection permits retry, and reviewed reference details propagate to the page.
+

@@ -14,3 +14,15 @@ test('canceling a photographer choice leaves the reference unchanged',async ({pa
 test('stale reference review preserves the selected photographer and newer metadata',async ({page})=>{
  const {screen,references}=await setup(page);await screen.linkPhotographer();await screen.choosePhotographer('Photographer 01');references.items[0].notes='Newer notes';references.items[0].revision++;await screen.confirmPhotographer();await screen.expectPhotographerFailure();await screen.reviewPhotographer();await screen.confirmPhotographer();await screen.expectPhotographer('Photographer 01','photographer-1');expect(references.items[0].notes).toBe('Newer notes');
 });
+test('a missing photographer can be replaced by another choice',async ({page})=>{
+ const {screen,photographers}=await setup(page);await screen.linkPhotographer();await screen.choosePhotographer('Photographer 01');photographers.items.shift();await screen.confirmPhotographer();await screen.expectPhotographerFailure();await screen.choosePhotographer('Photographer 02');await screen.confirmPhotographer();await screen.expectPhotographer('Photographer 02','photographer-2');
+});
+test('cancel after reviewing a stale reference displays its latest notes',async ({page})=>{
+ const {screen,references}=await setup(page);await screen.linkPhotographer();await screen.choosePhotographer('Photographer 01');references.items[0].notes='New notes from another tab';references.items[0].revision++;await screen.confirmPhotographer();await screen.reviewPhotographer();await screen.cancelPhotographer();await screen.expectText('notes','New notes from another tab');
+});
+test('retry reconciles a completed link whose response was lost',async ({page})=>{
+ const {screen,references}=await setup(page);references.lostPhotographerResponses=1;await screen.linkPhotographer();await screen.choosePhotographer('Photographer 01');await screen.confirmPhotographer();await screen.expectPhotographerFailure();await screen.confirmPhotographer();await screen.expectPhotographer('Photographer 01','photographer-1');expect(references.items[0].revision).toBe(2);
+});
+for(const width of [1280,320])test(`photographer picker remains accessible at ${width}px`,async ({page})=>{
+ await page.setViewportSize({width,height:800});const {screen}=await setup(page);await screen.linkPhotographer();await screen.choosePhotographer('Photographer 01');await screen.expectSuggestionsAccessible();
+});

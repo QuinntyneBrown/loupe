@@ -44,7 +44,7 @@
               name="photographer"
               [checked]="selected()?.id === item.id"
               [disabled]="busy()"
-              (change)="selected.set(item)"
+              (change)="choose(item)"
             /><span class="candidate-text"
               ><span>{{ item.name }}</span
               ><span class="meta"

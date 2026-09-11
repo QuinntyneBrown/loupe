@@ -16,6 +16,7 @@
     [reference]="item"
     (closed)="closePhotographer()"
     (saved)="closePhotographer($event)"
+    (reviewed)="detail()?.reference.set($event)"
   />
 }
 @if (photographerNotice(); as photographer) {

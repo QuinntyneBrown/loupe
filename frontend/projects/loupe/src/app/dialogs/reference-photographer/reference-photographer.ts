@@ -28,6 +28,7 @@ export class ReferencePhotographer {
   readonly reference = input.required<ReferenceResult>();
   readonly closed = output<void>();
   readonly saved = output<ReferenceResult>();
+  readonly reviewed = output<ReferenceResult>();
   readonly baseline = signal<ReferenceResult | null>(null);
   readonly selected = signal<ReferenceResult['photographer']>(null);
   readonly query = signal('');
@@ -80,6 +81,11 @@ export class ReferencePhotographer {
     this.loading.set(false);
     this.timer = setTimeout(() => void this.load(), 200);
   }
+  choose(item: PhotographerSummary): void {
+    this.selected.set(item);
+    this.unavailable.set(false);
+    if (!this.stale()) this.error.set('');
+  }
   async load(): Promise<void> {
     if (this.loading()) return;
     const generation = ++this.generation;
@@ -118,6 +124,7 @@ export class ReferencePhotographer {
       if (this.destroy.destroyed) return;
       this.baseline.set(latest);
       this.latest.set(latest);
+      this.reviewed.emit(latest);
       this.stale.set(false);
       this.error.set('');
     } catch (error) {
