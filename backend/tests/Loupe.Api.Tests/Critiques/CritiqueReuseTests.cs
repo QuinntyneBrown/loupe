@@ -152,6 +152,44 @@ public sealed class CritiqueReuseTests(PostgreSqlFixture database) : IClassFixtu
         cleanup.EnsureSuccessStatusCode();
     }
 
+    // Acceptance Test. Traces to: L2-036.8, L2-035.1.
+    [Fact]
+    public async Task Azure_requests_preserve_but_do_not_reuse_direct_OpenAI_results()
+    {
+        var provider = new ControlledCritiqueProvider((_, _, _) => Task.FromResult(CritiqueResultFixture.Valid()));
+        await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
+        { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" }, CritiqueProvider = provider };
+        using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        var id = (await PhotographFixture.UploadAsync(client)).GetProperty("id").GetGuid();
+        using var first = await SubmitAsync(client, id);
+        await RunAsync(factory);
+        // Reproduce a persisted direct-OpenAI result without invoking an external service.
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<LibraryDbContext>();
+            var photo = await context.Photographs.SingleAsync(item => item.Id == id);
+            var old = JsonSerializer.Deserialize<SavedCritique>(photo.CritiqueJson!)! with { PromptVersion = "critique-v2" };
+            photo.CritiqueJson = JsonSerializer.Serialize(old);
+            await context.BackgroundOperations.Where(item => item.Id == old.OperationId).ExecuteUpdateAsync(setters => setters
+                .SetProperty(item => item.PromptVersion, "critique-v2")
+                .SetProperty(item => item.OutputJson, photo.CritiqueJson));
+            await context.SaveChangesAsync();
+        }
+        var previous = await client.GetStringAsync($"/api/photographs/{id}/critique");
+        using var changed = await SubmitAsync(client, id);
+        Assert.Equal(HttpStatusCode.Accepted, changed.StatusCode);
+        Assert.NotEqual(first.Headers.Location, changed.Headers.Location);
+        Assert.Equal("Queued", (await changed.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("status").GetString());
+        Assert.Equal(previous, await client.GetStringAsync($"/api/photographs/{id}/critique"));
+        await RunAsync(factory);
+        var replacement = await client.GetFromJsonAsync<JsonElement>($"/api/photographs/{id}/critique");
+        Assert.Equal("azure-critique-v2", replacement.GetProperty("promptVersion").GetString());
+        Assert.Equal("gpt-5.4-mini-2026-03-17", replacement.GetProperty("model").GetString());
+        using var repeated = await SubmitAsync(client, id);
+        Assert.Equal(changed.Headers.Location, repeated.Headers.Location);
+        Assert.Equal(2, provider.Calls);
+    }
+
     private static async Task<long> RevisionAsync(HttpClient client, Guid id) =>
         (await client.GetFromJsonAsync<JsonElement>($"/api/photographs/{id}")).GetProperty("revision").GetInt64();
 

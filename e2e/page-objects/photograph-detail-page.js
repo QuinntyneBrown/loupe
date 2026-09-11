@@ -3,6 +3,16 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographDetailPage {
   constructor(page) { this.page = page; }
+  async expectAzureCritiqueDisclosure(original = false) {
+    await expect(this.critiqueStatus()).toContainText(original
+      ? 'Retry sends the original image, brief, and camera settings to Azure OpenAI.'
+      : 'This sends your saved image, brief, and camera settings to Azure OpenAI.');
+    await expect(this.critiqueStatus()).toContainText('Personal notes are not sent');
+  }
+  async expectAzureRegenerationDisclosure() {
+    await expect(this.regeneration()).toContainText('This sends your saved image, brief, and camera settings to Azure OpenAI.');
+    await expect(this.regeneration()).toContainText('Personal notes are not sent');
+  }
   async retryFailedCritique() { await this.critiqueStatus().getByRole('button', { name: 'Retry failed critique', exact: true }).click(); }
   async expectFailedRetryDisabled() { await expect(this.critiqueStatus().getByRole('button', { name: 'Retry failed critique', exact: true })).toBeDisabled(); }
   async expectNoFailedRetry() { await expect(this.critiqueStatus().getByRole('button', { name: 'Retry failed critique', exact: true })).toHaveCount(0); }

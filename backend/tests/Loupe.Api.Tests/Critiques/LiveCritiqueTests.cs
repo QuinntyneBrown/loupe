@@ -1,3 +1,4 @@
+// Acceptance Test. Traces to: L2-036, L2-041.
 // Given explicit Live configuration and an admitted image/brief snapshot, when
 // the Responses boundary replies, then only valid critiques publish.
 using System.Net;
@@ -15,9 +16,10 @@ namespace Loupe.Api.Tests.Critiques;
 public sealed class LiveCritiqueTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
 {
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task L2_006_1_008_4_036_1_041_1_Live_uses_only_admitted_analysis_inputs_and_validated_structured_output(bool malformed)
+    [InlineData(false, "https://loupe-fixture.openai.azure.com")]
+    [InlineData(false, "https://loupe-fixture.openai.azure.com/")]
+    [InlineData(true, "https://loupe-fixture.openai.azure.com")]
+    public async Task L2_006_1_008_4_036_1_041_1_Live_uses_only_admitted_analysis_inputs_and_validated_structured_output(bool malformed, string endpoint)
     {
         var calls = 0;
         string? submitted = null;
@@ -26,9 +28,9 @@ public sealed class LiveCritiqueTests(PostgreSqlFixture database) : IClassFixtur
         {
             calls++;
             Assert.Equal(HttpMethod.Post, request.Method);
-            Assert.Equal("https://api.openai.com/v1/responses", request.RequestUri!.AbsoluteUri);
-            Assert.Equal("Bearer", request.Headers.Authorization!.Scheme);
-            Assert.Equal("fixture-only-openai-key", request.Headers.Authorization.Parameter);
+            Assert.Equal("https://loupe-fixture.openai.azure.com/openai/v1/responses", request.RequestUri!.AbsoluteUri);
+            Assert.Null(request.Headers.Authorization);
+            Assert.Equal("fixture-only-openai-key", Assert.Single(request.Headers.GetValues("api-key")));
             submitted = await request.Content!.ReadAsStringAsync(cancellationToken);
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
@@ -43,7 +45,7 @@ public sealed class LiveCritiqueTests(PostgreSqlFixture database) : IClassFixtur
         });
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot)
         {
-            Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-openai-key" },
+            Settings = new Dictionary<string, string?> { ["Ai:Endpoint"] = endpoint, ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-openai-key" },
             AiTransport = transport
         };
         using var client = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
@@ -73,7 +75,7 @@ public sealed class LiveCritiqueTests(PostgreSqlFixture database) : IClassFixtur
         Assert.DoesNotContain("fixture-only-openai-key", submitted);
         using var payload = JsonDocument.Parse(submitted);
         var root = payload.RootElement;
-        Assert.Equal("gpt-5.4-mini-2026-03-17", root.GetProperty("model").GetString());
+        Assert.Equal("critique-fixture", root.GetProperty("model").GetString());
         Assert.False(root.GetProperty("store").GetBoolean());
         var content = root.GetProperty("input")[0].GetProperty("content");
         var image = content.EnumerateArray().Single(item => item.GetProperty("type").GetString() == "input_image");

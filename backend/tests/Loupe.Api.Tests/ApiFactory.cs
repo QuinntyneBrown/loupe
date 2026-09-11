@@ -56,9 +56,11 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         if (AiTransport is not null)
-            builder.ConfigureTestServices(services => services.AddHttpClient("openai").ConfigurePrimaryHttpMessageHandler(() => AiTransport));
+            builder.ConfigureTestServices(services => services.AddHttpClient("azure-openai").ConfigurePrimaryHttpMessageHandler(() => AiTransport));
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
+            ["Ai:Endpoint"] = "https://loupe-fixture.openai.azure.com",
+            ["Ai:Deployment"] = "critique-fixture",
             ["Identity:Authority"] = "https://identity.example",
             ["Identity:ClientId"] = "loupe-fixture",
             ["Identity:ClientSecret"] = "fixture-only-not-a-real-secret",

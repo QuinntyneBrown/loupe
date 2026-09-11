@@ -1,0 +1,124 @@
+WEBVTT
+
+00:00:00.105 --> 00:00:04.265
+The Inspiration mock puts the image collection beside a boards sidebar,
+
+00:00:04.421 --> 00:00:06.173
+with tag filters above it.
+
+00:00:06.474 --> 00:00:09.778
+Card overlays show titles and photographer labels.
+
+00:00:10.092 --> 00:00:13.554
+These names and images are demonstration placeholders.
+
+00:00:15.172 --> 00:00:19.450
+Here is the real Angular interface with the same first twelve images.
+
+00:00:19.764 --> 00:00:23.566
+The heading, navigation, restrained colours, and image grid carry
+
+00:00:23.566 --> 00:00:24.121
+through.
+
+00:00:24.435 --> 00:00:28.645
+This recording uses in-memory fixtures, with no production writes
+
+00:00:28.645 --> 00:00:30.147
+or AI requests.
+
+00:00:31.745 --> 00:00:34.234
+The difference is visible side by side.
+
+00:00:34.548 --> 00:00:37.484
+The mock has boards, counts, and tag filters.
+
+00:00:37.811 --> 00:00:42.087
+The current page uses the full width for references, with saved status
+
+00:00:42.087 --> 00:00:44.089
+and dates in the card captions.
+
+00:00:44.390 --> 00:00:48.352
+Boards, filtering, and on-card board actions are still mock-only.
+
+00:00:49.945 --> 00:00:52.947
+The collection opens with twenty-four references.
+
+00:00:53.261 --> 00:00:55.565
+Load more brings in the remaining item.
+
+00:00:55.866 --> 00:00:59.985
+Titles open each saved reference, keeping browsing separate from the
+
+00:00:59.985 --> 00:01:03.368
+detailed source information and personal study notes.
+
+00:01:04.972 --> 00:01:07.947
+A reference opens into its own detail page.
+
+00:01:08.275 --> 00:01:12.658
+The photograph stays connected to its source, attribution, and notes.
+
+00:01:12.959 --> 00:01:17.288
+Edit metadata lets us record what to study, then save that context
+
+00:01:17.288 --> 00:01:19.092
+back to the fixture library.
+
+00:01:20.692 --> 00:01:24.982
+Save link keeps a source URL with an optional title, attribution,
+
+00:01:24.982 --> 00:01:25.812
+and notes.
+
+00:01:26.113 --> 00:01:28.549
+Saving opens a link-only reference.
+
+00:01:28.863 --> 00:01:31.773
+It does not invent a preview or fetch the source.
+
+00:01:32.100 --> 00:01:35.904
+The separate import action is shown here but is not submitted.
+
+00:01:37.505 --> 00:01:40.612
+This is a deliberately simulated loading failure.
+
+00:01:40.926 --> 00:01:43.915
+The page gives a clear error and a retry action.
+
+00:01:44.229 --> 00:01:46.704
+Retrying restores the image collection.
+
+00:01:47.018 --> 00:01:50.939
+The demonstration verifies the recovery as well as the successful
+
+00:01:50.939 --> 00:01:52.099
+browsing path.
+
+00:01:53.705 --> 00:01:58.021
+At three hundred and seventy-five pixels, the working collection reflows
+
+00:01:58.021 --> 00:02:00.891
+to fit the screen without horizontal scrolling.
+
+00:02:01.205 --> 00:02:05.416
+The save and upload entry points remain available, and each reference
+
+00:02:05.416 --> 00:02:07.207
+still opens through its title.
+
+00:02:08.798 --> 00:02:12.932
+The working page delivers collection browsing, reference details,
+
+00:02:13.009 --> 00:02:15.182
+notes, and saving source links.
+
+00:02:15.483 --> 00:02:18.484
+The mock goes further with boards and tag filtering.
+
+00:02:18.798 --> 00:02:23.364
+This comparison preserves those visible gaps, so the video demonstrates
+
+00:02:23.364 --> 00:02:25.063
+the current product honestly.

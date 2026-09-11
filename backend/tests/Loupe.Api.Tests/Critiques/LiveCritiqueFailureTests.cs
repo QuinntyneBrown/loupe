@@ -1,4 +1,5 @@
-// Given a Live provider transport, when HTTP or response validation fails, then
+// Acceptance Test. Traces to: L2-036.9, L2-034.
+// Given a Live Azure provider transport, when HTTP or response validation fails, then
 // durable safe failure/retry states replace neither saved content nor private notes.
 using System.Net;
 using System.Net.Http.Json;
@@ -32,9 +33,11 @@ public sealed class LiveCritiqueFailureTests(PostgreSqlFixture database) : IClas
     public async Task L2_034_2_3_4_5_Provider_failures_have_bounded_safe_outcomes(int status, string responseKind, string expectedStatus, string code, int retryAfter)
     {
         var calls = 0;
-        using var transport = new ControlledAiTransport((_, _) =>
+        using var transport = new ControlledAiTransport((request, _) =>
         {
             calls++;
+            Assert.Equal("https://loupe-fixture.openai.azure.com/openai/v1/responses", request.RequestUri!.AbsoluteUri);
+            Assert.Equal("fixture-only-openai-key", Assert.Single(request.Headers.GetValues("api-key")));
             if (responseKind == "transport-timeout") return Task.FromException<HttpResponseMessage>(new TaskCanceledException("private-provider-detail"));
             var body = responseKind switch
             {

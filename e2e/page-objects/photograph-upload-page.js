@@ -3,6 +3,13 @@ import AxeBuilder from '@axe-core/playwright';
 
 export class PhotographUploadPage {
   constructor(page) { this.page = page; }
+  async expectAzureDisclosureInView() {
+    await expect(this.modal().getByText('Requesting a critique sends your image, brief, and camera settings to Azure OpenAI.', { exact: false })).toBeInViewport({ ratio: 1 });
+  }
+  async expectAzureCritiqueDisclosure() {
+    await expect(this.modal()).toContainText('Requesting a critique sends your image, brief, and camera settings to Azure OpenAI.');
+    await expect(this.modal()).toContainText('Personal notes are not sent.');
+  }
   async refreshCanceledUpload() { await this.page.getByRole('button', { name: 'Refresh My Work', exact: true }).click(); }
   async capture(path) { await this.page.screenshot({ path, fullPage: false }); }
   async escapeDialog() { await this.page.keyboard.press('Escape'); }

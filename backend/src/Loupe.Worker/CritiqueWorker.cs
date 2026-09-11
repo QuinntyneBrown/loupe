@@ -13,9 +13,9 @@ public sealed class CritiqueWorker(IServiceScopeFactory scopes, IOptions<AiOptio
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (options.Value.Mode != "Live") return;
-        if (string.IsNullOrWhiteSpace(options.Value.ApiKey))
+        if (!options.Value.IsConfigured)
         {
-            logger.LogWarning("Live critique processing requires configured analysis credentials");
+            logger.LogWarning("Live critique processing requires Ai:Endpoint, Ai:Deployment, and Ai:ApiKey configuration");
             return;
         }
         await Task.WhenAll(Enumerable.Range(0, options.Value.MaxConcurrentCalls).Select(_ => ProcessAsync(stoppingToken)));

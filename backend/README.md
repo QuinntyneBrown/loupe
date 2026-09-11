@@ -65,16 +65,77 @@ shared database leases enforce the deployment total and two calls per owner,
 with round-robin selection of eligible owners. Stop workers before lowering the
 cap so existing calls drain before the new limit applies.
 
-`Ai:Mode=Live` requires an externally supplied `Ai:ApiKey`. `Ai:Model` defaults to
-`gpt-5.4-mini-2026-03-17`. The worker calls the fixed OpenAI Responses endpoint
-with the admitted private JPEG preview, brief and allowlisted EXIF; notes and
-storage keys are excluded. It requests strict structured output with `store=false`.
-Provider responses are bounded to two million bytes, with a 120-second attempt
-deadline and durable retry policy. HTTP redirects and client request logging are
-disabled. Stored critiques identify their model, prompt version and execution
-mode. Controlled transport tests do not replace the required real-model quality
-evaluation or provider account/data-retention review before deployment.
+### Azure OpenAI critiques
 
+Configure the same values on the API and every worker through environment variables
+(or the equivalent Microsoft Configuration keys):
+
+```text
+Ai__Mode=Live
+Ai__Endpoint=https://YOUR-RESOURCE-NAME.openai.azure.com
+Ai__Deployment=YOUR-CRITIQUE-DEPLOYMENT
+Ai__Model=gpt-5.4-mini-2026-03-17
+```
+
+Supply `Ai__ApiKey` separately from your secret store or process environment; never
+commit it or place it in frontend configuration. `Ai:Deployment` is the Azure
+**deployment name**, not a model identifier. `Ai:Model` is the model/version recorded
+on saved critiques (default shown above); it must match the model/version behind
+that deployment. Use a deployment supporting image input and strict structured
+output through the Responses API. Availability depends on model and region.
+
+`Ai:Endpoint` is the HTTPS resource root, with an optional trailing slash. Do not
+include `/openai/v1`, credentials, query strings, or fragments. Invalid supplied
+endpoints fail startup with a safe setting-specific error. A missing endpoint,
+deployment, or API key disables critique admission and processing while manual
+library work remains available. Omit `Ai:Mode` to disable critiques explicitly.
+There is no direct-OpenAI fallback or Entra ID authentication in this integration.
+
+The worker posts to `{endpoint}/openai/v1/responses` with the `api-key` header and
+the deployment name in `model`. It sends the admitted private JPEG preview, brief,
+and allowlisted EXIF; personal notes and storage keys are excluded. It requests
+strict structured output with `store=false`. Responses are bounded to two million
+bytes, with a 120-second attempt deadline and the existing durable retry policy.
+HTTP redirects and client request logging remain disabled. See Microsoft's
+[Azure Responses API documentation](https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/responses).
+
+`store=false` is not a promise of zero retention across Azure's service. Review
+the account's abuse-monitoring configuration and deployment geography/type against
+[Microsoft's data-handling documentation](https://learn.microsoft.com/en-us/azure/foundry/responsible-ai/openai/data-privacy)
+before submitting private photographs. Global and DataZone deployments have
+different processing-location rules from regional deployments.
+
+#### Switching from direct OpenAI
+
+Pause new critique submissions and let queued/running critique operations settle
+under the old configuration before stopping API and worker processes. Deploy the
+new code and Azure settings together on every instance, then resume submissions.
+Repeat this drain procedure before changing endpoint, deployment, or model/version;
+in-flight work must not execute against a different deployment than intended.
+
+No database migration is needed for this change. Existing critiques and provenance
+remain readable. New Azure requests use `azure-critique-v2`, so completed direct-
+OpenAI results are not reused. Existing critiques remain current until a successful
+replacement. Retrying a failed direct-OpenAI operation follows the existing
+analysis-inputs-changed flow: review the saved brief and request new Azure work.
+To roll back, drain Azure work first, then restore the earlier application version
+and its direct-OpenAI configuration together; preserve the database and saved results.
+
+#### Live connection check
+
+After supplying real Azure configuration, start the configured API, worker and web
+client. Sign in, upload a synthetic or explicitly permitted test photograph, and
+request its critique. Verify that admission supplies a durable operation, the worker
+completes it, and reopening the photograph shows the structured critique with the
+configured model/version. Repeat the same request to check reuse without another
+provider call. Record the operation ID, deployed model/version, and observed outcome
+without recording secrets, private inputs, or raw provider responses.
+
+For a failure, inspect the safe operation code: credentials/access errors require
+account configuration, `provider_disabled` can indicate a missing deployment,
+rate limits require capacity or retry, and `invalid_output` requires checking model
+support and output quality. Do not describe controlled transport acceptance tests as
+a live Azure check or as proof of photographic critique quality.
 
 ### Retiring historical samples
 
