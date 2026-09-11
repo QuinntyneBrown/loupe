@@ -48,7 +48,9 @@ public sealed class ReferencePhotographerStore(LibraryDbContext database) : IRef
 
     public async Task<Reference> SetAsync(string ownerId, Guid referenceId, long revision, Guid? photographerId, CancellationToken cancellationToken)
     {
-        await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
+        // Standalone linking owns its transaction; inline creation participates in the receipt transaction.
+        await using var transaction = database.Database.CurrentTransaction is null
+            ? await database.Database.BeginTransactionAsync(cancellationToken) : null;
         // Lock the selected bookmark before the reference, matching bookmark deletion.
         var photographer = photographerId is { } id
             ? await database.Photographers.FromSqlInterpolated($"SELECT * FROM photographers WHERE \"Id\" = {id} AND \"OwnerId\" = {ownerId} FOR UPDATE")
@@ -63,6 +65,7 @@ public sealed class ReferencePhotographerStore(LibraryDbContext database) : IRef
         reference.Revision++;
         try { await database.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateConcurrencyException) { throw new RevisionConflictException(); }
-        await transaction.CommitAsync(cancellationToken); return reference;
+        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
+        return reference;
     }
 }

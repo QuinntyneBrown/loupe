@@ -17,6 +17,11 @@ namespace Loupe.Api.Controllers;
 [Route("api/references")]
 public sealed class ReferencesController(ISender sender) : ControllerBase
 {
+    [HttpPost("{id:guid}/photographer")]
+    public Task<ReferenceResult> CreatePhotographer(Guid id, CreateLinkedPhotographerRequest request,
+        [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken) =>
+        sender.Send(new CreateLinkedPhotographerCommand(id, request.Revision, request.Name, request.PortfolioUrl, operationKey), cancellationToken);
+
     [HttpPut("{id:guid}/photographer")]
     public Task<ReferenceResult> SetPhotographer(Guid id, SetReferencePhotographerRequest request, CancellationToken cancellationToken) =>
         sender.Send(new SetReferencePhotographerCommand(id, request.Revision, request.PhotographerId), cancellationToken);

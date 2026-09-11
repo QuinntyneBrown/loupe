@@ -461,3 +461,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: selecting another photographer after an unavailable choice left Link disabled; cancel after stale review displayed old notes.
 - GREEN: all 13 picker, text and deletion Chromium cases pass, including lost-response reconciliation and desktop/320px Axe checks. A new selection permits retry, and reviewed reference details propagate to the page.
 
+
+### Atomic inline photographer creation
+- RED: two API cases received 405 for the missing endpoint.
+- GREEN: all 35 photographer API cases pass. The final Link transaction creates/reuses a private portfolio and links the reference together, with revision rollback and keyed retry. Existing metadata and supplied attribution survive.
+
