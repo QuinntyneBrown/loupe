@@ -162,3 +162,54 @@ p {
 .lp-critique-section__head .lp-heading {
   margin: var(--lp-zero);
 }
+
+.observation-row {
+  display: grid;
+  grid-template-columns: minmax(var(--lp-zero), var(--lp-fraction));
+  gap: var(--lp-space-4);
+}
+.observation-row.has-regions {
+  grid-template-columns: var(--lp-loupe-size) minmax(var(--lp-zero), var(--lp-fraction));
+}
+.observation-body {
+  display: grid;
+  gap: var(--lp-space-2);
+  min-width: var(--lp-zero);
+}
+.loupes {
+  display: grid;
+  gap: var(--lp-space-2);
+}
+.evidence-loupe {
+  width: var(--lp-loupe-size);
+  height: var(--lp-loupe-size);
+  min-height: var(--lp-loupe-size);
+  padding: var(--lp-zero);
+  overflow: hidden;
+  border-radius: var(--lp-radius-full);
+  border: var(--lp-stroke) solid var(--lp-color-surface);
+  background: var(--lp-color-image-fallback);
+  box-shadow: var(--lp-zero) var(--lp-zero) var(--lp-zero) var(--lp-hairline)
+    var(--lp-color-border-strong);
+}
+.evidence-loupe svg {
+  display: block;
+  width: var(--lp-full);
+  height: var(--lp-full);
+}
+.evidence-loupe[aria-pressed='true'] {
+  outline: var(--lp-ring-width) solid var(--lp-color-focus);
+}
+.evidence-details {
+  font-size: var(--lp-text-sm);
+  color: var(--lp-color-text-2);
+}
+.evidence-details summary {
+  cursor: pointer;
+}
+.evidence-details[open] > summary {
+  margin-bottom: var(--lp-space-2);
+}
+.evidence {
+  margin: var(--lp-zero);
+}

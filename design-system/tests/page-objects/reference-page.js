@@ -81,4 +81,21 @@ export class ReferencePage {
     await expect(grid.getByRole('listitem')).toHaveCount(10);
     expect(await grid.evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(expected);
   }
+  async hoverExampleEvidence() {
+    await this.page.getByRole('button', { name: 'Show example image area', exact: true }).hover();
+  }
+  async leaveExampleEvidence() { await this.page.mouse.move(0, 0); }
+  async focusExampleEvidenceWithKeyboard() {
+    const button = this.page.getByRole('button', { name: 'Show example image area', exact: true });
+    await button.focus();
+    await this.page.keyboard.press('Shift+Tab');
+    await this.page.keyboard.press('Tab');
+    await expect(button).toBeFocused();
+  }
+  async blurExampleEvidence() { await this.page.keyboard.press('Tab'); }
+  async expectExampleEvidenceVisible(visible) {
+    const region = this.page.locator('[data-example-region]');
+    if (visible) await expect(region).toBeVisible();
+    else await expect(region).not.toBeVisible();
+  }
 }

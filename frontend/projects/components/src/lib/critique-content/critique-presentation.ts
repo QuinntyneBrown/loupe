@@ -1,4 +1,11 @@
+export interface EvidenceRegion {
+  x: number;
+  y: number;
+  size: number;
+}
+
 export interface CritiqueEvidence {
+  region: EvidenceRegion | null;
   label: string;
   statement: string;
   fact: string | null;

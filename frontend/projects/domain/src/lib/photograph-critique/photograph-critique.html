@@ -9,7 +9,13 @@
   @if (loading()) {
     <p role="status">Loading critique…</p>
   } @else if (critique(); as item) {
-    <lp-critique-content [content]="presentation()!" />
+    <lp-critique-content
+      [content]="presentation()!"
+      [imageUrl]="imageUrl()"
+      [imageWidth]="imageWidth()"
+      [imageHeight]="imageHeight()"
+      (regionChanged)="regionChanged.emit($event)"
+    />
   } @else if (error() === 'item_unavailable') {
     <p role="alert">Critique unavailable. The photograph may have been removed.</p>
   } @else if (error()) {

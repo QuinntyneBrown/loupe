@@ -50,6 +50,7 @@ const aspectGroups = [
 function presentEvidence(statements: EvidenceStatement[]): CritiqueEvidence[] {
   return statements.map((item) => ({
     label: evidenceLabels[item.kind],
+    region: item.kind === 'VisibleObservation' ? (item.region ?? null) : null,
     statement: item.statement,
     fact: item.exifField ? `${exifLabels[item.exifField]}: ${item.exifValue}` : null,
   }));

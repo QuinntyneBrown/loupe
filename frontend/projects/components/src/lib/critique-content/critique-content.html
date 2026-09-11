@@ -5,12 +5,18 @@
 </div>
 <div class="observations">
   @for (strength of item.strengths; track $index) {
-    <section>
-      <p class="lp-observation__text">{{ strength.explanation }}</p>
+    <section class="observation-row" [class.has-regions]="hasRegions(strength.evidence)">
       <ng-container
-        [ngTemplateOutlet]="evidence"
+        [ngTemplateOutlet]="loupes"
         [ngTemplateOutletContext]="{ $implicit: strength.evidence }"
       />
+      <div class="observation-body">
+        <p class="lp-observation__text">{{ strength.explanation }}</p>
+        <ng-container
+          [ngTemplateOutlet]="evidence"
+          [ngTemplateOutletContext]="{ $implicit: strength.evidence }"
+        />
+      </div>
     </section>
   }
 </div>
@@ -22,16 +28,22 @@
   </div>
   <div class="observations">
     @for (observation of group.observations; track observation.label) {
-      <section>
-        <h4>{{ observation.label }}</h4>
-        <p class="lp-observation__text">{{ observation.explanation }}</p>
-        @if (observation.uncertainty) {
-          <p class="uncertainty"><strong>Cannot assess:</strong> {{ observation.uncertainty }}</p>
-        }
+      <section class="observation-row" [class.has-regions]="hasRegions(observation.evidence)">
         <ng-container
-          [ngTemplateOutlet]="evidence"
+          [ngTemplateOutlet]="loupes"
           [ngTemplateOutletContext]="{ $implicit: observation.evidence }"
         />
+        <div class="observation-body">
+          <h4>{{ observation.label }}</h4>
+          <p class="lp-observation__text">{{ observation.explanation }}</p>
+          @if (observation.uncertainty) {
+            <p class="uncertainty"><strong>Cannot assess:</strong> {{ observation.uncertainty }}</p>
+          }
+          <ng-container
+            [ngTemplateOutlet]="evidence"
+            [ngTemplateOutletContext]="{ $implicit: observation.evidence }"
+          />
+        </div>
       </section>
     }
   </div>
@@ -44,6 +56,9 @@
 <ol class="priorities">
   @for (priority of item.priorities; track $index) {
     <li>
+      <div class="observation-row" [class.has-regions]="hasRegions(priority.evidence)">
+        <ng-container [ngTemplateOutlet]="loupes" [ngTemplateOutletContext]="{ $implicit: priority.evidence }" />
+        <div class="observation-body">
       <p class="lp-observation__text"><strong>Observation</strong> {{ priority.observation }}</p>
       <p class="lp-observation__text"><strong>Effect</strong> {{ priority.effect }}</p>
       <p class="lp-observation__text"><strong>Action</strong> {{ priority.action }}</p>
@@ -51,6 +66,8 @@
         [ngTemplateOutlet]="evidence"
         [ngTemplateOutletContext]="{ $implicit: priority.evidence }"
       />
+        </div>
+      </div>
     </li>
   }
 </ol>
@@ -86,16 +103,49 @@
 </div>
 <ng-template #evidence let-statements>
   @if (statements.length) {
-    <ul class="evidence">
+    <details class="evidence-details" [open]="!hasRegions(statements)">
+      <summary>Evidence</summary>
+      <ul class="evidence">
+        @for (statement of statements; track $index) {
+          <li>
+            <strong class="evidence-kind">{{ statement.label }}</strong>
+            {{ statement.statement }}
+            @if (statement.fact) {
+              <span>({{ statement.fact }})</span>
+            }
+          </li>
+        }
+      </ul>
+    </details>
+  }
+</ng-template>
+
+<ng-template #loupes let-statements>
+  @if (hasRegions(statements)) {
+    <div class="loupes">
       @for (statement of statements; track $index) {
-        <li>
-          <strong class="evidence-kind">{{ statement.label }}</strong>
-          {{ statement.statement }}
-          @if (statement.fact) {
-            <span>({{ statement.fact }})</span>
-          }
-        </li>
+        @if (statement.region; as region) {
+          <button
+            class="evidence-loupe"
+            type="button"
+            [attr.aria-label]="'Show image area: ' + statement.statement"
+            [attr.aria-pressed]="pinned() === statement"
+            (mouseenter)="hovered.set(statement)"
+            (mouseleave)="hovered.set(null)"
+            (focus)="focused.set(statement)"
+            (blur)="focused.set(null)"
+            (click)="toggle(statement)"
+          >
+            <svg [attr.viewBox]="crop(region)" aria-hidden="true" focusable="false">
+              <image
+                [attr.href]="imageUrl()"
+                [attr.width]="imageWidth()"
+                [attr.height]="imageHeight()"
+              />
+            </svg>
+          </button>
+        }
       }
-    </ul>
+    </div>
   }
 </ng-template>

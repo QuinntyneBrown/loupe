@@ -9,6 +9,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { EvidenceRegion } from 'components';
 import { DatePipe } from '@angular/common';
 import { PHOTOGRAPH_SERVICE, PhotographResult, OperationResult, ServiceError } from 'api';
 import { PhotographNotes } from '../photograph-notes/photograph-notes';
@@ -54,6 +55,9 @@ export class PhotographDetail {
     () => !!(this.briefEditor()?.dirty() || this.briefEditor()?.busy()),
   );
   private readonly service = inject(PHOTOGRAPH_SERVICE);
+  readonly activeRegion = signal<EvidenceRegion | null>(null);
+  readonly imageFailed = signal(false);
+  readonly imageLoaded = signal(false);
   readonly photo = signal<PhotographResult | null>(null);
   readonly completedCritiqueId = signal<string | null>(null);
   readonly hasCaptureSettings = computed(() =>
@@ -83,6 +87,9 @@ export class PhotographDetail {
       this.loading.set(true);
       this.error.set(null);
       this.photo.set(null);
+      this.activeRegion.set(null);
+      this.imageFailed.set(false);
+      this.imageLoaded.set(false);
       void this.service
         .get(id)
         .then((photo) => {

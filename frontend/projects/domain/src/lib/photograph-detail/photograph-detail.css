@@ -89,3 +89,18 @@ dl {
 .lp-detail__actions a {
   text-decoration: none;
 }
+
+.photo-stage {
+  position: relative;
+}
+.image-region {
+  position: absolute;
+  aspect-ratio: var(--lp-circle-ratio);
+  transform: translate(var(--lp-region-centre), var(--lp-region-centre));
+  border-radius: var(--lp-radius-full);
+  box-shadow:
+    var(--lp-zero) var(--lp-zero) var(--lp-zero) var(--lp-stroke) var(--lp-color-on-image),
+    var(--lp-zero) var(--lp-zero) var(--lp-zero) var(--lp-region-shadow-spread)
+      var(--lp-color-overlay);
+  pointer-events: none;
+}

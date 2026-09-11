@@ -7,11 +7,12 @@ import {
   inject,
   Injector,
   input,
+  output,
   signal,
   untracked,
   viewChild,
 } from '@angular/core';
-import { CritiqueContent } from 'components';
+import { CritiqueContent, EvidenceRegion } from 'components';
 import { presentCritique } from './present-critique';
 import { CRITIQUE_SERVICE, SavedCritique, ServiceError } from 'api';
 
@@ -23,6 +24,10 @@ import { CRITIQUE_SERVICE, SavedCritique, ServiceError } from 'api';
 })
 export class PhotographCritique {
   readonly id = input.required<string>();
+  readonly imageUrl = input<string | null>(null);
+  readonly imageWidth = input(1);
+  readonly imageHeight = input(1);
+  readonly regionChanged = output<EvidenceRegion | null>();
   readonly operationId = input<string | null>(null);
   private readonly service = inject(CRITIQUE_SERVICE);
   private readonly injector = inject(Injector);

@@ -463,4 +463,37 @@ export class PhotographDetailPage {
     await this.page.getByRole('link', { name: 'Compare with a later attempt', exact: true }).click();
     await expect(this.page).toHaveURL(new RegExp(`/compare\\?firstId=${id}$`));
   }
+  evidenceArea(statement) { return this.page.getByRole('button', { name: `Show image area: ${statement}`, exact: true }); }
+  async hoverEvidence(statement) { await this.evidenceArea(statement).hover(); }
+  async leaveEvidence() { await this.page.mouse.move(0, 0); }
+  async focusEvidenceWithKeyboard(statement) {
+    await this.evidenceArea(statement).focus();
+    await this.page.keyboard.press('Shift+Tab');
+    await this.page.keyboard.press('Tab');
+    await expect(this.evidenceArea(statement)).toBeFocused();
+  }
+  async activateEvidenceWithKeyboard() { await this.page.keyboard.press('Enter'); }
+  async blurEvidence() { await this.page.keyboard.press('Tab'); }
+  async clickEvidence(statement) { await this.evidenceArea(statement).click(); }
+  async tapEvidence(statement) { await this.evidenceArea(statement).tap(); }
+  async dismissEvidence() { await this.page.keyboard.press('Escape'); }
+  async expectNoEvidenceHighlight() { await expect(this.page.locator('[data-evidence-region]')).not.toBeVisible(); }
+  async expectEvidenceRegion(region) {
+    const spotlight = this.page.locator('[data-evidence-region]');
+    await expect(spotlight).toBeVisible();
+    const image = await this.page.getByRole('img', { name: 'Study 01', exact: true }).boundingBox();
+    const spot = await spotlight.boundingBox();
+    expect(Math.abs(spot.width - image.width * region.size), 'Region diameter follows image width').toBeLessThanOrEqual(1);
+    expect(Math.abs(spot.height - spot.width), 'Evidence regions remain circular').toBeLessThanOrEqual(1);
+    expect(Math.abs(spot.x + spot.width / 2 - image.x - image.width * region.x), 'Region horizontal center stays aligned to image evidence').toBeLessThanOrEqual(1);
+    expect(Math.abs(spot.y + spot.height / 2 - image.y - image.height * region.y), 'Region vertical center stays aligned to image evidence').toBeLessThanOrEqual(1);
+    const radius = await spotlight.evaluate(element => getComputedStyle(element).borderTopLeftRadius);
+    const radiusPixels = radius.endsWith('%') ? parseFloat(radius) * spot.width / 100 : parseFloat(radius);
+    expect(radiusPixels, 'The highlight has a circular boundary').toBeGreaterThanOrEqual(spot.width / 2 - 1);
+  }
+  async expectNoEvidenceLoupes(statement) {
+    await this.expectCritiqueText(statement);
+    await expect(this.page.getByRole('button', { name: /^Show image area:/ })).toHaveCount(0);
+    await this.expectNoEvidenceHighlight();
+  }
 }

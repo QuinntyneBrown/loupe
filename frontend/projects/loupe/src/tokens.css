@@ -176,6 +176,9 @@
   --lp-tile-min: 220px;
   --lp-card-min: 300px;
   --lp-loupe-size: 56px;
+  --lp-region-shadow-spread: 100vmax;
+  --lp-region-centre: -50%;
+  --lp-circle-ratio: 1;
   --lp-loupe-zoom: 320%;
   --lp-z-topbar: 20;
   --lp-z-menu: 30;

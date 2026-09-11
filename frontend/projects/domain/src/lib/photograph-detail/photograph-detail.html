@@ -69,9 +69,31 @@
       }
     </div>
     <div class="lp-detail__media">
-      <figure>
-        <img [src]="item.imageUrl" [alt]="item.title" [width]="item.width" [height]="item.height" />
+      <figure class="photo-stage">
+        <img
+          [src]="item.imageUrl"
+          [alt]="item.title"
+          [width]="item.width"
+          [height]="item.height"
+          (load)="imageLoaded.set(true)"
+          (error)="imageFailed.set(true); activeRegion.set(null)"
+        />
+        @if (activeRegion(); as region) {
+          <span
+            data-evidence-region
+            class="image-region"
+            aria-hidden="true"
+            [style.left.%]="region.x * 100"
+            [style.top.%]="region.y * 100"
+            [style.width.%]="region.size * 100"
+          ></span>
+        }
       </figure>
+      @if (imageFailed()) {
+        <p role="status">
+          The photograph image could not be loaded. Your critique and notes are still available.
+        </p>
+      }
       <section aria-labelledby="capture-heading">
         <h2 id="capture-heading" class="visually-hidden">Capture settings</h2>
         @if (!hasCaptureSettings()) {
@@ -97,7 +119,14 @@
       </section>
     </div>
     <div class="lp-detail__body">
-      <lp-photograph-critique [id]="item.id" [operationId]="completedCritiqueId()" />
+      <lp-photograph-critique
+        [id]="item.id"
+        [operationId]="completedCritiqueId()"
+        [imageUrl]="imageLoaded() && !imageFailed() ? item.imageUrl : null"
+        [imageWidth]="item.width"
+        [imageHeight]="item.height"
+        (regionChanged)="activeRegion.set($event)"
+      />
       <section aria-label="Personal notes">
         <h2 id="notes-heading" class="lp-kicker">Your notes</h2>
         <lp-photograph-notes [photograph]="item" (saved)="photo.set($event)" />
