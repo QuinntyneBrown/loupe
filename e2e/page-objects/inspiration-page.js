@@ -33,6 +33,12 @@ export class InspirationPage {
   }
   async chooseFallbackImage() { await this.page.getByRole('dialog').getByLabel('Add an image', { exact: true }).setInputFiles({ name: 'Added.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1kAAAAASUVORK5CYII=', 'base64') }); }
   async expectDraftError(message) { await expect(this.page.getByRole('dialog').getByRole('alert')).toHaveText(message); }
+  async expectDraftUnload(expected) { expect(await this.page.evaluate(() => !window.dispatchEvent(new Event('beforeunload', { cancelable: true })))).toBe(expected); }
+  async backInBrowser() { await this.page.evaluate(() => history.back()); }
+  async expectDiscardDraft() { await expect(this.page.getByRole('dialog', { name: 'Discard unsaved changes?', exact: true })).toBeVisible(); }
+  async keepDraft() { await this.page.getByRole('dialog', { name: 'Discard unsaved changes?', exact: true }).getByRole('button', { name: 'Keep editing', exact: true }).click(); }
+  async discardDraftNavigation() { await this.page.getByRole('dialog', { name: 'Discard unsaved changes?', exact: true }).getByRole('button', { name: 'Discard', exact: true }).click(); }
+  async expectPendingDraftWarning() { await expect(this.page.getByRole('dialog', { name: 'Discard unsaved changes?', exact: true })).toContainText('This save may finish after you leave. Check Inspiration before saving again.'); }
   async startUploadDraft() {
     const dialog = this.page.getByRole('dialog');
     await dialog.getByRole('radio', { name: 'Upload an image', exact: true }).check();

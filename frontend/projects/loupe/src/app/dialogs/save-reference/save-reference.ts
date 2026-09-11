@@ -66,6 +66,17 @@ export class SaveReference {
   readonly saving = signal(false);
   readonly error = signal('');
   readonly progress = signal<UploadProgress | null>(null);
+  readonly dirty = computed(
+    () =>
+      this.phase() !== 'duplicate' &&
+      !!(
+        this.draft() ||
+        this.file() ||
+        this.source().trim() ||
+        this.notes().trim() ||
+        this.newBoardName().trim()
+      ),
+  );
   private readonly service = inject(REFERENCE_DRAFT_SERVICE);
   private readonly boardService = inject(BOARD_SERVICE);
   private readonly obsoleteDrafts = new Set<string>();
@@ -268,9 +279,9 @@ export class SaveReference {
         this.error.set('Import status could not be loaded. Try again.');
     }
   }
-  async cancel(event?: Event): Promise<void> {
+  async cancel(event?: Event): Promise<boolean> {
     event?.preventDefault();
-    if (this.closing() || this.saving()) return;
+    if (this.closing() || this.saving()) return false;
     const draft = this.draft();
     this.closing.set(true);
     clearTimeout(this.timer);
@@ -282,8 +293,10 @@ export class SaveReference {
         this.modal().nativeElement.close();
         this.closed.emit();
       }
+      return true;
     } catch {
       if (!this.destroy.destroyed) this.error.set('The preview could not be discarded. Try again.');
+      return false;
     } finally {
       if (!this.destroy.destroyed) {
         this.closing.set(false);

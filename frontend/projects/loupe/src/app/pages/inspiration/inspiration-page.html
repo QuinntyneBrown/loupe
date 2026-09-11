@@ -1,4 +1,12 @@
 <main id="main" tabindex="-1" class="lp-main">
+  <lp-unsaved-changes
+    [dirty]="dirty"
+    [warning]="
+      saveDialog()?.saving()
+        ? 'This save may finish after you leave. Check Inspiration before saving again.'
+        : null
+    "
+  />
   <div class="lp-page-header">
     <div class="lp-page-header__text">
       <div class="title-row">

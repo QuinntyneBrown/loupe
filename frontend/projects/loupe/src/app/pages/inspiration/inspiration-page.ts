@@ -8,11 +8,13 @@ import {
   ReferenceResult,
   ReferenceSummary,
   ReferenceTagFacet,
+  SESSION_SERVICE,
 } from 'api';
 import { BoardDialog } from '../../dialogs/board/board-dialog';
 import { BoardPicker } from '../../dialogs/board-picker/board-picker';
 import { TagFiltersDialog } from '../../dialogs/tag-filters/tag-filters-dialog';
 import { SaveReference } from '../../dialogs/save-reference/save-reference';
+import { UnsavedChanges } from '../../dialogs/unsaved-changes/unsaved-changes';
 @Component({
   selector: 'lp-inspiration-page',
   imports: [
@@ -23,11 +25,23 @@ import { SaveReference } from '../../dialogs/save-reference/save-reference';
     ReferenceFilters,
     TagFiltersDialog,
     SaveReference,
+    UnsavedChanges,
   ],
   templateUrl: './inspiration-page.html',
   styleUrl: './inspiration-page.css',
 })
 export class InspirationPage {
+  readonly saveDialog = viewChild(SaveReference);
+  readonly dirty = () => this.saveDialog()?.dirty() ?? false;
+  private readonly unsaved = viewChild.required(UnsavedChanges);
+  private readonly session = inject(SESSION_SERVICE);
+  async canLeave(): Promise<boolean> {
+    if (!this.session.current()) return true;
+    const form = this.saveDialog();
+    if (!(await this.unsaved().canLeave(this.dirty()))) return false;
+    if (!form || form.saving()) return true;
+    return form.cancel();
+  }
   readonly savingReference = signal(false);
   referenceSaved(reference: ReferenceResult): void {
     this.savingReference.set(false);

@@ -191,3 +191,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: cancellation left one preview behind when an image response overlapped Cancel; upload progress was missing; a final-save duplicate closed the dialog.
 - GREEN: all 16 dialog cases pass. Both overlapping previews are discarded, transfer progress remains separate from acknowledgment, late duplicates show Already saved, and a lost save response retries without duplicating its reference or new board.
 
+
+### Draft navigation protection
+- RED: an edited preview did not prevent unload, and browser Back bypassed the unsaved dialog.
+- GREEN: all 23 dialog/board cases pass. Keep editing restores the preview, Discard cancels it, and leaving an admitted final Save warns while ignoring its late response. The retained session guard allows sign-out to complete.
+

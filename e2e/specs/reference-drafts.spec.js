@@ -138,3 +138,21 @@ test('A source saved elsewhere during preview shows the existing reference at fi
   const existing = { ...new (inspiration.library.constructor)(1).items[0], sourceUrl: 'https://source.example/work' }; inspiration.library.items.push(existing);
   await inspiration.saveDraft(); await inspiration.expectDraftDuplicate(); expect(inspiration.library.items).toEqual([existing]);
 });
+
+test('Browser navigation offers Keep editing or Discard for an unsaved preview', async ({ page }) => {
+  const inspiration = await setup(page);
+  await inspiration.openSave(); await inspiration.expectDraftUnload(false); await inspiration.uploadDraft(); await inspiration.expectDraftUnload(true);
+  await inspiration.backInBrowser(); await inspiration.expectDiscardDraft(); await inspiration.keepDraft(); await inspiration.expectDraftPreview();
+  await inspiration.backInBrowser(); await inspiration.expectDiscardDraft(); await inspiration.discardDraftNavigation();
+  await expect(page).toHaveURL(/\/my-work$/); await inspiration.expectDraftUnload(false);
+  expect(inspiration.library.items).toHaveLength(0); expect(inspiration.library.drafts.size).toBe(0);
+});
+
+test('Leaving a pending final Save warns and ignores its late response', async ({ page }) => {
+  const inspiration = await setup(page); inspiration.library.pause('draft-save');
+  await inspiration.openSave(); await inspiration.uploadDraft(); await inspiration.saveDraft();
+  await expect.poll(() => inspiration.library.draftCalls.some(call => call.operation === 'save')).toBe(true);
+  await inspiration.backInBrowser(); await inspiration.expectDiscardDraft(); await inspiration.expectPendingDraftWarning(); await inspiration.discardDraftNavigation();
+  inspiration.library.release('draft-save'); await expect.poll(() => inspiration.library.items.length).toBe(1);
+  await expect(page).toHaveURL(/\/my-work$/);
+});
