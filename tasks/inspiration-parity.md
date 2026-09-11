@@ -329,3 +329,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: four list cases failed on the absent GET collection endpoint.
 - GREEN: 14 save/edit/list cases pass. The frozen-clock fixture initially expected insertion order; it now explicitly tests both created-time order and the required ID tie-breaker. All 25 records appear once, with private totals and owner/page-size scoped cursors.
 
+
+### Reference photographer association
+- RED: both attribution variants failed on the absent link endpoint; the foreign-item case already returned 404.
+- GREEN: 36 photographer/reference metadata/suggestion cases pass. Link changes are private, revision checked, and preserve textual attribution through rename, replacement and unlink. The database enforces owner-matched associations.
+

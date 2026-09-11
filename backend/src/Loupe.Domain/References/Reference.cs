@@ -9,6 +9,8 @@ public sealed class Reference
     public string? SourceUrl { get; set; }
     public string? SourceImportJson { get; set; }
     public string? Attribution { get; set; }
+    public Guid? PhotographerId { get; set; }
+    public Loupe.Domain.Photographers.Photographer? Photographer { get; set; }
     public string? Notes { get; set; }
     public string? Description { get; set; }
     public string? DescriptionProvenance { get; set; }

@@ -53,6 +53,9 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Board>().HasIndex(board => new { board.OwnerId, board.NormalizedName }).IsUnique();
         modelBuilder.Entity<Board>().Property(board => board.Revision).IsConcurrencyToken();
         modelBuilder.Entity<Reference>().HasAlternateKey(reference => new { reference.Id, reference.OwnerId });
+        modelBuilder.Entity<Reference>().HasOne(reference => reference.Photographer).WithMany()
+            .HasForeignKey(reference => new { reference.PhotographerId, reference.OwnerId }).HasPrincipalKey(item => new { item.Id, item.OwnerId }).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Reference>().Navigation(reference => reference.Photographer).AutoInclude();
         modelBuilder.Entity<BoardReference>().ToTable("board_references").HasKey(item => new { item.BoardId, item.ReferenceId });
         modelBuilder.Entity<BoardReference>().HasOne<Board>().WithMany(board => board.References)
             .HasForeignKey(item => new { item.BoardId, item.OwnerId }).HasPrincipalKey(board => new { board.Id, board.OwnerId }).OnDelete(DeleteBehavior.Cascade);

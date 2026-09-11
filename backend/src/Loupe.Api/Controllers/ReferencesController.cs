@@ -1,4 +1,6 @@
 using Loupe.Api.References;
+using Loupe.Api.Photographers;
+using Loupe.Application.Photographers;
 using Loupe.Application.Deletions;
 using Loupe.Api.Boards;
 using Loupe.Application.Boards;
@@ -15,6 +17,10 @@ namespace Loupe.Api.Controllers;
 [Route("api/references")]
 public sealed class ReferencesController(ISender sender) : ControllerBase
 {
+    [HttpPut("{id:guid}/photographer")]
+    public Task<ReferenceResult> SetPhotographer(Guid id, SetReferencePhotographerRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new SetReferencePhotographerCommand(id, request.Revision, request.PhotographerId), cancellationToken);
+
     [HttpPut("{id:guid}/description")]
     public Task<ReferenceResult> Description(Guid id, UpdateReferenceTextRequest request, CancellationToken cancellationToken) =>
         sender.Send(new UpdateReferenceTextCommand(id, request.Revision, ReferenceTextField.Description, request.Text), cancellationToken);
