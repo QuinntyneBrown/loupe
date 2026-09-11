@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, input, signal, viewChild } from '@angular/core';
+import { Component, computed, ElementRef, input, output, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -8,6 +8,10 @@ import { RouterLink } from '@angular/router';
   styleUrl: './reference-card.css',
 })
 export class ReferenceCard {
+  readonly inBoard = input(false);
+  readonly busy = input(false);
+  readonly boardsRequested = output<void>();
+  readonly removeRequested = output<void>();
   readonly destination = input.required<string>();
   readonly title = input.required<string>();
   readonly attribution = input<string | null>(null);

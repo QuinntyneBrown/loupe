@@ -71,3 +71,20 @@ be established without printing credentials. Live quality checks are mandatory.
 - Rename/delete preserve references; membership replacement is atomic, revision
   checked and idempotent. Counts cover the full filtered set. Cursors bind the
   owner, selected board and page size.
+
+### Board navigation and dialogs
+- Given private boards, the library exposes counted board views and native modal
+  create/rename/delete/picker workflows; cancel preserves saved data, removing a
+  membership supports Undo, and deleting a board preserves its references.
+- RED: initial board UI scenarios failed on the missing New board control. The
+  pagination acceptance case then demonstrated 25 loaded references resetting to
+  24 after membership save.
+- GREEN: 18 board/Inspiration Chromium cases passed, including duplicate drafts,
+  reload, multiple memberships, delete/cancel, Undo, inline creation with failed
+  assignment/retry, and preserving pagination and keyboard focus.
+- API library totals: RED missing `libraryCount`, GREEN 12 membership/list cases.
+- Angular production build passed with the existing bundle warning. Inspected
+  desktop, picker and 375px screenshots using cached mock images; four desktop
+  columns and two mobile columns render without horizontal page overflow.
+- Remaining visual work includes tag-row spacing, the unified save control, and
+  the shared shell. These screenshots are intermediate, not parity approval.

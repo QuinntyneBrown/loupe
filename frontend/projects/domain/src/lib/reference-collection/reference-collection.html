@@ -14,14 +14,26 @@
           [previewUrl]="item.previewUrl"
           [width]="item.width"
           [height]="item.height"
+          [inBoard]="!!boardId()"
+          [busy]="busy()"
+          (boardsRequested)="boardsRequested.emit(item)"
+          (removeRequested)="removeRequested.emit(item)"
         />
       }
     }
   </div>
   @if (loaded() && !items().length && !failed()) {
     <div class="lp-empty">
-      <h2 class="lp-empty__title" #emptyHeading tabindex="-1">No references yet</h2>
-      <p class="lp-empty__text">Your saved inspiration will appear here.</p>
+      <h2 class="lp-empty__title" #emptyHeading tabindex="-1">
+        {{ boardId() ? 'Nothing on this board yet.' : 'No references yet' }}
+      </h2>
+      <p class="lp-empty__text">
+        {{
+          boardId()
+            ? 'Save a new reference straight to it, or add existing ones from their detail view.'
+            : 'Your saved inspiration will appear here.'
+        }}
+      </p>
     </div>
   }
   @if (failed()) {

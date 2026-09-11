@@ -9,8 +9,11 @@ import { MockSessionService } from './mock-session.service';
 import { MockPhotographService } from './mock-photograph.service';
 import { COMPARISON_SERVICE } from 'api';
 import { MockComparisonService } from './mock-comparison.service';
+import { BOARD_SERVICE } from 'api';
+import { MockBoardService } from './mock-board.service';
 
 export const appProviders = [
+  { provide: BOARD_SERVICE, useClass: MockBoardService },
   { provide: REFERENCE_IMPORT_SERVICE, useClass: MockReferenceImportService },
   { provide: REFERENCE_SERVICE, useClass: MockReferenceService },
   { provide: COMPARISON_SERVICE, useClass: MockComparisonService },

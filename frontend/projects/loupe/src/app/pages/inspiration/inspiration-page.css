@@ -1,3 +1,89 @@
 :host {
   display: block;
 }
+.inspiration-layout {
+  display: grid;
+  grid-template-columns: var(--lp-sidebar-width) minmax(var(--lp-zero), var(--lp-fraction));
+  gap: var(--lp-space-9);
+  align-items: start;
+}
+lp-board-navigation {
+  position: sticky;
+  top: calc(var(--lp-topbar-height) + var(--lp-space-6));
+}
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-3);
+}
+h1,
+p {
+  margin: var(--lp-zero);
+}
+.board-menu {
+  position: relative;
+}
+.board-menu summary {
+  list-style: none;
+}
+.board-menu__list {
+  position: absolute;
+  z-index: var(--lp-z-menu);
+  min-width: var(--lp-menu-min);
+  background: var(--lp-color-surface);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+  box-shadow: var(--lp-shadow-md);
+  padding: var(--lp-space-1);
+}
+.board-menu__list button {
+  display: block;
+  width: var(--lp-full);
+  text-align: left;
+  color: var(--lp-color-text);
+  background: none;
+  border: none;
+  font-size: var(--lp-text-sm);
+}
+.board-menu__list button:hover {
+  background: var(--lp-color-surface-2);
+}
+.notice {
+  position: fixed;
+  bottom: var(--lp-space-6);
+  left: var(--lp-gutter);
+  z-index: var(--lp-z-toast);
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-4);
+  max-width: min(var(--lp-toast-max), calc(var(--lp-full) - var(--lp-gutter) * 2));
+  background: var(--lp-color-ink);
+  color: var(--lp-color-on-ink);
+  padding: var(--lp-space-3) var(--lp-space-4);
+  border-radius: var(--lp-radius-md);
+  box-shadow: var(--lp-shadow-lg);
+}
+.notice .lp-icon-button {
+  color: inherit;
+}
+.notice .lp-button {
+  color: inherit;
+}
+.failure {
+  color: var(--lp-color-danger);
+  margin-top: var(--lp-space-4);
+}
+@media (width < 1024px) {
+  .inspiration-layout {
+    grid-template-columns: minmax(var(--lp-zero), var(--lp-fraction));
+    gap: var(--lp-space-5);
+  }
+  lp-board-navigation {
+    position: static;
+  }
+}
+@media (width < 640px) {
+  .notice {
+    bottom: calc(var(--lp-tabbar-height) + var(--lp-space-4));
+  }
+}

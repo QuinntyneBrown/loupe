@@ -15,6 +15,8 @@ public sealed class ListReferencesQueryHandler(ICurrentOwner owner, IReferenceSt
         var found = await references.ListAsync(owner.Id, request.PageSize + 1, ReferenceListCursor.Parse(request.Cursor, scope), request.BoardId, cancellationToken);
         var items = found.Take(request.PageSize).ToArray();
         var next = found.Count > request.PageSize ? ReferenceListCursor.Encode(new CreatedCursor(items[^1].CreatedAt, items[^1].Id), scope) : null;
-        return new ReferencePage(items, next, await references.CountAsync(owner.Id, request.BoardId, cancellationToken));
+        var totalCount = await references.CountAsync(owner.Id, request.BoardId, cancellationToken);
+        var libraryCount = request.BoardId is null ? totalCount : await references.CountAsync(owner.Id, null, cancellationToken);
+        return new ReferencePage(items, next, totalCount, libraryCount);
     }
 }

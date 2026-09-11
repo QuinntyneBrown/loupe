@@ -5,8 +5,10 @@ import { SESSION_SERVICE, SessionService, PHOTOGRAPH_SERVICE, PhotographService 
 import { DELETION_SERVICE, DeletionService } from 'api';
 import { CRITIQUE_SERVICE, CritiqueService } from 'api';
 import { COMPARISON_SERVICE, ComparisonService } from 'api';
+import { BOARD_SERVICE, BoardService } from 'api';
 
 export const appProviders = [
+  { provide: BOARD_SERVICE, useClass: BoardService },
   { provide: REFERENCE_IMPORT_SERVICE, useClass: ReferenceImportService },
   { provide: REFERENCE_SERVICE, useClass: ReferenceService },
   { provide: COMPARISON_SERVICE, useClass: ComparisonService },

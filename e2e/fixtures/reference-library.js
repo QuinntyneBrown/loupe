@@ -4,7 +4,7 @@ export class ReferenceLibrary {
     this.items = Array.from({ length: count }, (_, index) => ({
       id: `10000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
       title: `Reference ${String(index + 1).padStart(2, '0')}`, createdAt: '2026-09-08T12:00:00Z',
-      width: 800, height: 600, imageUrl, previewUrl: imageUrl, revision: 1,
+      width: 800, height: 600, imageUrl, previewUrl: imageUrl, revision: 1, boardIds: [],
       sourceUrl: 'https://source.example/photo', attribution: 'Supplied photographer', notes: 'Study the separation.\nKeep the source context.',
     }));
     this.importCalls=[];this.importOperations=new Map();this.importReceipts=new Map();this.importFailures={};this.importErrors={};this.lostImportResponses=0;
@@ -12,8 +12,40 @@ export class ReferenceLibrary {
     this.updates = []; this.lostUpdateResponses = 0;
     this.uploadReceipts = new Map(); this.lostUploadResponses = 0;
     this.calls = []; this.failures = {}; this.errors = {}; this.gates = {};
+    this.boards = []; this.boardCalls = [];
   }
   async attach(page) {
+    await page.exposeFunction('loupeBoards', async (operation, input) => {
+      this.boardCalls.push({ operation, ...input });
+      await this.gates['boards-' + operation]?.promise;
+      if (this.failures['boards-' + operation] > 0) { this.failures['boards-' + operation]--; return { error: 'request_failed' }; }
+      const counted = board => ({ ...board, referenceCount: this.items.filter(item => item.boardIds?.includes(board.id)).length });
+      if (operation === 'list') return { data: this.boards.map(counted).sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase())) };
+      if (operation === 'setMemberships') {
+        const item = this.items.find(item => item.id === input.id);
+        if (!item || input.boardIds.some(id => !this.boards.some(board => board.id === id))) return { error: 'item_unavailable' };
+        if (item.revision !== input.revision) return { error: 'revision_conflict' };
+        item.boardIds = [...new Set(input.boardIds)]; item.revision++;
+        return { data: item };
+      }
+      const board = this.boards.find(board => board.id === input.id);
+      if (operation !== 'create' && !board) return { error: 'item_unavailable' };
+      if (board && board.revision !== input.revision) return { error: 'revision_conflict' };
+      if (operation === 'delete') {
+        this.boards = this.boards.filter(board => board.id !== input.id);
+        this.items.forEach(item => { item.boardIds = (item.boardIds ?? []).filter(id => id !== input.id); });
+        return { data: null };
+      }
+      const name = input.name.trim().normalize('NFC');
+      if (!name || [...name].length > 80) return { error: 'invalid_request' };
+      if (this.boards.some(other => other.id !== input.id && other.name.toUpperCase() === name.toUpperCase())) return { error: 'board_name_conflict' };
+      if (operation === 'create') {
+        const created = { id: crypto.randomUUID(), name, revision: 1 }; this.boards.push(created);
+        return { data: counted(created) };
+      }
+      if (operation === 'rename') { board.name = name; board.revision++; return { data: counted(board) }; }
+      throw new Error('Unexpected board operation: ' + operation);
+    });
     await page.exposeFunction('loupeReferenceImports',async(operation,input)=>{
       this.importCalls.push({operation,...input});await this.gates['import-'+operation]?.promise;
       const error=this.importErrors[operation]?.shift();if(error)return {error};
@@ -74,8 +106,10 @@ export class ReferenceLibrary {
         return {data:item};
       }
       if (operation === 'list') {
-        const start = Number(input.cursor ?? 0), end = Math.min(start + 24, this.items.length);
-        return { data: { items: this.items.slice(start, end), nextCursor: end < this.items.length ? String(end) : null } };
+        if (input.boardId && !this.boards.some(board => board.id === input.boardId)) return { error: 'item_unavailable' };
+        const items = input.boardId ? this.items.filter(item => item.boardIds?.includes(input.boardId)) : this.items;
+        const start = Number(input.cursor ?? 0), end = Math.min(start + 24, items.length);
+        return { data: { items: items.slice(start, end), nextCursor: end < items.length ? String(end) : null, totalCount: items.length, libraryCount: this.items.length } };
       }
       if (operation === 'get') {
         const item = this.items.find(item => item.id === input.id);

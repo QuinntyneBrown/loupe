@@ -12,7 +12,7 @@ export interface IReferenceService {
     onProgress?: (progress: UploadProgress) => void,
   ): Promise<ReferenceResult>;
   update(id: string, revision: number, metadata: ReferenceMetadata): Promise<ReferenceResult>;
-  list(cursor?: string): Promise<ReferencePage>;
+  list(cursor?: string, boardId?: string): Promise<ReferencePage>;
   get(id: string): Promise<ReferenceResult>;
 }
 export const REFERENCE_SERVICE = new InjectionToken<IReferenceService>('REFERENCE_SERVICE');

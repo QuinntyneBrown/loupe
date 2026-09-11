@@ -44,8 +44,8 @@ export class MockReferenceService implements IReferenceService {
   update(id: string, revision: number, metadata: ReferenceMetadata): Promise<ReferenceResult> {
     return this.call('update', { id, revision, ...metadata });
   }
-  list(cursor?: string): Promise<ReferencePage> {
-    return this.call('list', { cursor });
+  list(cursor?: string, boardId?: string): Promise<ReferencePage> {
+    return this.call('list', { cursor, boardId });
   }
   get(id: string): Promise<ReferenceResult> {
     return this.call('get', { id });

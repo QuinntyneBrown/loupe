@@ -19,8 +19,29 @@
     <h2 class="lp-tile__title">{{ title() }}</h2>
     <div class="lp-tile__meta">{{ attribution() || 'Unknown photographer' }}</div>
   </div>
-  @if (source(); as url) {
-    <div class="lp-tile__actions">
+  <div class="lp-tile__actions">
+    @if (inBoard()) {
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Remove from this board"
+        [disabled]="busy()"
+        (click)="removeRequested.emit()"
+      >
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    } @else {
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Add to boards"
+        [disabled]="busy()"
+        (click)="boardsRequested.emit()"
+      >
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-board" /></svg>
+      </button>
+    }
+    @if (source(); as url) {
       <a
         class="lp-icon-button"
         [href]="url"
@@ -31,6 +52,6 @@
       >
         <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-external" /></svg>
       </a>
-    </div>
-  }
+    }
+  </div>
 </article>

@@ -1,0 +1,80 @@
+<dialog #modal class="lp-dialog" aria-labelledby="board-picker-title" (cancel)="cancel($event)">
+  <form class="lp-dialog__panel" (ngSubmit)="save()">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="board-picker-title">Add to boards</h2>
+        <p class="lp-dialog__text">{{ reference().title }}</p>
+      </div>
+      <button
+        type="button"
+        class="lp-icon-button"
+        aria-label="Close"
+        [disabled]="saving()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body" [attr.aria-busy]="loading()">
+      @if (loading()) {
+        <p role="status">Loading boards…</p>
+      } @else if (current()) {
+        <div class="picker">
+          @for (board of boards(); track board.id) {
+            <label
+              ><input
+                type="checkbox"
+                [attr.aria-label]="board.name"
+                [checked]="selected().includes(board.id)"
+                (change)="toggle(board.id)"
+                [disabled]="saving()"
+              /><span>{{ board.name }}</span
+              ><span class="count">{{ board.referenceCount }}</span></label
+            >
+          }
+          <div class="picker-new">
+            <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-plus" /></svg
+            ><input
+              class="lp-input"
+              aria-label="New board name"
+              placeholder="New board"
+              name="newBoard"
+              [ngModel]="newName()"
+              (ngModelChange)="newName.set($event)"
+              [disabled]="saving()"
+            />
+          </div>
+        </div>
+      }
+      @if (error()) {
+        <p role="alert">{{ error() }}</p>
+        @if (!current() || conflicted()) {
+          <button
+            type="button"
+            class="lp-button lp-button--secondary"
+            (click)="load()"
+            [disabled]="loading()"
+          >
+            Load latest boards
+          </button>
+        }
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      <button
+        type="button"
+        class="lp-button lp-button--secondary"
+        (click)="cancel()"
+        [disabled]="saving()"
+      >
+        Cancel</button
+      ><button
+        type="submit"
+        class="lp-button lp-button--primary"
+        [disabled]="loading() || saving() || !current() || conflicted()"
+      >
+        {{ saving() ? 'Saving…' : 'Save' }}
+      </button>
+    </footer>
+  </form>
+</dialog>

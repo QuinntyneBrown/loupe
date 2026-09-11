@@ -1,0 +1,7 @@
+[role='alert'] {
+  color: var(--lp-color-danger);
+  margin: var(--lp-zero);
+}
+.lp-field__hint {
+  margin-bottom: var(--lp-zero);
+}

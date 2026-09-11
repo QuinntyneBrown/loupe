@@ -24,6 +24,7 @@ public sealed class BoardMembershipTests(PostgreSqlFixture database) : IClassFix
         var page = await owner.GetFromJsonAsync<JsonElement>($"/api/references?boardId={boardId}&pageSize=1");
         Assert.Single(page.GetProperty("items").EnumerateArray());
         Assert.Equal(2, page.GetProperty("totalCount").GetInt32());
+        Assert.Equal(3, page.GetProperty("libraryCount").GetInt32());
         var cursor = Uri.EscapeDataString(page.GetProperty("nextCursor").GetString()!);
         var next = await owner.GetFromJsonAsync<JsonElement>($"/api/references?boardId={boardId}&pageSize=1&cursor={cursor}");
         Assert.Single(next.GetProperty("items").EnumerateArray());

@@ -9,11 +9,14 @@ export interface ReferenceSummary {
   attribution: string | null;
 }
 export interface ReferenceResult extends ReferenceSummary {
+  boardIds: string[];
   notes: string | null;
   imageUrl: string | null;
   revision: number;
 }
 export interface ReferencePage {
+  totalCount: number;
+  libraryCount: number;
   items: ReferenceSummary[];
   nextCursor: string | null;
 }

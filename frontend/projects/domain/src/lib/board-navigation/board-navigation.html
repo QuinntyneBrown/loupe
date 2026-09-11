@@ -1,0 +1,38 @@
+<aside aria-label="Boards" [attr.aria-busy]="loading()">
+  <h2 class="lp-kicker">Boards</h2>
+  <nav aria-label="Boards" class="board-list">
+    <a
+      routerLink="/inspiration"
+      [attr.aria-current]="!selectedId() ? 'page' : null"
+      aria-label="All references"
+    >
+      <span>All references</span><span class="count">{{ totalCount() }}</span>
+    </a>
+    @for (board of boards(); track board.id) {
+      <a
+        routerLink="/inspiration"
+        [queryParams]="{ boardId: board.id }"
+        [attr.aria-label]="board.name"
+        [attr.aria-current]="selectedId() === board.id ? 'page' : null"
+      >
+        <span>{{ board.name }}</span
+        ><span class="count">{{ board.referenceCount }}</span>
+      </a>
+    }
+    @if (loading() && !boards().length) {
+      @for (item of [1, 2, 3]; track item) {
+        <span class="lp-skeleton lp-skeleton--text" aria-hidden="true"></span>
+      }
+    }
+    <button type="button" class="new-board" (click)="newBoard.emit()">
+      <span>New board</span
+      ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-plus" /></svg>
+    </button>
+  </nav>
+  @if (failed()) {
+    <p role="alert">Boards could not be loaded.</p>
+    <button type="button" class="lp-button lp-button--secondary" (click)="refresh()">
+      Retry loading boards
+    </button>
+  }
+</aside>

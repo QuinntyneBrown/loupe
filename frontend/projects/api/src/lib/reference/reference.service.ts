@@ -98,8 +98,11 @@ export class ReferenceService implements IReferenceService {
       );
     }
   }
-  list(cursor?: string): Promise<ReferencePage> {
-    return this.read('/api/references', cursor ? { cursor } : {});
+  list(cursor?: string, boardId?: string): Promise<ReferencePage> {
+    return this.read('/api/references', {
+      ...(cursor ? { cursor } : {}),
+      ...(boardId ? { boardId } : {}),
+    });
   }
   get(id: string): Promise<ReferenceResult> {
     return this.read('/api/references/' + encodeURIComponent(id));

@@ -6,7 +6,10 @@ import {
   viewChild,
   inject,
   Injector,
-  OnInit,
+  effect,
+  input,
+  output,
+  untracked,
   signal,
   viewChildren,
 } from '@angular/core';
@@ -19,7 +22,7 @@ import { ReferenceCard } from 'components';
   templateUrl: './reference-collection.html',
   styleUrl: './reference-collection.css',
 })
-export class ReferenceCollection implements OnInit {
+export class ReferenceCollection {
   private readonly service = inject(REFERENCE_SERVICE);
   private readonly destroyed = inject(DestroyRef);
   private readonly injector = inject(Injector);
@@ -32,7 +35,24 @@ export class ReferenceCollection implements OnInit {
   readonly loaded = signal(false);
   readonly nextCursor = signal<string | null>(null);
   readonly skeletonTiles = Array.from({ length: 8 }, (_, index) => index);
-  ngOnInit(): void {
+  readonly boardId = input<string | null>(null);
+  readonly busy = input(false);
+  readonly boardsRequested = output<ReferenceSummary>();
+  readonly removeRequested = output<ReferenceSummary>();
+  readonly libraryCount = output<number>();
+  private generation = 0;
+  constructor() {
+    effect(() => {
+      this.boardId();
+      untracked(() => this.refresh());
+    });
+  }
+  refresh(): void {
+    this.generation++;
+    this.items.set([]);
+    this.nextCursor.set(null);
+    this.loaded.set(false);
+    this.loading.set(false);
     void this.load();
   }
   async load(retry = false): Promise<void> {
@@ -40,15 +60,20 @@ export class ReferenceCollection implements OnInit {
     this.loading.set(true);
     this.failed.set(false);
     const previousCount = this.items().length;
+    const generation = this.generation;
     try {
-      const page = await this.service.list(this.nextCursor() ?? undefined);
-      if (this.destroyed.destroyed) return;
+      const page = await this.service.list(
+        this.nextCursor() ?? undefined,
+        this.boardId() ?? undefined,
+      );
+      if (this.destroyed.destroyed || generation !== this.generation) return;
       this.items.update((items) => [
         ...items,
         ...page.items.filter((item) => !items.some((existing) => existing.id === item.id)),
       ]);
       this.nextCursor.set(page.nextCursor);
       this.loaded.set(true);
+      this.libraryCount.emit(page.libraryCount);
       if (retry || (previousCount && this.items().length > previousCount))
         afterNextRender(
           () => {
@@ -60,7 +85,7 @@ export class ReferenceCollection implements OnInit {
           { injector: this.injector },
         );
     } catch {
-      if (!this.destroyed.destroyed) {
+      if (!this.destroyed.destroyed && generation === this.generation) {
         this.failed.set(true);
         if (retry)
           afterNextRender(
@@ -71,7 +96,7 @@ export class ReferenceCollection implements OnInit {
           );
       }
     } finally {
-      if (!this.destroyed.destroyed) this.loading.set(false);
+      if (!this.destroyed.destroyed && generation === this.generation) this.loading.set(false);
     }
   }
 }

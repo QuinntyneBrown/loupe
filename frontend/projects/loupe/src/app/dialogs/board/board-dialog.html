@@ -1,0 +1,79 @@
+<dialog #modal class="lp-dialog" aria-labelledby="board-dialog-title" (cancel)="cancel($event)">
+  <form class="lp-dialog__panel" (ngSubmit)="save()">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="board-dialog-title">{{ title() }}</h2>
+        @if (deleting()) {
+          <p class="lp-dialog__text">
+            The {{ current()?.referenceCount }} references on this board stay in your library. Only
+            the board is removed.
+          </p>
+        }
+      </div>
+      <button
+        type="button"
+        class="lp-icon-button"
+        aria-label="Close"
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body">
+      @if (!deleting()) {
+        <div class="lp-field">
+          <label class="lp-field__label" for="board-name">Name</label>
+          <input
+            autofocus
+            class="lp-input"
+            id="board-name"
+            name="boardName"
+            [ngModel]="name()"
+            (ngModelChange)="name.set($event)"
+            [disabled]="busy()"
+            [attr.aria-describedby]="board() ? null : 'board-hint'"
+          />
+          @if (!board()) {
+            <p class="lp-field__hint" id="board-hint">
+              A reference can sit on any number of boards.
+            </p>
+          }
+        </div>
+      }
+      @if (error()) {
+        <p role="alert">{{ error() }}</p>
+      }
+      @if (conflicted()) {
+        <button
+          type="button"
+          class="lp-button lp-button--secondary"
+          (click)="reload()"
+          [disabled]="busy()"
+        >
+          Load latest board
+        </button>
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      <button
+        type="button"
+        class="lp-button lp-button--secondary"
+        [disabled]="busy()"
+        (click)="cancel()"
+        [autofocus]="deleting()"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="lp-button"
+        [class.lp-button--danger]="deleting()"
+        [class.lp-button--primary]="!deleting()"
+        [disabled]="busy() || conflicted()"
+      >
+        {{ busy() ? 'Saving…' : deleting() ? 'Delete board' : board() ? 'Save' : 'Create board' }}
+      </button>
+    </footer>
+  </form>
+</dialog>
