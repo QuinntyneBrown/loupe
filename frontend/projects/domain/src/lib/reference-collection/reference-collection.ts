@@ -11,11 +11,11 @@ import {
   viewChildren,
 } from '@angular/core';
 import { REFERENCE_SERVICE, ReferenceSummary } from 'api';
-import { PhotographCard } from 'components';
+import { ReferenceCard } from 'components';
 
 @Component({
   selector: 'lp-reference-collection',
-  imports: [PhotographCard],
+  imports: [ReferenceCard],
   templateUrl: './reference-collection.html',
   styleUrl: './reference-collection.css',
 })
@@ -23,7 +23,7 @@ export class ReferenceCollection implements OnInit {
   private readonly service = inject(REFERENCE_SERVICE);
   private readonly destroyed = inject(DestroyRef);
   private readonly injector = inject(Injector);
-  private readonly cards = viewChildren(PhotographCard);
+  private readonly cards = viewChildren(ReferenceCard);
   private readonly emptyHeading = viewChild<ElementRef<HTMLElement>>('emptyHeading');
   private readonly retryButton = viewChild<ElementRef<HTMLElement>>('retryButton');
   readonly items = signal<ReferenceSummary[]>([]);

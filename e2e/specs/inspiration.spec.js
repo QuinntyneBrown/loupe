@@ -11,6 +11,21 @@ async function setup(page, count) {
   return { inspiration, detail: new ReferenceDetailPage(page), signIn };
 }
 
+// Traces to L2-012, L2-043, L2-044. Mock source/attribution card overlays.
+test('reference cards expose attribution and a safe source action on keyboard focus', async ({ page }) => {
+  const { inspiration } = await setup(page, 1);
+  await inspiration.open();
+  await inspiration.expectSourceOverlay('Reference 01', 'Supplied photographer', 'https://source.example/photo');
+  expect(inspiration.library.calls).toEqual(['list']);
+});
+
+test('reference cards never invent missing attribution, source, or image', async ({ page }) => {
+  const { inspiration } = await setup(page, 1);
+  Object.assign(inspiration.library.items[0], { attribution: null, sourceUrl: null, previewUrl: null });
+  await inspiration.open();
+  await inspiration.expectUnknownSource('Reference 01');
+});
+
 test('initial load shows skeleton placeholders until the first page arrives', async ({ page }) => {
   const { inspiration } = await setup(page, 4);
   inspiration.library.pause('list');

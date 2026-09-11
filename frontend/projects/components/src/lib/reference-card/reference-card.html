@@ -1,0 +1,36 @@
+<article class="lp-tile">
+  @if (previewUrl() && previewUrl() !== failedImage()) {
+    <img
+      [src]="previewUrl()"
+      alt=""
+      [attr.width]="width()"
+      [attr.height]="height()"
+      loading="lazy"
+      decoding="async"
+      (error)="failedImage.set(previewUrl())"
+    />
+  } @else {
+    <div class="lp-tile__placeholder" role="img" aria-label="No preview available">
+      <svg class="lp-icon" aria-hidden="true"><use href="#i-image" /></svg>
+    </div>
+  }
+  <a #link class="lp-tile__link" [routerLink]="destination()" [attr.aria-label]="title()"></a>
+  <div class="lp-tile__scrim">
+    <h2 class="lp-tile__title">{{ title() }}</h2>
+    <div class="lp-tile__meta">{{ attribution() || 'Unknown photographer' }}</div>
+  </div>
+  @if (source(); as url) {
+    <div class="lp-tile__actions">
+      <a
+        class="lp-icon-button"
+        [href]="url"
+        target="_blank"
+        rel="noopener noreferrer"
+        referrerpolicy="no-referrer"
+        aria-label="Open source page"
+      >
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-external" /></svg>
+      </a>
+    </div>
+  }
+</article>

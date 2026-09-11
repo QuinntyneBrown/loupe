@@ -62,7 +62,8 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
             || reference.CreatedAt == cursor.CreatedAt && reference.Id.CompareTo(cursor.Id) > 0);
         return await query.OrderByDescending(reference => reference.CreatedAt).ThenBy(reference => reference.Id).Take(count)
             .Select(reference => new ReferenceSummary(reference.Id, reference.Title, reference.CreatedAt,
-                reference.Width, reference.Height, reference.PreviewKey == null ? null : $"/api/references/{reference.Id}/preview"))
+                reference.Width, reference.Height, reference.PreviewKey == null ? null : $"/api/references/{reference.Id}/preview",
+                reference.SourceUrl, reference.Attribution))
             .ToListAsync(cancellationToken);
     }
     public async Task SaveAsync(Reference reference, CancellationToken cancellationToken)

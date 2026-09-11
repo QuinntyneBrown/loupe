@@ -5,10 +5,10 @@ export interface ReferenceSummary {
   width: number | null;
   height: number | null;
   previewUrl: string | null;
-}
-export interface ReferenceResult extends ReferenceSummary {
   sourceUrl: string | null;
   attribution: string | null;
+}
+export interface ReferenceResult extends ReferenceSummary {
   notes: string | null;
   imageUrl: string | null;
   revision: number;

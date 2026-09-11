@@ -6,12 +6,12 @@
       }
     } @else {
       @for (item of items(); track item.id) {
-        <lp-photograph-card
+        <lp-reference-card
           [destination]="'/inspiration/' + item.id"
           [title]="item.title"
-          [status]="item.previewUrl ? 'Saved reference' : 'Link-only reference'"
+          [attribution]="item.attribution"
+          [sourceUrl]="item.sourceUrl"
           [previewUrl]="item.previewUrl"
-          [createdAt]="item.createdAt"
           [width]="item.width"
           [height]="item.height"
         />
@@ -28,12 +28,22 @@
     <div class="lp-empty">
       <p role="alert" class="lp-empty__text">Inspiration could not be loaded. Try again.</p>
       <div class="lp-empty__action">
-        <button #retryButton type="button" class="lp-button lp-button--secondary" (click)="load(true)"><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg>Retry loading references</button>
+        <button
+          #retryButton
+          type="button"
+          class="lp-button lp-button--secondary"
+          (click)="load(true)"
+        >
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg>Retry
+          loading references
+        </button>
       </div>
     </div>
   } @else if (loading()) {
     <p role="status">Loading references…</p>
   } @else if (nextCursor()) {
-    <button type="button" class="lp-button lp-button--secondary" (click)="load()">Load more references</button>
+    <button type="button" class="lp-button lp-button--secondary" (click)="load()">
+      Load more references
+    </button>
   }
 </section>
