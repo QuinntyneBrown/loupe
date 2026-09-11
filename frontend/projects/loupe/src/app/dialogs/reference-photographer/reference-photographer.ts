@@ -27,7 +27,7 @@ import {
 })
 export class ReferencePhotographer {
   readonly reference = input.required<ReferenceResult>();
-  readonly closed = output<void>();
+  readonly closed = output<boolean>();
   readonly saved = output<ReferenceResult>();
   readonly reviewed = output<ReferenceResult>();
   readonly baseline = signal<ReferenceResult | null>(null);
@@ -57,6 +57,7 @@ export class ReferencePhotographer {
   private readonly destroy = inject(DestroyRef);
   private readonly modal = viewChild.required<ElementRef<HTMLDialogElement>>('modal');
   private generation = 0;
+  private attempted = false;
   private timer: ReturnType<typeof setTimeout> | undefined;
   constructor() {
     afterNextRender(() => {
@@ -125,7 +126,7 @@ export class ReferencePhotographer {
     event?.preventDefault();
     if (this.busy()) return;
     this.modal().nativeElement.close();
-    this.closed.emit();
+    this.closed.emit(this.attempted);
   }
   private finish(reference: ReferenceResult): void {
     this.modal().nativeElement.close();
@@ -200,6 +201,7 @@ export class ReferencePhotographer {
     }
     this.busy.set(true);
     this.error.set('');
+    this.attempted = true;
     try {
       const attempt = this.createAttempt();
       const result = attempt

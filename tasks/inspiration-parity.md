@@ -471,3 +471,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: three Chromium cases failed on the absent New photographer name field.
 - GREEN: all 39 reference-picker and photographer-detail cases pass. Entering a name reveals the required portfolio URL; final Link creates and links atomically, Cancel creates nothing, and lost-response retry retains one keyed request. Inspected desktop and 320px captures; picker results scroll and footer actions remain reachable.
 
+
+### Inline picker conflict and cancel recovery
+- RED: cancel after a completed save with a lost response left the reference showing no photographer.
+- GREEN: all 14 reference-picker Chromium cases pass. Closing after an attempted save refreshes the reference, stale inline creation retains its draft until explicit review, and normalized duplicates retain existing bookmark metadata.
+

@@ -35,3 +35,12 @@ test('canceling inline creation does not save a bookmark',async ({page})=>{
 test('inline creation retains its keyed request after a lost response',async ({page})=>{
  const {screen,photographers,references}=await setup(page);references.lostCreatePhotographerResponses=1;await screen.linkPhotographer();await screen.newPhotographer('New Artist','https://new.example/');await screen.confirmPhotographer();await screen.expectPhotographerFailure();await screen.expectNewPhotographer('New Artist','https://new.example/');await screen.confirmPhotographer();await screen.expectPhotographer('New Artist',photographers.items[0].id);expect(photographers.items).toHaveLength(27);expect(references.items[0].revision).toBe(2);
 });
+test('cancel after an unacknowledged inline save refreshes the completed reference link',async ({page})=>{
+ const {screen,photographers,references}=await setup(page);references.lostCreatePhotographerResponses=1;await screen.linkPhotographer();await screen.newPhotographer('New Artist','https://new.example/');await screen.confirmPhotographer();await screen.expectPhotographerFailure();await screen.cancelPhotographer();await screen.expectPhotographer('New Artist',photographers.items[0].id);
+});
+test('stale inline creation keeps the draft and creates only after explicit review',async ({page})=>{
+ const {screen,photographers,references}=await setup(page);await screen.linkPhotographer();await screen.newPhotographer('New Artist','https://new.example/');references.items[0].revision++;references.items[0].notes='Newer note';await screen.confirmPhotographer();await screen.expectPhotographerFailure();expect(photographers.items).toHaveLength(26);await screen.reviewPhotographer();await screen.expectNewPhotographer('New Artist','https://new.example/');await screen.confirmPhotographer();await screen.expectPhotographer('New Artist',photographers.items[0].id);expect(references.items[0].notes).toBe('Newer note');
+});
+test('inline creation reuses a portfolio without replacing its bookmark name',async ({page})=>{
+ const {screen,photographers}=await setup(page);await screen.linkPhotographer();await screen.newPhotographer('Different name','https://portfolio1.example/work#about');await screen.confirmPhotographer();await screen.expectPhotographer('Photographer 01','photographer-1');expect(photographers.items).toHaveLength(26);
+});

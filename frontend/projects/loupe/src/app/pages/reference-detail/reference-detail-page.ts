@@ -25,13 +25,14 @@ export class ReferenceDetailPage {
   readonly linkingPhotographer = signal<ReferenceResult | null>(null);
   readonly photographerDialog = viewChild(ReferencePhotographer);
   readonly photographerNotice = signal<ReferenceResult['photographer']>(null);
-  closePhotographer(result?: ReferenceResult): void {
+  closePhotographer(result?: ReferenceResult, refresh = false): void {
     if (result) {
       this.detail()?.reference.set(result);
       this.photographerNotice.set(result.photographer);
     }
     this.linkingPhotographer.set(null);
-    this.detail()?.focusActions();
+    if (refresh) this.detail()?.retry();
+    else this.detail()?.focusActions();
   }
   readonly pickingBoards = signal<ReferenceResult | null>(null);
   closeBoards(saved?: ReferenceResult): void {
