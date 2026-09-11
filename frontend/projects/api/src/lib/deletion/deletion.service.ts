@@ -8,6 +8,19 @@ import { ServiceError } from '../common/service-error';
 
 @Injectable()
 export class DeletionService implements IDeletionService {
+  async deletePhotographer(id: string, revision: number): Promise<DeletionResult> {
+    try {
+      return await firstValueFrom(
+        this.http.delete<DeletionResult>(`/api/photographers/${encodeURIComponent(id)}`, {
+          params: { revision },
+          headers: { 'X-CSRF-Token': await this.session.getRequestToken() },
+          timeout: 15000,
+        }),
+      );
+    } catch (error) {
+      throw this.failure(error);
+    }
+  }
   async deleteReference(id: string, revision: number): Promise<DeletionResult> {
     const token = await this.session.getRequestToken();
     try {

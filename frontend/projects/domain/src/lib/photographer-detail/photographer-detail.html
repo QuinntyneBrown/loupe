@@ -30,6 +30,14 @@
             <button class="lp-button lp-button--ghost" type="button" (click)="edit(menu)">
               Edit details
             </button>
+            <button
+              class="lp-button lp-button--ghost delete-action"
+              type="button"
+              [disabled]="referenceCount() === null"
+              (click)="delete(menu)"
+            >
+              Delete photographer
+            </button>
           </div>
         </details>
       </div>

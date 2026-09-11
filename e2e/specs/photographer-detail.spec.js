@@ -104,3 +104,40 @@ test("failed and stale edits retain the draft and preserve newer unrelated notes
   await screen.expectDetailsClosed();
   await screen.expectProfile("Casey Revised", "My description", "Newer notes");
 });
+
+test("delete confirmation defaults to Cancel and deletion retains linked references", async ({
+  page,
+}) => {
+  const { library, screen } = await setup(page);
+  library.linked = Array.from({ length: 6 }, (_, i) => ({
+    id: "ref-" + i,
+    title: "Study " + i,
+    previewUrl: null,
+  }));
+  await screen.open();
+  await screen.expectReferences(6);
+  await screen.deleteBookmark();
+  await screen.expectDeletion("Photographer 01", 6);
+  await screen.cancelDeletion();
+  expect(library.items).toHaveLength(1);
+  await screen.deleteBookmark();
+  await screen.confirmDeletion();
+  await screen.expectDeleted();
+  expect(library.items).toHaveLength(0);
+  expect(library.retainedReferences).toHaveLength(6);
+});
+test("a stale delete requires reviewing the latest bookmark before confirmation", async ({
+  page,
+}) => {
+  const { library, screen } = await setup(page);
+  await screen.open();
+  await screen.expectEmpty();
+  await screen.deleteBookmark();
+  library.items[0].name = "Changed elsewhere";
+  library.items[0].revision++;
+  await screen.confirmDeletion();
+  await screen.reviewDeletion();
+  await screen.expectDeletion("Changed elsewhere", 0);
+  await screen.confirmDeletion();
+  await screen.expectDeleted();
+});

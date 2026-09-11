@@ -2,9 +2,22 @@
   <a class="back" routerLink="/photographers"
     ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-left" /></svg
     >Photographers</a
-  ><lp-photographer-detail [id]="id()" (editRequested)="editing.set($event)" />
+  ><lp-photographer-detail
+    [id]="id()"
+    (editRequested)="editing.set($event)"
+    (deleteRequested)="deleting.set($event)"
+  />
 </main>
 <lp-unsaved-changes [dirty]="dirty" />
+@if (deleting(); as request) {
+  <lp-delete-photographer
+    [photographer]="request.item"
+    [referenceCount]="request.count"
+    (closed)="deleting.set(null)"
+    (reviewed)="reviewed($event)"
+    (deleted)="deletionComplete()"
+  />
+}
 @if (editing(); as item) {
   <lp-edit-photographer
     [photographer]="item"

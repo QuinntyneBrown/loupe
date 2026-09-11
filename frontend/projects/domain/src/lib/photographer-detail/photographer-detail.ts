@@ -11,6 +11,13 @@ import { PHOTOGRAPHER_SERVICE, PhotographerResult, ReferenceSummary } from 'api'
 })
 export class PhotographerDetail {
   readonly editRequested = output<PhotographerResult>();
+  readonly deleteRequested = output<{ item: PhotographerResult; count: number }>();
+  delete(menu: HTMLDetailsElement): void {
+    menu.open = false;
+    const item = this.item();
+    const count = this.referenceCount();
+    if (item && count !== null) this.deleteRequested.emit({ item, count });
+  }
   edit(menu: HTMLDetailsElement): void {
     menu.open = false;
     const item = this.item();

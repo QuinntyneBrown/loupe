@@ -3,6 +3,7 @@ import { PhotographerCollection } from 'domain';
 import { PhotographerResult, SESSION_SERVICE } from 'api';
 import { AddPhotographer } from '../../dialogs/add-photographer/add-photographer';
 import { UnsavedChanges } from '../../dialogs/unsaved-changes/unsaved-changes';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'lp-photographers-page',
@@ -12,7 +13,11 @@ import { UnsavedChanges } from '../../dialogs/unsaved-changes/unsaved-changes';
 })
 export class PhotographersPage {
   readonly adding = signal(false);
-  readonly notice = signal('');
+  readonly notice = signal(
+    inject(Router).currentNavigation()?.extras.state?.['photographerDeleted']
+      ? 'Photographer deleted. Their references are still in your library.'
+      : '',
+  );
   readonly dialog = viewChild(AddPhotographer);
   private readonly collection = viewChild.required(PhotographerCollection);
   private readonly unsaved = viewChild.required(UnsavedChanges);

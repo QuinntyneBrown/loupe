@@ -396,3 +396,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: three cases failed on absent More actions/Edit details. After implementation, the page object was corrected to address the native summary by its accessible label (Chromium exposes it as generic).
 - GREEN: all six detail Chromium cases pass, including profile accessibility. Save uses the current revision; cancel leaves the bookmark untouched; failure retains edits; reviewing a stale revision preserves newer unrelated notes and tags before retrying.
 
+
+### Photographer deletion dialog
+- RED: two cases failed on the missing delete action. Stale review subsequently exposed focus being attempted before Angular re-enabled Cancel.
+- GREEN: 22 profile/reference/photograph deletion Chromium checks pass. Confirmation names the bookmark and linked-reference count; Cancel has initial and post-review focus. Stale deletion requires renewed review, deletion retains references, and success returns to the collection with the retention notice.
+

@@ -56,6 +56,24 @@ export class PhotographerLibrary {
             },
           };
         }
+        if (operation === "deletePhotographer") {
+          const item = this.items.find((item) => item.id === input.id);
+          if (!item) return { error: "item_unavailable" };
+          if (item.revision !== input.revision)
+            return { error: "revision_conflict" };
+          this.items = this.items.filter((item) => item.id !== input.id);
+          this.retainedReferences = [...this.linked];
+          this.linked = [];
+          return {
+            data: {
+              id: "deletion-1",
+              resourceId: input.id,
+              status: "Completed",
+              deletedAt: "2026-09-11T12:00:00Z",
+              completedAt: "2026-09-11T12:00:00Z",
+            },
+          };
+        }
         if (operation === "update") {
           const item = this.items.find((item) => item.id === input.id);
           if (!item) return { error: "item_unavailable" };

@@ -14,6 +14,44 @@ export class PhotographerPage {
   dialog() {
     return this.page.getByRole("dialog", { name: "Edit details", exact: true });
   }
+  async deleteBookmark() {
+    await this.page.getByLabel("More actions", { exact: true }).click();
+    await this.page
+      .getByRole("button", { name: "Delete photographer", exact: true })
+      .click();
+  }
+  deletion() {
+    return this.page.getByRole("dialog", { name: /^Delete / });
+  }
+  async expectDeletion(name, count) {
+    await expect(this.deletion()).toContainText(name);
+    await expect(this.deletion()).toContainText(`${count} linked references`);
+    await expect(
+      this.deletion().getByRole("button", { name: "Cancel", exact: true }),
+    ).toBeFocused();
+  }
+  async cancelDeletion() {
+    await this.deletion()
+      .getByRole("button", { name: "Cancel", exact: true })
+      .click();
+    await expect(this.deletion()).not.toBeVisible();
+  }
+  async confirmDeletion() {
+    await this.deletion()
+      .getByRole("button", { name: "Delete", exact: true })
+      .click();
+  }
+  async expectDeleted() {
+    await expect(this.page).toHaveURL(/\/photographers$/);
+    await expect(this.page.getByRole("status")).toContainText(
+      "Photographer deleted. Their references are still in your library.",
+    );
+  }
+  async reviewDeletion() {
+    await this.deletion()
+      .getByRole("button", { name: "Review latest photographer", exact: true })
+      .click();
+  }
   async changeDetails(name, url, description) {
     await this.dialog()
       .getByRole("textbox", { name: "Name", exact: true })

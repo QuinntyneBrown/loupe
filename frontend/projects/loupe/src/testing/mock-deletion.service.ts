@@ -3,6 +3,9 @@ import { DeletionResult, IDeletionService, ServiceError } from 'api';
 
 @Injectable()
 export class MockDeletionService implements IDeletionService {
+  deletePhotographer(id: string, revision: number): Promise<DeletionResult> {
+    return this.request('deletePhotographer', { id, revision }, 'loupePhotographers');
+  }
   deleteReference(id: string, revision: number): Promise<DeletionResult> {
     return this.request('deleteReference', { id, revision }, 'loupeReferences');
   }
@@ -15,11 +18,11 @@ export class MockDeletionService implements IDeletionService {
   private async request(
     operation: string,
     input: object,
-    bridge: 'loupeReferences' | 'loupePhotographs' = 'loupePhotographs',
+    bridge: 'loupeReferences' | 'loupePhotographs' | 'loupePhotographers' = 'loupePhotographs',
   ): Promise<DeletionResult> {
     const callback = (
       window as Window & {
-        [key in 'loupeReferences' | 'loupePhotographs']?:
+        [key in 'loupeReferences' | 'loupePhotographs' | 'loupePhotographers']?:
           | undefined
           | ((operation: string, input: object) => Promise<{ data?: unknown; error?: string }>);
       }
