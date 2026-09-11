@@ -13,7 +13,7 @@
   <lp-delete-photographer
     [photographer]="request.item"
     [referenceCount]="request.count"
-    (closed)="deleting.set(null)"
+    (closed)="closeDelete()"
     (reviewed)="reviewed($event)"
     (deleted)="deletionComplete()"
   />
@@ -22,6 +22,6 @@
   <lp-edit-photographer
     [photographer]="item"
     (saved)="saved($event)"
-    (closed)="editing.set(null)"
+    (closed)="closeEdit()"
   />
 }

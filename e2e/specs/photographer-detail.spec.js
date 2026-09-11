@@ -220,3 +220,31 @@ test("duplicate tag names are rejected without saving another variant", async ({
   await screen.expectTagError("already");
   expect(library.calls.some((call) => call.operation === "update")).toBe(false);
 });
+
+test("closing edit and deletion dialogs restores the More actions focus target", async ({
+  page,
+}) => {
+  const { screen } = await setup(page);
+  await screen.open();
+  await screen.edit();
+  await screen.cancelDetails();
+  await screen.expectActionsFocused();
+  await screen.deleteBookmark();
+  await screen.cancelDeletion();
+  await screen.expectActionsFocused();
+});
+test("unsaved notes can keep editing or explicitly discard before leaving", async ({
+  page,
+}) => {
+  const { library, screen } = await setup(page);
+  await screen.open();
+  await screen.writeNotes("Private unfinished notes");
+  await screen.backToCollection();
+  await screen.keepEditing();
+  await screen.saveNotes();
+  await screen.expectNotesSaved("Private unfinished notes");
+  await screen.writeNotes("Discard these");
+  await screen.backToCollection();
+  await screen.discardNotes();
+  expect(library.items[0].notes).toBe("Private unfinished notes");
+});

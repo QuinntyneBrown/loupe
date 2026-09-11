@@ -1,4 +1,8 @@
 import {
+  afterNextRender,
+  DestroyRef,
+  ElementRef,
+  Injector,
   Component,
   computed,
   effect,
@@ -21,6 +25,17 @@ import { PHOTOGRAPHER_SERVICE, PhotographerResult, ReferenceSummary } from 'api'
   styleUrl: './photographer-detail.css',
 })
 export class PhotographerDetail {
+  private readonly actions = viewChild<ElementRef<HTMLElement>>('actions');
+  private readonly injector = inject(Injector);
+  private readonly destroy = inject(DestroyRef);
+  focusActions(): void {
+    afterNextRender(
+      () => {
+        if (!this.destroy.destroyed) this.actions()?.nativeElement.focus();
+      },
+      { injector: this.injector },
+    );
+  }
   private readonly notes = viewChild(PhotographerNotes);
   private readonly tags = viewChild(PhotographerTags);
   readonly dirty = computed(

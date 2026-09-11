@@ -37,6 +37,14 @@ export class PhotographerDetailPage {
   }
   saved(item: PhotographerResult): void {
     this.detail().item.set(item);
+    this.closeEdit();
+  }
+  closeEdit(): void {
     this.editing.set(null);
+    this.detail().focusActions();
+  }
+  closeDelete(): void {
+    this.deleting.set(null);
+    this.detail().focusActions();
   }
 }

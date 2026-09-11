@@ -411,3 +411,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: three cases failed on absent Add a tag/remove controls.
 - GREEN: all 13 profile Chromium cases pass. Tag additions/removals persist immediately, reject case-normalized duplicates, and retain failed actions. Conflict review reapplies one action to current metadata without losing unrelated tags. Unsaved notes survive tag writes and can be reviewed and saved afterward.
 
+
+### Profile navigation and dialog focus
+- RED: dialog closure left More actions unfocused; the unsaved-note Keep editing/Discard case already passed.
+- GREEN: all 15 profile Chromium cases pass. Canceling either edit or deletion restores the visible menu trigger after rendering. Notes can remain on the page or be explicitly discarded before navigation.
+

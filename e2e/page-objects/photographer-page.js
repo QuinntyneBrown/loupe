@@ -5,6 +5,30 @@ export class PhotographerPage {
   constructor(page) {
     this.page = page;
   }
+  async expectActionsFocused() {
+    await expect(
+      this.page.getByLabel("More actions", { exact: true }),
+    ).toBeFocused();
+  }
+  async backToCollection() {
+    await this.page
+      .getByRole("main")
+      .getByRole("link", { name: "Photographers", exact: true })
+      .click();
+  }
+  async keepEditing() {
+    await this.page
+      .getByRole("dialog", { name: "Discard unsaved changes?", exact: true })
+      .getByRole("button", { name: "Keep editing", exact: true })
+      .click();
+  }
+  async discardNotes() {
+    await this.page
+      .getByRole("dialog", { name: "Discard unsaved changes?", exact: true })
+      .getByRole("button", { name: "Discard", exact: true })
+      .click();
+    await expect(this.page).toHaveURL(/\/photographers$/);
+  }
   tagsPanel() {
     return this.page.getByRole("region", { name: "Tags", exact: true });
   }
