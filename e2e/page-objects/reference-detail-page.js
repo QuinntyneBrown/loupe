@@ -2,6 +2,11 @@ import { expect } from '@playwright/test';
 
 export class ReferenceDetailPage {
   constructor(page) { this.page = page; }
+  async openBoards() { await this.page.getByRole('button', { name: 'Add to boards', exact: true }).click(); }
+  async selectPickerBoard(name) { await this.page.getByRole('dialog', { name: 'Add to boards', exact: true }).getByRole('checkbox', { name, exact: true }).check(); }
+  async expectBoardLink(name) { await expect(this.page.getByRole('region', { name: 'Boards', exact: true }).getByRole('link', { name, exact: true })).toBeVisible(); }
+  async followBoard(name) { await this.page.getByRole('region', { name: 'Boards', exact: true }).getByRole('link', { name, exact: true }).click(); }
+  async expectBoardButtonFocus() { await expect(this.page.getByRole('button', { name: 'Add to boards', exact: true })).toBeFocused(); }
   async openDelete() { await this.page.getByLabel('More actions', { exact: true }).click(); await this.page.getByRole('button', { name: 'Delete reference', exact: true }).click(); await expect(this.deleteDialog().getByRole('button', { name: 'Cancel', exact: true })).toBeFocused(); }
   deleteDialog() { return this.page.getByRole('dialog', { name: 'Delete this reference?', exact: true }); }
   async cancelDelete() { await this.deleteDialog().getByRole('button', { name: 'Cancel', exact: true }).click(); await expect(this.deleteDialog()).toHaveCount(0); await expect(this.page.getByLabel('More actions', { exact: true })).toBeFocused(); }

@@ -1,0 +1,7 @@
+:host {
+  display: block;
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+  font-size: var(--lp-text-sm);
+}

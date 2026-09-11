@@ -4,6 +4,7 @@ import { ReferenceResult } from 'api';
 import { ReferenceImageDialog } from '../../dialogs/reference-image/reference-image-dialog';
 import { Router, RouterLink } from '@angular/router';
 import { DeleteReference } from '../../dialogs/delete-reference/delete-reference';
+import { BoardPicker } from '../../dialogs/board-picker/board-picker';
 import { ReferenceDetailPanel } from 'domain';
 @Component({
   selector: 'lp-reference-detail-page',
@@ -13,11 +14,18 @@ import { ReferenceDetailPanel } from 'domain';
     UnsavedChanges,
     ReferenceImageDialog,
     DeleteReference,
+    BoardPicker,
   ],
   templateUrl: './reference-detail-page.html',
   styleUrl: './reference-detail-page.css',
 })
 export class ReferenceDetailPage {
+  readonly pickingBoards = signal<ReferenceResult | null>(null);
+  closeBoards(saved?: ReferenceResult): void {
+    if (saved) this.detail()?.reference.set(saved);
+    this.pickingBoards.set(null);
+    this.detail()?.focusBoards();
+  }
   readonly deletingReference = signal<ReferenceResult | null>(null);
   readonly deletionDialog = viewChild(DeleteReference);
   private readonly router = inject(Router);

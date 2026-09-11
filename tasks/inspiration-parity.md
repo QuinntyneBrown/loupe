@@ -230,3 +230,7 @@ be established without printing credentials. Live quality checks are mandatory.
 - GREEN: 36 reference deletion/image/metadata and photograph-deletion regressions pass. Cancel restores menu focus, explicit Delete returns to Inspiration with confirmation, failures retry and stale revisions require review.
 - Desktop and 375px screenshots, Axe and overflow checks pass. The dialog follows the mock confirmation copy and Cancel-first focus.
 - A local test-runner startup raced a library build; the ignored parity config now uses the explicitly managed 4218 server without automatic startup. Tests ran after the server stabilized.
+
+### Reference board links
+- RED: the detail workflow failed on missing Add to boards.
+- GREEN: all 14 detail-board/board/deletion/replacement Chromium cases pass. The existing picker supports inline creation, returns focus to its trigger and updates the named board links; each link opens the matching board collection.

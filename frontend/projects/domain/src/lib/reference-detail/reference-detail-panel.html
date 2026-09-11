@@ -41,6 +41,11 @@
         Saved
         <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'mediumDate' }}</time>
       </p>
+      <lp-reference-boards
+        [reference]="item"
+        [disabled]="dirty()"
+        (pickerRequested)="boardsRequested.emit($event)"
+      />
     </div>
     <div class="lp-detail__media">
       <figure>

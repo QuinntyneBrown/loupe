@@ -1,6 +1,7 @@
 import { ReferenceImportPanel } from '../reference-import/reference-import-panel';
 import { ReferenceMetadataEditor } from '../reference-metadata/reference-metadata-editor';
 import { ReferenceTags } from '../reference-tags/reference-tags';
+import { ReferenceBoards } from '../reference-boards/reference-boards';
 import { computed, output } from '@angular/core';
 import {
   afterNextRender,
@@ -18,11 +19,22 @@ import { REFERENCE_SERVICE, ReferenceResult, ServiceError } from 'api';
 
 @Component({
   selector: 'lp-reference-detail-panel',
-  imports: [DatePipe, ReferenceMetadataEditor, ReferenceImportPanel, ReferenceTags],
+  imports: [
+    DatePipe,
+    ReferenceMetadataEditor,
+    ReferenceImportPanel,
+    ReferenceTags,
+    ReferenceBoards,
+  ],
   templateUrl: './reference-detail-panel.html',
   styleUrl: './reference-detail-panel.css',
 })
 export class ReferenceDetailPanel {
+  readonly boardsRequested = output<ReferenceResult>();
+  private readonly boardsPanel = viewChild(ReferenceBoards);
+  focusBoards(): void {
+    this.boardsPanel()?.focus();
+  }
   readonly deleteRequested = output<ReferenceResult>();
   requestDelete(menu: HTMLDetailsElement, item: ReferenceResult): void {
     menu.open = false;

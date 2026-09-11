@@ -7,8 +7,12 @@
     (discardRequested)="requestDiscard($event)"
     (replaceImageRequested)="replacingImage.set($event)"
     (deleteRequested)="deletingReference.set($event)"
+    (boardsRequested)="pickingBoards.set($event)"
   />
 </main>
+@if (pickingBoards(); as item) {
+  <lp-board-picker [reference]="item" (closed)="closeBoards()" (saved)="closeBoards($event)" />
+}
 @if (deletingReference(); as item) {
   <lp-delete-reference
     [reference]="item"
