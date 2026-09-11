@@ -12,6 +12,13 @@ namespace Loupe.Api.Controllers;
 [Route("api/reference-drafts")]
 public sealed class ReferenceDraftsController(ISender sender) : ControllerBase
 {
+    [HttpPost("links")]
+    public async Task<ActionResult<ReferenceDraftResult>> Import(ImportReferenceDraftRequest request,
+        [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken)
+    {
+        var draft = await sender.Send(new ImportReferenceDraftCommand(request.SourceUrl, operationKey), cancellationToken);
+        return Accepted($"/api/reference-drafts/{draft.Id}", draft);
+    }
     [HttpPost("images")]
     [RequestSizeLimit(UploadLimits.RequestBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = UploadLimits.RequestBytes)]

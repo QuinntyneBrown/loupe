@@ -10,6 +10,12 @@ namespace Loupe.Infrastructure.Persistence;
 
 public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
 {
+    public Task<Reference?> FindSourceOwnedAsync(string ownerId, string source, CancellationToken cancellationToken) =>
+        database.References.FromSqlInterpolated($"""
+            SELECT * FROM "references" WHERE "OwnerId" = {ownerId} AND "SourceHash" = md5(loupe_normalize_source({source}))
+              AND loupe_normalize_source("SourceUrl") = loupe_normalize_source({source})
+            """).AsNoTracking().Include(item => item.Boards).Include(item => item.Tags)
+            .OrderBy(item => item.CreatedAt).ThenBy(item => item.Id).FirstOrDefaultAsync(cancellationToken);
     public async Task<Reference> SaveSourceAsync(Reference reference, CancellationToken cancellationToken)
     {
         var source = await LockSourceAsync(reference.OwnerId, reference.SourceUrl, cancellationToken)

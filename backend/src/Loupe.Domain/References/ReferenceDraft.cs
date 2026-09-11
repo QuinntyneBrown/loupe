@@ -14,4 +14,7 @@ public sealed class ReferenceDraft
     public int? Height { get; set; }
     public long Revision { get; set; } = 1;
     public Guid? CommittedReferenceId { get; set; }
+    public string? FailureCode { get; set; }
+    public Guid? ImportOperationId { get; set; }
+    public Loupe.Domain.Operations.BackgroundOperation? ImportOperation { get; set; }
 }

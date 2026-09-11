@@ -131,3 +131,14 @@ be established without printing credentials. Live quality checks are mandatory.
 - Draft media stays out of the library, remains protected from orphan cleanup
   while active, and transfers to the reference in the final receipt transaction.
   Drafts expire after 24 hours. Link import and the unified dialog remain next.
+
+### Source draft admission and cancellation
+- RED: all 3 source-draft cases returned Method not allowed for the missing route.
+- GREEN: 17 source/upload draft, legacy import-admission and cleanup cases passed.
+- Import creates private queued work without a reference. Cancel terminates work
+  and clears its captured source payload. An unconfigured importer leaves an
+  explicit manual fallback, and owned normalized duplicates return their existing
+  reference without queueing another import or exposing another owner's match.
+- The source reader will use [AngleSharp 1.8.1](https://www.nuget.org/packages/AngleSharp/1.8.1)
+  for HTML parsing and the applicable rules from [RFC 9309](https://www.rfc-editor.org/rfc/rfc9309.html).
+  Network loading stays in the existing restricted HTTP transport.

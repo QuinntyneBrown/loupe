@@ -30,6 +30,8 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<ReferenceDraft>().ToTable("reference_drafts").HasKey(draft => draft.Id);
         modelBuilder.Entity<ReferenceDraft>().HasIndex(draft => new { draft.OwnerId, draft.ExpiresAt });
         modelBuilder.Entity<ReferenceDraft>().Property(draft => draft.Revision).IsConcurrencyToken();
+        modelBuilder.Entity<ReferenceDraft>().HasOne(draft => draft.ImportOperation).WithMany()
+            .HasForeignKey(draft => draft.ImportOperationId).OnDelete(DeleteBehavior.SetNull);
         modelBuilder.Entity<ReferenceTag>().ToTable("reference_tags").HasKey(tag => new { tag.ReferenceId, tag.NormalizedName });
         modelBuilder.Entity<ReferenceTag>().HasIndex(tag => new { tag.OwnerId, tag.NormalizedName });
         modelBuilder.Entity<ReferenceTag>().HasOne<Reference>().WithMany(reference => reference.Tags)
