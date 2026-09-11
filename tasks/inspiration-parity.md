@@ -142,3 +142,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - The source reader will use [AngleSharp 1.8.1](https://www.nuget.org/packages/AngleSharp/1.8.1)
   for HTML parsing and the applicable rules from [RFC 9309](https://www.rfc-editor.org/rfc/rfc9309.html).
   Network loading stays in the existing restricted HTTP transport.
+
+### Source robots policy
+- RED: 11 existing acceptance cases failed because IRobotsPolicy was unregistered.
+- GREEN: all 29 robots and restricted-network cases pass, including grouped agent rules, wildcard/end matching, encoded paths, missing policies and bounded failures.
+- An oversized-response exception initially escaped the fallback; the exact failure now maps to Unavailable. Source transport bypasses ambient proxies so connection checks apply to the destination.
+

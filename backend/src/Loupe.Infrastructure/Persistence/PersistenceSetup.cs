@@ -36,6 +36,7 @@ public static class PersistenceSetup
         services.AddSingleton<IDnsResolver, DnsResolver>();
         services.AddSingleton<ISourceConnector, SocketSourceConnector>();
         services.AddScoped<IRestrictedPageFetcher, RestrictedPageFetcher>();
+        services.AddScoped<IRobotsPolicy, RobotsPolicy>();
         services.AddHttpClient("sourceFetch", client =>
             {
                 client.Timeout = TimeSpan.FromSeconds(30);
@@ -45,6 +46,7 @@ public static class PersistenceSetup
             {
                 AllowAutoRedirect = false,
                 UseCookies = false,
+                UseProxy = false,
                 ConnectTimeout = TimeSpan.FromSeconds(10),
                 ConnectCallback = async (context, cancellationToken) =>
                 {
