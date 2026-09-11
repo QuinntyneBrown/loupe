@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Loupe.Api.Tests.Critiques;
 
-public sealed class CritiqueWorkerCapacityTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
+public sealed class AnalysisWorkerCapacityTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
 {
     [Theory]
     [InlineData(1, 4)]
@@ -51,7 +51,7 @@ public sealed class CritiqueWorkerCapacityTests(PostgreSqlFixture database) : IC
         await using var second = new ApiFactory(database.ConnectionString, database.MediaRoot) { Settings = settings, CritiqueProvider = provider };
         var clients = new List<HttpClient>();
         var jobs = new List<(HttpClient Client, Guid Photo, Uri Status)>();
-        var workers = new List<CritiqueWorker>();
+        var workers = new List<AnalysisWorker>();
         try
         {
             for (var owner = 0; owner < 3; owner++)
@@ -75,8 +75,8 @@ public sealed class CritiqueWorkerCapacityTests(PostgreSqlFixture database) : IC
             for (var host = 0; host < hostCount; host++)
             {
                 var services = (host == 0 ? first : second).Services;
-                var worker = new CritiqueWorker(services.GetRequiredService<IServiceScopeFactory>(),
-                    services.GetRequiredService<IOptions<AiOptions>>(), NullLogger<CritiqueWorker>.Instance);
+                var worker = new AnalysisWorker(services.GetRequiredService<IServiceScopeFactory>(),
+                    services.GetRequiredService<IOptions<AiOptions>>(), NullLogger<AnalysisWorker>.Instance);
                 workers.Add(worker);
                 await worker.StartAsync(default);
             }

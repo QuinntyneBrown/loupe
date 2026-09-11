@@ -43,8 +43,8 @@ public sealed class CritiqueExecutionTests(PostgreSqlFixture database) : IClassF
             // external analysis boundary is replaced with a controlled test provider.
             await using var workerHost = new ApiFactory(database.ConnectionString, database.MediaRoot)
             { Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only-key" } };
-            using var worker = new CritiqueWorker(workerHost.Services.GetRequiredService<IServiceScopeFactory>(),
-                workerHost.Services.GetRequiredService<IOptions<AiOptions>>(), NullLogger<CritiqueWorker>.Instance);
+            using var worker = new AnalysisWorker(workerHost.Services.GetRequiredService<IServiceScopeFactory>(),
+                workerHost.Services.GetRequiredService<IOptions<AiOptions>>(), NullLogger<AnalysisWorker>.Instance);
             JsonElement status = default;
             await worker.StartAsync(default);
             try

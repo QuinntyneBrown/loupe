@@ -259,3 +259,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - GREEN: 20 visual-analysis/critique-provider/execution cases and 15 critique validation/timeout/renewal regressions pass.
 - The Azure Responses adapter sends the validated preview with a strict description/tag schema and excludes notes. Publication retains editorial fields and stores private, timestamped suggestions separately, guarded by the lease and image revision.
 - Retry handling is shared with critiques, preserving the existing critique messages and bounded backoff. Worker-host registration, review actions, additional adversarial cases and live evaluation remain separate slices.
+
+### Shared image-analysis worker
+- RED: the host left reference analysis queued; malformed-output and canceled-publication checks already passed. A queued job from the failing host test also explained the follow-on publication failure.
+- GREEN: all 12 reference-worker, shared-capacity and critique-execution cases pass. The renamed AnalysisWorker alternates reference and critique work within its existing pool and database-enforced capacity. Invalid outputs retry once; replaced/deleted image results cannot publish.
+

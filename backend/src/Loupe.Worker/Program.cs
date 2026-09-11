@@ -1,5 +1,6 @@
 using Loupe.Application.Maintenance;
 using Loupe.Application.Critiques;
+using Loupe.Application.ReferenceAnalysis;
 using Loupe.Application.ReferenceImports;
 using Loupe.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,14 +24,15 @@ public static class Program
         builder.Services.AddMediatR(options =>
         {
             options.TypeEvaluator = type => type.Namespace == typeof(CleanDeletedContentCommand).Namespace
-                || type == typeof(RunCritiqueCommandHandler) || type == typeof(RunReferenceImportCommandHandler);
+                || type == typeof(RunCritiqueCommandHandler) || type == typeof(RunReferenceImportCommandHandler)
+                || type == typeof(RunReferenceAnalysisCommandHandler);
             options.RegisterServicesFromAssemblyContaining<CleanDeletedContentCommand>();
         });
         builder.Services.AddOptions<CleanupOptions>().BindConfiguration("Cleanup")
             .Validate(options => options.PollInterval > TimeSpan.Zero && options.PollInterval <= TimeSpan.FromMinutes(5),
                 "Cleanup:PollInterval must be positive and at most five minutes.").ValidateOnStart();
         builder.Services.AddHostedService<CleanupWorker>();
-        builder.Services.AddHostedService<CritiqueWorker>();
+        builder.Services.AddHostedService<AnalysisWorker>();
         builder.Services.AddHostedService<ReferenceImportWorker>();
         using var host = builder.Build();
         using var scope = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Loupe.Worker.Host")
