@@ -196,6 +196,32 @@ public sealed class SourceDraftWorkerTests(PostgreSqlFixture database) : IClassF
         return await response.Content.ReadFromJsonAsync<JsonElement>();
     }
 
+    [Theory]
+    [InlineData("<script type='application/ld+json'>{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"isAccessibleForFree\":false}</script>")]
+    [InlineData("<script type='application/ld+json'>{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"WebPage\",\"hasPart\":{\"isAccessibleForFree\":\"False\"}}]}</script>")]
+    [InlineData("<meta itemprop='isAccessibleForFree' content='false'>")]
+    [InlineData("<input type='password'>")]
+    public async Task A_page_declaring_restricted_access_does_not_fetch_its_advertised_image(string restriction)
+    {
+        using var image = NetVips.Image.Black(8, 6, bands: 3);
+        using var transport = new ControlledSourceTransport((request, _) =>
+        {
+            if (request.RequestUri!.AbsolutePath == "/robots.txt") return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+            if (request.RequestUri.AbsolutePath == "/private.png")
+            {
+                var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(image.PngsaveBuffer()) };
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue("image/png"); return Task.FromResult(response);
+            }
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(restriction + "<meta property='og:image' content='/private.png'>", System.Text.Encoding.UTF8, "text/html") });
+        });
+        await using var factory = Factory(transport); using var owner = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        var draft = await Start(owner); await Run(factory);
+        var result = await owner.GetFromJsonAsync<JsonElement>($"/api/reference-drafts/{draft.GetProperty("id").GetGuid()}");
+        Assert.Equal("source_access_denied", result.GetProperty("failureCode").GetString());
+        Assert.Equal(JsonValueKind.Null, result.GetProperty("imageUrl").ValueKind);
+        Assert.DoesNotContain(transport.Requests, uri => uri.AbsolutePath == "/private.png");
+    }
+
     private static async Task Run(ApiFactory factory)
     {
         await using var scope = factory.Services.CreateAsyncScope();

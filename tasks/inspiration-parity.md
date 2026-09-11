@@ -303,3 +303,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - GREEN: 18 of 19 initial checks passed; the 25-hour persistence test then correctly encountered session expiry. With a fresh sign-in for that persistence read, all 13 saved-source/draft-worker/worker-host cases pass.
 - Workers process both saved links and drafts. Saved-link imports fill a missing image, preserve user metadata, reject changed source/image snapshots and queue visual analysis. Requested/fetched URL, time and extracted title/attribution persist independently of the draft lifetime.
 
+
+### Declared source restrictions
+- RED: three structured-paywall fixtures fetched their advertised image; the password case already passed.
+- GREEN: 34 source-worker and robots cases pass. JSON-LD and microdata access declarations are checked before image candidates; restricted pages retain the manual fallback.
+- Checked the access flag against [Schema.org isAccessibleForFree](https://schema.org/isAccessibleForFree).
+

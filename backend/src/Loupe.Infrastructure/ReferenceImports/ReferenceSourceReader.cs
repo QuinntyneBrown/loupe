@@ -18,7 +18,7 @@ public sealed class ReferenceSourceReader(IRestrictedPageFetcher fetcher, IRobot
         var bytes = await BoundedSourceContent.ReadAsync(response.Content, 2_000_000, cancellationToken);
         using var stream = new MemoryStream(bytes);
         using var document = await new HtmlParser().ParseDocumentAsync(stream, cancellationToken);
-        if (document.QuerySelector("input[type=password]") is not null) throw new SourceImportException("source_access_denied");
+        if (SourcePageRestrictions.DeniesAccess(document)) throw new SourceImportException("source_access_denied");
         var title = Clean(document.QuerySelector("meta[property='og:title']")?.GetAttribute("content") ?? document.Title, 200);
         var author = Clean(document.QuerySelector("meta[name='author']")?.GetAttribute("content"), 200);
         var candidates = document.QuerySelectorAll("meta[property='og:image'], meta[name='og:image']")
