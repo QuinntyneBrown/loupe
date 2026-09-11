@@ -49,6 +49,12 @@ export class ReferenceDetailPage {
   async expectNoTag(name) { await expect(this.page.getByRole('button', { name: `Remove tag ${name}`, exact: true })).toHaveCount(0); }
   async expectTagFailure() { await expect(this.page.getByRole('region', { name: 'Your tags', exact: true }).getByRole('alert')).toHaveText('Tags could not be saved. Your change is still here. Try again.'); }
   async retryTags() { await this.page.getByRole('button', { name: 'Retry saving tags', exact: true }).click(); }
+  activeTags() { return this.page.getByRole('region', { name: 'Your tags', exact: true }); }
+  async editActiveTag(name, value, category) { await this.activeTags().getByRole('button', { name: 'Edit tag ' + name, exact: true }).click(); await this.activeTags().getByLabel('Tag name', { exact: true }).fill(value); await this.activeTags().getByLabel('Category', { exact: true }).selectOption(category); }
+  async saveTagEdit() { await this.activeTags().getByRole('button', { name: 'Save tag', exact: true }).click(); }
+  async expectTagEdit(value, category) { await expect(this.activeTags().getByLabel('Tag name', { exact: true })).toHaveValue(value); await expect(this.activeTags().getByLabel('Category', { exact: true })).toHaveValue(category); }
+  async expectTagConflict() { await expect(this.activeTags().getByRole('alert')).toContainText('This reference changed.'); }
+  async loadLatestTags() { await this.activeTags().getByRole('button', { name: 'Load latest tags', exact: true }).click(); }
   async expectTitle() { await expect(this.page).toHaveTitle('Reference \u00b7 Loupe'); }
   async expectHeadingFocus(title) { await expect(this.page.getByRole('heading', { name: title, exact: true })).toBeFocused(); }
   async edit() { await this.page.getByRole('button',{name:'Edit metadata',exact:true}).click(); await expect(this.page.getByLabel('Title',{exact:true})).toBeFocused(); }

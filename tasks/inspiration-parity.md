@@ -309,3 +309,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - GREEN: 34 source-worker and robots cases pass. JSON-LD and microdata access declarations are checked before image candidates; restricted pages retain the manual fallback.
 - Checked the access flag against [Schema.org isAccessibleForFree](https://schema.org/isAccessibleForFree).
 
+
+### Active-tag editing
+- RED: both new workflows failed on missing active-tag edit controls.
+- GREEN: 15 tag/suggestion/text Chromium cases pass. Renaming and optional categorization preserve unchanged tags' provenance. Failed and stale edits retain the draft and require explicit latest-tag review before retry. The saved tag status uses an accessible success token; the edited-tag page passes Axe.
+

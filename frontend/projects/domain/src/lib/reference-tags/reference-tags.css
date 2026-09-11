@@ -9,8 +9,25 @@ section {
   gap: var(--lp-space-3);
 }
 .status {
-  color: var(--lp-color-text-3);
+  color: var(--lp-color-success);
   font-size: var(--lp-text-xs);
+}
+.tag-name {
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  padding: var(--lp-zero);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.tag-name:hover {
+  text-decoration: underline;
+}
+.tag-editor {
+  padding: var(--lp-space-4);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
 }
 .chip-input {
   display: flex;

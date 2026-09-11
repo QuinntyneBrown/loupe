@@ -170,7 +170,7 @@ export class ReferenceLibrary {
         const item = this.items.find(item => item.id === input.id);
         if (!item) return { error: 'item_unavailable' };
         if (item.revision !== input.revision) return { error: 'revision_conflict' };
-        item.tags = input.tags.map(tag => ({ ...tag, provenance: 'manual' })); item.revision++;
+        item.tags = input.tags.map(tag => { const existing = item.tags.find(saved => saved.name === tag.name && saved.category === tag.category); return { ...tag, provenance: existing?.provenance || 'manual' }; }); item.revision++;
         return { data: item };
       }
       if (operation === 'upload') {

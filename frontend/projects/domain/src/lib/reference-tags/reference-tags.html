@@ -5,13 +5,21 @@
   </div>
   <form (ngSubmit)="add()" class="chip-input">
     @for (tag of reference().tags; track tag.name) {
-      <span class="lp-tag"
-        >{{ tag.name
-        }}<button
+      <span class="lp-tag">
+        <button
+          type="button"
+          class="tag-name"
+          [attr.aria-label]="'Edit tag ' + tag.name"
+          [attr.title]="(tag.category || 'Uncategorized') + ' · ' + tag.provenance"
+          [disabled]="busy() || !!editing() || !!action()"
+          (click)="edit(tag)"
+        >
+          {{ tag.name }}</button
+        ><button
           type="button"
           class="lp-tag__action"
           [attr.aria-label]="'Remove tag ' + tag.name"
-          [disabled]="busy()"
+          [disabled]="busy() || !!editing()"
           (click)="remove(tag.name)"
         >
           <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg></button
@@ -26,9 +34,57 @@
       aria-label="Add a tag"
       [ngModel]="draft()"
       (ngModelChange)="change($event)"
-      [disabled]="busy()"
+      [disabled]="busy() || !!editing()"
     />
   </form>
+  @if (editing()) {
+    <form class="tag-editor lp-field" (ngSubmit)="saveEdit()">
+      <label class="lp-field__label" for="active-tag-name">Tag name</label>
+      <input
+        #editField
+        id="active-tag-name"
+        class="lp-input"
+        name="editName"
+        [ngModel]="editName()"
+        (ngModelChange)="editName.set($event); editChanged()"
+        [disabled]="busy()"
+        [attr.aria-invalid]="editInvalid()"
+        aria-describedby="active-tag-hint"
+      />
+      <p id="active-tag-hint" class="lp-field__hint">Use 50 characters or fewer.</p>
+      <label class="lp-field__label" for="active-tag-category">Category</label>
+      <select
+        id="active-tag-category"
+        class="lp-select"
+        name="editCategory"
+        [ngModel]="editCategory()"
+        (ngModelChange)="editCategory.set($event); editChanged()"
+        [disabled]="busy()"
+      >
+        <option value="">Uncategorized</option>
+        @for (category of categories; track category) {
+          <option [value]="category">{{ category | titlecase }}</option>
+        }
+      </select>
+      <div class="lp-row">
+        <button
+          type="submit"
+          class="lp-button lp-button--secondary lp-button--sm"
+          [disabled]="busy() || conflicted() || editInvalid() || failed()"
+        >
+          Save tag
+        </button>
+        <button
+          type="button"
+          class="lp-button lp-button--ghost lp-button--sm"
+          [disabled]="busy()"
+          (click)="cancelEdit()"
+        >
+          Cancel tag edit
+        </button>
+      </div>
+    </form>
+  }
   @if (error()) {
     <p role="alert">{{ error() }}</p>
   }
