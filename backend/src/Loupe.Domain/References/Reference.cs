@@ -7,6 +7,7 @@ public sealed class Reference
     public required string Title { get; set; }
     public required DateTimeOffset CreatedAt { get; init; }
     public string? SourceUrl { get; set; }
+    public string? SourceImportJson { get; set; }
     public string? Attribution { get; set; }
     public string? Notes { get; set; }
     public string? Description { get; set; }

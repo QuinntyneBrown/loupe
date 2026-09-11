@@ -297,3 +297,9 @@ be established without printing credentials. Live quality checks are mandatory.
 - GREEN: 25 of the initial 26 checks passed; the remaining assertion still expected no analysis after replacement. It now verifies automatic replacement admission and explicit-request deduplication. All 29 automatic/admission/worker/import-admission/lease cases then passed.
 - Validated uploads, final draft saves and replacements enqueue once in the save transaction when the provider is configured. Queue saturation records a retryable analysis failure without losing the saved image. Draft preview alone never saves a reference; keyed retries reuse the operation.
 
+
+### Saved-source imports and durable provenance
+- RED: saved-reference jobs were not claimed, and a committed draft did not retain source provenance.
+- GREEN: 18 of 19 initial checks passed; the 25-hour persistence test then correctly encountered session expiry. With a fresh sign-in for that persistence read, all 13 saved-source/draft-worker/worker-host cases pass.
+- Workers process both saved links and drafts. Saved-link imports fill a missing image, preserve user metadata, reject changed source/image snapshots and queue visual analysis. Requested/fetched URL, time and extracted title/attribution persist independently of the draft lifetime.
+

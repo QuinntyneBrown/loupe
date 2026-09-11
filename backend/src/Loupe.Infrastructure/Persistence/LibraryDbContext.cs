@@ -51,6 +51,8 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Reference>().Property(reference => reference.Revision).HasDefaultValue(1L).IsConcurrencyToken();
         modelBuilder.Entity<Reference>().Property(reference => reference.ImageRevision).HasDefaultValue(1L);
         modelBuilder.Entity<Reference>().Property(reference => reference.SuggestionsJson).HasColumnType("jsonb");
+        modelBuilder.Entity<Reference>().Property(reference => reference.SourceImportJson).HasColumnType("jsonb");
+        modelBuilder.Entity<ReferenceDraft>().Property(reference => reference.SourceImportJson).HasColumnType("jsonb");
         modelBuilder.Entity<Reference>().Property(reference => reference.SuggestionUndoJson).HasColumnType("jsonb");
         modelBuilder.Entity<Reference>().Property<string>("SourceHash").HasMaxLength(32)
             .HasComputedColumnSql("md5(loupe_normalize_source(\"SourceUrl\"))", stored: true);

@@ -7,6 +7,7 @@ public sealed class ReferenceDraft
     public required DateTimeOffset ExpiresAt { get; init; }
     public required string Title { get; set; }
     public string? SourceUrl { get; set; }
+    public string? SourceImportJson { get; set; }
     public string? Attribution { get; set; }
     public string? ImageKey { get; set; }
     public string? PreviewKey { get; set; }

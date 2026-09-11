@@ -96,6 +96,7 @@ public sealed class ReferenceDraftStore(LibraryDbContext database, IReferenceSto
             Attribution = metadata.Attribution,
             Notes = metadata.Notes,
             ImageKey = draft.ImageKey,
+            SourceImportJson = draft.SourceImportJson,
             PreviewKey = draft.PreviewKey,
             Width = draft.Width,
             Height = draft.Height
