@@ -10,6 +10,16 @@ namespace Loupe.Infrastructure.Persistence;
 
 public sealed class PhotographerStore(LibraryDbContext database) : IPhotographerStore
 {
+    public Task<int> CountAsync(string ownerId, CancellationToken cancellationToken) =>
+        database.Photographers.CountAsync(item => item.OwnerId == ownerId, cancellationToken);
+
+    public async Task<IReadOnlyList<Photographer>> ListAsync(string ownerId, int count, CreatedCursor? cursor, CancellationToken cancellationToken)
+    {
+        var query = database.Photographers.AsNoTracking().Where(item => item.OwnerId == ownerId);
+        if (cursor is not null) query = query.Where(item => item.CreatedAt < cursor.CreatedAt || item.CreatedAt == cursor.CreatedAt && item.Id.CompareTo(cursor.Id) > 0);
+        return await query.OrderByDescending(item => item.CreatedAt).ThenBy(item => item.Id).Take(count).Include(item => item.Tags).ToListAsync(cancellationToken);
+    }
+
     public Task<Photographer?> FindOwnedAsync(string ownerId, Guid id, CancellationToken cancellationToken) =>
         database.Photographers.AsNoTracking().Include(item => item.Tags).SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken);
 

@@ -324,3 +324,8 @@ be established without printing credentials. Live quality checks are mandatory.
 - RED: both edit workflows failed with MethodNotAllowed.
 - GREEN: all 10 save/edit API cases pass. Revision checks preserve concurrent edits, portfolio URL conflicts leave both records intact, and unchanged tag provenance is retained.
 
+
+### Photographer collection pagination
+- RED: four list cases failed on the absent GET collection endpoint.
+- GREEN: 14 save/edit/list cases pass. The frozen-clock fixture initially expected insertion order; it now explicitly tests both created-time order and the required ID tie-breaker. All 25 records appear once, with private totals and owner/page-size scoped cursors.
+

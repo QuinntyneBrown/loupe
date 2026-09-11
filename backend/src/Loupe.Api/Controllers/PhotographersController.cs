@@ -11,6 +11,10 @@ namespace Loupe.Api.Controllers;
 [Route("api/photographers")]
 public sealed class PhotographersController(ISender sender) : ControllerBase
 {
+    [HttpGet]
+    public Task<PhotographerPage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null) =>
+        sender.Send(new ListPhotographersQuery(pageSize, cursor), cancellationToken);
+
     [HttpPost]
     public async Task<ActionResult<SavePhotographerResult>> Save(SavePhotographerRequest request, [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken)
     {
