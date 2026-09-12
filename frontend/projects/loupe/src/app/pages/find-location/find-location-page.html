@@ -80,11 +80,26 @@
       </p>
     }
   </div>
+  @if (queryRequired()) {
+    <div class="lp-empty lp-empty--compact">
+      <h2 class="lp-empty__title">Describe the shoot to search by meaning.</h2>
+      <p class="lp-empty__text">
+        Meaning needs a few words to rank against. Keyword mode can browse your locations by filters
+        alone.
+      </p>
+      <div class="lp-empty__action">
+        <button class="lp-button lp-button--secondary" type="button" (click)="useKeyword()">
+          Switch to Keyword
+        </button>
+      </div>
+    </div>
+  }
   <lp-location-search-results
     [request]="request()"
     (queryEditRequested)="focusQuery()"
     (filtersClearRequested)="clearFilters()"
     (filtersRequested)="openFilters()"
+    (keywordRequested)="useKeyword()"
     (invalidRequest)="showValidation($event)"
   />
 </main>

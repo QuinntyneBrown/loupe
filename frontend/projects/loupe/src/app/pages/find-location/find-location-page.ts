@@ -66,6 +66,9 @@ export class FindLocationPage {
     'Indoor headshots with soft window light',
     'Somewhere a family of six can spread out at midday',
   ];
+  readonly queryRequired = computed(
+    () => this.started() && this.mode() === 'meaning' && this.query().trim().length === 0,
+  );
   readonly filterErrors = computed(() =>
     Object.entries(this.fieldErrors())
       .filter(([field]) => field !== 'query')
@@ -101,6 +104,9 @@ export class FindLocationPage {
     const errors: Record<string, string> = {};
     if (Array.from(query).length > 500 || query.includes('\0'))
       errors['query'] = 'Use 500 characters or fewer without null characters.';
+    else if (this.mode() === 'meaning' && query.length === 0 && this.started())
+      errors['query'] =
+        'Describe the shoot to search by meaning. Keyword can browse by filters alone.';
     if (!filters.shootTypes.every((value) => (SHOOT_TYPES as readonly string[]).includes(value)))
       errors['shootTypes'] = 'Choose shoot types from the list.';
     if (!filters.timesOfDay.every((value) => (TIMES_OF_DAY as readonly string[]).includes(value)))
@@ -155,6 +161,9 @@ export class FindLocationPage {
   chooseMode(mode: LocationSearchMode): void {
     this.mode.set(mode);
     if (this.started()) void this.submit();
+  }
+  useKeyword(): void {
+    this.chooseMode('keyword');
   }
   changeFilters(filters: LocationSearchFilterValue): void {
     this.filters.set(filters);

@@ -228,7 +228,39 @@ export class FindLocationPage {
     return this.page.getByRole("region", { name: "Matching locations", exact: true });
   }
   async expectResultsHead(text) {
-    await expect(this.results().getByRole("status")).toHaveText(text);
+    await expect(this.results().getByRole("status").first()).toHaveText(text);
+  }
+  async expectMatchedByMeaning(shown) {
+    await expect(this.results().getByText("Matched by meaning", { exact: true })).toHaveCount(shown ? 1 : 0);
+  }
+  async expectMeaningUnavailable() {
+    await expect(
+      this.results().getByRole("alert").getByRole("heading", { name: "Meaning search isn't available right now.", exact: true }),
+    ).toBeVisible();
+    await expect(this.results().getByText(/Keyword search still works with the same filters/)).toBeVisible();
+  }
+  async switchToKeyword() {
+    await this.main().getByRole("button", { name: "Switch to Keyword", exact: true }).click();
+  }
+  async expectQueryRequired() {
+    await expect(this.main().getByRole("alert")).toContainText("Describe the shoot to search by meaning.");
+    await expect(this.searchbox()).toHaveAttribute("aria-invalid", "true");
+    await expect(this.main().getByRole("heading", { name: "Describe the shoot to search by meaning.", exact: true })).toBeVisible();
+    await expect(this.results()).toHaveCount(0);
+  }
+  async expectRefreshRequired() {
+    const notice = this.results().getByRole("status").filter({ hasText: "Your locations changed while you were browsing." });
+    await expect(notice).toBeVisible();
+    await expect(notice.getByRole("button", { name: "Refresh results", exact: true })).toBeVisible();
+  }
+  async refreshResults() {
+    await this.results().getByRole("button", { name: "Refresh results", exact: true }).click();
+  }
+  async expectNoRefreshRequired() {
+    await expect(this.results().getByText("Your locations changed while you were browsing.")).toHaveCount(0);
+  }
+  async expectCardCount(count) {
+    await expect(this.cards()).toHaveCount(count);
   }
   cards() {
     return this.results().getByRole("article");

@@ -2,10 +2,21 @@
   display: block;
 }
 .results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--lp-space-3);
   margin: var(--lp-space-6) var(--lp-zero);
   color: var(--lp-color-text-2);
   font-size: var(--lp-text-sm);
+}
+.results-head p {
+  margin: var(--lp-zero);
   overflow-wrap: anywhere;
+}
+.lp-notice {
+  margin-top: var(--lp-space-6);
 }
 .grid {
   display: grid;

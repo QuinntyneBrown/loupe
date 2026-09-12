@@ -56,6 +56,18 @@ export class LocationPage {
   async expectReportStatus(text) {
     await expect(this.main().getByText(text, { exact: false }).first()).toBeVisible();
   }
+  indexStatus() {
+    return this.main().getByRole("status", { name: "Search index", exact: true });
+  }
+  async expectIndexStatus(text) {
+    await expect(this.indexStatus()).toContainText(text);
+  }
+  async expectNoIndexStatus() {
+    await expect(this.indexStatus()).toHaveCount(0);
+  }
+  async retryIndexing() {
+    await this.indexStatus().getByRole("button", { name: "Retry", exact: true }).click();
+  }
   gallery() {
     return this.main().getByRole("radiogroup", { name: "Images", exact: true });
   }

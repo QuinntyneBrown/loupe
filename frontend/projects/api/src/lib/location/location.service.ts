@@ -6,6 +6,7 @@ import { ServiceError } from '../common/service-error';
 import { SESSION_SERVICE } from '../session/session.service.contract';
 import { ILocationService, LocationTextField } from './location.service.contract';
 import { LocationPage, LocationResult } from './location-result';
+import { OperationResult } from '../operation/operation-result';
 import { LocationDetailsInput, LocationInput, LocationTagInput } from './location-input';
 
 @Injectable()
@@ -109,6 +110,29 @@ export class LocationService implements ILocationService {
   }
   setCover(id: string, imageId: string, revision: number): Promise<LocationResult> {
     return this.put(`/api/locations/${encodeURIComponent(id)}/cover`, { revision, imageId });
+  }
+  async retryIndex(
+    operationId: string,
+    revision: number,
+    operationKey: string,
+  ): Promise<OperationResult> {
+    try {
+      return await firstValueFrom(
+        this.http.post<OperationResult>(
+          `/api/operations/${encodeURIComponent(operationId)}/retry`,
+          { revision },
+          {
+            headers: {
+              'Idempotency-Key': operationKey,
+              'X-CSRF-Token': await this.session.getRequestToken(),
+            },
+            timeout: 15000,
+          },
+        ),
+      );
+    } catch (error) {
+      throw LocationService.failure(error);
+    }
   }
   private async put(url: string, body: object): Promise<LocationResult> {
     try {

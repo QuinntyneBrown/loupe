@@ -7,6 +7,7 @@ import {
   LocationResult,
   LocationTagInput,
   LocationTextField,
+  OperationResult,
   ServiceError,
   UploadProgress,
 } from 'api';
@@ -80,6 +81,13 @@ export class MockLocationService implements ILocationService {
   }
   setCover(id: string, imageId: string, revision: number): Promise<LocationResult> {
     return this.call('setCover', { id, imageId, revision });
+  }
+  retryIndex(
+    operationId: string,
+    revision: number,
+    operationKey: string,
+  ): Promise<OperationResult> {
+    return this.call('retryIndex', { operationId, revision, operationKey });
   }
   private async call<T>(operation: string, input: object): Promise<T> {
     const callback = (

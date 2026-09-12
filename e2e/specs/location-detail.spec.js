@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-055, L2-057, L2-044, L2-045
+// Traces to: L2-055, L2-057, L2-062, L2-044, L2-045
 // Description: Inspect a location by URL: the gallery, address, coordinates, setting,
 // brief, notes, tags, timestamps and report status are shown; details are edited in
 // a revision-protected dialog, the brief, notes and tags save inline, deletion is
@@ -203,4 +203,33 @@ test('L2-045: the detail is accessible at phone width', async ({ page }) => {
   await detail.open(detail.library.items[2].id);
   await detail.expectGallery(3);
   await detail.expectAccessible();
+});
+
+test('L2-062.4 / L2-062.5 / L2-062.6: the detail reports Processing report, Updating search, and Search indexing failed with Retry, and shows nothing when current or not configured', async ({ page }) => {
+  const detail = await setup(page);
+  const item = detail.library.items[0];
+  detail.library.indexing(item, 'processing-report');
+  await detail.open(item.id);
+  await detail.expectIndexStatus('Processing report');
+  detail.library.indexing(item, 'updating');
+  await detail.expectIndexStatus('Updating search');
+  detail.library.indexing(item, 'failed', 'index-op-1');
+  await detail.expectIndexStatus('Search indexing failed');
+  await detail.expectNotesEditable();
+  await detail.editText('notes', 'Still editing while indexing failed.');
+  await detail.saveText('notes');
+  await detail.expectTextStatus('notes', 'Saved');
+  await detail.retryIndexing();
+  await detail.expectIndexStatus('Updating search');
+  expect(detail.library.indexRetries).toEqual([
+    expect.objectContaining({ operationId: 'index-op-1', revision: item.revision }),
+  ]);
+  expect(detail.library.indexRetries[0].operationKey).toMatch(/^[!-~]{1,128}$/);
+  detail.library.indexing(item, 'current');
+  await detail.expectNoIndexStatus();
+  await detail.expectAccessible();
+  detail.library.indexing(item, 'not-configured');
+  await detail.reload();
+  await detail.expectTitle(item.name);
+  await detail.expectNoIndexStatus();
 });

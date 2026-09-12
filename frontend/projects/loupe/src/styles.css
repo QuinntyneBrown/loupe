@@ -551,6 +551,19 @@ body:has(dialog[open]) {
   background: var(--lp-color-surface-2);
   color: var(--lp-color-text-2);
 }
+.lp-notice__body {
+  flex: 1;
+  display: grid;
+  gap: var(--lp-space-1);
+}
+.lp-notice__title {
+  font-weight: var(--lp-weight-medium);
+}
+.lp-notice__actions {
+  display: flex;
+  gap: var(--lp-space-3);
+  margin-top: var(--lp-space-1);
+}
 .lp-auth {
   min-height: 100vh;
   display: grid;

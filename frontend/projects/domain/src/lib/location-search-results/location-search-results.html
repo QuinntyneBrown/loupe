@@ -1,6 +1,11 @@
 @if (request(); as search) {
   <section aria-label="Matching locations" [attr.aria-busy]="loading()">
-    <p class="results-head" role="status">{{ status() }}</p>
+    <div class="results-head">
+      <p role="status">{{ status() }}</p>
+      @if (search.mode === 'meaning' && items().length && !failed()) {
+        <span class="lp-pill lp-pill--ai">Matched by meaning</span>
+      }
+    </div>
     @if (items().length) {
       <div class="grid">
         @for (item of cards(); track item.id) {
@@ -25,17 +30,46 @@
           }
         </div>
       }
+    } @else if (failed() && refreshRequired()) {
+      <div class="lp-notice lp-notice--info" role="status">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>
+        <div class="lp-notice__body">
+          <span class="lp-notice__title">Your locations changed while you were browsing.</span>
+          <span
+            >The next page can't be fetched from the old ordering. Refresh to continue from the top
+            with the current results.</span
+          >
+          <div class="lp-notice__actions">
+            <button
+              class="lp-button lp-button--secondary lp-button--sm"
+              type="button"
+              (click)="load(true, true)"
+            >
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg
+              >Refresh results
+            </button>
+          </div>
+        </div>
+      </div>
     } @else if (failed()) {
       <div class="lp-empty" role="alert">
-        @if (invalidCursor()) {
-          <h2 class="lp-empty__title">These results need refreshing.</h2>
+        @if (unavailable()) {
+          <h2 class="lp-empty__title">Meaning search isn't available right now.</h2>
           <p class="lp-empty__text">
-            The next page can no longer be loaded. Refresh to start again with the same query and
-            filters.
+            Nothing is shown rather than passing keyword matches off as meaning results. Keyword
+            search still works with the same filters.
           </p>
           <div class="lp-empty__action">
-            <button class="lp-button lp-button--secondary" type="button" (click)="load(true, true)">
-              Refresh results
+            <button
+              class="lp-button lp-button--secondary"
+              type="button"
+              (click)="keywordRequested.emit()"
+            >
+              Switch to Keyword
+            </button>
+            <button class="lp-button lp-button--ghost" type="button" (click)="load(true, true)">
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg>Try
+              again
             </button>
           </div>
         } @else if (failure()?.code === 'invalid_request') {

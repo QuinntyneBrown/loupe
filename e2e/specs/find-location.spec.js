@@ -1,5 +1,5 @@
 // Acceptance Test
-// Traces to: L2-061, L2-062, L2-043, L2-044, L2-045
+// Traces to: L2-061, L2-062, L2-026, L2-043, L2-044, L2-045
 // Description: Find a location by keyword from the Locations area: the initial page
 // explains the modes and filters, results show each location's cover or placeholder,
 // name, locality, Recommended periods, group range, and the rating for every selected
@@ -14,10 +14,10 @@ const shootTypes = ['Portraits', 'Family portraits', 'Headshots', 'Engagement', 
 const periods = ['Dawn', 'Morning', 'Midday', 'Afternoon', 'Golden hour', 'Blue hour', 'Night'];
 const emptyRequest = { operation: 'search', mode: 'keyword', shootTypes: [], people: null, timesOfDay: [], setting: null, tags: [] };
 
-async function setup(page) {
+async function setup(page, count) {
   await new MyWorkPage(page).configureCollection(0);
   const finder = new FindLocationPage(page);
-  await finder.configure();
+  await finder.configure(count);
   return finder;
 }
 
@@ -174,6 +174,76 @@ test('L2-045.2 / L2-045.3: the filters dialog lists the library tags with counts
   await finder.expectCards(['Kew Bridge foreshore']);
   expect(finder.lastSearch()).toEqual({ ...emptyRequest, query: '', tags: ['river', 'arches'] });
   await expect(page).toHaveURL(/tags=river&tags=arches/);
+});
+
+test('L2-061.1 / L2-061.7: Meaning results are labeled Matched by meaning, an unavailable service says so and offers Keyword or Try again, and keyword matches are never labeled as meaning', async ({ page }) => {
+  const finder = await setup(page);
+  await finder.open('?q=foreshore&mode=meaning');
+  await finder.expectMode('Meaning');
+  await finder.expectResultsHead('1 location for “foreshore”');
+  await finder.expectMatchedByMeaning(true);
+  expect(finder.lastSearch()).toEqual({ ...emptyRequest, query: 'foreshore', mode: 'meaning' });
+  await finder.chooseMode('Keyword');
+  await finder.expectCards(['Kew Bridge foreshore']);
+  await finder.expectMatchedByMeaning(false);
+  await expect(page).not.toHaveURL(/mode=/);
+  finder.library.errors.search.push({ error: 'search_unavailable' });
+  await finder.chooseMode('Meaning');
+  await finder.expectMeaningUnavailable();
+  await finder.expectMatchedByMeaning(false);
+  await finder.expectAccessible();
+  await finder.retry();
+  await finder.expectCards(['Kew Bridge foreshore']);
+  await finder.expectMatchedByMeaning(true);
+  finder.library.errors.search.push({ error: 'search_unavailable' });
+  await finder.search('roof');
+  await finder.expectMeaningUnavailable();
+  await finder.switchToKeyword();
+  await finder.expectMode('Keyword');
+  await finder.expectCards(['Peckham multi-storey roof']);
+  await finder.expectMatchedByMeaning(false);
+  expect(finder.lastSearch()).toEqual({ ...emptyRequest, query: 'roof', mode: 'keyword' });
+});
+
+test('L2-061.6: a blank Meaning query asks for a query instead of embedding nothing, and Switch to Keyword browses by the filters alone', async ({ page }) => {
+  const finder = await setup(page);
+  await finder.open('?mode=meaning&setting=Outdoor');
+  await finder.expectMode('Meaning');
+  await finder.expectSetting('Outdoor');
+  await finder.expectQueryRequired();
+  expect(finder.searchCount()).toBe(0);
+  await finder.expectAccessible();
+  await finder.switchToKeyword();
+  await finder.expectMode('Keyword');
+  await finder.expectResultsHead('7 locations');
+  expect(finder.lastSearch()).toEqual({ ...emptyRequest, query: '', setting: 'Outdoor' });
+  await finder.chooseMode('Meaning');
+  await finder.expectQueryRequired();
+  expect(finder.searchCount()).toBe(1);
+  await finder.search('river');
+  await finder.expectMatchedByMeaning(true);
+  await finder.expectCards(['Kew Bridge foreshore', 'Deptford creek stairs']);
+});
+
+test('L2-061.8: a changed index generation while paging shows the refresh notice and Refresh results continues from the top', async ({ page }) => {
+  const finder = await setup(page, 30);
+  await finder.open('?q=&mode=meaning');
+  await finder.expectQueryRequired();
+  await finder.search('Kew');
+  await finder.expectResultsHead('3 locations for “Kew”');
+  await finder.search('e');
+  await finder.expectCardCount(24);
+  finder.library.errors.search.push({ error: 'refresh_required' });
+  await finder.more();
+  await finder.expectRefreshRequired();
+  await finder.expectCardCount(24);
+  await finder.expectAccessible();
+  await finder.refreshResults();
+  await finder.expectNoRefreshRequired();
+  await finder.expectCardCount(24);
+  expect(finder.lastSearch().cursor).toBeUndefined();
+  await finder.more();
+  await finder.expectCardCount(30);
 });
 
 for (const [width, columns] of [

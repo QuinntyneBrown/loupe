@@ -69,9 +69,14 @@
           >
         }
       </div>
-      @if (reportStatus(); as status) {
+      @if (reportStatus() || item.indexStatus !== 'current') {
         <div class="lp-detail__meta">
-          <span class="lp-status" [class]="'lp-status ' + status.modifier">{{ status.label }}</span>
+          @if (reportStatus(); as status) {
+            <span class="lp-status" [class]="'lp-status ' + status.modifier">{{
+              status.label
+            }}</span>
+          }
+          <lp-search-index-status [location]="item" (updated)="location.set($event)" />
         </div>
       }
     </div>

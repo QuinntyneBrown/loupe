@@ -2,6 +2,8 @@ import { SavedScoutingReport } from '../scouting-report/scouting-report-result';
 
 export type LocationSetting = 'Indoor' | 'Outdoor' | 'Mixed';
 export type LocationReportStatus = 'None' | 'Queued' | 'Running' | 'Ready' | 'Outdated' | 'Failed';
+export type LocationIndexStatus =
+  'not-configured' | 'processing-report' | 'updating' | 'failed' | 'current';
 
 export interface Coordinates {
   latitude: string;
@@ -37,6 +39,8 @@ export interface LocationResult {
   coverImageId: string | null;
   report: SavedScoutingReport | null;
   reportStatus: LocationReportStatus;
+  indexStatus: LocationIndexStatus;
+  indexOperationId: string | null;
   createdAt: string;
   updatedAt: string;
   revision: number;

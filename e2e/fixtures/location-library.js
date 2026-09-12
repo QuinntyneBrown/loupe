@@ -8,8 +8,9 @@ import { ScoutingReports } from "./scouting-reports.js";
 
 export class LocationLibrary {
   constructor(count = 7) {
-    this.failures = { list: 0, get: 0, create: 0, update: 0, updateText: 0, setTags: 0, deleteLocation: 0, addImage: 0, removeImage: 0, setCover: 0 };
-    this.errors = { create: [], update: [], updateText: [], setTags: [], deleteLocation: [], addImage: [], removeImage: [], setCover: [] };
+    this.failures = { list: 0, get: 0, create: 0, update: 0, updateText: 0, setTags: 0, deleteLocation: 0, addImage: 0, removeImage: 0, setCover: 0, retryIndex: 0 };
+    this.errors = { create: [], update: [], updateText: [], setTags: [], deleteLocation: [], addImage: [], removeImage: [], setCover: [], retryIndex: [] };
+    this.indexRetries = [];
     this.aborted = [];
     this.deletions = [];
     this.gates = {};
@@ -57,6 +58,8 @@ export class LocationLibrary {
       coverImageId: images[0]?.id ?? null,
       report: null,
       reportStatus: number % 5 === 0 && imageCount ? "Ready" : "None",
+      indexStatus: "current",
+      indexOperationId: null,
       createdAt: "2026-09-12T12:00:00Z",
       updatedAt: "2026-09-12T12:00:00Z",
       revision: 1,
@@ -144,6 +147,11 @@ export class LocationLibrary {
     if (!input.operationKey) errors.operationKey = ["Provide an Idempotency-Key."];
     return errors;
   }
+  /** Moves a location's search index status, as the worker would. */
+  indexing(item, status, operationId = item.indexOperationId) {
+    item.indexStatus = status;
+    item.indexOperationId = status === "not-configured" ? null : (operationId ?? `index-${item.id}`);
+  }
   hold(operation, operationKey) {
     let release;
     const promise = new Promise((resolve) => (release = resolve));
@@ -188,6 +196,30 @@ export class LocationLibrary {
         return item ? { data: item } : { error: "item_unavailable" };
       }
       if (operation === "addImage") return this.addImage(input);
+      if (operation === "retryIndex") {
+        const item = this.items.find((item) => item.indexOperationId === input.operationId);
+        if (!item) return { error: "item_unavailable" };
+        if (item.revision !== input.revision) return { error: "revision_conflict" };
+        if (item.indexStatus !== "failed") return { error: "retry_unavailable" };
+        this.indexRetries.push(input);
+        this.indexing(item, "updating", `${input.operationId}-retry`);
+        return {
+          data: {
+            id: item.indexOperationId,
+            resourceId: item.id,
+            type: "LocationIndex",
+            status: "Queued",
+            mode: "Live",
+            createdAt: "2026-09-12T12:00:00Z",
+            updatedAt: "2026-09-12T12:00:00Z",
+            completedAt: null,
+            nextAttemptAt: null,
+            retryAvailableAt: null,
+            failureCode: null,
+            message: "Waiting to update search.",
+          },
+        };
+      }
       if (["update", "updateText", "setTags", "deleteLocation", "removeImage", "setCover"].includes(operation)) {
         const item = this.items.find((item) => item.id === input.id);
         if (!item) return { error: "item_unavailable" };

@@ -128,6 +128,8 @@ export class LocationSearchLibrary {
       }
       if (input.mode !== "keyword" && input.mode !== "meaning")
         return { error: "invalid_request", errors: { mode: ["Choose Keyword or Meaning."] } };
+      if (input.mode === "meaning" && !(input.query ?? "").trim())
+        return { error: "invalid_request", errors: { query: ["Describe the shoot to search by meaning."] } };
       const matching = this.items.filter((item) => this.matches(item, input));
       const start = Number(input.cursor ?? 0);
       const end = Math.min(matching.length, start + 24);

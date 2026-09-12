@@ -32,7 +32,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] C3a Record location index intents and report index status (L2-028.2; L2-062.4, .5)
 - [x] C3b Embed location documents through Ollama and keep vectors current (L2-028.1, .4, .5; L2-062.4, .6, .7; L2-041)
 - [x] C4 Rank locations by meaning (L2-061.1, .4, .7, .8; L2-062.5, .7)
-- [ ] C5 Meaning mode in the Find a location page (L2-061.1, .6, .7, .8; L2-062.4–.6)
+- [x] C5 Meaning mode in the Find a location page (L2-061.1, .6, .7, .8; L2-062.4–.6)
 - [ ] C6 Relevance evaluation corpus and procedure (L2-061.9; L2-047)
 - [ ] D Design-system examples, README, final evidence, PR
 
@@ -893,4 +893,45 @@ recorded only when actually executed.
   hand-built vectors prove ranking, threshold, ties and generation handling
   only. L2-061.1/.6/.7/.8 and L2-062.4/.5/.6 keep their UI halves for C5;
   L2-062.7 is now proven for both modes.
+
+### C5 — Meaning mode in the Find a location page (L2-061.1, .6, .7, .8 UI; L2-062.4, .5, .6 UI)
+
+- Tests: `e2e/specs/find-location.spec.js` (+3 cases) and
+  `e2e/specs/location-detail.spec.js` (+1): Meaning results carry the
+  `Matched by meaning` pill and keyword results never do, `search_unavailable`
+  shows "Meaning search isn't available right now." with Switch to Keyword
+  (re-runs the same query and filters in Keyword mode, URL without `mode`) and
+  Try again; a blank Meaning query (`?mode=meaning&setting=Outdoor`, or choosing
+  Meaning with an empty box) marks the field invalid, shows "Describe the shoot to
+  search by meaning." with Switch to Keyword and makes no search call, and
+  Keyword then browses the seven Outdoor locations; `refresh_required` on Load
+  more keeps the 24 loaded cards under the "Your locations changed while you were
+  browsing." notice whose Refresh results reloads from the top without a cursor;
+  the detail shows `Processing report`, follows the fixture to `Updating search`
+  by polling, shows `Search indexing failed · Retry` while notes still save,
+  Retry posts the failed operation id with the revision and an idempotency key
+  and returns to `Updating search`, and `current` or `not-configured` show no
+  pill. Fixture growth: `LocationLibrary.indexing(item, status, operationId)`,
+  `retryIndex` bridge with revision/retry-unavailable checks, and the search
+  fixture refusing blank Meaning queries as the API does.
+- RED: `-g "L2-061.1 / L2-061.7|L2-061.6:|L2-061.8:|L2-062.4 / L2-062.5"` →
+  `4 failed` (no `Matched by meaning`, no query-required state — two alerts
+  resolved, no `Search index` status).
+- Built: `LocationResult.indexStatus/indexOperationId` (`LocationIndexStatus`
+  type), `ILocationService.retryIndex` → `POST /api/operations/{id}/retry` with
+  the mock bridge; `domain` `SearchIndexStatus` (status pill named
+  `Search index`, 2 s polling of the location while processing-report/updating,
+  Retry with a stable idempotency key and safe error copy) hosted in
+  `LocationDetailPanel`'s meta row; `LocationSearchResults` gains the meaning
+  pill, the unavailable state with `keywordRequested`, and the
+  refresh-required notice (`refresh_required` or an invalid cursor) that keeps
+  loaded cards; `FindLocationPage` refuses a blank Meaning query before any
+  request (`queryRequired` field error + compact state) and `useKeyword()`;
+  `.lp-notice__body/title/actions` shared classes.
+- GREEN: same selection → `5 passed`; band `find-location`,
+  `location-detail`, `scouting-report`, `location-images`, `locations`,
+  `locations-add`, `search`, `search-navigation` → `84 passed`;
+  `npm run build` clean; prettier clean.
+- Non-claims: the index status is not shown on the Locations grid cards (the
+  spec places it on the detail); relevance of live Meaning results is C6.
 

@@ -40,6 +40,11 @@ export class LocationSearchResults {
   readonly invalidCursor = computed(
     () => this.failure()?.code === 'invalid_request' && !!this.failure()?.errors['cursor']?.length,
   );
+  readonly refreshRequired = computed(
+    () => this.failure()?.code === 'refresh_required' || this.invalidCursor(),
+  );
+  readonly unavailable = computed(() => this.failure()?.code === 'search_unavailable');
+  readonly keywordRequested = output<void>();
   readonly queryEditRequested = output<void>();
   readonly filtersClearRequested = output<void>();
   readonly filtersRequested = output<void>();
@@ -67,7 +72,9 @@ export class LocationSearchResults {
     if (this.failed())
       return count
         ? `${count} of ${total} locations shown. Results could not be updated.`
-        : 'Search could not be completed.';
+        : this.unavailable()
+          ? 'Meaning search could not be completed.'
+          : 'Search could not be completed.';
     return `${total} ${total === 1 ? 'location' : 'locations'}${suffix}`;
   });
   readonly cards = computed(() => {

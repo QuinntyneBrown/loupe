@@ -1,5 +1,6 @@
 import { InjectionToken } from '@angular/core';
 import { LocationPage, LocationResult } from './location-result';
+import { OperationResult } from '../operation/operation-result';
 import { LocationDetailsInput, LocationInput, LocationTagInput } from './location-input';
 import { UploadProgress } from '../common/upload-progress';
 
@@ -26,5 +27,7 @@ export interface ILocationService {
   ): Promise<LocationResult>;
   removeImage(id: string, imageId: string, revision: number): Promise<LocationResult>;
   setCover(id: string, imageId: string, revision: number): Promise<LocationResult>;
+  /** Re-queues a failed search index run through the shared operations route. */
+  retryIndex(operationId: string, revision: number, operationKey: string): Promise<OperationResult>;
 }
 export const LOCATION_SERVICE = new InjectionToken<ILocationService>('LOCATION_SERVICE');

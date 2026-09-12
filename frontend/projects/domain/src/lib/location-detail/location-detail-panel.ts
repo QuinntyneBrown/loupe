@@ -19,6 +19,7 @@ import { LocationGallery } from '../location-gallery/location-gallery';
 import { LocationTextEditor } from '../location-text/location-text-editor';
 import { LocationTags } from '../location-tags/location-tags';
 import { ScoutingReportPanel } from '../scouting-report/scouting-report-panel';
+import { SearchIndexStatus } from '../search-index-status/search-index-status';
 
 @Component({
   selector: 'lp-location-detail-panel',
@@ -29,6 +30,7 @@ import { ScoutingReportPanel } from '../scouting-report/scouting-report-panel';
     LocationTextEditor,
     LocationTags,
     ScoutingReportPanel,
+    SearchIndexStatus,
   ],
   templateUrl: './location-detail-panel.html',
   styleUrl: './location-detail-panel.css',
