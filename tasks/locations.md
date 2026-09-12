@@ -31,7 +31,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] C2 Find a location page with keyword results (L2-061.1, .5, .6; L2-062.8; L2-043.2; L2-044.1)
 - [x] C3a Record location index intents and report index status (L2-028.2; L2-062.4, .5)
 - [x] C3b Embed location documents through Ollama and keep vectors current (L2-028.1, .4, .5; L2-062.4, .6, .7; L2-041)
-- [ ] C4 Rank locations by meaning (L2-061.1, .4, .7, .8; L2-062.5, .7)
+- [x] C4 Rank locations by meaning (L2-061.1, .4, .7, .8; L2-062.5, .7)
 - [ ] C5 Meaning mode in the Find a location page (L2-061.1, .6, .7, .8; L2-062.4–.6)
 - [ ] C6 Relevance evaluation corpus and procedure (L2-061.9; L2-047)
 - [ ] D Design-system examples, README, final evidence, PR
@@ -847,4 +847,50 @@ recorded only when actually executed.
   search reading these vectors is C4, so L2-062.4/.6 stay open until the vectors
   are searchable and the detail shows the states (C5). No real Ollama call was
   made; the live smoke is the end-of-branch step.
+
+### C4 — Rank locations by meaning (L2-061.1 API, .6 API, .7 API, .8; L2-062.4, .5, .7 API; L2-026.3, .4, .6 for locations)
+
+- Tests: `backend/tests/Loupe.Api.Tests/ShootPlanning/FindLocationsMeaningTests.cs`
+  (6 cases) with a `ControlledEmbeddingTransport` that embeds each seeded
+  location's document to a hand-built unit or blended vector and the query to
+  axis one, indexing through a hosted `SearchIndexWorker`: the canonical query
+  returns the relevant location first (score 1.0, then 0.6) without any query
+  word in its tags, drops the orthogonal one, carries the card fields and embeds
+  the query exactly once; a setting filter narrows the ranked set before paging
+  (two pages of one, no underfill, no third page) and a 0.1 score never
+  appears; equal scores order by identifier across pages, the cursor is refused
+  by another page size (400) and by a second `ApiFactory` under
+  `Embeddings:Model=other-model` with 409 `refresh_required`, whose own Meaning
+  search compares nothing built under the old model; a blank or whitespace
+  Meaning query → 400 `query` with no embedding request while Keyword browses
+  by filters; a 500 from the endpoint and an unconfigured endpoint → 503
+  `search_unavailable` while Keyword still finds the location; a notes edit
+  removes the location from Meaning results and counts until its re-index
+  lands while Keyword finds the edit at once, and a deleted location leaves
+  results and counts.
+- RED: `-Filter 'FullyQualifiedName~FindLocationsMeaningTests'` → `Failed: 6`
+  — `mode=meaning` answered the shared 400. One fault surfaced on the way to
+  GREEN and was fixed: the keyword token predicate was still applied in Meaning
+  mode (every query word had to occur in the text), so Meaning matched nothing.
+- Built: `SemanticCursor` (Application/Search: score+id keyset bound to the
+  search scope and a model-identity generation segment → 400 for another
+  search, 409 `refresh_required` for another model);
+  `SearchUnavailableException` (503 `search_unavailable`, Retry-After 5) and
+  `SearchRefreshRequiredException` (409 `refresh_required`);
+  `LocationSearchRanking` (model + query vector, 0.20 threshold);
+  `ILocationSearchStore.RankAsync/CountRankedAsync` and the store's shared
+  `Filtered` SQL now carries a `Score` column — `1 - (Vector <=> query)` from
+  the `search_vectors` row of the configured model at the location's current
+  `Revision`, null otherwise — so ranking, threshold, filters and keyset paging
+  compose over one query; `FindLocationsQueryHandler` meaning branch (blank
+  query refused before embedding, unconfigured or failing provider →
+  unavailable, tokens only in Keyword); `LocationSearchItem.Score` is
+  `[JsonIgnore]`d — no score reaches the client.
+- GREEN: same filter → `Passed: 6`. Band
+  `ShootPlanning|Search|Locations|Scouting` → `Passed: 155`. `dotnet build`
+  clean; `dotnet format` clean on touched files.
+- Non-claims: relevance of a real model is C6's reviewer-run evaluation; the
+  hand-built vectors prove ranking, threshold, ties and generation handling
+  only. L2-061.1/.6/.7/.8 and L2-062.4/.5/.6 keep their UI halves for C5;
+  L2-062.7 is now proven for both modes.
 

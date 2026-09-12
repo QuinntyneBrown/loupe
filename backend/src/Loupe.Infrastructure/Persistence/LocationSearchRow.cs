@@ -12,4 +12,5 @@ public sealed class LocationSearchRow
     public string? ScoutingReportJson { get; init; }
     public long ImageSetRevision { get; init; }
     public DateTimeOffset CreatedAt { get; init; }
+    public double? Score { get; init; }
 }

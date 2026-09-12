@@ -12,7 +12,22 @@ namespace Loupe.Infrastructure.Persistence;
 public sealed class LocationSearchStore(LibraryDbContext database) : ILocationSearchStore
 {
     public Task<int> CountAsync(string ownerId, LocationSearchFilter filter, CancellationToken cancellationToken) =>
-        Filtered(ownerId, filter).CountAsync(cancellationToken);
+        Filtered(ownerId, filter, null).CountAsync(cancellationToken);
+
+    public Task<int> CountRankedAsync(string ownerId, LocationSearchFilter filter, LocationSearchRanking ranking, CancellationToken cancellationToken) =>
+        Ranked(ownerId, filter, ranking).CountAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<LocationSearchItem>> RankAsync(string ownerId, LocationSearchFilter filter, LocationSearchRanking ranking, int count, SemanticCursor? cursor, CancellationToken cancellationToken)
+    {
+        var query = Ranked(ownerId, filter, ranking);
+        if (cursor is not null) query = query.Where(row => row.Score < cursor.Score || row.Score == cursor.Score && row.Id.CompareTo(cursor.Id) > 0);
+        var rows = await query.OrderByDescending(row => row.Score).ThenBy(row => row.Id).Take(count).ToListAsync(cancellationToken);
+        return rows.Select(Item).ToArray();
+    }
+
+    // Only a vector of the configured model at the location's current revision takes part; scores under the threshold are never candidates.
+    private IQueryable<LocationSearchRow> Ranked(string ownerId, LocationSearchFilter filter, LocationSearchRanking ranking) =>
+        Filtered(ownerId, filter, ranking).Where(row => row.Score >= LocationSearchRanking.Threshold);
 
     public async Task<IReadOnlyList<SearchTagCount>> ListTagsAsync(string ownerId, CancellationToken cancellationToken) =>
         await database.Database.SqlQuery<SearchTagCount>($"""
@@ -25,7 +40,7 @@ public sealed class LocationSearchStore(LibraryDbContext database) : ILocationSe
 
     public async Task<IReadOnlyList<LocationSearchItem>> ListAsync(string ownerId, LocationSearchFilter filter, int count, CreatedCursor? cursor, CancellationToken cancellationToken)
     {
-        var query = Filtered(ownerId, filter);
+        var query = Filtered(ownerId, filter, null);
         if (cursor is not null) query = query.Where(row => row.CreatedAt < cursor.CreatedAt || row.CreatedAt == cursor.CreatedAt && row.Id.CompareTo(cursor.Id) > 0);
         var rows = await query.OrderByDescending(row => row.CreatedAt).ThenBy(row => row.Id).Take(count).ToListAsync(cancellationToken);
         return rows.Select(Item).ToArray();
@@ -42,17 +57,21 @@ public sealed class LocationSearchStore(LibraryDbContext database) : ILocationSe
             report?.TimesOfDay.Where(entry => entry.Rating == TimeOfDayRating.Recommended).Select(entry => Label(entry.Period)).ToArray() ?? [],
             report is null ? null : new LocationSearchGroupSize(report.GroupSize.CannotAssess, report.GroupSize.Minimum, report.GroupSize.Maximum),
             report?.Suitability.Select(entry => new LocationSearchSuitability(Label(entry.ShootType), Label(entry.Rating))).ToArray() ?? [],
-            row.CreatedAt);
+            row.CreatedAt, row.Score);
     }
 
     private static string Label<T>(T value) where T : struct, Enum => ScoutingVocabulary.Labels<T>()[Array.IndexOf(Enum.GetValues<T>(), value)];
 
     // Keyword text: every eligible field plus every string value of the current report; filters read the report JSON's shared labels.
-    private IQueryable<LocationSearchRow> Filtered(string ownerId, LocationSearchFilter filter) => database.Database.SqlQuery<LocationSearchRow>($$"""
+    // With a ranking, the score is the cosine similarity of the location's current vector under that model, null when none is current.
+    private IQueryable<LocationSearchRow> Filtered(string ownerId, LocationSearchFilter filter, LocationSearchRanking? ranking) => database.Database.SqlQuery<LocationSearchRow>($$"""
         SELECT l."Id", l."Name", l."Locality", l."CoverImageId",
             (SELECT count(*)::integer FROM location_images i WHERE i."LocationId" = l."Id" AND i."OwnerId" = {{ownerId}}) AS "ImageCount",
             (SELECT o."Status" FROM background_operations o WHERE o."Id" = l."CurrentScoutingOperationId") AS "OperationStatus",
-            l."ScoutingReportJson"::text AS "ScoutingReportJson", l."ImageSetRevision", l."CreatedAt"
+            l."ScoutingReportJson"::text AS "ScoutingReportJson", l."ImageSetRevision", l."CreatedAt",
+            (SELECT 1 - (v."Vector" <=> CAST({{ranking?.Query}} AS vector)) FROM search_vectors v
+                WHERE v."OwnerId" = l."OwnerId" AND v."ItemType" = 'location' AND v."ItemId" = l."Id"
+                    AND v."ModelIdentity" = CAST({{ranking?.Model}} AS text) AND v."SourceRevision" = l."Revision") AS "Score"
         FROM locations l
         WHERE l."OwnerId" = {{ownerId}}
             AND (CAST({{filter.Setting}} AS text) IS NULL OR l."Setting" = CAST({{filter.Setting}} AS text))
