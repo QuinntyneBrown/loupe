@@ -1,0 +1,263 @@
+{
+  "$schema": "./manifest.schema.json",
+  "version": "location-scouting-v1",
+  "purpose": "Release evaluation for the scouting report under L2-059.5 and L2-059.6. Deterministic acceptance fixtures are separate and unchanged by this manifest.",
+  "gate": {
+    "runsPerFixture": 3,
+    "totalRuns": 24,
+    "contractPass": 24,
+    "evidencePass": 22,
+    "contract": "Every output satisfies ScoutingReportValidator and contains no prohibited claim from its fixture.",
+    "evidence": "At least 22 outputs satisfy every fixture-specific acceptable-observation and actionability check, assessed by the named reviewer with recorded reasons."
+  },
+  "reviewer": {
+    "name": "<TO SUPPLY>",
+    "recordedReasonsPath": "docs/evaluation/scouting/runs/<release>/reasons.md"
+  },
+  "model": {
+    "deployment": "<TO SUPPLY>",
+    "promptVersion": "location-scouting-v1"
+  },
+  "commonProhibitedClaims": [
+    "Permits, fees, opening hours, ownership or booking rules stated as fact",
+    "Parking, crowd levels or safety stated as fact",
+    "Compass orientation, exact sun position or sunset time",
+    "Distances or dimensions stated as measurements",
+    "A place name or address stated as fact",
+    "Any logistics detail not present in the brief, or a brief detail presented as verified"
+  ],
+  "fixtures": [
+    {
+      "id": "open-park",
+      "title": "An open park",
+      "description": "Wide grass, scattered trees, open sky; two to five daytime frames.",
+      "assets": {
+        "directory": "docs/evaluation/scouting/fixtures/open-park/",
+        "images": "<TO SUPPLY: two to five licensed or synthetic images>",
+        "licence": "<TO SUPPLY>"
+      },
+      "brief": "<TO SUPPLY: a brief with no logistics detail>",
+      "acceptableObservations": [
+        "Open shade under tree canopies",
+        "Uncluttered grass foreground",
+        "Open sky lighting the scene evenly",
+        "Room for a group to spread out"
+      ],
+      "prohibitedClaims": [
+        "Park opening hours",
+        "Permit requirements",
+        "Which direction is north or where the sun sets",
+        "How far the trees are from the path"
+      ],
+      "actionabilityChecks": [
+        "Each Recommended or Avoid period names a visible basis present in the images",
+        "At least one technique explains where in the frame it applies",
+        "Cautions name something visible in a cited image",
+        "The group size reason refers to visible space"
+      ]
+    },
+    {
+      "id": "urban-street",
+      "title": "An urban street with strong lines",
+      "description": "Kerbs, facades, street furniture and receding lines; two to five frames.",
+      "assets": {
+        "directory": "docs/evaluation/scouting/fixtures/urban-street/",
+        "images": "<TO SUPPLY: two to five licensed or synthetic images>",
+        "licence": "<TO SUPPLY>"
+      },
+      "brief": "<TO SUPPLY: a brief with no logistics detail>",
+      "acceptableObservations": [
+        "Leading lines from kerbs, railings or facades",
+        "Hard shadows on the sunlit side",
+        "Open shade on the far side of the street",
+        "Distractions such as signs, bins or parked vehicles"
+      ],
+      "prohibitedClaims": [
+        "The street name or the city",
+        "Traffic or crowd levels at any hour",
+        "Parking availability",
+        "Ownership of the buildings"
+      ],
+      "actionabilityChecks": [
+        "Each Recommended or Avoid period names a visible basis present in the images",
+        "At least one technique explains where in the frame it applies",
+        "Cautions name something visible in a cited image",
+        "The group size reason refers to visible space"
+      ]
+    },
+    {
+      "id": "window-lit-interior",
+      "title": "A window-lit interior",
+      "description": "A room lit by one or more windows; two to five frames.",
+      "assets": {
+        "directory": "docs/evaluation/scouting/fixtures/window-lit-interior/",
+        "images": "<TO SUPPLY: two to five licensed or synthetic images>",
+        "licence": "<TO SUPPLY>"
+      },
+      "brief": "<TO SUPPLY: a brief with no logistics detail>",
+      "acceptableObservations": [
+        "Soft directional window light",
+        "Fall-off away from the window",
+        "Reflective floors or walls",
+        "Limited floor area for a group"
+      ],
+      "prohibitedClaims": [
+        "Whether the space can be booked or its fees",
+        "Which compass direction the window faces",
+        "Opening hours",
+        "The room's exact dimensions"
+      ],
+      "actionabilityChecks": [
+        "Each Recommended or Avoid period names a visible basis present in the images",
+        "At least one technique explains where in the frame it applies",
+        "Cautions name something visible in a cited image",
+        "The group size reason refers to visible space"
+      ]
+    },
+    {
+      "id": "narrow-alley",
+      "title": "A narrow alley",
+      "description": "Tall walls close on both sides; two to five frames.",
+      "assets": {
+        "directory": "docs/evaluation/scouting/fixtures/narrow-alley/",
+        "images": "<TO SUPPLY: two to five licensed or synthetic images>",
+        "licence": "<TO SUPPLY>"
+      },
+      "brief": "<TO SUPPLY: a brief with no logistics detail>",
+      "acceptableObservations": [
+        "Deep shade with a strip of sky",
+        "Natural framing between walls",
+        "Textured walls as backgrounds",
+        "Limited room for more than a few people"
+      ],
+      "prohibitedClaims": [
+        "Safety at night or crowd levels",
+        "Whether photography is permitted",
+        "The alley's name or location",
+        "Distances between walls stated as measurements"
+      ],
+      "actionabilityChecks": [
+        "Each Recommended or Avoid period names a visible basis present in the images",
+        "At least one technique explains where in the frame it applies",
+        "Cautions name something visible in a cited image",
+        "The group size reason refers to visible space"
+      ]
+    },
+    {
+      "id": "waterfront",
+      "title": "A waterfront",
+      "description": "Water's edge, reflections, a horizon; two to five frames.",
+      "assets": {
+        "directory": "docs/evaluation/scouting/fixtures/waterfront/",
+        "images": "<TO SUPPLY: two to five licensed or synthetic images>",
+        "licence": "<TO SUPPLY>"
+      },
+      "brief": "<TO SUPPLY: a brief with no logistics detail>",
+      "acceptableObservations": [
+        "Reflections on the water",
+        "Open sky and horizon",
+        "Wet or uneven ground near the edge",
+        "Backlight potential at low sun"
+      ],
+      "prohibitedClaims": [
+        "Tide times or water levels at any hour",
+        "Exact sunset position or time",
+        "Distances to the far bank",
+        "The name of the river, lake or sea"
+      ],
+      "actionabilityChecks": [
+        "Each Recommended or Avoid period names a visible basis present in the images",
+        "At least one technique explains where in the frame it applies",
+        "Cautions name something visible in a cited image",
+        "The group size reason refers to visible space"
+      ]
+    },
+    {
+      "id": "large-hall",
+      "title": "A large hall",
+      "description": "A high, wide interior with artificial or mixed light; two to five frames.",
+      "assets": {
+        "directory": "docs/evaluation/scouting/fixtures/large-hall/",
+        "images": "<TO SUPPLY: two to five licensed or synthetic images>",
+        "licence": "<TO SUPPLY>"
+      },
+      "brief": "<TO SUPPLY: a brief with no logistics detail>",
+      "acceptableObservations": [
+        "Mixed colour temperature from artificial and daylight sources",
+        "Symmetry of columns, beams or windows",
+        "Room for a large group",
+        "Reflective or busy floors and ceilings"
+      ],
+      "prohibitedClaims": [
+        "Booking, fees or capacity rules",
+        "Ownership or who to ask",
+        "Opening hours",
+        "Measured dimensions or ceiling height"
+      ],
+      "actionabilityChecks": [
+        "Each Recommended or Avoid period names a visible basis present in the images",
+        "At least one technique explains where in the frame it applies",
+        "Cautions name something visible in a cited image",
+        "The group size reason refers to visible space"
+      ]
+    },
+    {
+      "id": "playground",
+      "title": "A playground",
+      "description": "Play structures, bright colours, ground surfaces; two to five frames.",
+      "assets": {
+        "directory": "docs/evaluation/scouting/fixtures/playground/",
+        "images": "<TO SUPPLY: two to five licensed or synthetic images>",
+        "licence": "<TO SUPPLY>"
+      },
+      "brief": "<TO SUPPLY: a brief with no logistics detail>",
+      "acceptableObservations": [
+        "Bright colours as palette anchors or distractions",
+        "Repetition and patterns in equipment",
+        "Hard shade under structures",
+        "Uneven or soft ground surfaces"
+      ],
+      "prohibitedClaims": [
+        "Crowd levels or times children are present",
+        "Supervision or permit rules",
+        "Which direction the equipment faces",
+        "The playground's name"
+      ],
+      "actionabilityChecks": [
+        "Each Recommended or Avoid period names a visible basis present in the images",
+        "At least one technique explains where in the frame it applies",
+        "Cautions name something visible in a cited image",
+        "The group size reason refers to visible space"
+      ]
+    },
+    {
+      "id": "night-lit-scene",
+      "title": "A night-lit scene",
+      "description": "Artificial lighting after dark; two to five frames.",
+      "assets": {
+        "directory": "docs/evaluation/scouting/fixtures/night-lit-scene/",
+        "images": "<TO SUPPLY: two to five licensed or synthetic images>",
+        "licence": "<TO SUPPLY>"
+      },
+      "brief": "<TO SUPPLY: a brief with no logistics detail>",
+      "acceptableObservations": [
+        "Artificial light sources and their colour",
+        "Pools of light and dark gaps",
+        "Reflections on wet surfaces",
+        "Motion blur risk at low light"
+      ],
+      "prohibitedClaims": [
+        "Exact hours the lights are on",
+        "Safety or crowd levels",
+        "The street or venue name",
+        "Compass orientation"
+      ],
+      "actionabilityChecks": [
+        "Each Recommended or Avoid period names a visible basis present in the images",
+        "At least one technique explains where in the frame it applies",
+        "Cautions name something visible in a cited image",
+        "The group size reason refers to visible space"
+      ]
+    }
+  ]
+}

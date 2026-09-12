@@ -198,6 +198,16 @@ rate limits require capacity or retry, and `invalid_output` requires checking mo
 support and output quality. Do not describe controlled transport acceptance tests as
 a live Azure check or as proof of photographic critique quality.
 
+For the scouting report, create a location, upload two or three synthetic or
+explicitly permitted images, set a brief without logistics detail, and request a
+scouting report (`POST /api/locations/{id}/scouting-report`). Verify the durable
+operation, that the worker completes it, and that the detail shows the six sections
+with the configured model and `location-scouting-v1`. Repeat the request to check
+reuse without a provider call, then Regenerate to check a new job. Record the same
+safe details as above. The release evaluation in `docs/evaluation/scouting/` is a
+separate, reviewer-run procedure; a connection check is not evidence of report
+quality.
+
 ### Retiring historical samples
 
 Stop API/worker processes before applying `20260910000000_ArchiveDemoCritiques`,

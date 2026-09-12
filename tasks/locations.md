@@ -26,7 +26,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] B2 Generate, validate, and publish a scouting report (L2-058.1–.7; L2-059.3, .4; L2-060.4, .5, .6, .8; L2-034)
 - [x] B3 Outdate, cancel, and retry scouting work (L2-060.3, .6; L2-056.5; L2-055.5; L2-031.7; L2-034.4)
 - [x] B4 Request and read the scouting report in the detail (L2-060.1–.8; L2-058.1, .7; L2-057.3; L2-055.5; L2-041.2; L2-045.3)
-- [ ] B5 Release evaluation manifest and procedure (L2-059.5, .6; L2-050.2, .5)
+- [x] B5 Release evaluation manifest and procedure (L2-059.5, .6; L2-050.2, .5 — procedure only)
 - [ ] C1 Find locations by keyword with shoot filters (L2-062.1, .2, .3, .7, .8; L2-061.2–.6)
 - [ ] C2 Find a location page with keyword results (L2-061.1, .5, .6; L2-062.8; L2-043.2; L2-044.1)
 - [ ] C3a Record location index intents and report index status (L2-028.2; L2-062.4, .5)
@@ -612,4 +612,19 @@ recorded only when actually executed.
 - Non-claims: B5 records the evaluation manifest; the five-second reflection of
   persisted states (L2-033.2) rests on the 1 s poll as for photographer summaries
   and is not timed separately here.
+
+### B5 — Release evaluation manifest and procedure (L2-059.5, .6; L2-050.2, .5)
+
+- Documentation only, no test: `docs/evaluation/scouting/manifest.json` defines
+  the eight fixture slots (open park, urban street with strong lines, window-lit
+  interior, narrow alley, waterfront, large hall, playground, night-lit scene),
+  each with acceptable observations, prohibited claims and actionability checks,
+  the 24-run / 24-contract / 22-evidence gate, and `<TO SUPPLY>` markers for
+  assets, licences, briefs, the reviewer and the deployment;
+  `docs/evaluation/scouting/README.md` states the procedure, the gate and the
+  recording rules; `backend/README.md` adds the scouting step to the live
+  connection check.
+- Recorded as a procedure: no evaluation has been run and nothing is described
+  as passing. L2-059.1, .2, .5 and .6 stay open in `todo.md` until a named
+  reviewer runs the evaluation against the production model.
 
