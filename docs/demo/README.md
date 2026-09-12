@@ -9,10 +9,12 @@ or credentials in a deployed environment.
 
 Four recordings, all against real, running software — no product responses were
 mocked or invented for these takes. See "Integration substitutions and known
-limitations" below for exactly what stands in for what, and why. The newest,
-[`inspiration/`](inspiration/README.md), is a narrated tour of the Inspiration
-library (boards, tags, upload, notes) and keyword search recorded on 2026-09-12
-against the current code with local JWT sign-in.
+limitations" below for exactly what stands in for what, and why. The two newest,
+[`inspiration/`](inspiration/README.md) and [`locations/`](locations/README.md), are
+narrated tours recorded on 2026-09-12 against the current code with local JWT
+sign-in: the Inspiration library with keyword search, and the Locations area with
+images, live search indexing through a local embedding model, the scouting report
+request, and Find a location in Keyword and Meaning modes.
 
 ## Application inventory
 
@@ -20,11 +22,13 @@ against the current code with local JWT sign-in.
 | --- | --- | --- |
 | `loupe` — the Angular web client | Recorded | [loupe.webm](loupe.webm) |
 | `loupe` — Inspiration library and keyword search, narrated | Recorded 2026-09-12 (real API, worker, database; local JWT sign-in) | [inspiration/inspiration-tour.mp4](inspiration/inspiration-tour.mp4) · [player](inspiration/index.html) · [details](inspiration/README.md) |
+| `loupe` — Locations, scouting report request and Find a location (keyword and meaning), narrated | Recorded 2026-09-12 (real API, worker, database, pgvector and a local Ollama `bge-m3`; no Azure OpenAI) | [locations/locations-tour.mp4](locations/locations-tour.mp4) · [player](locations/index.html) · [details](locations/README.md) |
 | `Loupe.Api` + `Loupe.Worker` — the .NET backend and background worker | Recorded (combined; see below) | [loupe-api.webm](loupe-api.webm) |
 | `design-system` — the standalone token/component reference site | Recorded | [design-system.webm](design-system.webm) |
 | `Loupe.DemoIdentityProvider` | Demo-only harness, not a product application | — |
 | Boards, tag filters, keyword search | Recorded in the Inspiration tour above | see `inspiration/` |
-| Meaning (semantic) search, photographer bookmarking, AI suggestions/summaries | Not recorded — semantic search and AI features need a configured provider; photographer bookmarking is implemented but outside the Inspiration tour's scope | — |
+| Meaning search for locations, location indexing | Recorded in the Locations tour above (real local `bge-m3` embeddings) | see `locations/` |
+| Scouting report generation, Meaning search for the inspiration library, photographer bookmarking, AI suggestions/summaries | Not recorded — the scouting report and AI suggestions need a configured Azure OpenAI provider (the Locations tour shows the request being refused and a synthetic design-system example); inspiration Meaning search is not implemented; photographer bookmarking is implemented but outside the tours' scope | — |
 
 `Loupe.Api` and `Loupe.Worker` are two independently runnable executables, but
 `Loupe.Worker` has no interaction surface of its own — it only executes work the

@@ -44,6 +44,7 @@ to play (GitHub opens the MP4 in its video player).
 | --- | --- |
 | ▶ **Video** | [`docs/demo/inspiration/inspiration-tour.mp4`](docs/demo/inspiration/inspiration-tour.mp4) (142 s, 1440 × 1040, 12.9 MB, narrated and captioned) |
 | 📖 **Chapters, transcript and how it was recorded** | [`docs/demo/inspiration/README.md`](docs/demo/inspiration/README.md) |
+| ▶ **Locations video** | [`docs/demo/locations/locations-tour.mp4`](docs/demo/locations/locations-tour.mp4) (199 s, 1440 × 1040, 14.0 MB, narrated and captioned; real local embeddings, no Azure OpenAI) · [chapters and transcript](docs/demo/locations/README.md) |
 | 🎞 **All demo recordings** (critique, API + worker, design system) | [`docs/demo/README.md`](docs/demo/README.md) |
 
 Everything in the recording is real, persisted state: no mocked product

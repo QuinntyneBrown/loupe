@@ -37,7 +37,7 @@
 .PARAMETER Ollama
   Also start a local Ollama container (<Prefix>-ollama) on the stack network,
   pull the bge-m3 embedding model into it (about 1.2 GB on first use, kept in
-  the <Prefix>-ollama-models volume), and point the Api and Worker at it through
+  the shared loupe-ollama-models volume), and point the Api and Worker at it through
   Embeddings__Endpoint so Find a location's Meaning mode and the search index
   worker run. Without this switch Meaning mode reports search unavailable and
   each location shows no search-index status; keyword search is unaffected.
@@ -118,8 +118,19 @@ $env:Jwt__SigningKey = [Convert]::ToBase64String([System.Security.Cryptography.R
 if ($Ollama) {
   Write-Host "== 5b. Start Ollama ($ollamaContainer) and pull bge-m3 for local embeddings ==" -ForegroundColor Cyan
   docker rm -f $ollamaContainer 2>$null | Out-Null
-  docker run -d --name $ollamaContainer --network $network -v "${Prefix}-ollama-models:/root/.ollama" ollama/ollama | Out-Null
+  # Pulled models are immutable downloads, so every stack shares one volume instead of pulling 1.2 GB per prefix.
+  # OLLAMA_KEEP_ALIVE keeps bge-m3 resident; the default unloads it after five idle minutes, and the reload adds seconds to the next query.
+  docker run -d --name $ollamaContainer --network $network -e OLLAMA_KEEP_ALIVE=24h -v "loupe-ollama-models:/root/.ollama" ollama/ollama | Out-Null
+  # The server inside the container takes a moment to listen; pull only once it answers.
+  $ready = $false
+  foreach ($attempt in 1..30) {
+    docker exec $ollamaContainer ollama list *>$null
+    if ($LASTEXITCODE -eq 0) { $ready = $true; break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $ready) { throw 'Ollama did not start.' }
   docker exec $ollamaContainer ollama pull bge-m3
+  if ($LASTEXITCODE -ne 0) { throw 'Pulling bge-m3 failed.' }
   $env:Embeddings__Endpoint = "http://${ollamaContainer}:11434"
   $env:Embeddings__Model = 'bge-m3'
 }

@@ -1019,3 +1019,27 @@ recorded only when actually executed.
   the `domain` library build was cut short when the setup script was moved to
   the background — a session artefact, not a harness defect.
 
+### Narrated demo recording (`docs/demo/locations/`)
+
+- `locations-tour.mp4` — 199.3 s, 1440 × 1040, 13.96 MB, ten chapters, narration
+  mean −16.2 dB / peak −1.5 dB, 52 caption cues (burned in and as SRT/VTT),
+  chaptered player `index.html`, `transcript.md`, `chapters.json`, `poster.jpg`,
+  `verification.md`. One continuous Chromium take of the real application against
+  the real Api, Worker, PostgreSQL/pgvector and a local Ollama `bge-m3`
+  (`setup.ps1 -Ollama`): sign-in, browse, add a location, three real uploads and a
+  cover change, inline notes/tags with the live `Updating search` → current cycle,
+  the scouting request refused with `integration_not_configured` (no Azure
+  credentials — the one expected 503), a synthetic report on the design-system
+  site badged as such, keyword search with setting and tag filters, and Meaning
+  search ranked by the real model (Kew › Hampstead › Walthamstow), then the
+  persisted state re-read through the API. Pipeline in `e2e/demo/locations/`
+  (`seed.mjs`, `record.mjs --dry`, `narrate.py`, `record.mjs`, `assemble.py`,
+  `verify-player.mjs`, `verify-media.py`), mirroring the Inspiration tour.
+- Harness: `reset-content.ps1` now empties the Locations tables and
+  `search_vectors`; `setup.ps1 -Ollama` waits for the Ollama server, shares one
+  `loupe-ollama-models` volume across stacks and keeps the model resident
+  (`OLLAMA_KEEP_ALIVE=24h`).
+- Non-claims: no scouting report was generated (no provider); the design-system
+  chapter is synthetic and labelled; Meaning relevance beyond this eight-location
+  library is the reviewer-run evaluation, not this recording.
+
