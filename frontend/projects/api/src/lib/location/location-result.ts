@@ -1,3 +1,5 @@
+import { SavedScoutingReport } from '../scouting-report/scouting-report-result';
+
 export type LocationSetting = 'Indoor' | 'Outdoor' | 'Mixed';
 export type LocationReportStatus = 'None' | 'Queued' | 'Running' | 'Ready' | 'Outdated' | 'Failed';
 
@@ -33,7 +35,7 @@ export interface LocationResult {
   tags: LocationTag[];
   images: LocationImage[];
   coverImageId: string | null;
-  report: unknown | null;
+  report: SavedScoutingReport | null;
   reportStatus: LocationReportStatus;
   createdAt: string;
   updatedAt: string;

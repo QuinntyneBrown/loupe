@@ -4,3 +4,4 @@ export * from './lib/photographer-card/photographer-card';
 export * from './lib/critique-content/critique-content';
 export * from './lib/critique-content/critique-presentation';
 export * from './lib/location-card/location-card';
+export * from './lib/scouting-report-content/scouting-report-content';

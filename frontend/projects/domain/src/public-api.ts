@@ -21,3 +21,4 @@ export * from './lib/location-gallery/location-gallery';
 export * from './lib/location-text/location-text-editor';
 export * from './lib/location-tags/location-tags';
 export * from './lib/location-image-upload/location-image-upload';
+export * from './lib/scouting-report/scouting-report-panel';

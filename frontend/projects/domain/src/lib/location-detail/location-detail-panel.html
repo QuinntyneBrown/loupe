@@ -119,19 +119,11 @@
       </dl>
     </div>
     <div class="lp-detail__body">
-      <section class="lp-ai-block lp-ai-block--quiet" aria-label="Scouting report">
-        <div class="lp-ai-block__head">
-          <h2 class="lp-kicker lp-kicker--ai">Scouting report</h2>
-        </div>
-        @if (!item.images.length) {
-          <p class="lp-ai-block__text lp-muted">
-            Add an image to get a scouting report. It only describes what the images show, so
-            there's nothing to report on yet.
-          </p>
-        } @else {
-          <p class="lp-ai-block__text lp-muted">No scouting report yet.</p>
-        }
-      </section>
+      <lp-scouting-report
+        [location]="item"
+        (updated)="location.set($event)"
+        (imageSelected)="selectImage($event)"
+      />
       <lp-location-text-editor
         [location]="item"
         field="scoutingBrief"

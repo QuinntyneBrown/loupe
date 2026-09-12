@@ -1,6 +1,8 @@
 import { REFERENCE_IMPORT_SERVICE } from 'api';
 import { LOCATION_SERVICE } from 'api';
 import { MockLocationService } from './mock-location.service';
+import { SCOUTING_REPORT_SERVICE } from 'api';
+import { MockScoutingReportService } from './mock-scouting-report.service';
 import { SEARCH_SERVICE } from 'api';
 import { MockSearchService } from './mock-search.service';
 import { PHOTOGRAPHER_SUMMARY_SERVICE } from 'api';
@@ -28,6 +30,7 @@ import { MockReferenceDraftService } from './mock-reference-draft.service';
 
 export const appProviders = [
   { provide: LOCATION_SERVICE, useClass: MockLocationService },
+  { provide: SCOUTING_REPORT_SERVICE, useClass: MockScoutingReportService },
   { provide: SEARCH_SERVICE, useClass: MockSearchService },
   { provide: PHOTOGRAPHER_SUMMARY_SERVICE, useClass: MockPhotographerSummaryService },
   { provide: PHOTOGRAPHER_DRAFT_SERVICE, useClass: MockPhotographerDraftService },

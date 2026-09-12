@@ -18,10 +18,18 @@ import { LOCATION_SERVICE, LocationImage, LocationResult, ServiceError } from 'a
 import { LocationGallery } from '../location-gallery/location-gallery';
 import { LocationTextEditor } from '../location-text/location-text-editor';
 import { LocationTags } from '../location-tags/location-tags';
+import { ScoutingReportPanel } from '../scouting-report/scouting-report-panel';
 
 @Component({
   selector: 'lp-location-detail-panel',
-  imports: [DatePipe, RouterLink, LocationGallery, LocationTextEditor, LocationTags],
+  imports: [
+    DatePipe,
+    RouterLink,
+    LocationGallery,
+    LocationTextEditor,
+    LocationTags,
+    ScoutingReportPanel,
+  ],
   templateUrl: './location-detail-panel.html',
   styleUrl: './location-detail-panel.css',
 })
@@ -124,6 +132,10 @@ export class LocationDetailPanel {
     this.actions()?.nativeElement.focus();
   }
   focusGallery(): void {
+    this.gallery()?.focus();
+  }
+  selectImage(id: string): void {
+    this.gallery()?.select(id);
     this.gallery()?.focus();
   }
   request(menu: HTMLDetailsElement, item: LocationResult, action: 'edit' | 'delete'): void {

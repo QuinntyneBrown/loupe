@@ -1,0 +1,178 @@
+<section class="lp-ai-block" [class.lp-ai-block--quiet]="!report()" aria-label="Scouting report">
+  <div class="lp-ai-block__head">
+    <div class="head-row">
+      <h2 class="lp-kicker lp-kicker--ai">Scouting report</h2>
+      @if (report()) {
+        <span class="lp-pill lp-pill--ai">AI generated</span>
+        @if (outdated() && !active() && !failed()) {
+          <span class="lp-pill lp-pill--warning">Outdated</span>
+        }
+        @if (active() || failed()) {
+          <span class="lp-pill">Previous report</span>
+        }
+      }
+    </div>
+    @if (report(); as saved) {
+      <span class="lp-ai-block__note"
+        >Generated {{ saved.generatedAt | date: 'd MMM yyyy' }} · Azure OpenAI · {{ saved.model }} ·
+        {{ saved.imageCount }} {{ saved.imageCount === 1 ? 'image' : 'images' }} · brief as saved
+        {{ saved.generatedAt | date: 'd MMM yyyy' }}</span
+      >
+    }
+  </div>
+
+  @if (!imageCount()) {
+    <p class="lp-ai-block__text lp-muted">
+      Add an image to get a scouting report. It only describes what the images show, so there's
+      nothing to report on yet.
+    </p>
+  } @else if (notConfigured()) {
+    <p class="lp-ai-block__text lp-muted">
+      Integration not configured. Set the provider credentials on the server to request scouting
+      reports. You can keep editing this location.
+    </p>
+  } @else if (active()) {
+    <div class="lp-processing" role="status">
+      <div class="lp-processing__title">
+        <span class="lp-spinner" aria-hidden="true"></span
+        >{{
+          report()
+            ? 'Regenerating with the current ' + imageCount() + ' images'
+            : operation()?.status === 'Queued'
+              ? 'Queued for scouting'
+              : 'Looking at the images'
+        }}
+      </div>
+      <p class="lp-processing__text">
+        {{
+          report()
+            ? 'The report below stays until the new one is ready. If this fails, it stays anyway.'
+            : operation()?.status === 'Queued'
+              ? 'Usually under a minute. You can leave this page; the report will be here when you come back.'
+              : 'Reading all ' +
+                imageCount() +
+                ' images, their camera settings, and your brief. Usually under a minute. You can leave this page; the report will be here when you come back.'
+        }}
+      </p>
+    </div>
+  } @else if (failed()) {
+    <div class="lp-notice lp-notice--error" role="alert">
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>
+      <div class="lp-notice__body">
+        <span class="lp-notice__title">The scouting report didn't complete.</span>
+        <span
+          >{{ reason() }}
+          @if (report(); as saved) {
+            Your images and brief are saved; the report from
+            {{ saved.generatedAt | date: 'd MMM yyyy' }} is still below.
+          }
+        </span>
+        <div class="lp-notice__actions">
+          <button
+            class="lp-button lp-button--secondary lp-button--sm"
+            type="button"
+            [disabled]="busy()"
+            (click)="retry()"
+          >
+            <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg>Retry
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else if (!report()) {
+    <p class="lp-ai-block__text">
+      No scouting report yet. Ready when you are: the report says what shoots this place suits, when
+      the light works, which compositions apply, how many people fit, and what to watch for, each
+      tied to what's visible in your images.
+    </p>
+    <div class="lp-ai-block__actions">
+      <button
+        class="lp-button lp-button--primary"
+        type="button"
+        [disabled]="busy() || conflicted()"
+        (click)="request(false)"
+      >
+        {{ busy() ? 'Requesting…' : 'Request scouting report' }}
+      </button>
+    </div>
+    <p class="lp-ai-block__note">
+      Sends these {{ imageCount() }} {{ imageCount() === 1 ? 'image' : 'images' }}, your scouting
+      brief, and camera settings (focal length, aperture, shutter, ISO, capture time) to Azure
+      OpenAI. Your address, coordinates, notes, and tags stay on the server.
+    </p>
+  } @else if (outdated()) {
+    <div class="lp-notice lp-notice--warning">
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>
+      <div class="lp-notice__body">
+        <span class="lp-notice__title"
+          >Based on {{ report()!.imageCount }}
+          {{ report()!.imageCount === 1 ? 'image' : 'images' }} as of
+          {{ report()!.generatedAt | date: 'd MMM yyyy' }}. The image set has changed since.</span
+        >
+        <span
+          >Still readable, and still what Find a location uses, until a new report replaces
+          it.</span
+        >
+        <div class="lp-notice__actions">
+          <button
+            class="lp-button lp-button--primary lp-button--sm"
+            type="button"
+            [disabled]="busy() || conflicted()"
+            (click)="request(true)"
+          >
+            Regenerate
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else if (briefChanged()) {
+    <div class="lp-notice lp-notice--info">
+      <div class="lp-notice__body">
+        <span class="lp-notice__title">
+          Your brief changed. This report used the brief as saved
+          {{ report()!.generatedAt | date: 'd MMM yyyy' }}: “{{
+            report()!.briefSnapshot || 'no brief'
+          }}”.
+        </span>
+        <span
+          >Regenerate to have the report answer the new brief. Until then it stays as it is.</span
+        >
+        <div class="lp-notice__actions">
+          <button
+            class="lp-button lp-button--primary lp-button--sm"
+            type="button"
+            [disabled]="busy() || conflicted()"
+            (click)="request(true)"
+          >
+            Regenerate
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="lp-ai-block__actions">
+      <button
+        class="lp-button lp-button--ghost lp-button--sm"
+        type="button"
+        [disabled]="busy() || conflicted()"
+        (click)="request(true)"
+      >
+        Regenerate
+      </button>
+    </div>
+    <p class="lp-ai-block__note">
+      Regenerating sends the current images, your brief, and camera settings to Azure OpenAI again.
+      Notes, address, coordinates, and tags are never sent.
+    </p>
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  @if (report(); as saved) {
+    <lp-scouting-report-content
+      [report]="saved.report"
+      [images]="images()"
+      (imageSelected)="imageSelected.emit($event)"
+    />
+  }
+</section>

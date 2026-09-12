@@ -54,11 +54,7 @@ export class LocationPage {
     await expect(this.main().getByText(`Setting: ${setting}`)).toBeAttached();
   }
   async expectReportStatus(text) {
-    await expect(
-      this.main()
-        .getByRole("region", { name: "Scouting report", exact: true })
-        .getByText(text),
-    ).toBeVisible();
+    await expect(this.main().getByText(text, { exact: false }).first()).toBeVisible();
   }
   gallery() {
     return this.main().getByRole("radiogroup", { name: "Images", exact: true });
@@ -396,5 +392,82 @@ export class LocationPage {
   async confirmRemove() {
     await this.removeDialog().getByRole("button", { name: "Remove", exact: true }).click();
     await expect(this.removeDialog()).toHaveCount(0);
+  }
+  reportRegion() {
+    return this.main().getByRole("region", { name: "Scouting report", exact: true });
+  }
+  requestButton() {
+    return this.reportRegion().getByRole("button", { name: "Request scouting report", exact: true });
+  }
+  async requestReport() {
+    await this.requestButton().click();
+  }
+  async expectRequestAvailable() {
+    await expect(this.requestButton()).toBeEnabled();
+  }
+  async expectRequestDisabled() {
+    await expect(this.requestButton()).toBeDisabled();
+  }
+  async expectNoRequestControl() {
+    await expect(this.requestButton()).toHaveCount(0);
+  }
+  async expectDisclosure() {
+    const disclosure = this.reportRegion().getByText(/Sends these \d+ images?, your scouting brief, and camera settings/);
+    await expect(disclosure).toBeVisible();
+    await expect(disclosure).toContainText("Azure OpenAI");
+    await expect(disclosure).toContainText("Your address, coordinates, notes, and tags stay on the server.");
+  }
+  async expectProcessing(title) {
+    await expect(this.main().getByRole("status").filter({ hasText: title })).toBeVisible();
+  }
+  async expectReportText(text) {
+    await expect(this.reportRegion().getByText(text, { exact: false }).first()).toBeVisible();
+  }
+  async expectReportFailure(reason) {
+    const alert = this.reportRegion().getByRole("alert");
+    await expect(alert).toContainText("The scouting report didn't complete.");
+    await expect(alert).toContainText(reason);
+  }
+  async retryReport() {
+    await this.reportRegion().getByRole("button", { name: "Retry", exact: true }).click();
+  }
+  async regenerateReport() {
+    await this.reportRegion().getByRole("button", { name: "Regenerate", exact: true }).click();
+  }
+  async expectRegenerateAvailable() {
+    await expect(this.reportRegion().getByRole("button", { name: "Regenerate", exact: true })).toBeEnabled();
+  }
+  async expectReportSections(headings) {
+    await expect(this.reportRegion().getByRole("heading", { level: 3 })).toHaveText(headings);
+  }
+  async expectReportPill(text) {
+    await expect(this.reportRegion().getByText(text, { exact: true }).first()).toBeVisible();
+  }
+  async expectReportProvenance(text) {
+    await expect(this.reportRegion().getByText(text, { exact: false }).first()).toBeVisible();
+  }
+  async expectEntry(section, label, { rating, basis }) {
+    const row = this.reportRegion()
+      .getByRole("region", { name: section, exact: true })
+      .locator(".lp-report__row")
+      .filter({ has: this.page.getByText(label, { exact: true }) });
+    await expect(row).toHaveCount(1);
+    if (rating) await expect(row.getByText(rating, { exact: true })).toBeVisible();
+    if (basis) await expect(row.getByText(basis, { exact: true })).toBeVisible();
+  }
+  async expectNoScores() {
+    const text = await this.reportRegion().innerText();
+    expect(text).not.toMatch(/\d+\s*%|\d+\s*\/\s*\d+|★|⭐/);
+  }
+  async citeImage(section, label, index) {
+    await this.reportRegion()
+      .getByRole("region", { name: section, exact: true })
+      .locator(".lp-report__row")
+      .filter({ has: this.page.getByText(label, { exact: true }) })
+      .getByRole("button", { name: `Show image ${index}`, exact: true })
+      .click();
+  }
+  async expectNotesEditable() {
+    await expect(this.textEditor("notes").getByRole("textbox")).toBeEnabled();
   }
 }

@@ -25,7 +25,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] B1 Admit a scouting report request (L2-060.1, .2, .7; L2-033.1; L2-035)
 - [x] B2 Generate, validate, and publish a scouting report (L2-058.1–.7; L2-059.3, .4; L2-060.4, .5, .6, .8; L2-034)
 - [x] B3 Outdate, cancel, and retry scouting work (L2-060.3, .6; L2-056.5; L2-055.5; L2-031.7; L2-034.4)
-- [ ] B4 Request and read the scouting report in the detail (L2-060.1–.8; L2-058.1; L2-057.3; L2-041.2)
+- [x] B4 Request and read the scouting report in the detail (L2-060.1–.8; L2-058.1, .7; L2-057.3; L2-055.5; L2-041.2; L2-045.3)
 - [ ] B5 Release evaluation manifest and procedure (L2-059.5, .6; L2-050.2, .5)
 - [ ] C1 Find locations by keyword with shoot filters (L2-062.1, .2, .3, .7, .8; L2-061.2–.6)
 - [ ] C2 Find a location page with keyword results (L2-061.1, .5, .6; L2-062.8; L2-043.2; L2-044.1)
@@ -562,4 +562,54 @@ recorded only when actually executed.
   `dotnet format` clean.
 - Non-claims: the Outdated label's count/timestamp display, Regenerate and Retry
   controls are B4; "current for search until a replacement commits" is C1.
+
+### B4 — Request and read the scouting report in the detail (L2-060.1–.8 UI; L2-058.1, .7; L2-057.3; L2-055.5; L2-041.2; L2-045.3)
+
+- Spec: `e2e/specs/scouting-report.spec.js` (7 cases) with the
+  `e2e/fixtures/scouting-reports.js` sub-fixture (`window.loupeScoutingReports`:
+  operations per location, `advance`/`complete`/`fail`, receipts, `errors.request`)
+  attached by the location library, and the detail page object's report helpers:
+  an imaged location shows `No scouting report yet`, an enabled Request scouting
+  report and the disclosure naming Azure OpenAI, the images, brief and camera
+  settings sent and the address, coordinates, notes and tags kept; the request
+  acknowledges at once with `Queued for scouting` and the head `Queued` pill, the
+  control disappears so it cannot be activated twice, notes stay editable, the
+  bridge saw one request with a visible-ASCII key and `regenerate: false`;
+  advancing to Running shows `Looking at the images`, completing shows the six
+  headings in order and `Report ready` through the 1 s poll; a ready report shows
+  `AI generated`, `Generated 10 Sep 2026 · Azure OpenAI · gpt-4.1 · 3 images ·
+  brief as saved`, the sections in order, `Not recommended`/`Workable`/`Recommended`/
+  `Unknown` pills, `Visible`/`Inferred` bases, `2–8 people`, the caution, no
+  score/star/percentage text, and clicking a cited thumbnail selects that gallery
+  image; an Outdated report shows the pill and `Based on 2 images as of 10 Sep
+  2026…`, Regenerate sends `regenerate: true`, `Regenerating with the current 3
+  images` and `Previous report` keep the sections visible until completion shows
+  `Generated 12 Sep 2026`; a failed job shows the alert with the safe reason and
+  Retry while the previous report stays, Retry calls the retry route; an
+  `integration_not_configured` request shows the copy and notes still save; no
+  images → the explanation and no request control; a changed brief shows the
+  snapshot it used and offers Regenerate.
+- RED: `cd e2e && npx playwright test specs/scouting-report.spec.js` → 6 failed
+  (no request control, no report rendering); the no-images case already passed on
+  A7 and confirms. One spec precision after wiring: a retry with an earlier
+  report shows the regenerating state, not the first-request `Queued` copy.
+- Built: `api` `scouting-report/` shapes, `IScoutingReportService`
+  (`current/get/request/retry`) + `SCOUTING_REPORT_SERVICE`,
+  `ScoutingReportService` (204 → null, CSRF + `Idempotency-Key`, error
+  parsing), `OperationResult.type` + `'LocationScouting'`,
+  `LocationResult.report` typed; `components` `ScoutingReportContent` (six
+  sections in order, rating pills, basis, cited thumbnails as `Show image N`
+  buttons, no numeric rendering); `domain` `ScoutingReportPanel` (loads the
+  current operation, polls every second while active, refreshes the location on
+  completion, request/regenerate/retry with `crypto.randomUUID()` keys and a
+  single in-flight request, not-configured, failed, outdated, brief-changed and
+  no-image states); `LocationDetailPanel` hosts the panel and selects the gallery
+  image on citation; `MockScoutingReportService` and both `app.providers.ts`.
+- GREEN: `specs/scouting-report.spec.js` → 7 passed; band `scouting-report`,
+  `location-detail`, `location-images`, `locations`, `photographer-summary` → 49
+  passed; `npm run build` clean apart from the pre-existing budget warning;
+  prettier clean.
+- Non-claims: B5 records the evaluation manifest; the five-second reflection of
+  persisted states (L2-033.2) rests on the 1 s poll as for photographer summaries
+  and is not timed separately here.
 

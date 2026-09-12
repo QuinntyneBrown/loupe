@@ -4,6 +4,8 @@ const coverUrl =
     '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="600"><rect width="480" height="600" fill="#d8d3c8"/><path d="M0 600 300 0h80L80 600" fill="#8a8378"/></svg>',
   );
 
+import { ScoutingReports } from "./scouting-reports.js";
+
 export class LocationLibrary {
   constructor(count = 7) {
     this.failures = { list: 0, get: 0, create: 0, update: 0, updateText: 0, setTags: 0, deleteLocation: 0, addImage: 0, removeImage: 0, setCover: 0 };
@@ -17,6 +19,7 @@ export class LocationLibrary {
     this.items = Array.from({ length: count }, (_, index) =>
       LocationLibrary.location(index),
     );
+    this.scouting = new ScoutingReports(this);
   }
   static location(index) {
     const number = index + 1;
@@ -154,6 +157,7 @@ export class LocationLibrary {
     );
   }
   async attach(page) {
+    await this.scouting.attach(page);
     await page.exposeFunction("loupeLocations", async (operation, input) => {
       this.calls.push({ operation, ...input });
       if (operation === "abortUpload") {
