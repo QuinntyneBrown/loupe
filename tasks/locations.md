@@ -30,7 +30,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] C1 Find locations by keyword with shoot filters (L2-062.1, .2, .3, .5, .7; L2-061.2–.5)
 - [x] C2 Find a location page with keyword results (L2-061.1, .5, .6; L2-062.8; L2-043.2; L2-044.1)
 - [x] C3a Record location index intents and report index status (L2-028.2; L2-062.4, .5)
-- [ ] C3b Embed location documents through Ollama and keep vectors current (L2-028.1, .4, .5; L2-062.4, .6, .7; L2-041)
+- [x] C3b Embed location documents through Ollama and keep vectors current (L2-028.1, .4, .5; L2-062.4, .6, .7; L2-041)
 - [ ] C4 Rank locations by meaning (L2-061.1, .4, .7, .8; L2-062.5, .7)
 - [ ] C5 Meaning mode in the Find a location page (L2-061.1, .6, .7, .8; L2-062.4–.6)
 - [ ] C6 Relevance evaluation corpus and procedure (L2-061.9; L2-047)
@@ -784,4 +784,67 @@ recorded only when actually executed.
   the worker (C3b) and stale-vector exclusion the query-time join (C4), so
   L2-062.4/.5 stay open; the frontend `LocationResult` shape gains
   `indexStatus` in C5 where it is rendered.
+
+### C3b — Embed location documents through Ollama and keep vectors current (L2-028.1, .4, .5 for locations; L2-062.4, .6, .7 API; L2-041)
+
+- Tests: `backend/tests/Loupe.Api.Tests/Search/LocationIndexWorkerTests.cs`
+  (6 cases) hosting `SearchIndexWorker` against a `ControlledEmbeddingTransport`
+  on the `ollama` client (`ApiFactory.EmbeddingTransport`): one worker pass
+  moves a saved location to `current`, its operation to `Succeeded`, and the
+  `search_vectors` row to the location's `Revision`, while the single
+  `POST http://ollama.test:11434/api/embed` body names `bge-m3` and carries the
+  name, locality, region, country, setting, tags, brief and notes but never the
+  address lines or postal code; a report requested with the save reports
+  `processing-report`, then the published report re-embeds a document holding
+  the caution text and period labels; an edit acknowledged while the first
+  embedding is in flight (gated transport) cancels that run, records a new intent,
+  and the replacement is built from the edited notes with no vector left from
+  the first run; a 503 from the endpoint retries twice under the shared clock
+  and then reports `failed` while keyword search still finds the location and
+  no vector exists, a stale revision on `POST /api/operations/{id}/retry` → 409,
+  the right revision → 202 with a new `LocationIndex` operation that the worker
+  completes to `current`; deletion removes the vector row; without an endpoint
+  the worker sends nothing and the intent stays queued. Requests are matched by a
+  per-test marker because the acceptance database (and its queued intents) is
+  shared across the class.
+- RED (two steps, the `IDnsResolver` precedent): HTTP-only the tests cannot host a
+  worker that does not exist, so the seam landed first — `SearchIndexWorker`,
+  `RefreshLocationSearchDocumentCommand` with a handler returning false,
+  `IEmbeddingProvider`, `ApiFactory.EmbeddingTransport` — then
+  `-Filter 'FullyQualifiedName~LocationIndexWorkerTests'` → `Failed: 5,
+  Passed: 1`: status stayed `updating`, the operation stayed `Queued`, no
+  request reached the transport, and `relation "search_vectors" does not exist`
+  (the idle-when-unconfigured case is true of the seam and stays green).
+- Built: migration `SearchVectors` (`CREATE EXTENSION IF NOT EXISTS vector`,
+  `search_vectors(OwnerId, ItemType, ItemId, ModelIdentity, SourceRevision,
+  Vector vector(1024), IndexedAt)` with an HNSW cosine index, raw SQL outside
+  the EF model); `LocationSearchInputBuilder` (document without address lines,
+  report flattened through `ScoutingVocabulary.Label`); `LocationIndexSource`,
+  `ILocationIndexWorkStore`/`LocationIndexWorkStore` (claim through the shared
+  lease store, read, conditional publish — the location must still point at the
+  operation at the same revision, else the run is canceled as superseded or
+  deleted — `real[]::vector` upsert, requeue); `RefreshLocationSearchDocumentCommandHandler`
+  (120 s timeout, lease renewal, provider/timeout rejection through
+  `IAnalysisFailureStore`); `OllamaEmbeddingProvider` (`POST {Endpoint}/api/embed`,
+  named client `ollama`, 429 → rate limited, 404 → disabled, 400 → unsupported,
+  other failures transient, wrong dimension → invalid output);
+  `RetryLocationIndexCommand[Handler]` behind the shared retry route (Failed
+  `LocationIndex` only, revision check, no input comparison, receipt
+  `retry-index`); `DeletionStore` deletes the vector row; worker `Program.cs`
+  hosts `SearchIndexWorker` and whitelists the handler; `backend/README.md`
+  documents `Embeddings:Endpoint/Model`, the pgvector requirement and the
+  connection check.
+- GREEN: same filter with `LocationIndexTests` → `Passed: 9`. Band
+  `Locations|Scouting|ShootPlanning|Search|Critiques|Deletion|Operations` →
+  `Passed: 283`. `dotnet build` clean; `dotnet format` clean on touched files.
+- Review notes: the plan's generic `IVectorWriter`/`PgVectorStore` names became
+  the single-use `ILocationIndexWorkStore`/`LocationIndexWorkStore` — one port
+  for one worker; C4 adds the ranking read to `ILocationSearchStore`. Index
+  operations reuse the shared lease store and its per-owner/global concurrency,
+  and the requested-job caps exclude them (C3a).
+- Non-claims: the 60 s freshness window is asserted as "current after one worker
+  pass" under the shared clock; the wall-clock budget is not measured. Meaning
+  search reading these vectors is C4, so L2-062.4/.6 stay open until the vectors
+  are searchable and the detail shows the states (C5). No real Ollama call was
+  made; the live smoke is the end-of-branch step.
 

@@ -5,6 +5,7 @@ using Loupe.Application.ReferenceImports;
 using Loupe.Application.PhotographerImports;
 using Loupe.Application.PhotographerSummaries;
 using Loupe.Application.Scouting;
+using Loupe.Application.ShootPlanning;
 using Loupe.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,7 +30,8 @@ public static class Program
             options.TypeEvaluator = type => type.Namespace == typeof(CleanDeletedContentCommand).Namespace
                 || type == typeof(RunCritiqueCommandHandler) || type == typeof(RunReferenceImportCommandHandler)
                 || type == typeof(RunReferenceAnalysisCommandHandler) || type == typeof(RunPhotographerImportCommandHandler)
-                || type == typeof(RunPhotographerSummaryCommandHandler) || type == typeof(RunScoutingReportCommandHandler);
+                || type == typeof(RunPhotographerSummaryCommandHandler) || type == typeof(RunScoutingReportCommandHandler)
+                || type == typeof(RefreshLocationSearchDocumentCommandHandler);
             options.RegisterServicesFromAssemblyContaining<CleanDeletedContentCommand>();
         });
         builder.Services.AddOptions<CleanupOptions>().BindConfiguration("Cleanup")
@@ -38,6 +40,7 @@ public static class Program
         builder.Services.AddHostedService<CleanupWorker>();
         builder.Services.AddHostedService<AnalysisWorker>();
         builder.Services.AddHostedService<ReferenceImportWorker>();
+        builder.Services.AddHostedService<SearchIndexWorker>();
         using var host = builder.Build();
         using var scope = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Loupe.Worker.Host")
             .BeginScope(new Dictionary<string, object> { ["EntryPoint"] = "worker_host", ["RunId"] = Guid.NewGuid().ToString("N") });
