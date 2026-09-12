@@ -22,7 +22,7 @@ request, and Find a location in Keyword and Meaning modes.
 | --- | --- | --- |
 | `loupe` — the Angular web client | Recorded | [loupe.webm](loupe.webm) |
 | `loupe` — Inspiration library and keyword search, narrated | Recorded 2026-09-12 (real API, worker, database; local JWT sign-in) | [inspiration/inspiration-tour.mp4](inspiration/inspiration-tour.mp4) · [player](inspiration/index.html) · [details](inspiration/README.md) |
-| `loupe` — Locations, scouting report request and Find a location (keyword and meaning), narrated | Recorded 2026-09-12 (real API, worker, database, pgvector and a local Ollama `bge-m3`; no Azure OpenAI) | [locations/locations-tour.mp4](locations/locations-tour.mp4) · [player](locations/index.html) · [details](locations/README.md) |
+| `loupe` — Locations, scouting report request and Find a location (keyword and meaning), narrated | Recorded 2026-09-12 (real API, worker, database, pgvector and a local Ollama `bge-m3`; no Azure OpenAI) | [locations/locations-tour.mp4](locations/locations-tour.mp4) · [player](locations/index.html) · [details](locations/README.md) · [how it was made](locations/making-of.md) |
 | `Loupe.Api` + `Loupe.Worker` — the .NET backend and background worker | Recorded (combined; see below) | [loupe-api.webm](loupe-api.webm) |
 | `design-system` — the standalone token/component reference site | Recorded | [design-system.webm](design-system.webm) |
 | `Loupe.DemoIdentityProvider` | Demo-only harness, not a product application | — |

@@ -3,7 +3,9 @@
 Open `index.html` for the chaptered player, or play `locations-tour.mp4`
 directly. `transcript.md` holds the narration, `captions.srt`/`captions.vtt` the
 timed captions (also burned into the strip below the interface), `chapters.json`
-the chapter metadata, and `verification.md` the measured verification record.
+the chapter metadata, `verification.md` the measured verification record, and
+`making-of.md` the exact production record — voice, tools, every step from the
+stack to the encode.
 
 | Application | Purpose | Status |
 | --- | --- | --- |
@@ -24,8 +26,10 @@ the chapter metadata, and `verification.md` the measured verification record.
   the embedding model is real and local; no Azure OpenAI credentials are configured,
   so the scouting report request is shown being refused (chapter 6), and chapter 7
   switches to the design-system site, badged separately, for a synthetic report.
-- **Narration:** synthetic, Microsoft Edge `en-US-EmmaMultilingualNeural` via
-  `edge-tts`; only the authored text in `e2e/demo/locations/scenes.json` is sent.
+- **Narration:** synthetic, Microsoft Edge `en-US-EmmaMultilingualNeural` ("Emma")
+  via `edge-tts` 7.2.8 at rate −5 %; only the authored text in
+  `e2e/demo/locations/scenes.json` is sent, and its word boundaries time the
+  captions (see [`making-of.md`](making-of.md)).
 - **Source revision:** recorded on the `feat/locations` branch at the commit that
   adds this recording (`docs/demo/harness/*`, `e2e/demo/locations/*`).
 
