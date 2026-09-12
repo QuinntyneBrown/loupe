@@ -1,4 +1,5 @@
 using Loupe.Api.Locations;
+using Loupe.Application.Images;
 using Loupe.Application.Locations;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -43,4 +44,37 @@ public sealed class LocationsController(ISender sender) : ControllerBase
     [HttpPut("{id:guid}/tags")]
     public Task<LocationResult> Tags(Guid id, SetLocationTagsRequest request, CancellationToken cancellationToken) =>
         sender.Send(new SetLocationTagsCommand(id, request.Revision, request.Tags), cancellationToken);
+
+    [HttpPost("{id:guid}/images")]
+    [RequestSizeLimit(UploadLimits.RequestBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = UploadLimits.RequestBytes)]
+    public async Task<IActionResult> AddImage(Guid id, [FromForm] AddLocationImageRequest request,
+        [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new AddLocationImageCommand(id, new ImageUpload(request.Image.OpenReadStream,
+            request.Image.FileName, request.Image.ContentType, request.Image.Length), operationKey, Request.Form.Files.Count), cancellationToken);
+        return Created($"/api/locations/{id}", result);
+    }
+
+    [HttpDelete("{id:guid}/images/{imageId:guid}")]
+    public Task<LocationResult> RemoveImage(Guid id, Guid imageId, [FromQuery] long revision, CancellationToken cancellationToken) =>
+        sender.Send(new RemoveLocationImageCommand(id, imageId, revision), cancellationToken);
+
+    [HttpPut("{id:guid}/cover")]
+    public Task<LocationResult> Cover(Guid id, SetLocationCoverRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new SetLocationCoverCommand(id, request.Revision, request.ImageId), cancellationToken);
+
+    [HttpGet("{id:guid}/images/{imageId:guid}")]
+    public async Task<IActionResult> Image(Guid id, Guid imageId, CancellationToken cancellationToken)
+    {
+        var image = await sender.Send(new GetLocationImageQuery(id, imageId, false), cancellationToken);
+        return File(image.Content, image.ContentType);
+    }
+
+    [HttpGet("{id:guid}/images/{imageId:guid}/preview")]
+    public async Task<IActionResult> Preview(Guid id, Guid imageId, CancellationToken cancellationToken)
+    {
+        var image = await sender.Send(new GetLocationImageQuery(id, imageId, true), cancellationToken);
+        return File(image.Content, image.ContentType);
+    }
 }

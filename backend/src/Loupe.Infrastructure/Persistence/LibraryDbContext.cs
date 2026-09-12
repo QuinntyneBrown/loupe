@@ -26,6 +26,7 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
     public DbSet<BackgroundOperation> BackgroundOperations => Set<BackgroundOperation>();
     public DbSet<AnalysisDispatchCursor> AnalysisDispatchCursors => Set<AnalysisDispatchCursor>();
     public DbSet<Location> Locations => Set<Location>();
+    public DbSet<LocationImage> LocationImages => Set<LocationImage>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Loupe.Domain.Users.User>().ToTable("users").HasKey(u => u.Id);
@@ -91,6 +92,12 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Location>().Property(location => location.Latitude).HasPrecision(9, 6);
         modelBuilder.Entity<Location>().Property(location => location.Longitude).HasPrecision(10, 6);
         modelBuilder.Entity<Location>().Property(location => location.Setting).HasConversion<string>().HasMaxLength(16);
+        modelBuilder.Entity<Location>().Property(location => location.ImageSetRevision).HasDefaultValue(1L);
+        modelBuilder.Entity<LocationImage>().ToTable("location_images").HasKey(image => image.Id);
+        modelBuilder.Entity<LocationImage>().HasIndex(image => new { image.LocationId, image.Position });
+        modelBuilder.Entity<LocationImage>().ComplexProperty(image => image.Exif).ToJson();
+        modelBuilder.Entity<LocationImage>().HasOne<Location>().WithMany(location => location.Images)
+            .HasForeignKey(image => new { image.LocationId, image.OwnerId }).HasPrincipalKey(location => new { location.Id, location.OwnerId }).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<LocationTag>().ToTable("location_tags").HasKey(tag => new { tag.LocationId, tag.NormalizedName });
         modelBuilder.Entity<LocationTag>().HasIndex(tag => new { tag.OwnerId, tag.NormalizedName });
         modelBuilder.Entity<LocationTag>().HasOne<Location>().WithMany(location => location.Tags)

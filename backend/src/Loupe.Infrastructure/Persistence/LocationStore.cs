@@ -14,7 +14,7 @@ public sealed class LocationStore(LibraryDbContext context, TimeProvider clock) 
     }
 
     public Task<Location?> FindOwnedAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>
-        context.Locations.AsNoTracking().Include(location => location.Tags)
+        context.Locations.AsNoTracking().Include(location => location.Tags).Include(location => location.Images)
             .SingleOrDefaultAsync(location => location.Id == id && location.OwnerId == ownerId, cancellationToken);
 
     public Task<int> CountAsync(string ownerId, CancellationToken cancellationToken) =>
@@ -26,7 +26,9 @@ public sealed class LocationStore(LibraryDbContext context, TimeProvider clock) 
         if (cursor is not null) query = query.Where(location => location.CreatedAt < cursor.CreatedAt
             || location.CreatedAt == cursor.CreatedAt && location.Id.CompareTo(cursor.Id) > 0);
         return await query.OrderByDescending(location => location.CreatedAt).ThenBy(location => location.Id).Take(count)
-            .Select(location => new LocationSummary(location.Id, location.Name, location.Locality, null, 0, "None", location.CreatedAt))
+            .Select(location => new LocationSummary(location.Id, location.Name, location.Locality,
+                location.CoverImageId == null ? null : LocationImageUrls.Preview(location.Id, location.CoverImageId.Value),
+                location.Images.Count, "None", location.CreatedAt))
             .ToListAsync(cancellationToken);
     }
 

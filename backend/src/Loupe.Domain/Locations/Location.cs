@@ -18,6 +18,9 @@ public sealed class Location
     public string? Notes { get; set; }
     public required DateTimeOffset CreatedAt { get; init; }
     public required DateTimeOffset UpdatedAt { get; set; }
+    public Guid? CoverImageId { get; set; }
+    public long ImageSetRevision { get; set; } = 1;
     public long Revision { get; set; } = 1;
     public ICollection<LocationTag> Tags { get; } = new List<LocationTag>();
+    public ICollection<LocationImage> Images { get; } = new List<LocationImage>();
 }

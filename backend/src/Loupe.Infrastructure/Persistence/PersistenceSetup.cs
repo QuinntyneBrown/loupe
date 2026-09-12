@@ -54,6 +54,7 @@ public static class PersistenceSetup
         services.AddScoped<Loupe.Application.ReferenceDrafts.IReferenceDraftStore, ReferenceDraftStore>();
         services.AddScoped<IReferenceTagStore, ReferenceTagStore>();
         services.AddScoped<ILocationStore, LocationStore>();
+        services.AddScoped<ILocationImageStore, LocationImageStore>();
         services.AddScoped<IBoardStore, BoardStore>();
         services.AddScoped<IReferenceImportStore, ReferenceImportStore>();
         services.AddSingleton<IReferenceImportConfiguration, ReferenceImportConfiguration>();

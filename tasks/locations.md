@@ -16,7 +16,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] A1b Validate location details at their limits (L2-055.3, .7)
 - [x] A2 Edit details, brief, notes, and tags with revision protection (L2-055.2, .4, .5, .6)
 - [x] A3 List owned locations with cursor paging (L2-057.1, .4)
-- [ ] A4 Add, remove, and choose the cover of location images (L2-056.1–.8)
+- [x] A4 Add, remove, and choose the cover of location images (L2-056.1–.8)
 - [ ] A5 Delete a location and complete its cleanup (L2-057.6, .7; L2-031.5, .7; L2-032.2)
 - [ ] A6a Browse the Locations area (L2-057.1, .4; L2-043.1, .2, .5; L2-044.1; L2-045.1, .6)
 - [ ] A6b Add a location from the grid (L2-055.1, .3, .8; L2-043.7; L2-044.6; L2-045.2)
@@ -161,4 +161,49 @@ recorded only when actually executed.
 - Non-claims: `coverPreviewUrl` and `imageCount` are constants until images exist
   (A4 replaces them with the cover image's preview and the real count); the grid,
   placeholder, empty state and failure recovery are A6a.
+
+### A4 — Add, remove, and choose the cover of location images (L2-056.1, .2, .3, .5, .6, .7, .8)
+
+- Tests: `backend/tests/Loupe.Api.Tests/Locations/LocationImagesTests.cs` (7 cases)
+  with `LocationFixture` (create, `SubmitImageAsync`, `AddImageAsync`): PNG, JPEG,
+  WebP, HEIC and an orientation-6 JPEG become five images in upload order with
+  positions 1–5, the first as cover, full PNG and JPEG preview at the oriented
+  size (10×20 for the rotated file) after an API restart, and the grid card shows
+  `imageCount` 5 with the cover's preview URL; the eleventh upload → 400 naming
+  `images` with the media folder unchanged and ten images kept; a replayed
+  `Idempotency-Key` adds nothing, an undecodable file → 415 with no new bytes and
+  the later upload still succeeds; removing the middle of three keeps `[a, c]` at
+  positions 1–2 with the cover on `a`, the removed URL → 404, removing the cover
+  moves it to `c`, the card follows, and the cleanup worker deletes four files while
+  `c` stays readable; a chosen cover survives a restart with the order unchanged
+  and a stale revision → 409; a stranger's upload, cover, remove, image and preview
+  reads → 404, an unknown location or image id → 404, no file written and the
+  record identical; GPS, serial and owner EXIF are absent from the response and
+  from both retained copies, while typed coordinates stay exact and untyped ones
+  stay absent.
+- RED: `-Filter 'FullyQualifiedName~LocationImagesTests'` → `Failed: 7, Passed: 0`
+  — `POST /api/locations/{id}/images` returned 404 `request_failed`. A second
+  RED after wiring (`unexpected_failure` 500) was diagnosed as EF treating the
+  client-keyed `LocationImage` reached through the navigation as an existing row
+  (`Modified`, 0 rows affected); fixed by adding the entity explicitly.
+- Built: `LocationImage` (`location_images`, position index, JSON `Exif`),
+  `Location.CoverImageId`/`ImageSetRevision` (migration `LocationImages`),
+  `ILocationImageStore`/`LocationImageStore` (row lock `FOR UPDATE`, cap re-check,
+  next position, first-is-cover, position renumbering and cover hand-off on
+  remove, `journal.deletions` row `location-image` with both keys, `Revision` and
+  `ImageSetRevision` bumps), `AddLocationImageCommand[Handler]` (single file,
+  key, ownership and cap before reading bytes, receipt type `location-image`,
+  staged keys deleted on refusal), `RemoveLocationImageCommand[Handler]`,
+  `SetLocationCoverCommand[Handler]`, `GetLocationImageQuery[Handler]`,
+  `LocationImageLimit`, `LocationImageUrls`; `LocationResult.images/coverImageId`
+  and `LocationSummary.coverPreviewUrl/imageCount` from real data; routes
+  `POST {id}/images`, `DELETE {id}/images/{imageId}?revision`, `PUT {id}/cover`,
+  `GET {id}/images/{imageId}[/preview]`; `AbandonedMediaCleaner` and
+  `DeletedContentCleaner` treat `location_images` keys as live.
+- GREEN: same filter → `Passed: 7`. Band
+  `Locations|Search|AbandonedMedia|Cleanup|DeleteReference|DeletePhotograph` →
+  `Passed: 114`. `dotnet build` clean; `dotnet format` applied to two new files,
+  then clean under `Locations`.
+- Non-claims: the L2-056.5 report-outdating half and L2-056.7's deleted-location
+  case land with B3 and A5; criteria .3 (per-file queue UI), .4 and .9 are A8.
 
