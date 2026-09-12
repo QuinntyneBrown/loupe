@@ -17,6 +17,19 @@ public sealed class LocationStore(LibraryDbContext context, TimeProvider clock) 
         context.Locations.AsNoTracking().Include(location => location.Tags)
             .SingleOrDefaultAsync(location => location.Id == id && location.OwnerId == ownerId, cancellationToken);
 
+    public Task<int> CountAsync(string ownerId, CancellationToken cancellationToken) =>
+        context.Locations.CountAsync(location => location.OwnerId == ownerId, cancellationToken);
+
+    public async Task<IReadOnlyList<LocationSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, CancellationToken cancellationToken)
+    {
+        var query = context.Locations.AsNoTracking().Where(location => location.OwnerId == ownerId);
+        if (cursor is not null) query = query.Where(location => location.CreatedAt < cursor.CreatedAt
+            || location.CreatedAt == cursor.CreatedAt && location.Id.CompareTo(cursor.Id) > 0);
+        return await query.OrderByDescending(location => location.CreatedAt).ThenBy(location => location.Id).Take(count)
+            .Select(location => new LocationSummary(location.Id, location.Name, location.Locality, null, 0, "None", location.CreatedAt))
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<Location> UpdateAsync(Guid id, string ownerId, long revision, LocationDetails details, CancellationToken cancellationToken) =>
         EditAsync(id, ownerId, revision, location =>
         {

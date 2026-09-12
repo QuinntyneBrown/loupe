@@ -15,7 +15,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] A1a Create a location and read it back (L2-055.1)
 - [x] A1b Validate location details at their limits (L2-055.3, .7)
 - [x] A2 Edit details, brief, notes, and tags with revision protection (L2-055.2, .4, .5, .6)
-- [ ] A3 List owned locations with cursor paging (L2-057.1, .4)
+- [x] A3 List owned locations with cursor paging (L2-057.1, .4)
 - [ ] A4 Add, remove, and choose the cover of location images (L2-056.1–.8)
 - [ ] A5 Delete a location and complete its cleanup (L2-057.6, .7; L2-031.5, .7; L2-032.2)
 - [ ] A6a Browse the Locations area (L2-057.1, .4; L2-043.1, .2, .5; L2-044.1; L2-045.1, .6)
@@ -136,4 +136,29 @@ recorded only when actually executed.
 - Non-claims: L2-055.4's images, cover, report and report status are proven
   unchanged once they exist (A4, B3); L2-055.5 (brief edit keeps the report current
   and offers Regenerate) lands with B3; the UI halves of .2/.4/.6 land in A7.
+
+### A3 — List owned locations with cursor paging (L2-057.1, .4 — API half)
+
+- Test: `backend/tests/Loupe.Api.Tests/Locations/BrowseLocationsTests.cs` (6 cases):
+  25 owned locations plus a stranger's location, a reference and a photograph →
+  `GET /api/locations?pageSize=10` walks three pages (10/10/5, `nextCursor` null on
+  the last) in creation-date-descending then id order with every location once,
+  `totalCount` 25, each item carrying name, locality-or-null, `coverPreviewUrl`
+  null, `imageCount` 0 and `reportStatus` `None`; the default page is 24;
+  `/api/photographs` and `/api/references` still hold one item each and the
+  stranger sees only theirs; an empty library is a 200 empty page with
+  `totalCount` 0; `pageSize=0`/`101`/`cursor=invalid` → 400 naming the field; a
+  cursor replayed with another page size or by another owner → 400 `cursor`.
+- RED: `-Filter 'FullyQualifiedName~BrowseLocationsTests'` → `Failed: 6, Passed: 0`
+  — `GET /api/locations` returned `MethodNotAllowed`.
+- Built: `LocationSummary`, `LocationPage`, `ListLocationsQuery[Handler]`
+  (1–100 page size, scope-bound cursor), `LocationListCursor` (owner + page size
+  scope over `CreatedCursor`), `ILocationStore.ListAsync/CountAsync` in
+  `LocationStore` (keyset paging on `(CreatedAt desc, Id)`), `GET /api/locations`
+  with `pageSize` (default 24) and `cursor`.
+- GREEN: band `-Filter 'FullyQualifiedName~Locations|FullyQualifiedName~Search'` →
+  `Passed: 89`. `dotnet build` clean; `dotnet format` reports nothing under `Locations`.
+- Non-claims: `coverPreviewUrl` and `imageCount` are constants until images exist
+  (A4 replaces them with the cover image's preview and the real count); the grid,
+  placeholder, empty state and failure recovery are A6a.
 

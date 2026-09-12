@@ -20,6 +20,10 @@ public sealed class LocationsController(ISender sender) : ControllerBase
         return Created($"/api/locations/{result.Id}", result);
     }
 
+    [HttpGet]
+    public Task<LocationPage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null) =>
+        sender.Send(new ListLocationsQuery(pageSize, cursor), cancellationToken);
+
     [HttpGet("{id:guid}")]
     public Task<LocationResult> Get(Guid id, CancellationToken cancellationToken) => sender.Send(new GetLocationQuery(id), cancellationToken);
 
