@@ -88,7 +88,7 @@
     bottom: 0;
     z-index: var(--lp-z-topbar);
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 0;
     height: calc(var(--lp-tabbar-height) + env(safe-area-inset-bottom));
     padding: 0 var(--lp-space-2) env(safe-area-inset-bottom);

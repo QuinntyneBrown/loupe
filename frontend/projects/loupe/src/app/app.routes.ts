@@ -20,6 +20,13 @@ import { ComparePage } from './pages/compare/compare-page';
 
 export const routes: Routes = [
   {
+    path: 'locations',
+    loadComponent: () =>
+      import('./pages/locations/locations-page').then((module) => module.LocationsPage),
+    canActivate: [sessionGuard],
+    title: 'Locations \u00b7 Loupe',
+  },
+  {
     path: 'search',
     loadComponent: () => import('./pages/search/search-page').then((module) => module.SearchPage),
     canActivate: [sessionGuard],

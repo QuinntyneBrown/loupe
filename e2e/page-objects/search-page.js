@@ -15,8 +15,14 @@ export class SearchPage {
       .click();
   }
   async expectNavigation(area) {
-    await expect(this.navigation().getByRole("link")).toHaveCount(4);
-    for (const name of ["My Work", "Inspiration", "Photographers", "Search"]) {
+    await expect(this.navigation().getByRole("link")).toHaveCount(5);
+    for (const name of [
+      "My Work",
+      "Inspiration",
+      "Photographers",
+      "Locations",
+      "Search",
+    ]) {
       const link = this.navigation().getByRole("link", { name, exact: true });
       await expect(link).toBeInViewport();
       if (area === name)

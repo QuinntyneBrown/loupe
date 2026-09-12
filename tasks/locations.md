@@ -18,7 +18,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] A3 List owned locations with cursor paging (L2-057.1, .4)
 - [x] A4 Add, remove, and choose the cover of location images (L2-056.1–.8)
 - [x] A5 Delete a location and complete its cleanup (L2-057.6, .7; L2-031.5, .7; L2-032.2)
-- [ ] A6a Browse the Locations area (L2-057.1, .4; L2-043.1, .2, .5; L2-044.1; L2-045.1, .6)
+- [x] A6a Browse the Locations area (L2-057.1, .4; L2-043.1, .2; L2-044.1; L2-045.1, .6)
 - [ ] A6b Add a location from the grid (L2-055.1, .3, .8; L2-043.7; L2-044.6; L2-045.2)
 - [ ] A7 Inspect a location and edit its details (L2-055.2, .4, .5, .6, .8; L2-057.2, .3, .4, .6; L2-044.2)
 - [ ] A8 Manage location images in the gallery (L2-056.1–.6, .9; L2-057.2, .5)
@@ -234,4 +234,38 @@ recorded only when actually executed.
 - Non-claims: cancelling an active scouting job on deletion (L2-031.7's job
   clause) and removing the location's search vector land with B3 and C3b; the
   confirmation dialog and immediate UI revocation are A7.
+
+### A6a — Browse the Locations area (L2-057.1, .4 UI; L2-043.1, .2; L2-044.1; L2-045.1, .6)
+
+- Spec: `e2e/specs/locations.spec.js` (14 cases) with page object
+  `e2e/page-objects/locations-page.js` and fixture `e2e/fixtures/location-library.js`
+  (`window.loupeLocations`): the Library navigation has five links and Locations
+  opens by click and by URL/reload with title `Locations · Loupe`, `aria-current`
+  and the H1; 25 locations show eight tile skeletons while the list is held, then
+  `25 locations`, 24 cards in fixture order with cover or the `No images yet`
+  placeholder, name, `Richmond · 1 image · No scouting report` style meta and a
+  `Report` pill, Load more → 25 with focus on card 25 and exactly two list calls;
+  a failed first load shows the alert with Try again and recovers, a failed Load
+  more keeps the 24 cards, an emptied library shows the empty state with two Add
+  location controls and passes axe; a failed empty library recovers with focus on
+  the empty heading; grid columns 1/2/3/4/5 at 575/576/767/768/991/992/1199/1200;
+  axe A/AA and ≥ 24 px targets at 320 and 1440.
+- RED: `cd e2e && npx playwright test specs/locations.spec.js` → 14 failed —
+  `NG04002: Cannot match any routes. URL Segment: 'locations'` and the navigation
+  had 4 links. Two later failures were the spec's own (the mock session is
+  in-memory, so a reload needs the sign-in step other specs use); fixed in the
+  page object's `reload()`.
+- Built: `api` `location-result.ts` shapes, `ILocationService.list` +
+  `LOCATION_SERVICE`, `LocationService`; `components` `LocationCard` (cover or
+  placeholder, status pill, meta line); `domain` `LocationCollection` (skeletons,
+  paging, refresh, retry focus, empty and failed states, `--lp-image-columns`
+  grid); `loupe` `LocationsPage`, route `locations`, fifth nav link with `i-pin`
+  sprite, tab bar `repeat(5, 1fr)`, `.lp-status--outdated`; `MockLocationService`
+  and both `app.providers.ts`; `search-page.js` expects five links.
+- GREEN: `specs/locations.spec.js` → 14 passed; band `locations`,
+  `search-navigation`, `sign-in`, `photographers` → 36 passed; `npm run build`
+  clean apart from the pre-existing 500 kB budget warning; prettier applied to the
+  three touched templates.
+- Non-claims: the Add location dialog (L2-043.5/.7, L2-055.8) is A6b; the grid's
+  Delete action and the detail page are A7.
 

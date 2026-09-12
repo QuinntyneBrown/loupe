@@ -28,7 +28,7 @@ export class App {
           path === '/search' &&
           this.router.currentNavigation()?.extras.state?.['focusSearch'] === true;
         this.currentArea.set(
-          ['inspiration', 'photographers', 'search'].find(
+          ['inspiration', 'photographers', 'locations', 'search'].find(
             (area) => path === '/' + area || path.startsWith('/' + area + '/'),
           ) ?? 'my-work',
         );

@@ -743,6 +743,9 @@ body:has(dialog[open]) {
 .lp-status--failed {
   color: var(--lp-color-danger);
 }
+.lp-status--outdated {
+  color: var(--lp-color-warning);
+}
 .lp-status--on-image {
   position: absolute;
   top: var(--lp-space-2);

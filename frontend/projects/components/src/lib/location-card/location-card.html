@@ -1,0 +1,35 @@
+<article
+  class="lp-tile"
+  [class.lp-tile--placeholder]="!coverPreviewUrl() || coverPreviewUrl() === failedImage()"
+>
+  @if (coverPreviewUrl() && coverPreviewUrl() !== failedImage()) {
+    <img
+      [src]="coverPreviewUrl()"
+      [alt]="name()"
+      loading="lazy"
+      decoding="async"
+      (error)="failedImage.set(coverPreviewUrl())"
+    />
+  } @else {
+    <div class="lp-tile__placeholder" role="img" aria-label="No images yet">
+      <svg class="lp-icon" aria-hidden="true"><use href="#i-pin" /></svg>
+    </div>
+  }
+  <a
+    #link
+    class="lp-tile__link"
+    [routerLink]="destination()"
+    [attr.aria-label]="'Open ' + name()"
+  ></a>
+  @if (status(); as status) {
+    <span
+      class="lp-status lp-status--on-image"
+      [class]="'lp-status lp-status--on-image ' + status.modifier"
+      >{{ status.label }}</span
+    >
+  }
+  <div class="lp-tile__scrim">
+    <h2 class="lp-tile__title">{{ name() }}</h2>
+    <div class="lp-tile__meta">{{ meta() }}</div>
+  </div>
+</article>

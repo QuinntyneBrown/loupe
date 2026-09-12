@@ -63,3 +63,6 @@ export * from './lib/search/search-tag-facet';
 export * from './lib/search/search-result';
 export * from './lib/search/search.service.contract';
 export * from './lib/search/search.service';
+export * from './lib/location/location-result';
+export * from './lib/location/location.service.contract';
+export * from './lib/location/location.service';
