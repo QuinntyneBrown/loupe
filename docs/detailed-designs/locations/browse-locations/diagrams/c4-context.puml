@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Browse, inspect, and delete locations
+Person(owner, "Library owner", "Browses saved locations, opens one, and deletes what is no longer needed")
+System(loupe, "Loupe", "Browse, inspect, and delete locations")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

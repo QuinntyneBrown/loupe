@@ -1,0 +1,57 @@
+@startuml
+title Regenerate a scouting report
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "ScoutingReportPanel" as page
+participant "ScoutingReportService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "ScoutingReportsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "RequestScoutingReportCommandHandler" as handler
+participant "RunScoutingReportCommandHandler" as run
+participant "Location" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "Durable work runner" as worker
+end box
+note over page : An image was added: report labeled Outdated with the image count and timestamp it used; still readable; still used by search
+actor -> page : Regenerate
+page -> client : revision, regenerate = true, operationKey
+client -> controller : POST /api/locations/{id}/scouting-report
+controller -> handler : MediatR dispatch RequestScoutingReportCommand
+handler -> db : AdmitAsync with Regenerate: new LocationScouting job over the current image set and brief snapshot
+db --> handler : 202 operation; second request while active returns this job
+handler --> controller : Typed result
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Previous report stays visible; Regenerating shown
+worker -> run : Claim and generate (produce-scouting-report)
+alt validated report
+run -> db : PublishAsync: FOR UPDATE; CurrentScoutingOperationId and ImageSetRevision still match
+db --> run : New report, timestamp, mode, model, brief snapshot, and image-set revision become current together; notes unchanged
+else provider failure or invalid output after retries
+run -> db : Failed with safe reason; previous report untouched
+end
+page -> client : Poll every second while active
+client -> controller : GET /api/locations/{id}/scouting-report
+controller --> client : Current report: replaced, or previous with Failed status and Retry
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Produce and ground a scouting report
+Person(owner, "Library owner", "Reads what a scouted place suits, when, and for how many people")
+System(loupe, "Loupe", "Produce and ground a scouting report")
+System_Ext(external, "Configured external services", "Azure OpenAI responses endpoint used by this slice")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+Rel(loupe, external, "Sends only current images, brief, and allowlisted EXIF through a bounded server adapter", "HTTPS")
+@enduml

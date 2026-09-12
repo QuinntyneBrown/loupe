@@ -10,7 +10,7 @@ The HTML mockups provide visual references. Photograph-upload navigation uses th
 
 This slice composes existing vertical API contracts through application routing and presentational controls. Its layout and focus behavior run in the frontend; no layout or navigation API is introduced.
 
-`LibraryShell` owns routes, page titles, active navigation, and the compact menu. Each owned detail supports direct navigation and reload. `UnknownRoutePage` offers return to library. `LibraryStatePanel` is presentational: its inputs distinguish initial loading, successful empty, populated, and failed states without injecting application services. My Work offers Upload photograph; Inspiration Save reference; Photographers Add photographer; Search explains query/filter entry.
+`LibraryShell` owns routes, page titles, active navigation, and the compact menu. Each owned detail supports direct navigation and reload. `UnknownRoutePage` offers return to library. `LibraryStatePanel` is presentational: its inputs distinguish initial loading, successful empty, populated, and failed states without injecting application services. My Work offers Upload photograph; Inspiration Save reference; Photographers Add photographer; Search explains query/filter entry. Locations is the fifth main area; its empty state offers Add location ([browse-locations](../../locations/browse-locations/README.md)).
 
 Each feature adapter retains loaded content during retryable failures and preserves route filters on retry. Submitting marks only the relevant action pending and reuses the operation key on accidental duplicate activation. Unrelated navigation remains usable. Editors expose Save and acknowledgment-driven saved state.
 
@@ -38,7 +38,7 @@ The table preserves source wording verbatim, including its use of “must”. Qu
 
 | L2 ID | Refines (L1) | Requirement |
 | --- | --- | --- |
-| `L2-043` | `L1-011` | The application must expose My Work, Inspiration, Photographers, and Search with directly addressable owned detail screens. Primary actions must be visible and named for their effect. Every data-driven view must distinguish initial loading, successful empty data, populated data, and failure. Editors must use explicit Save, and navigation away from unsaved edits must offer Keep editing or Discard. |
+| `L2-043` | `L1-011` | The application must expose My Work, Inspiration, Photographers, Search, and Locations with directly addressable owned detail screens. Primary actions must be visible and named for their effect. Every data-driven view must distinguish initial loading, successful empty data, populated data, and failure. Editors must use explicit Save, and navigation away from unsaved edits must offer Keep editing or Discard. (Updated 2026-09-12: Locations added as a fifth main area.) |
 
 Acceptance criteria: [L2-043](../../../specs/L2.md#l2-043-provide-clear-navigation-and-recoverable-states).
 

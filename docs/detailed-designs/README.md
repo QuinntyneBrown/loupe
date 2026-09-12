@@ -2,9 +2,9 @@
 
 ## Overview
 
-Loupe supports private photography practice and a searchable inspiration library. This design tree covers every defined requirement in `docs/specs/L2.md`: **L2-001 through L2-052**, refining L1-001 through L1-013. Every defined L2 statement has a feature page, its exact source wording, and an L1 parent link.
+Loupe supports private photography practice and a searchable inspiration library. This design tree covers **L2-001 through L2-052 and L2-055 through L2-062** in `docs/specs/L2.md`, refining L1-001 through L1-016. Each covered L2 statement has a feature page, its exact source wording, and an L1 parent link. `L2-053` and `L2-054` (photograph detail mock fidelity and evidence loupes) have no feature page yet; `docs/mocks/critique.html` and the photograph-detail acceptance tests fix their behavior.
 
-The repository currently contains requirements and illustrative HTML mockups, not an Angular or .NET implementation. Names and contracts in these designs are proposed. The thirteen subsystem names follow capability groupings in the flat specifications: My Work, critique, inspiration, metadata, boards, photographers, search, persistence, processing, security, experience, operations, and design system.
+The repository implements the My Work, critique, inspiration, metadata, boards, photographers, and keyword-search slices in Angular and .NET; semantic search, Locations, scouting reports, and shoot planning remain proposed. Implemented slices are described by their real names; proposed slices follow the same conventions. The sixteen subsystem names follow capability groupings in the flat specifications: My Work, critique, inspiration, metadata, boards, photographers, search, persistence, processing, security, experience, operations, design system, locations, scouting, and shoot planning.
 
 ## Description
 
@@ -34,13 +34,15 @@ Application validators trim input, normalize line endings to LF, and count Unico
 
 **Shared consistency contracts.** Owner-scoped keys and foreign-key checks prevent cross-owner relationships. Photograph and reference records are distinct. A reference has zero or one photographer link, independent textual attribution, and zero or more board memberships. Board deletion removes memberships only. Notes never belong to an AI write set.
 
+**Locations contracts.** A location is a distinct owned record with zero to ten images, a cover, an `ImageSetRevision`, and at most one current scouting report. Address and coordinates are typed by the owner, never derived from image metadata, and never leave the server; no geocoding, mapping, or sun-position service exists. The scouting report is one `LocationScouting` operation over the current image set and brief snapshot; changing the image set marks the report Outdated by revision comparison without removing it. Locations never enter the inspiration search; Find a location is their own query.
+
 `ILibraryStore` denotes feature-specific queries and transactional write operations implemented by Infrastructure, not an unrestricted table gateway. `ICurrentOwner` supplies caller identity; workers use the admitted owner's immutable context. Expected versions protect manual edits. Image and source revisions protect derived output. A transactional outbox stores work intent alongside source changes, so a process restart does not lose acknowledged work. Leases and conditional publication tolerate duplicate delivery without duplicate current output. The [processing designs](processing/track-and-retry-work/README.md) define five states, five-second status visibility, 60-second lease expiry, 120-second provider timeout, and bounded retries. Keys persist 24 hours. Admission permits five requested jobs per owner, two simultaneous provider calls per owner, and four deployment-wide; maintenance bypasses only the requested-job admission cap.
 
 Image writes stage immutable validated objects before committing record pointers. Failed staging exposes no saved item; failed database commit leaves cleanup candidates. Replacements switch pointers atomically and retire old objects only after commit. Semantic writes stage vectors and publish a matching source revision only if the target remains current. Authoritative state gates all search rows and counts. The [deletion design](persistence/delete-content/README.md) revokes access on acknowledgment, completes healthy cleanup within 24 hours, retains deletion records 35 days, and expires backups by day 30. Restore replays deletions before readiness.
 
 **Implementation sequence.** Each feature's source acceptance criteria supply its Given-When-Then slices. Implementation first writes and runs the corresponding failing acceptance test, then adds only production behavior required for that slice. Refactoring and relevant regression checks finish before the next slice. Backend tests use API integration boundaries. Frontend tests live under `e2e/specs` and call screen page objects under `e2e/page-objects`; selectors stay in the page objects. Angular composition binds mocks so frontend acceptance tests never reach real adapters. Controlled provider and clock fixtures establish deterministic behavior; recorded real-provider evaluations establish integration and content quality. No application implementation or behavioral test execution is claimed by these design artifacts.
 
-Implementation follows the source acceptance-delivery order: first an accessible primitive in the independent design system; then identity/private library and durable upload; critique and comparison; reference import; metadata review; boards; photographers; keyword search; semantic indexing and retrieval; complete deletion/restore; release evaluations. Security, accessibility, persistence, and deletion apply from each feature's first relevant increment. Each acceptance file identifies L2 coverage and each test its criterion. Tests do not parse specifications for traceability.
+Implementation follows the source acceptance-delivery order: first an accessible primitive in the independent design system; then identity/private library and durable upload; critique and comparison; reference import; metadata review; boards; photographers; keyword search; semantic indexing and retrieval; complete deletion/restore; release evaluations; then locations and their images, scouting reports, and shoot-planning search. Security, accessibility, persistence, and deletion apply from each feature's first relevant increment. Each acceptance file identifies L2 coverage and each test its criterion. Tests do not parse specifications for traceability.
 
 ## Requirements
 
@@ -80,6 +82,12 @@ Feature pages quote L2 statements exactly and pair each with its L1 parent. Sour
 | operations | [Diagnose failures and restore the private library](operations/restore-library/README.md) | `L2-049` |
 | operations | [Configure, verify, and release Loupe reproducibly](operations/configure-and-release/README.md) | `L2-050` |
 | design-system | [Publish the visual reference and apply its tokens](design-system/publish-visual-reference/README.md) | `L2-051`, `L2-052` |
+| locations | [Save a location and edit its details](locations/save-location/README.md) | `L2-055` |
+| locations | [Upload and manage a location's images](locations/manage-location-images/README.md) | `L2-056` |
+| locations | [Browse, inspect, and delete locations](locations/browse-locations/README.md) | `L2-057` |
+| scouting | [Produce and ground a scouting report](scouting/produce-scouting-report/README.md) | `L2-058`, `L2-059` |
+| scouting | [Request, regenerate, and outdate a scouting report](scouting/request-scouting-report/README.md) | `L2-060` |
+| shoot-planning | [Find a location for a shoot](shoot-planning/find-location/README.md) | `L2-061`, `L2-062` |
 
 The following deployment and release inputs remain `<TO SUPPLY>`. They are implementation selections or evidence, not missing product requirements.
 
@@ -91,6 +99,7 @@ The following deployment and release inputs remain `<TO SUPPLY>`. They are imple
 | Licensed evaluation assets, frozen semantic corpus, relevance labels, and named reviewers | Fixed numeric release quality gates; no unexecuted check is reported as passing |
 | Approved token values, visual baselines, exact browser/package versions, and deployment commands | Independent design-system implementation and reproducible release manifest |
 | Backup, independent deletion ledger, telemetry/alert sink, and quota-store adapters | Cross-instance and restore acceptance budgets remain binding |
+| Eight licensed or synthetic scouting fixture sets, the frozen 30-location shoot-planning corpus, its relevance labels, and named reviewers | Fixed numeric release gates for L2-059 and L2-061; no unexecuted check is reported as passing |
 
 The design follows primary references for [WCAG 2.2](https://www.w3.org/TR/WCAG22/), [outbound destination protection](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html), and [ASP.NET Core antiforgery](https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery). Loupe's numeric limits come from its own L2 specification.
 

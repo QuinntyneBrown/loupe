@@ -16,6 +16,7 @@ const AREAS = [
   { title: 'Inspiration', blurb: 'Save references from a link or an upload, review AI tags, keep them on boards.', pages: ['inspiration.html', 'reference.html'] },
   { title: 'Photographers', blurb: 'Bookmark portfolios, keep notes, and link references to the people who made them.', pages: ['photographers.html', 'photographer.html'] },
   { title: 'Search', blurb: 'Describe what you want in plain language and combine it with type, board, and tag filters.', pages: ['search.html'] },
+  { title: 'Locations', blurb: 'Save the places you scout with a few photographs, get an AI scouting report grounded in them, and find one for a shoot.', pages: ['locations.html', 'location.html', 'find-location.html'] },
   { title: 'Account', blurb: 'Sign in, and see what the AI integration is doing.', pages: ['sign-in.html', 'settings.html'] },
   { title: 'System', blurb: 'Pages for a dead link and a recoverable failure.', pages: ['not-found.html', 'error.html'] },
   { title: 'Reference', blurb: 'Every reusable piece, grouped by the Angular library that will own it.', pages: ['components.html'] },
@@ -36,6 +37,14 @@ const FLOWS = [
     ['critique.html#dialog=compare-pick', 'Pick a later attempt'],
     ['compare.html', 'Compare the two'],
   ] },
+  { title: 'Scout, report, find', steps: [
+    ['locations.html#dialog=add-location:form', 'Save a location'],
+    ['location.html?state=no-images', 'Open it, still empty'],
+    ['location.html#dialog=add-images:progress', 'Add images, one upload each'],
+    ['location.html?state=scouting', 'Wait for the scouting report'],
+    ['location.html', 'Read the report'],
+    ['find-location.html?state=results', 'Find it for a shoot'],
+  ] },
 ];
 
 const GRAMMAR = [
@@ -55,6 +64,8 @@ const OMITTED = [
   'Social features, public profiles, sharing, payments, and full-site crawling, as the brief defers them.',
   'A deleted-board filter chip in search results (L2-019). The filters dialog already explains the board/photographer exclusion; the rarer stale-URL case is a build-time concern, not a screen of its own.',
   'A mid-comparison deletion state in Compare (L2-005). One attempt disappearing while the screen is open is a real-time edge case, not a distinct static illustration.',
+  'Maps, geocoding, a coordinate picker, distance filters, sun or weather data, and permit lookups. Address and coordinates are typed in by the user and stay private, as the L1 exclusions say.',
+  'Image reordering on a location. Images keep upload order; the cover is chosen, not dragged (L2-056).',
 ];
 
 const attrAll = (html, name) => [...html.matchAll(new RegExp(`${name}="([^"]*)"`, 'g'))].map((m) => m[1]);

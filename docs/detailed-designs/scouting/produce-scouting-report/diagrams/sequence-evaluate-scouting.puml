@@ -1,0 +1,44 @@
+@startuml
+title Evaluate scouting report quality
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Named release reviewer" as reviewer
+box "Backend - Loupe Evaluation application" #D1FADF
+participant "ScoutingEvaluationRunner" as runner
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "EvaluateScoutingCommand handler" as handler
+participant "ScoutingReportValidator" as validator
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+participant "IScoutingProvider adapter" as ext
+database "Evaluation record" as record
+end box
+reviewer -> runner : Run release evaluation with the production model and prompt version
+runner -> handler : EvaluateScoutingCommand(fixture manifest, identity, reviewer)
+handler -> record : Load eight fixtures of two to five images with acceptable observations and prohibited claims fixed before use
+loop each fixture, three runs
+handler -> ext : GenerateAsync(fixture ScoutingInput, identity)
+ext --> handler : ScoutingReport
+handler -> validator : Contract check
+validator --> handler : Valid or invalid
+handler -> handler : Scan every reason for prohibited claims; check fixture-specific evidence and actionability
+handler -> record : Store output, configuration, and per-check result
+end
+handler -> handler : Gate: 24 of 24 valid with no prohibited claim; at least 22 pass every fixture check
+handler --> runner : Pass or fail with reasons
+runner --> reviewer : Recorded verdict with named-reviewer reasons; a failed gate blocks release until the changed configuration passes
+@enduml

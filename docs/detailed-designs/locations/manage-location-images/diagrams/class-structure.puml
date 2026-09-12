@@ -1,0 +1,113 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Upload and manage a location's images
+class Location {
+  +Id: Guid
+  +OwnerId: string
+  +CoverImageId: Guid?
+  +ImageSetRevision: long
+  +Revision: long
+  +Images: ICollection<LocationImage>
+}
+class LocationImage {
+  +Id: Guid
+  +LocationId: Guid
+  +OwnerId: string
+  +Position: int
+  +ImageKey: string
+  +PreviewKey: string
+  +Width: int
+  +Height: int
+  +Exif: CaptureMetadata
+  +CreatedAt: DateTimeOffset
+}
+Location "1" *-- "0..10" LocationImage : owns in upload order
+interface ILocationImageStore {
+  +AddAsync(locationId: Guid, ownerId: string, image: ProcessedImage, ct: CancellationToken): Task<LocationImage>
+  +RemoveAsync(locationId: Guid, imageId: Guid, ownerId: string, revision: long, ct: CancellationToken): Task<Location>
+  +SetCoverAsync(locationId: Guid, imageId: Guid, ownerId: string, revision: long, ct: CancellationToken): Task<Location>
+}
+interface IImageIngestor {
+  +Process(bytes: byte[], declaredContentType: string, ct: CancellationToken): ProcessedImage
+}
+interface IImageStore {
+  +WriteAsync(content: byte[], ct: CancellationToken): Task<string>
+  +OpenRead(key: string): Stream
+  +Delete(key: string): void
+}
+class AddLocationImageCommand {
+  +Id: Guid
+  +Image: ImageUpload
+  +OperationKey: string?
+  +FileCount: int
+}
+class AddLocationImageCommandHandler {
+  +Handle(request: AddLocationImageCommand, cancellation: CancellationToken): Task<LocationImageResult>
+}
+class RemoveLocationImageCommand {
+  +Id: Guid
+  +ImageId: Guid
+  +Revision: long
+}
+class SetLocationCoverCommand {
+  +Id: Guid
+  +ImageId: Guid
+  +Revision: long
+}
+class GetLocationImageQuery {
+  +Id: Guid
+  +ImageId: Guid
+  +Preview: bool
+}
+AddLocationImageCommandHandler ..> AddLocationImageCommand : handles
+AddLocationImageCommandHandler ..> IImageIngestor : processes after checks
+AddLocationImageCommandHandler ..> IImageStore : stages / deletes staged
+AddLocationImageCommandHandler ..> ILocationImageStore : row-locked add
+AddLocationImageCommandHandler --> Location : ownership and cap
+RemoveLocationImageCommand ..> ILocationImageStore : RemoveAsync
+SetLocationCoverCommand ..> ILocationImageStore : SetCoverAsync
+GetLocationImageQuery ..> IImageStore : OpenRead after authorization
+interface ILocationService {
+  +addImage(id: string, image: File, operationKey: string, onProgress?: (progress: UploadProgress) => void, signal?: AbortSignal): Promise<LocationImageResult>
+  +removeImage(id: string, imageId: string, revision: number): Promise<LocationResult>
+  +setCover(id: string, imageId: string, revision: number): Promise<LocationResult>
+}
+class LocationService {
+  -http: HttpClient
+}
+LocationService ..|> ILocationService
+class LocationGallery {
+  -service: ILocationService
+  +queue: Signal<UploadItem[]>
+  +selected: Signal<string>
+  +remaining: Signal<number>
+}
+class UploadItem {
+  +file: File
+  +operationKey: string
+  +progress: UploadProgress | null
+  +failure: string | null
+  +saved: LocationImageResult | null
+}
+LocationGallery ..> ILocationService : inject token
+LocationGallery *-- UploadItem : one per chosen file
+@enduml

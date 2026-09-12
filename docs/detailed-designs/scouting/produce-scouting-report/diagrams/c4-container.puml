@@ -1,0 +1,22 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Produce and ground a scouting report
+Person(owner, "Library owner", "Uses this capability")
+System_Boundary(loupe, "Loupe") {
+Container(spa, "Loupe web", "Angular", "LocationDetailPage, ScoutingReportPanel, ScoutingReportContent")
+Container(api, "Loupe API", "ASP.NET Core", "ScoutingReportsController, OperationsController")
+Container(worker, "Loupe worker", ".NET hosted service", "AnalysisWorker leases LocationScouting work and dispatches RunScoutingReportCommand")
+ContainerDb(db, "Library store", "PostgreSQL via LibraryDbContext", "Locations, background_operations, report JSON")
+ContainerDb(media, "Image store", "FileImageStore", "Previews the provider receives")
+Container(evaluation, "Loupe Evaluation", ".NET CLI (proposed)", "Fixed fixture release evaluation")
+}
+System_Ext(external, "Configured external services", "Azure OpenAI responses endpoint")
+Rel(owner, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls via interface-bound HTTP adapter", "JSON / HTTPS")
+Rel(api, db, "Reads report and operation state", "Infrastructure adapter")
+Rel(worker, db, "Leases durable work and conditionally publishes", "Infrastructure adapter")
+Rel(worker, media, "Reads current previews", "IImageStore")
+Rel(worker, external, "Calls bounded adapter with images, brief, allowlisted EXIF", "HTTPS")
+Rel(evaluation, external, "Runs recorded real-provider checks", "HTTPS")
+@enduml

@@ -1,0 +1,23 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Save a location and edit its details
+Container(spa, "LocationForm / LocationTextEditor / LocationTags", "Angular domain", "Inject LOCATION_SERVICE")
+Container_Boundary(api, "Loupe API and Application") {
+Component(ctrl, "LocationsController", "API controller", "Binds, dispatches, returns")
+Component(handler, "CreateLocationCommandHandler\nUpdateLocationCommandHandler\nUpdateLocationTextCommandHandler\nSetLocationTagsCommandHandler", "Application / MediatR 12.5.0", "Validates, authorizes, coordinates slice")
+Component(validator, "LocationDetailsValidator", "Application", "Field limits, coordinate pair, setting")
+Component(entity, "Location", "Domain", "State, Revision, Tags")
+Component(store, "ILocationStore", "Application port", "Owner-scoped transactional reads and writes")
+Component(receipts, "IOperationReceiptStore", "Application port", "Idempotency-Key receipts")
+}
+ContainerDb(db, "Library store", "Infrastructure adapter", "Authoritative data")
+Rel(spa, ctrl, "Calls through ILocationService", "HTTPS")
+Rel(ctrl, handler, "Dispatches request", "MediatR")
+Rel(handler, validator, "Normalizes complete input")
+Rel(handler, entity, "Reads or applies behavior")
+Rel(handler, store, "Uses inward-defined port")
+Rel(handler, receipts, "Keys the create")
+Rel(store, db, "Implemented by Infrastructure")
+Rel(receipts, db, "Implemented by Infrastructure")
+@enduml

@@ -1,0 +1,72 @@
+@startuml
+title L2-060 - Request, regenerate, and outdate the scouting report
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "RequestScoutingReport / ScoutingReportPanel" as page
+participant "ScoutingReportService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "ScoutingReportsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "RequestScoutingReportCommandHandler" as handler
+participant "BackgroundOperation" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Request scouting report (disclosure names Azure OpenAI and what is sent)
+page -> client : revision, regenerate = false, operationKey
+client -> controller : POST /api/locations/{id}/scouting-report
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch RequestScoutingReportCommand
+handler -> handler : IScoutingConfiguration.GetIdentity()
+alt Azure OpenAI not configured
+handler --> controller : 503 integration_not_configured; nothing queued; location stays editable
+else Live identity
+handler -> db : Idempotency-Key receipt (type scouting)
+handler -> db : AdmitAsync: lock owned location; build ScoutingInput from current images, EXIF, ImageSetRevision, brief [L2-060]
+alt no images
+db --> handler : Field error images: add an image first; no provider call
+handler --> controller : 400 invalid_request
+else active job with equal input and identity
+db --> handler : Existing operation
+handler --> controller : 200 active operation
+else completed job with equal input, mode, model, prompt version and no Regenerate
+db --> handler : Succeeded operation
+handler -> db : Reuse its report as current; no new job
+handler --> controller : 200 reused operation
+else new work under the five-active cap
+handler -> entity : Insert LocationScouting Queued with InputJson; set CurrentScoutingOperationId
+handler -> db : Commit in one transaction
+db --> handler : Operation id and status location
+handler --> controller : 202 operation; no wait for AI
+end
+end
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals; Queued or Running shown; request control disabled while in flight
+page --> actor : Saved / loaded state or retained-input error
+opt Retry after a failed job
+page -> client : retry(operationId, revision, operationKey)
+client -> controller : POST /api/operations/{id}/retry
+controller -> handler : RetryCritiqueCommandHandler dispatches on OperationType = LocationScouting
+handler -> db : Same failure codes, RetryAvailableAt, revision; current ScoutingInput must equal the failed input
+db --> handler : Re-queued, 429 retry not ready, or 409 inputs changed
+handler --> controller : Typed result; earlier report stays readable
+end
+@enduml

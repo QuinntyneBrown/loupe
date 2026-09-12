@@ -1,0 +1,63 @@
+@startuml
+title L2-061 - Find locations for a shoot idea
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "FindLocationPage / LocationSearchResults" as page
+participant "LocationSearchService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "LocationSearchController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "FindLocationsQueryHandler" as handler
+participant "LocationSearchFilter / SemanticCursor" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IEmbeddingProvider / IVectorSearchReader adapters" as ext
+end box
+actor -> page : Describe the shoot in Meaning mode with shoot types, people, periods, setting, tags
+page -> page : URL holds query, mode, and filters
+page -> client : query, mode=meaning, filters, cursor?, pageSize?
+client -> controller : GET /api/locations/search
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch FindLocationsQuery
+handler -> entity : Validate: query <= 500, enum members, people 1..500, <= 10 tags [L2-061]
+alt blank query in Meaning mode
+handler --> controller : 400 field error query; no embedding generated
+else filters or enum values invalid
+handler --> controller : 400 invalid_request
+else valid
+handler -> db : Load active generation; validate cursor generation
+db --> handler : Coherent model identity or refresh-required 409
+handler -> ext : Embed nonblank query for the active generation
+ext --> handler : Query vector or service failure
+alt embedding or similarity unavailable
+handler --> controller : Meaning unavailable; offer explicit Keyword switch; no keyword matches presented as semantic
+else live compatible vectors
+handler -> ext : Rank owned current vectors; cosine >= 0.20; shoot types AND (Well suited or Workable); people within group range; periods OR Recommended; setting; tags AND; report-less locations excluded while shoot type, people, or period is set; then page
+ext --> handler : Score descending / id ascending + generation cursor
+handler -> db : Owner and deletion checks before rows and counts
+db --> handler : Verified LocationSearchItems
+handler --> controller : 200 items with cover, name, locality, Recommended periods, group range, rating per selected shoot type
+end
+end
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals only if the request identity is still current
+page --> actor : Saved / loaded state or retained-input error
+@enduml

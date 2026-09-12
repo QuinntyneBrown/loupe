@@ -1,0 +1,29 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Produce and ground a scouting report
+Container(spa, "ScoutingReportPanel / ScoutingReportContent", "Angular domain / components", "Inject SCOUTING_REPORT_SERVICE; render sections")
+Container_Boundary(api, "Loupe API and Application") {
+Component(ctrl, "ScoutingReportsController", "API controller", "Binds, dispatches, returns")
+Component(handler, "RunScoutingReportCommandHandler", "Application / MediatR 12.5.0", "Claims, generates, validates, publishes or rejects")
+Component(validator, "ScoutingReportValidator", "Application", "Sections, vocabularies, basis, citations, limits")
+Component(entity, "ScoutingInput / ScoutingReport / SavedScoutingReport", "Domain", "Snapshot, structured result, saved provenance")
+Component(work, "IScoutingWorkStore", "Application port", "Claim, renew, conditional publish, reject")
+Component(provider, "IScoutingProvider", "Application port", "GenerateAsync(ScoutingInput, AnalysisIdentity)")
+Component(config, "IScoutingConfiguration", "Application port", "Live identity or Integration not configured")
+Component(failures, "IAnalysisFailureStore", "Application port", "Bounded retry classes")
+}
+ContainerDb(db, "Library store", "Infrastructure adapter", "Authoritative data and durable work")
+Container(worker, "Loupe worker", ".NET", "Processes durable admitted work")
+Container(azure, "AzureOpenAiScoutingProvider", "Infrastructure adapter", "ScoutingPrompt, ScoutingResponseFormat, api-key, store=false")
+Rel(worker, handler, "Dispatches background command", "MediatR")
+Rel(spa, ctrl, "Reads report through IScoutingReportService", "HTTPS")
+Rel(handler, work, "Claims and publishes conditionally")
+Rel(handler, provider, "Generates from the snapshot")
+Rel(handler, config, "Resolves identity")
+Rel(handler, validator, "Validates before publish")
+Rel(handler, failures, "Records rejections")
+Rel(handler, entity, "Reads or applies behavior")
+Rel(work, db, "Implemented by Infrastructure")
+Rel(provider, azure, "Implemented by Infrastructure")
+@enduml

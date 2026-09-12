@@ -1,0 +1,147 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Request, regenerate, and outdate a scouting report
+enum OperationType {
+  Critique
+  ReferenceImport
+  ReferenceDraftImport
+  ReferenceAnalysis
+  PhotographerDraftImport
+  PhotographerSummary
+  LocationScouting
+}
+class BackgroundOperation {
+  +Id: Guid
+  +OwnerId: string
+  +ResourceId: Guid
+  +Type: OperationType
+  +Mode: ExecutionMode
+  +Model: string
+  +PromptVersion: string
+  +InputJson: string?
+  +OutputJson: string?
+  +Status: OperationStatus
+  +AttemptCount: int
+  +NextAttemptAt: DateTimeOffset?
+  +RetryAvailableAt: DateTimeOffset?
+  +FailureCode: string?
+  +Message: string
+}
+BackgroundOperation --> OperationType
+class Location {
+  +Id: Guid
+  +ImageSetRevision: long
+  +CurrentScoutingOperationId: Guid?
+  +ScoutingReportJson: string?
+  +Revision: long
+}
+class SavedScoutingReport {
+  +OperationId: Guid
+  +GeneratedAt: DateTimeOffset
+  +BriefSnapshot: string?
+  +ImageSetRevision: long
+  +ImageCount: int
+}
+Location o-- SavedScoutingReport : ScoutingReportJson
+Location --> BackgroundOperation : CurrentScoutingOperationId
+enum LocationReportStatus {
+  None
+  Queued
+  Running
+  Ready
+  Outdated
+  Failed
+}
+class LocationReportStatusReader {
+  +{static} Derive(location: Location, current: BackgroundOperation?): LocationReportStatus
+}
+LocationReportStatusReader ..> Location : compares ImageSetRevision with report
+LocationReportStatusReader --> LocationReportStatus
+interface IScoutingStore {
+  +AdmitAsync(locationId: Guid, ownerId: string, revision: long, regenerate: bool, identity: AnalysisIdentity, ct: CancellationToken): Task<Guid>
+  +FindCurrentAsync(locationId: Guid, ownerId: string, ct: CancellationToken): Task<BackgroundOperation?>
+}
+interface IScoutingConfiguration {
+  +GetIdentity(): AnalysisIdentity
+}
+interface IOperationReceiptStore {
+  +ExecuteAsync(ownerId: string, operationType: string, key: string, payloadHash: string, create: Func<CancellationToken, Task<Guid>>, ct: CancellationToken): Task<Guid>
+}
+class RequestScoutingReportCommand {
+  +LocationId: Guid
+  +Revision: long
+  +Regenerate: bool
+  +OperationKey: string?
+}
+class RequestScoutingReportCommandHandler {
+  +Handle(request: RequestScoutingReportCommand, cancellation: CancellationToken): Task<OperationResult>
+}
+class GetScoutingReportQuery {
+  +LocationId: Guid
+}
+class GetScoutingOperationQuery {
+  +LocationId: Guid
+}
+class RetryCritiqueCommand {
+  +OperationId: Guid
+  +Revision: long
+  +OperationKey: string?
+}
+class RetryCritiqueCommandHandler {
+  +Handle(request: RetryCritiqueCommand, cancellation: CancellationToken): Task<OperationResult>
+  -RetryCritique(operation: BackgroundOperation): Task<OperationResult>
+  -RetryScouting(operation: BackgroundOperation): Task<OperationResult>
+}
+RequestScoutingReportCommandHandler ..> RequestScoutingReportCommand : handles
+RequestScoutingReportCommandHandler ..> IScoutingConfiguration : identity first
+RequestScoutingReportCommandHandler ..> IOperationReceiptStore : keys request
+RequestScoutingReportCommandHandler ..> IScoutingStore : admits
+RequestScoutingReportCommandHandler --> BackgroundOperation : creates or reuses
+GetScoutingReportQuery ..> LocationReportStatusReader : status on read
+GetScoutingOperationQuery ..> IScoutingStore : FindCurrentAsync
+RetryCritiqueCommandHandler ..> RetryCritiqueCommand : handles
+RetryCritiqueCommandHandler ..> BackgroundOperation : dispatches on Type
+interface IScoutingReportService {
+  +current(locationId: string): Promise<OperationResult | null>
+  +get(locationId: string): Promise<SavedScoutingReport | null>
+  +request(locationId: string, revision: number, regenerate: boolean, operationKey: string): Promise<OperationResult>
+  +retry(operationId: string, revision: number, operationKey: string): Promise<OperationResult>
+}
+class ScoutingReportService {
+  -http: HttpClient
+}
+ScoutingReportService ..|> IScoutingReportService
+class ScoutingReportPanel {
+  -service: IScoutingReportService
+  +operation: Signal<OperationResult | null>
+  +report: Signal<SavedScoutingReport | null>
+  +active: Signal<boolean>
+  +status: Signal<LocationReportStatus>
+}
+class RequestScoutingReport {
+  -service: IScoutingReportService
+  +busy: Signal<boolean>
+  +unavailable: Signal<string | null>
+}
+ScoutingReportPanel ..> IScoutingReportService : inject token
+RequestScoutingReport ..> IScoutingReportService : inject token
+@enduml

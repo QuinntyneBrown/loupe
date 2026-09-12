@@ -9,7 +9,10 @@ results, while manual library work remains available.
 The adapter uses Azure's v1 Responses endpoint with server-side API-key
 credentials and an explicit deployment name. Stored model/version remains
 provenance; `azure-critique-v2` separates new requests from old direct-OpenAI
-completed-result reuse. Drain work before changing provider/deployment settings.
+completed-result reuse. Scouting reports use the same endpoint, credentials,
+and deployment through `AzureOpenAiScoutingProvider` with prompt version
+`location-scouting-v1` ([produce-scouting-report](../../scouting/produce-scouting-report/README.md)).
+Drain work before changing provider/deployment settings.
 No persistence migration is needed for this provider change.
 
 `ArchiveDemoCritiques` moves saved sample JSON into a private archive on its

@@ -1,0 +1,153 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Find a location for a shoot
+class FindLocationsQuery {
+  +Query: string?
+  +Mode: string
+  +ShootTypes: string[]
+  +People: int?
+  +TimesOfDay: string[]
+  +Setting: string?
+  +Tags: string[]
+  +PageSize: int
+  +Cursor: string?
+}
+class LocationSearchFilter {
+  +Tokens: string[]
+  +ShootTypes: ShootType[]
+  +People: int?
+  +TimesOfDay: TimeOfDay[]
+  +Setting: LocationSetting?
+  +Tags: string[]
+  +RequiresReport: bool
+}
+class LocationSearchCursor {
+  +{static} Scope(ownerId: string, mode: string, filter: LocationSearchFilter, pageSize: int): string
+  +{static} Encode(cursor: CreatedCursor, scope: string): string
+  +{static} Parse(value: string?, scope: string): CreatedCursor?
+}
+class SemanticCursor {
+  +GenerationId: Guid
+  +ModelIdentity: string
+  +LastScore: double
+  +LastId: Guid
+  +FilterFingerprint: string
+}
+class LocationSearchItem {
+  +Id: Guid
+  +Name: string
+  +Locality: string?
+  +CoverPreviewUrl: string?
+  +ImageCount: int
+  +HasReport: bool
+  +RecommendedPeriods: TimeOfDay[]
+  +GroupMinimum: int?
+  +GroupMaximum: int?
+  +GroupCannotAssess: bool
+  +Ratings: IReadOnlyDictionary<ShootType, SuitabilityRating>
+  +CreatedAt: DateTimeOffset
+}
+class LocationSearchPage {
+  +Items: IReadOnlyList<LocationSearchItem>
+  +NextCursor: string?
+  +TotalCount: int
+}
+LocationSearchPage "1" *-- "*" LocationSearchItem
+class FindLocationsQueryHandler {
+  +Handle(request: FindLocationsQuery, cancellation: CancellationToken): Task<LocationSearchPage>
+}
+interface ILocationSearchStore {
+  +ListAsync(ownerId: string, filter: LocationSearchFilter, count: int, cursor: CreatedCursor?, ct: CancellationToken): Task<IReadOnlyList<LocationSearchItem>>
+  +CountAsync(ownerId: string, filter: LocationSearchFilter, ct: CancellationToken): Task<int>
+}
+interface IEmbeddingProvider {
+  +Embed(text: string, model: string, ct: CancellationToken): Task<Vector>
+}
+interface IVectorSearchReader {
+  +Rank(owner: string, vector: Vector, filter: LocationSearchFilter, cursor: SemanticCursor?, ct: CancellationToken): Task<RankedPage>
+}
+interface IVectorWriter {
+  +Publish(document: SearchDocument, vector: Vector, expectedRevision: long, ct: CancellationToken): Task<bool>
+}
+FindLocationsQueryHandler ..> FindLocationsQuery : handles
+FindLocationsQueryHandler ..> LocationSearchFilter : validates into
+FindLocationsQueryHandler ..> LocationSearchCursor : keyword continuation
+FindLocationsQueryHandler ..> SemanticCursor : meaning continuation
+FindLocationsQueryHandler ..> ILocationSearchStore : keyword mode
+FindLocationsQueryHandler ..> IEmbeddingProvider : meaning mode
+FindLocationsQueryHandler ..> IVectorSearchReader : meaning mode
+class SearchDocument {
+  +OwnerId: string
+  +ItemId: Guid
+  +ItemType: string
+  +SourceRevision: long
+  +IndexedRevision: long?
+  +GenerationId: Guid?
+  +Status: string
+}
+class LocationSearchInputBuilder {
+  +{static} Build(location: Location, report: SavedScoutingReport?): string
+}
+class RefreshLocationSearchDocumentCommand {
+  +LocationId: Guid
+  +SourceRevision: long
+  +ImageSetRevision: long
+  +ReportOperationId: Guid?
+}
+class RefreshLocationSearchDocumentCommandHandler {
+  +Handle(request: RefreshLocationSearchDocumentCommand, cancellation: CancellationToken): Task<bool>
+}
+RefreshLocationSearchDocumentCommandHandler ..> RefreshLocationSearchDocumentCommand : handles
+RefreshLocationSearchDocumentCommandHandler ..> LocationSearchInputBuilder : builds text
+RefreshLocationSearchDocumentCommandHandler ..> IEmbeddingProvider : embeds
+RefreshLocationSearchDocumentCommandHandler ..> IVectorWriter : conditional publish
+RefreshLocationSearchDocumentCommandHandler --> SearchDocument : updates status
+interface ILocationSearchService {
+  +search(request: LocationSearchRequest): Promise<LocationSearchResult>
+  +tags(): Promise<SearchTagFacet[]>
+}
+class LocationSearchService {
+  -http: HttpClient
+}
+LocationSearchService ..|> ILocationSearchService
+class LocationSearchResults {
+  -service: ILocationSearchService
+  +items: Signal<LocationSearchItem[]>
+  +state: Signal<'initial' | 'results' | 'loading' | 'no-results' | 'error' | 'meaning-unavailable' | 'query-required' | 'refresh-required'>
+}
+class LocationResultCard {
+  +name: InputSignal<string>
+  +locality: InputSignal<string | null>
+  +recommendedPeriods: InputSignal<string[]>
+  +groupRange: InputSignal<string>
+  +ratings: InputSignal<Record<string, string>>
+  +hasReport: InputSignal<boolean>
+}
+LocationSearchResults ..> ILocationSearchService : inject token
+LocationSearchResults *-- LocationResultCard : renders
+' layout: stack clusters vertically to stay within the render width
+LocationSearchPage -[hidden]down-> FindLocationsQueryHandler
+ILocationSearchStore -[hidden]down-> RefreshLocationSearchDocumentCommandHandler
+IVectorSearchReader -[hidden]down-> SearchDocument
+IVectorWriter -[hidden]down-> LocationSearchResults
+RefreshLocationSearchDocumentCommandHandler -[hidden]down-> ILocationSearchService
+@enduml

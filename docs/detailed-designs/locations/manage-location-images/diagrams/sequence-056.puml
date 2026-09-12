@@ -1,0 +1,69 @@
+@startuml
+title L2-056 - Upload and manage location images
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "LocationGallery" as page
+participant "LocationService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "LocationsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "AddLocationImageCommandHandler" as handler
+participant "Location" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "IImageIngestor / IImageStore adapters" as ext
+end box
+actor -> page : Choose files
+page -> page : Reject a selection larger than the remaining capacity before any transfer
+loop one operation per accepted file, each with its own progress
+page -> client : image, Idempotency-Key, AbortSignal
+client -> controller : POST /api/locations/{id}/images (multipart, one file)
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch AddLocationImageCommand
+handler -> db : Load owned location [L2-056]
+db --> handler : Owned state or 404 item_unavailable; no file written
+alt ten images already
+handler --> controller : 400 field error images; no bytes retained
+else capacity remains
+handler -> ext : Process one file: validate, orient, strip GPS / serial / owner, preview
+alt unsupported, oversized, or corrupt
+ext --> handler : ImageValidationException
+handler --> controller : 413 / 415 / 422; row offers Remove
+else valid image
+ext --> handler : ProcessedImage
+handler -> ext : Stage original and preview objects
+handler -> db : FOR UPDATE location; re-check cap; append position; first image is cover; ImageSetRevision + 1
+db --> handler : Committed image or failure
+opt commit failed
+handler -> ext : Delete staged keys
+end
+handler --> controller : 201 LocationImageResult
+end
+end
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update this row's state signals
+end
+opt Cancel remaining
+page -> client : Abort the in-flight transfer
+note over page : Saved images stay saved; notice offers Refresh to reconcile a late server commit
+end
+page --> actor : Saved / loaded state or retained-input error
+@enduml
