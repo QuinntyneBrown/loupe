@@ -954,3 +954,33 @@ recorded only when actually executed.
   recorded as not run, never as passing (`L2-050.5`). L2-061.9 and L2-047 stay
   unticked. The same "procedure, not a pass" stance as B5.
 
+### D — Design-system examples and wrap-up (L2-051.3, L2-052.1 for Locations)
+
+- Tests: `design-system/tests/specs/locations.spec.js` (9 cases) with page
+  object `tests/page-objects/locations-page.js`: the reference navigation
+  reaches `/locations.html`; six location cards show Report ready, Outdated,
+  Queued, Scouting, Failed and the no-image placeholder with No scouting
+  report; result cards show place, Recommended periods, group range or Cannot
+  assess and the suitability pills, or the No scouting report pill; the gallery
+  radio group switches the stage by click and by ArrowRight/ArrowLeft with the
+  selection announced, and Set as cover renames the cover; the report lists the
+  six sections in order with rating and basis pills and no numeric score, and a
+  cite button selects and focuses the thumbnail; the status pills read
+  Processing report, Updating search and Search indexing failed · Retry, and
+  Retry moves to Updating search; the Meaning mode shows Matched by meaning and a
+  shoot-type chip toggles; axe A/AA clean and no request leaves 127.0.0.1;
+  eight widths assert the 1/2/3/3/4 result columns without horizontal overflow.
+- RED: `npx playwright test tests/specs/locations.spec.js` → `9 failed` (no
+  Locations link, no results list).
+- Built: `design-system/locations.html`, `src/locations.css` (tokens only),
+  `src/locations.js` (gallery, cover, cite, mode pill, chips, retry), the Vite
+  input and reference navigation link, `design-system/README.md` section;
+  `README.md` Features row for Locations; `docs/detailed-designs/README.md`
+  overview now lists Locations, scouting and shoot planning as implemented with
+  Meaning search for locations, leaving the inspiration library's Meaning search
+  proposed.
+- GREEN: full design-system suite → `79 passed`.
+- Non-claims: L2-052.1 visual review and L2-052.2 baselines are review
+  obligations, not automated here; the design-system item L2-051.3 covers every
+  area and stays a shared tick.
+

@@ -60,6 +60,7 @@ header says so).
 | **Boards and tags** | Organise a reference into any number of boards; add, edit and categorise tags; filter the collection by tag; review AI-suggested descriptions and tags before they apply. |
 | **Photographers** | Bookmark photographer portfolios, link references to them, and keep editable, grounded summaries. |
 | **Search** | Keyword search across titles, notes, tags, attribution and photographers, combined with board and tag filters, paging and navigable URL state. Meaning (semantic) search is planned on the same surface. |
+| **Locations** | Keep a private library of shoot locations with up to ten images, an address and coordinates you type yourself, a brief, notes and tags; request an AI scouting report grounded in the images (overview, suitability by shoot type, times of day, techniques, group size, cautions — each with its evidence basis and cited images); and find a location for a shoot by keyword or by meaning, with shoot-type, people, time-of-day, setting and tag filters. Meaning search embeds locally through Ollama and pgvector, so notes never leave the deployment. |
 | **Privacy and durability** | Every library is private to its owner: local accounts, Loupe-issued JWTs in secure HttpOnly cookies with server-side revocation, private media storage, revision-protected edits, idempotent uploads and an audited deletion ledger. |
 
 ## Architecture

@@ -1,0 +1,72 @@
+.locations-example [hidden] { display: none !important; }
+.locations-example section { margin-top: var(--lp-space-9); }
+.locations-example section section { margin-top: var(--lp-space-5); }
+.locations-example h3 { margin: var(--lp-zero) var(--lp-zero) var(--lp-space-2); font-size: var(--lp-text-md); }
+.locations-example .outline { background: transparent; border: var(--lp-hairline) solid var(--lp-color-border); }
+.locations-example ul { list-style: none; padding: var(--lp-zero); margin: var(--lp-zero); }
+
+/* Status pills: the same roles the application's lp-status classes use. */
+.status { display: inline-flex; align-items: center; gap: var(--lp-space-1); height: var(--lp-space-6); padding: var(--lp-zero) var(--lp-space-2); border-radius: var(--lp-radius-full); font-size: var(--lp-text-xs); font-weight: var(--lp-weight-medium); background: var(--lp-color-surface-2); color: var(--lp-color-text-2); }
+.status--ready { background: var(--lp-color-success-bg); color: var(--lp-color-success); }
+.status--queued { background: var(--lp-color-surface-2); color: var(--lp-color-text-2); }
+.status--analyzing { background: var(--lp-color-ai-bg); color: var(--lp-color-ai); }
+.status--outdated { background: var(--lp-color-warning-bg); color: var(--lp-color-warning); }
+.status--failed { background: var(--lp-color-danger-bg); color: var(--lp-color-danger); }
+.status .link { background: none; border: none; padding: var(--lp-zero); min-height: var(--lp-space-6); font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }
+.status-list li { display: inline-flex; }
+
+/* Location cards: image-led tiles on the image-grid column rule. */
+.location-grid { display: grid; grid-template-columns: repeat(var(--lp-image-columns), minmax(var(--lp-zero), 1fr)); gap: var(--lp-space-4); }
+.location-tile { position: relative; aspect-ratio: var(--lp-reference-ratio); border-radius: var(--lp-radius-sm); overflow: hidden; background: var(--lp-color-image-fallback); }
+.location-tile__cover { position: absolute; inset: var(--lp-zero); aspect-ratio: auto; border-radius: var(--lp-zero); }
+.location-tile__placeholder { position: absolute; inset: var(--lp-zero); display: grid; place-items: center; font-size: var(--lp-text-3xl); color: var(--lp-color-text-3); }
+.location-tile .status { position: absolute; top: var(--lp-space-2); left: var(--lp-space-2); z-index: 1; }
+.location-tile__link { position: absolute; inset: var(--lp-zero); border-radius: var(--lp-radius-sm); z-index: 2; }
+.location-tile__link:focus-visible { outline: var(--lp-stroke) solid var(--lp-color-focus); outline-offset: calc(-1 * var(--lp-stroke)); }
+.location-tile__scrim { position: absolute; inset: var(--lp-zero); display: flex; flex-direction: column; justify-content: flex-end; gap: var(--lp-space-1); padding: var(--lp-space-3); background: var(--lp-color-scrim); color: var(--lp-color-on-image); pointer-events: none; }
+.location-tile__scrim h3, .location-tile__scrim p { margin: var(--lp-zero); font-size: var(--lp-text-sm); color: inherit; }
+.location-tile__scrim p { font-size: var(--lp-text-xs); opacity: var(--lp-image-caption-opacity); }
+
+/* Find a location: mode control, filter chips, and result cards on the collection column rule. */
+.search-modes { display: grid; gap: var(--lp-space-4); }
+.segmented { display: inline-flex; width: fit-content; padding: var(--lp-space-1); border-radius: var(--lp-radius-md); background: var(--lp-color-bg); border: var(--lp-hairline) solid var(--lp-color-border); }
+.segmented__option { position: relative; margin: var(--lp-zero); cursor: pointer; }
+.segmented input { position: absolute; inset: var(--lp-zero); z-index: 1; opacity: var(--lp-zero); margin: var(--lp-zero); cursor: pointer; width: var(--lp-full); min-height: var(--lp-zero); }
+.segmented__label { display: inline-flex; align-items: center; height: calc(var(--lp-control-height-sm) - var(--lp-space-2)); padding: var(--lp-zero) var(--lp-space-3); border-radius: var(--lp-radius-sm); font-size: var(--lp-text-sm); font-weight: var(--lp-weight-medium); color: var(--lp-color-text-2); }
+.segmented input:checked + .segmented__label { background: var(--lp-color-surface); color: var(--lp-color-text); box-shadow: var(--lp-shadow-sm); }
+.segmented input:focus-visible + .segmented__label { outline: var(--lp-stroke) solid var(--lp-color-focus); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--lp-space-2); }
+.results-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--lp-space-3); margin: var(--lp-zero); font-size: var(--lp-text-sm); color: var(--lp-color-text-2); }
+.result-grid { display: grid; grid-template-columns: repeat(var(--lp-collection-columns), minmax(var(--lp-zero), 1fr)); gap: var(--lp-space-4); align-items: start; margin-top: var(--lp-space-5); }
+.result-card { display: grid; grid-template-columns: var(--lp-thumb-size-lg) minmax(var(--lp-zero), 1fr); gap: var(--lp-space-4); padding: var(--lp-space-4); border: var(--lp-hairline) solid var(--lp-color-border); border-radius: var(--lp-radius-lg); background: var(--lp-color-surface); }
+.result-card__cover { aspect-ratio: var(--lp-reference-ratio); }
+.result-card__body { display: grid; gap: var(--lp-space-2); align-content: start; min-width: var(--lp-zero); }
+.result-card h3 { margin: var(--lp-zero); font-size: var(--lp-text-md); overflow-wrap: anywhere; }
+.result-card__place { font-family: var(--lp-font-mono); font-size: var(--lp-text-xs); color: var(--lp-color-text-2); }
+.result-card__line { font-size: var(--lp-text-sm); color: var(--lp-color-text-2); }
+.ratings { display: flex; flex-wrap: wrap; gap: var(--lp-space-1); }
+.ratings .pill { font-size: var(--lp-text-xs); padding-block: var(--lp-zero); min-height: var(--lp-space-6); display: inline-flex; align-items: center; }
+
+/* Gallery: a contain-fit stage and radio thumbnails. */
+.gallery { display: grid; gap: var(--lp-space-4); }
+.gallery__stage { margin: var(--lp-zero); display: grid; gap: var(--lp-space-2); }
+.gallery__frame { max-height: var(--lp-stage-max-height); aspect-ratio: var(--lp-study-ratio); }
+.gallery__stage figcaption { font-size: var(--lp-text-sm); color: var(--lp-color-text-2); }
+.gallery__thumbs { display: flex; flex-wrap: wrap; gap: var(--lp-space-2); }
+.gallery__thumb { position: relative; margin: var(--lp-zero); width: var(--lp-thumb-size-lg); cursor: pointer; }
+.gallery__thumb input { position: absolute; inset: var(--lp-zero); z-index: 1; opacity: var(--lp-zero); margin: var(--lp-zero); width: var(--lp-full); min-height: var(--lp-zero); cursor: pointer; }
+.gallery__thumb .synthetic-image { display: block; border: var(--lp-stroke) solid transparent; }
+.gallery__thumb input:checked + .synthetic-image { border-color: var(--lp-color-ink); }
+.gallery__thumb input:focus-visible + .synthetic-image { outline: var(--lp-stroke) solid var(--lp-color-focus); outline-offset: var(--lp-space-1); }
+.gallery .actions { align-items: center; }
+.gallery .actions p { margin: var(--lp-zero); font-size: var(--lp-text-sm); color: var(--lp-color-text-2); }
+
+/* Scouting report: six sections, each entry with its basis and cited images. */
+.report { display: grid; gap: var(--lp-space-5); }
+.report__note { margin: var(--lp-zero); display: flex; align-items: center; flex-wrap: wrap; gap: var(--lp-space-2); font-size: var(--lp-text-sm); color: var(--lp-color-text-2); }
+.report__list { display: grid; gap: var(--lp-space-2); }
+.report__list li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--lp-space-2); padding: var(--lp-space-3); border-radius: var(--lp-radius-md); background: var(--lp-color-bg); }
+.report__text { min-width: var(--lp-zero); overflow-wrap: anywhere; }
+.report__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--lp-space-1); }
+.cite { min-height: var(--lp-space-6); min-width: var(--lp-space-6); padding: var(--lp-zero) var(--lp-space-2); border-radius: var(--lp-radius-sm); background: var(--lp-color-surface-2); color: var(--lp-color-text); font-family: var(--lp-font-mono); font-size: var(--lp-text-xs); }
+.cite:hover:not(:disabled) { background: var(--lp-color-border); }
