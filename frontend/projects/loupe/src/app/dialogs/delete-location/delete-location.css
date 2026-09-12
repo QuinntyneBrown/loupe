@@ -1,0 +1,11 @@
+[role='alert'] {
+  color: var(--lp-color-danger);
+}
+p {
+  margin: var(--lp-zero);
+}
+.lp-dialog__body {
+  display: grid;
+  gap: var(--lp-space-3);
+  justify-items: start;
+}

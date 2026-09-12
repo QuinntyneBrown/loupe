@@ -21,6 +21,7 @@ import { LocationCard } from 'components';
 })
 export class LocationCollection {
   readonly addRequested = output<void>();
+  readonly deleteRequested = output<LocationSummary>();
   private readonly service = inject(LOCATION_SERVICE);
   private readonly destroy = inject(DestroyRef);
   private readonly injector = inject(Injector);
@@ -63,6 +64,11 @@ export class LocationCollection {
   }
   focusAdd(): void {
     this.addButton().nativeElement.focus();
+  }
+  remove(id: string): void {
+    if (!this.items().some((item) => item.id === id)) return;
+    this.items.update((items) => items.filter((item) => item.id !== id));
+    this.total.update((total) => Math.max(0, (total ?? 1) - 1));
   }
   refresh(): Promise<void> {
     ++this.generation;

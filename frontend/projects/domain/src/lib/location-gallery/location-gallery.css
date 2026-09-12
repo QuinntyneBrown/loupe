@@ -1,0 +1,101 @@
+:host {
+  display: block;
+  min-width: var(--lp-zero);
+}
+.lp-gallery {
+  display: grid;
+  gap: var(--lp-space-3);
+}
+.lp-photo-stage {
+  position: relative;
+  margin: var(--lp-zero);
+  border-radius: var(--lp-radius-sm);
+  overflow: hidden;
+  background: var(--lp-color-image-fallback);
+}
+.lp-photo-stage img {
+  display: block;
+  width: var(--lp-full);
+  height: auto;
+}
+.lp-photo-stage--contain img {
+  max-height: var(--lp-stage-max-height);
+  object-fit: contain;
+}
+.lp-photo-stage--empty {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--lp-space-3);
+  aspect-ratio: var(--lp-study-ratio);
+  color: var(--lp-color-text-2);
+  text-align: center;
+  padding: var(--lp-space-6);
+}
+.lp-photo-stage--empty .lp-icon {
+  width: calc(var(--lp-icon-size) * 1.6);
+  height: calc(var(--lp-icon-size) * 1.6);
+}
+.lp-gallery__thumbs {
+  display: flex;
+  gap: var(--lp-space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: var(--lp-stroke);
+}
+.lp-gallery__thumbs::-webkit-scrollbar {
+  display: none;
+}
+.lp-gallery__thumb {
+  position: relative;
+  flex: none;
+  width: calc(var(--lp-thumb-size) * 1.4);
+  aspect-ratio: var(--lp-reference-ratio);
+  border-radius: var(--lp-radius-sm);
+  overflow: hidden;
+  background: var(--lp-color-image-fallback);
+  cursor: pointer;
+}
+.lp-gallery__thumb img {
+  width: var(--lp-full);
+  height: var(--lp-full);
+  object-fit: cover;
+}
+.lp-gallery__thumb input {
+  position: absolute;
+  inset: var(--lp-zero);
+  opacity: 0;
+  margin: var(--lp-zero);
+  cursor: pointer;
+}
+.lp-gallery__thumb:has(input:checked) {
+  outline: var(--lp-stroke) solid var(--lp-color-ink);
+  outline-offset: var(--lp-stroke);
+}
+.lp-gallery__thumb:has(input:focus-visible) {
+  outline: var(--lp-stroke) solid var(--lp-color-focus);
+  outline-offset: var(--lp-stroke);
+}
+.lp-gallery__thumb .lp-pill {
+  position: absolute;
+  left: var(--lp-space-1);
+  bottom: var(--lp-space-1);
+  pointer-events: none;
+  background: var(--lp-color-surface);
+  color: var(--lp-color-text);
+  box-shadow: var(--lp-shadow-sm);
+}
+.lp-gallery__caption,
+.lp-gallery__capacity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lp-space-2) var(--lp-space-3);
+  flex-wrap: wrap;
+  font-family: var(--lp-font-mono);
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-text-2);
+}
+.lp-gallery__capacity {
+  color: var(--lp-color-text-2);
+}

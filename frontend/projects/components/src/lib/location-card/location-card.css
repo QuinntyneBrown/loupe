@@ -73,3 +73,30 @@
   place-items: center;
   color: var(--lp-color-text-3);
 }
+.lp-tile__actions {
+  position: absolute;
+  top: var(--lp-space-2);
+  right: var(--lp-space-2);
+  display: flex;
+  gap: var(--lp-space-1);
+  opacity: 0;
+  transition: opacity var(--lp-duration-fast) var(--lp-ease);
+}
+.lp-tile:hover .lp-tile__actions,
+.lp-tile:focus-within .lp-tile__actions {
+  opacity: 1;
+}
+.lp-tile__actions .lp-icon-button {
+  width: var(--lp-control-height-sm);
+  height: var(--lp-control-height-sm);
+  min-height: var(--lp-control-height-sm);
+  padding: var(--lp-zero);
+  background: var(--lp-color-on-image-bg);
+  backdrop-filter: blur(var(--lp-space-2));
+  color: var(--lp-color-on-image);
+}
+@media (hover: none) {
+  .lp-tile__actions {
+    opacity: 1;
+  }
+}

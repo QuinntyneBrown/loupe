@@ -11,6 +11,7 @@ import { ReferenceDetailPage } from './pages/reference-detail/reference-detail-p
 import { Routes } from '@angular/router';
 import { sessionGuard } from './session.guard';
 import { locationsUnsavedGuard } from './locations-unsaved.guard';
+import { locationUnsavedGuard } from './location-unsaved.guard';
 import { SignIn } from './pages/sign-in/sign-in';
 import { MyWork } from './pages/my-work/my-work';
 import { PhotographDetailPage } from './pages/photograph-detail/photograph-detail-page';
@@ -20,6 +21,16 @@ import { DeletionPage } from './pages/deletion/deletion-page';
 import { ComparePage } from './pages/compare/compare-page';
 
 export const routes: Routes = [
+  {
+    path: 'locations/:id',
+    loadComponent: () =>
+      import('./pages/location-detail/location-detail-page').then(
+        (module) => module.LocationDetailPage,
+      ),
+    canActivate: [sessionGuard],
+    canDeactivate: [locationUnsavedGuard],
+    title: 'Location · Loupe',
+  },
   {
     path: 'locations',
     loadComponent: () =>

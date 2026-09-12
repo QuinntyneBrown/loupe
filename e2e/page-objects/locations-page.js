@@ -67,6 +67,12 @@ export class LocationsPage {
     if (status)
       await expect(card.getByText(status, { exact: true })).toBeVisible();
   }
+  async deleteCard(name) {
+    await this.card(name).hover();
+    await this.card(name)
+      .getByRole("button", { name: "Delete location", exact: true })
+      .click();
+  }
   async expectOrder(names) {
     await expect(this.cards().getByRole("heading")).toHaveText(names);
   }

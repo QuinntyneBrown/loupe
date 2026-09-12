@@ -1,0 +1,139 @@
+@if (loading()) {
+  <div class="lp-detail" aria-busy="true">
+    <div class="lp-detail__media">
+      <div class="lp-skeleton lp-skeleton--image" aria-hidden="true"></div>
+    </div>
+    <div class="lp-detail__head">
+      <p role="status">Loading location…</p>
+    </div>
+  </div>
+}
+@if (failed()) {
+  <div class="lp-empty" role="alert">
+    <h1 #heading tabindex="-1" class="lp-empty__title">Couldn't load this location.</h1>
+    <p class="lp-empty__text">
+      {{
+        unavailable()
+          ? 'It may have been deleted. Go back to your locations.'
+          : 'It may have been deleted, or the connection dropped. Try again, or go back to your locations.'
+      }}
+    </p>
+    <div class="lp-empty__action">
+      <button class="lp-button lp-button--secondary" type="button" (click)="retry()">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg>Try again
+      </button>
+      <a class="lp-button lp-button--ghost" routerLink="/locations">Back to Locations</a>
+    </div>
+  </div>
+}
+@if (location(); as item) {
+  <div class="lp-detail">
+    <div class="lp-detail__head">
+      <div class="lp-detail__title-row">
+        <h1 #heading tabindex="-1" class="lp-title">{{ item.name }}</h1>
+        <details #menu class="actions-menu">
+          <summary #actions class="lp-icon-button" aria-label="More actions">
+            <svg class="lp-icon" aria-hidden="true"><use href="#i-more" /></svg>
+          </summary>
+          <div class="actions-menu__list">
+            <button
+              type="button"
+              class="lp-button lp-button--ghost"
+              [disabled]="dirty()"
+              (click)="request(menu, item, 'edit')"
+            >
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-edit" /></svg>Edit
+              location
+            </button>
+            <button
+              type="button"
+              class="lp-button lp-button--ghost delete-action"
+              [disabled]="dirty()"
+              (click)="request(menu, item, 'delete')"
+            >
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-trash" /></svg
+              >Delete location
+            </button>
+          </div>
+        </details>
+      </div>
+      <div class="lp-detail__meta">
+        @if (place()) {
+          <span>{{ place() }}</span>
+        } @else if (!addressLines().length) {
+          <span class="faint">Address not recorded</span>
+        }
+        @if (item.setting; as setting) {
+          <span class="lp-pill lp-pill--outline"
+            ><span class="visually-hidden">Setting: </span>{{ setting }}</span
+          >
+        }
+      </div>
+      @if (reportStatus(); as status) {
+        <div class="lp-detail__meta">
+          <span class="lp-status" [class]="'lp-status ' + status.modifier">{{ status.label }}</span>
+        </div>
+      }
+    </div>
+    <div class="lp-detail__media">
+      <lp-location-gallery [location]="item" (addImagesRequested)="addImagesRequested.emit(item)" />
+      @if (addressLines().length) {
+        <address class="lp-address">
+          @for (line of addressLines(); track $index; let last = $last) {
+            @if (line === item.postalCode) {
+              <span class="mono">{{ line }}</span>
+            } @else {
+              {{ line }}
+            }
+            @if (!last) {
+              <br />
+            }
+          }
+        </address>
+      } @else {
+        <p class="lp-address faint">Address not recorded</p>
+      }
+      <dl class="lp-meta">
+        <dt>Coordinates</dt>
+        <dd>
+          @if (item.coordinates; as coordinates) {
+            <span class="mono">{{ coordinates.latitude }}, {{ coordinates.longitude }}</span>
+            <span class="faint">· typed by you, never read from a photo</span>
+          } @else {
+            <span class="faint">Not recorded</span>
+          }
+        </dd>
+        <dt>Created</dt>
+        <dd>
+          <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'd MMM yyyy' }}</time>
+        </dd>
+        <dt>Updated</dt>
+        <dd>
+          <time [attr.datetime]="item.updatedAt">{{ item.updatedAt | date: 'd MMM yyyy' }}</time>
+        </dd>
+      </dl>
+    </div>
+    <div class="lp-detail__body">
+      <section class="lp-ai-block lp-ai-block--quiet" aria-label="Scouting report">
+        <div class="lp-ai-block__head">
+          <h2 class="lp-kicker lp-kicker--ai">Scouting report</h2>
+        </div>
+        @if (!item.images.length) {
+          <p class="lp-ai-block__text lp-muted">
+            Add an image to get a scouting report. It only describes what the images show, so
+            there's nothing to report on yet.
+          </p>
+        } @else {
+          <p class="lp-ai-block__text lp-muted">No scouting report yet.</p>
+        }
+      </section>
+      <lp-location-text-editor
+        [location]="item"
+        field="scoutingBrief"
+        (saved)="location.set($event)"
+      />
+      <lp-location-text-editor [location]="item" field="notes" (saved)="location.set($event)" />
+      <lp-location-tags [location]="item" (saved)="location.set($event)" />
+    </div>
+  </div>
+}

@@ -1,17 +1,24 @@
 import { Component, DOCUMENT, inject, signal, viewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { LocationCollection } from 'domain';
-import { LocationResult } from 'api';
+import { LocationResult, LocationSummary } from 'api';
 import { AddLocation } from '../../dialogs/add-location/add-location';
+import { DeleteLocation } from '../../dialogs/delete-location/delete-location';
 
 @Component({
   selector: 'lp-locations-page',
-  imports: [LocationCollection, AddLocation],
+  imports: [LocationCollection, AddLocation, DeleteLocation],
   templateUrl: './locations-page.html',
   styleUrl: './locations-page.css',
 })
 export class LocationsPage {
   readonly adding = signal(false);
-  readonly notice = signal('');
+  readonly deleting = signal<LocationSummary | null>(null);
+  readonly notice = signal(
+    inject(Router).currentNavigation()?.extras.state?.['locationDeleted']
+      ? 'Location deleted.'
+      : '',
+  );
   private readonly document = inject(DOCUMENT);
   private readonly collection = viewChild.required(LocationCollection);
   private readonly dialog = viewChild(AddLocation);
@@ -32,6 +39,22 @@ export class LocationsPage {
   }
   canLeave(): boolean | Promise<boolean> {
     return this.dialog()?.canLeave() ?? true;
+  }
+  requestDelete(item: LocationSummary): void {
+    this.trigger = this.document.activeElement;
+    this.deleting.set(item);
+  }
+  closeDelete(): void {
+    this.deleting.set(null);
+    this.restoreFocus();
+  }
+  deleted(): void {
+    const item = this.deleting();
+    this.deleting.set(null);
+    if (item) this.collection().remove(item.id);
+    this.notice.set('Location deleted.');
+    this.trigger = null;
+    this.restoreFocus();
   }
   private restoreFocus(): void {
     const trigger = this.trigger;

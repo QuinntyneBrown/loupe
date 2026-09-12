@@ -28,6 +28,16 @@
       >{{ status.label }}</span
     >
   }
+  <div class="lp-tile__actions">
+    <button
+      class="lp-icon-button lp-icon-button--on-image"
+      type="button"
+      aria-label="Delete location"
+      (click)="deleteRequested.emit()"
+    >
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-trash" /></svg>
+    </button>
+  </div>
   <div class="lp-tile__scrim">
     <h2 class="lp-tile__title">{{ name() }}</h2>
     <div class="lp-tile__meta">{{ meta() }}</div>

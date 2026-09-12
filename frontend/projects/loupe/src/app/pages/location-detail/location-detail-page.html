@@ -1,0 +1,45 @@
+<main id="main" tabindex="-1" class="lp-main">
+  <a class="lp-back" routerLink="/locations"
+    ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-left" /></svg
+    >Locations</a
+  >
+  <lp-location-detail-panel
+    [id]="id()"
+    (editRequested)="editing.set($event)"
+    (deleteRequested)="deleting.set($event)"
+  />
+  @if (notice()) {
+    <div class="notice" role="status">
+      <span>{{ notice() }}</span
+      ><button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Dismiss notification"
+        (click)="notice.set('')"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </div>
+  }
+</main>
+@if (editing(); as item) {
+  <lp-edit-location [location]="item" (saved)="saved($event)" (closed)="closeEdit()" />
+}
+@if (deleting(); as item) {
+  <lp-delete-location
+    [id]="item.id"
+    [name]="item.name"
+    (closed)="closeDelete()"
+    (deleted)="deletionComplete()"
+  />
+}
+<lp-unsaved-changes
+  [dirty]="dirty"
+  [warning]="
+    deleteDialog()?.busy()
+      ? 'Deletion may finish after you leave. Check Locations before trying again.'
+      : detail()?.saving()
+        ? 'This save may finish after you leave. Reopen the location to check its details.'
+        : null
+  "
+/>

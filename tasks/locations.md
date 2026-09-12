@@ -20,7 +20,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] A5 Delete a location and complete its cleanup (L2-057.6, .7; L2-031.5, .7; L2-032.2)
 - [x] A6a Browse the Locations area (L2-057.1, .4; L2-043.1, .2; L2-044.1; L2-045.1, .6)
 - [x] A6b Add a location from the grid (L2-055.1, .3, .8; L2-043.7; L2-044.6; L2-045.2)
-- [ ] A7 Inspect a location and edit its details (L2-055.2, .4, .5, .6, .8; L2-057.2, .3, .4, .6; L2-044.2)
+- [x] A7 Inspect a location and edit its details (L2-055.2, .4, .5, .6, .8; L2-057.2, .3, .4, .6; L2-044.2)
 - [ ] A8 Manage location images in the gallery (L2-056.1–.6, .9; L2-057.2, .5)
 - [ ] B1 Admit a scouting report request (L2-060.1, .2, .5, .7; L2-033.1, .5; L2-035)
 - [ ] B2 Generate, validate, and publish a scouting report (L2-058.1–.7; L2-059.3, .4; L2-060.4; L2-034.1–.3; L2-036.6)
@@ -313,4 +313,65 @@ recorded only when actually executed.
 - Non-claims: the Edit location dialog reuse of `LocationForm` and the detail
   page land in A7; L2-045.2's "next relevant control if the trigger was deleted"
   is exercised by Delete in A7.
+
+### A7 — Inspect a location and edit its details (L2-055.2, .4, .5, .6, .8 UI; L2-057.2, .3, .4, .6 UI; L2-044.2; L2-045)
+
+- Spec: `e2e/specs/location-detail.spec.js` (11 cases) with page object
+  `e2e/page-objects/location-page.js`, the fixture's `get`, `update`,
+  `updateText`, `setTags` and `deleteLocation` operations (revision-checked,
+  `deletions` journal) and the grid page object's `deleteCard`: a location opened
+  by URL shows the H1 and `Location · Loupe` title, the address line by line with
+  empty lines omitted, six-place coordinates, `12 Sep 2026` created/updated,
+  locality and region, the setting pill, brief, notes, tags, `No scouting report
+  yet`, three radio thumbnails with `Image 1, cover` checked and `Image 1 · Cover`,
+  an `object-fit: contain` stage that follows the selected radio, `3 of 10 images`,
+  and survives reload with axe clean; no images → the placeholder with Add images,
+  `Address not recorded`, `Not recorded` coordinates and the "Add an image to get a
+  scouting report" explanation; an unknown id or a failed load → `Couldn't load this
+  location.` with Try again (recovers) and Back to Locations (navigates); Edit
+  location pre-fills name, address and coordinates without brief, notes or tags,
+  saves normalized values (blank second line dropped, `51.487210, -0.287600`,
+  `Mixed`, updated date) leaving the tags untouched and returning focus to More
+  actions, a stale revision → conflict notice + disabled save with the attempted
+  values kept, Reload latest then save succeeds, latitude 91 → field error; a
+  dirty Edit dialog prompts on Escape with Keep editing/Discard; brief and notes
+  show Saved → Unsaved → Saved, a failed notes save shows Couldn't save with the
+  text kept and retries, tags add/remove → Unsaved → Save → Saved with the brief
+  untouched and the fixture holding exactly the saved values; Delete from the
+  menu names the location with `Its 3 images, scouting report, notes, tags, and
+  search record are all removed.`, Cancel changes nothing and refocuses More
+  actions, confirm → `/locations` with `Location deleted.` and one card fewer;
+  Delete from a grid card shows the same dialog and removes the card in place; the
+  gallery and details stack at 991 px and sit side by side at 992 px; axe at 375.
+- RED: `cd e2e && npx playwright test specs/location-detail.spec.js` → 11 failed
+  (`NG04002: Cannot match any routes. URL Segment: 'locations/…'`; no card Delete).
+  Two implementation fixes after wiring: axe contrast on `--lp-color-text-3` text
+  (the app uses `--lp-color-text-2` for readable secondary text, as its hints do),
+  and focus returning to More actions after a save (the dialog now closes its
+  `<dialog>` before emitting `saved`, as the delete dialogs do).
+- Built: `api` `ILocationService.get/update/updateText/setTags` +
+  `LocationTextField`, `IDeletionService.deleteLocation` (HTTP `DELETE
+  /api/locations/{id}?revision`), mocks bridged to `loupeLocations`; `domain`
+  `LocationDetailPanel` (load/retry/unavailable, head with menu, address lines,
+  coordinates, dates, report placeholder), `LocationGallery` (viewing: contain
+  stage, radio thumbnails, cover pill, caption, capacity, Add images output),
+  `LocationTextEditor` (brief/notes, explicit Save, status, conflict review),
+  `LocationTags` (chips + explicit Save, status, reload on conflict),
+  `LocationForm.mode="details"`; `loupe` `LocationDetailPage` (route
+  `locations/:id`, `locationUnsavedGuard`, notice), `EditLocation` (revision
+  conflict → Reload latest keeping attempted values, field errors, retry),
+  `DeleteLocation` (loads latest for revision and image count, names effects),
+  grid card Delete action through `LocationCollection.deleteRequested/remove` and
+  the `locationDeleted` router state notice; `--lp-stage-max-height` token in
+  `design-system/src/tokens.css`.
+- GREEN: `specs/location-detail.spec.js` → 11 passed; band `location-detail`,
+  `locations`, `locations-add`, `search-navigation`, `reference-delete`,
+  `photograph-deletion` → 58 passed; `npm run build` clean apart from the
+  pre-existing budget warning; prettier clean; `design-system` `npm test` → 70
+  passed after the token addition.
+- Non-claims: L2-055.5's report-snapshot label and Regenerate, and the report
+  status pills for Queued/Running/Ready/Outdated/Failed, are exercised in B4 (the
+  pill mapping exists but the fixture only produces `None`/`Ready` today);
+  upload, remove and cover actions in the gallery are A8; L2-057.5's keyboard
+  arrow selection is asserted in A8 with the radio group already in place.
 

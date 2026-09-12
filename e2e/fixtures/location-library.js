@@ -6,8 +6,9 @@ const coverUrl =
 
 export class LocationLibrary {
   constructor(count = 7) {
-    this.failures = { list: 0, get: 0, create: 0 };
-    this.errors = { create: [] };
+    this.failures = { list: 0, get: 0, create: 0, update: 0, updateText: 0, setTags: 0, deleteLocation: 0 };
+    this.errors = { create: [], update: [], updateText: [], setTags: [], deleteLocation: [] };
+    this.deletions = [];
     this.gates = {};
     this.calls = [];
     this.receipts = new Map();
@@ -40,9 +41,14 @@ export class LocationLibrary {
         ? { latitude: "51.487213", longitude: "-0.287604" }
         : null,
       setting: number % 2 ? "Outdoor" : null,
-      scoutingBrief: null,
-      notes: null,
-      tags: [],
+      scoutingBrief: number % 2 ? "Couple sessions at low tide, two people, nothing staged." : null,
+      notes: number % 2 ? "Parking on Kew Green, five minutes' walk." : null,
+      tags: number % 2
+        ? [
+            { name: "river", category: "subject" },
+            { name: "low tide", category: null },
+          ]
+        : [],
       images,
       coverImageId: images[0]?.id ?? null,
       report: null,
@@ -140,6 +146,52 @@ export class LocationLibrary {
       const custom = this.errors[operation]?.shift();
       if (custom) return custom;
       if (operation === "create") return this.create(input);
+      if (operation === "get") {
+        const item = this.items.find((item) => item.id === input.id);
+        return item ? { data: item } : { error: "item_unavailable" };
+      }
+      if (["update", "updateText", "setTags", "deleteLocation"].includes(operation)) {
+        const item = this.items.find((item) => item.id === input.id);
+        if (!item) return { error: "item_unavailable" };
+        if (item.revision !== input.revision) return { error: "revision_conflict" };
+        if (operation === "update") {
+          const errors = LocationLibrary.validate({ ...input, operationKey: "edit" });
+          if (Object.keys(errors).length) return { error: "invalid_request", errors };
+          Object.assign(item, {
+            name: input.name.trim(),
+            addressLine1: input.addressLine1?.trim() || null,
+            addressLine2: input.addressLine2?.trim() || null,
+            locality: input.locality?.trim() || null,
+            region: input.region?.trim() || null,
+            postalCode: input.postalCode?.trim() || null,
+            country: input.country?.trim() || null,
+            coordinates: input.coordinates
+              ? {
+                  latitude: Number(input.coordinates.latitude).toFixed(6),
+                  longitude: Number(input.coordinates.longitude).toFixed(6),
+                }
+              : null,
+            setting: input.setting || null,
+          });
+        } else if (operation === "updateText") item[input.field] = input.text?.trim() || null;
+        else if (operation === "setTags") item.tags = input.tags.map((tag) => ({ name: tag.name, category: tag.category ?? null }));
+        else {
+          this.items = this.items.filter((other) => other.id !== item.id);
+          this.deletions.push(item.id);
+          return {
+            data: {
+              id: `deletion-${this.deletions.length}`,
+              resourceId: item.id,
+              status: "Pending",
+              deletedAt: "2026-09-12T12:00:00Z",
+              completedAt: null,
+            },
+          };
+        }
+        item.revision += 1;
+        item.updatedAt = "2026-09-13T09:30:00Z";
+        return { data: item };
+      }
       throw new Error("Unexpected location operation: " + operation);
     });
   }

@@ -123,90 +123,92 @@
       </p>
     }
   </div>
-  <div class="lp-field" [class.is-invalid]="errors().scoutingBrief">
-    <label class="lp-field__label" [for]="idPrefix() + '-brief'"
-      >Scouting brief <span class="lp-field__optional">optional</span></label
-    ><textarea
-      class="lp-textarea"
-      [id]="idPrefix() + '-brief'"
-      name="scoutingBrief"
-      data-field="scoutingBrief"
-      rows="2"
-      placeholder="Couple sessions at low tide, two people, nothing staged."
-      [ngModel]="scoutingBrief()"
-      (ngModelChange)="scoutingBrief.set($event); clear('scoutingBrief')"
-      [disabled]="busy()"
-      [attr.aria-invalid]="errors().scoutingBrief ? 'true' : null"
-      [attr.aria-describedby]="idPrefix() + '-brief-hint'"
-    ></textarea>
-    @if (errors().scoutingBrief; as message) {
-      <p class="lp-field__error">
-        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
-        >{{ message }}
-      </p>
-    }
-    <p class="lp-field__hint" [id]="idPrefix() + '-brief-hint'">
-      What you'd shoot here. Sent with the images when you request a scouting report.
-    </p>
-  </div>
-  <div class="lp-field" [class.is-invalid]="errors().notes">
-    <label class="lp-field__label" [for]="idPrefix() + '-notes'"
-      >Notes <span class="lp-field__optional">optional</span></label
-    ><textarea
-      class="lp-textarea"
-      [id]="idPrefix() + '-notes'"
-      name="notes"
-      data-field="notes"
-      rows="2"
-      placeholder="Parking, access, who to ask. Notes stay with you; they're never sent to the AI."
-      [ngModel]="notes()"
-      (ngModelChange)="notes.set($event); clear('notes')"
-      [disabled]="busy()"
-      [attr.aria-invalid]="errors().notes ? 'true' : null"
-    ></textarea>
-    @if (errors().notes; as message) {
-      <p class="lp-field__error">
-        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
-        >{{ message }}
-      </p>
-    }
-  </div>
-  <div class="lp-field" [class.is-invalid]="errors().tags">
-    <label class="lp-field__label" [for]="idPrefix() + '-tags'"
-      >Tags <span class="lp-field__optional">optional</span></label
-    >
-    <div class="lp-chip-input">
-      @for (tag of tags(); track tag) {
-        <span class="lp-tag"
-          >{{ tag
-          }}<button
-            class="lp-tag__action"
-            type="button"
-            [attr.aria-label]="'Remove tag ' + tag"
-            [disabled]="busy()"
-            (click)="removeTag(tag)"
-          >
-            <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg></button
-        ></span>
-      }
-      <input
-        [id]="idPrefix() + '-tags'"
-        name="tag"
-        data-field="tags"
-        type="text"
-        placeholder="Add a tag"
-        aria-label="Add a tag"
-        [ngModel]="tag()"
-        (ngModelChange)="tag.set($event); clear('tags')"
-        (keydown.enter)="addTag($event)"
+  @if (mode() === 'full') {
+    <div class="lp-field" [class.is-invalid]="errors().scoutingBrief">
+      <label class="lp-field__label" [for]="idPrefix() + '-brief'"
+        >Scouting brief <span class="lp-field__optional">optional</span></label
+      ><textarea
+        class="lp-textarea"
+        [id]="idPrefix() + '-brief'"
+        name="scoutingBrief"
+        data-field="scoutingBrief"
+        rows="2"
+        placeholder="Couple sessions at low tide, two people, nothing staged."
+        [ngModel]="scoutingBrief()"
+        (ngModelChange)="scoutingBrief.set($event); clear('scoutingBrief')"
         [disabled]="busy()"
-      />
-    </div>
-    @if (errors().tags; as message) {
-      <p class="lp-field__error">
-        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
-        >{{ message }}
+        [attr.aria-invalid]="errors().scoutingBrief ? 'true' : null"
+        [attr.aria-describedby]="idPrefix() + '-brief-hint'"
+      ></textarea>
+      @if (errors().scoutingBrief; as message) {
+        <p class="lp-field__error">
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
+          >{{ message }}
+        </p>
+      }
+      <p class="lp-field__hint" [id]="idPrefix() + '-brief-hint'">
+        What you'd shoot here. Sent with the images when you request a scouting report.
       </p>
-    }
-  </div>
+    </div>
+    <div class="lp-field" [class.is-invalid]="errors().notes">
+      <label class="lp-field__label" [for]="idPrefix() + '-notes'"
+        >Notes <span class="lp-field__optional">optional</span></label
+      ><textarea
+        class="lp-textarea"
+        [id]="idPrefix() + '-notes'"
+        name="notes"
+        data-field="notes"
+        rows="2"
+        placeholder="Parking, access, who to ask. Notes stay with you; they're never sent to the AI."
+        [ngModel]="notes()"
+        (ngModelChange)="notes.set($event); clear('notes')"
+        [disabled]="busy()"
+        [attr.aria-invalid]="errors().notes ? 'true' : null"
+      ></textarea>
+      @if (errors().notes; as message) {
+        <p class="lp-field__error">
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
+          >{{ message }}
+        </p>
+      }
+    </div>
+    <div class="lp-field" [class.is-invalid]="errors().tags">
+      <label class="lp-field__label" [for]="idPrefix() + '-tags'"
+        >Tags <span class="lp-field__optional">optional</span></label
+      >
+      <div class="lp-chip-input">
+        @for (tag of tags(); track tag) {
+          <span class="lp-tag"
+            >{{ tag
+            }}<button
+              class="lp-tag__action"
+              type="button"
+              [attr.aria-label]="'Remove tag ' + tag"
+              [disabled]="busy()"
+              (click)="removeTag(tag)"
+            >
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg></button
+          ></span>
+        }
+        <input
+          [id]="idPrefix() + '-tags'"
+          name="tag"
+          data-field="tags"
+          type="text"
+          placeholder="Add a tag"
+          aria-label="Add a tag"
+          [ngModel]="tag()"
+          (ngModelChange)="tag.set($event); clear('tags')"
+          (keydown.enter)="addTag($event)"
+          [disabled]="busy()"
+        />
+      </div>
+      @if (errors().tags; as message) {
+        <p class="lp-field__error">
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
+          >{{ message }}
+        </p>
+      }
+    </div>
+  }
 </div>

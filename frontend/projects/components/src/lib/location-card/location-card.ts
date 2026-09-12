@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, input, signal, viewChild } from '@angular/core';
+import { Component, computed, ElementRef, input, output, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 export type LocationCardStatus = 'None' | 'Queued' | 'Running' | 'Ready' | 'Outdated' | 'Failed';
@@ -16,6 +16,7 @@ export class LocationCard {
   readonly coverPreviewUrl = input<string | null>(null);
   readonly imageCount = input(0);
   readonly reportStatus = input<LocationCardStatus>('None');
+  readonly deleteRequested = output<void>();
   readonly failedImage = signal<string | null>(null);
   readonly status = computed(() => {
     switch (this.reportStatus()) {

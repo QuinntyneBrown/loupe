@@ -3,9 +3,9 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ServiceError } from '../common/service-error';
 import { SESSION_SERVICE } from '../session/session.service.contract';
-import { ILocationService } from './location.service.contract';
+import { ILocationService, LocationTextField } from './location.service.contract';
 import { LocationPage, LocationResult } from './location-result';
-import { LocationInput } from './location-input';
+import { LocationDetailsInput, LocationInput, LocationTagInput } from './location-input';
 
 @Injectable()
 export class LocationService implements ILocationService {
@@ -13,6 +13,9 @@ export class LocationService implements ILocationService {
   private readonly session = inject(SESSION_SERVICE);
   list(cursor?: string): Promise<LocationPage> {
     return this.read('/api/locations', cursor ? { cursor } : {});
+  }
+  get(id: string): Promise<LocationResult> {
+    return this.read(`/api/locations/${encodeURIComponent(id)}`, {});
   }
   async create(input: LocationInput, operationKey: string): Promise<LocationResult> {
     try {
@@ -22,6 +25,33 @@ export class LocationService implements ILocationService {
             'Idempotency-Key': operationKey,
             'X-CSRF-Token': await this.session.getRequestToken(),
           },
+          timeout: 15000,
+        }),
+      );
+    } catch (error) {
+      throw LocationService.failure(error);
+    }
+  }
+  update(id: string, input: LocationDetailsInput & { revision: number }): Promise<LocationResult> {
+    return this.put(`/api/locations/${encodeURIComponent(id)}`, input);
+  }
+  updateText(
+    id: string,
+    revision: number,
+    field: LocationTextField,
+    text: string | null,
+  ): Promise<LocationResult> {
+    const path = field === 'scoutingBrief' ? 'scouting-brief' : 'notes';
+    return this.put(`/api/locations/${encodeURIComponent(id)}/${path}`, { revision, text });
+  }
+  setTags(id: string, revision: number, tags: LocationTagInput[]): Promise<LocationResult> {
+    return this.put(`/api/locations/${encodeURIComponent(id)}/tags`, { revision, tags });
+  }
+  private async put(url: string, body: object): Promise<LocationResult> {
+    try {
+      return await firstValueFrom(
+        this.http.put<LocationResult>(url, body, {
+          headers: { 'X-CSRF-Token': await this.session.getRequestToken() },
           timeout: 15000,
         }),
       );

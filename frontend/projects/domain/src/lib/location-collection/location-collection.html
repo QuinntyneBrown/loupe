@@ -35,6 +35,7 @@
         [coverPreviewUrl]="item.coverPreviewUrl"
         [imageCount]="item.imageCount"
         [reportStatus]="item.reportStatus"
+        (deleteRequested)="deleteRequested.emit(item)"
       />
     }
   </div>

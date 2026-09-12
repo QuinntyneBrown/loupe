@@ -63,6 +63,7 @@
   --lp-dialog-height: 90dvh;
   --lp-study-ratio: 4 / 3;
   --lp-reference-ratio: 4 / 5;
+  --lp-stage-max-height: 70vh;
   --lp-image-caption-opacity: 0.85;
   --lp-study-circle: 40%;
   --lp-study-offset: 28%;

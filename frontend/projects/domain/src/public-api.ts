@@ -16,3 +16,7 @@ export * from './lib/reference-filters/reference-filters';
 export * from './lib/search-results/search-results';
 export * from './lib/location-collection/location-collection';
 export * from './lib/location-form/location-form';
+export * from './lib/location-detail/location-detail-panel';
+export * from './lib/location-gallery/location-gallery';
+export * from './lib/location-text/location-text-editor';
+export * from './lib/location-tags/location-tags';

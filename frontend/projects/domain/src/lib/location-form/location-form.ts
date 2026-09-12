@@ -50,6 +50,7 @@ export class LocationForm {
   readonly initial = input<LocationResult | null>(null);
   readonly busy = input(false);
   readonly idPrefix = input('location');
+  readonly mode = input<'full' | 'details'>('full');
   private readonly destroy = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly root = viewChild.required<ElementRef<HTMLElement>>('root');

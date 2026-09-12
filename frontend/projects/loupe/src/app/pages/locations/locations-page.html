@@ -1,7 +1,15 @@
 <main id="main" class="lp-main" tabindex="-1">
-  <lp-location-collection (addRequested)="openAdd()" />
+  <lp-location-collection (addRequested)="openAdd()" (deleteRequested)="requestDelete($event)" />
   @if (adding()) {
     <lp-add-location (saved)="added($event)" (closed)="close()" />
+  }
+  @if (deleting(); as item) {
+    <lp-delete-location
+      [id]="item.id"
+      [name]="item.name"
+      (closed)="closeDelete()"
+      (deleted)="deleted()"
+    />
   }
   @if (notice()) {
     <div class="notice" role="status">

@@ -1,0 +1,93 @@
+:host {
+  display: block;
+}
+h1,
+p,
+dl,
+dd {
+  margin: var(--lp-zero);
+}
+.lp-empty h1 {
+  font-size: var(--lp-text-xl);
+}
+.lp-empty__action {
+  display: flex;
+  gap: var(--lp-space-2);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.faint {
+  color: var(--lp-color-text-2);
+}
+.mono {
+  font-family: var(--lp-font-mono);
+  font-size: var(--lp-text-sm);
+}
+.lp-address {
+  font-style: normal;
+  font-size: var(--lp-text-sm);
+  line-height: var(--lp-leading-normal);
+}
+.lp-meta {
+  display: grid;
+  grid-template-columns: max-content minmax(var(--lp-zero), var(--lp-fraction));
+  gap: var(--lp-space-2) var(--lp-space-5);
+  font-size: var(--lp-text-sm);
+}
+.lp-meta dt {
+  color: var(--lp-color-text-2);
+}
+.lp-meta dd {
+  min-width: var(--lp-zero);
+  overflow-wrap: anywhere;
+}
+.lp-ai-block {
+  display: grid;
+  gap: var(--lp-space-3);
+  padding: var(--lp-space-4) var(--lp-space-5);
+  border-radius: var(--lp-radius-md);
+  background: var(--lp-color-ai-bg);
+  border: var(--lp-hairline) solid var(--lp-color-ai-border);
+}
+.lp-ai-block__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lp-space-3);
+  flex-wrap: wrap;
+}
+.lp-ai-block__head h2 {
+  margin: var(--lp-zero);
+}
+.lp-ai-block__text {
+  line-height: var(--lp-leading-relaxed);
+}
+.lp-ai-block--quiet {
+  background: var(--lp-color-surface-2);
+  border-color: var(--lp-color-border);
+}
+.lp-ai-block--quiet .lp-kicker--ai {
+  color: var(--lp-color-text-2);
+}
+:host .actions-menu {
+  position: relative;
+}
+:host .actions-menu__list {
+  display: grid;
+  position: absolute;
+  right: var(--lp-zero);
+  z-index: var(--lp-z-menu);
+  min-width: var(--lp-menu-min);
+  padding: var(--lp-space-1);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+  background: var(--lp-color-surface);
+  box-shadow: var(--lp-shadow-md);
+}
+.delete-action {
+  color: var(--lp-color-danger);
+  border-top: var(--lp-hairline) solid var(--lp-color-border);
+}
+:host summary {
+  list-style: none;
+}
