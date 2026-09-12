@@ -12,7 +12,7 @@ RED, implementation, GREEN, regressions, commit.
 
 ## Delivery checklist
 
-- [ ] A1a Create a location and read it back (L2-055.1)
+- [x] A1a Create a location and read it back (L2-055.1)
 - [ ] A1b Validate location details at their limits (L2-055.3, .7)
 - [ ] A2 Edit details, brief, notes, and tags with revision protection (L2-055.2, .4, .5, .6)
 - [ ] A3 List owned locations with cursor paging (L2-057.1, .4)
@@ -43,3 +43,37 @@ checks run in the acceptance container (`./backend/Test.ps1 -Filter …`); brows
 checks run in Chromium only (`cd e2e && npx playwright test specs/<name>.spec.js`).
 Azure OpenAI and Ollama were not configured in the planning shell; live checks are
 recorded only when actually executed.
+
+### A1a — Create a location and read it back (L2-055.1)
+
+- Test: `backend/tests/Loupe.Api.Tests/Locations/CreateLocationTests.cs`
+  (`L2_055_1_A_named_location_persists_with_absent_address_images_and_report`):
+  name-only `POST /api/locations` with an `Idempotency-Key` → 201 with a
+  `Location` header; the result and a later `GET` after an API restart show the
+  trimmed name with every address field, `coordinates`, `setting`, `scoutingBrief`,
+  `notes`, `coverImageId` and `report` null, `tags` and `images` empty,
+  `reportStatus` `None`, `revision` 1 and `createdAt == updatedAt`; replaying the
+  same key returns the same id; a stranger's `GET` → 404; `/api/photographs`,
+  `/api/references`, `/api/photographers` and `/api/search?query=Kew` stay empty.
+- RED: `./backend/Test.ps1 -Filter 'FullyQualifiedName~CreateLocationTests'` →
+  `Failed: 1` — `Assert.Equal() Failure: Expected: Created / Actual: NotFound`
+  at the first save (no `api/locations` route existed).
+- Built: `Loupe.Domain/Locations/{Location,LocationTag,LocationSetting}`;
+  `Loupe.Application/Locations/{ILocationStore,CreateLocationCommand[Handler],
+  GetLocationQuery[Handler],LocationDetails,LocationDetailsValidator,LocationResult,
+  LocationTagInput,LocationTagResult,LocationImageResult,Coordinates}` (receipt type
+  `location`, `TextField`/`TagName` normalization, ≤ 50 distinct tags);
+  `LibraryDbContext` `locations`/`location_tags` (alternate key `(Id, OwnerId)`,
+  `Revision` default 1 concurrency token, index `(OwnerId, CreatedAt, Id)`,
+  `Setting` stored as text, `numeric(9,6)`/`numeric(10,6)` coordinates); migration
+  `Locations`; `LocationStore`; `LocationsController` `POST` + `GET {id}`;
+  `CreateLocationRequest`.
+- GREEN: same filter → `Passed: 1`. Band
+  `-Filter 'FullyQualifiedName~Locations|FullyQualifiedName~Search'` → `Passed: 49`.
+  `dotnet build backend/Loupe.slnx` → 0 warnings, 0 errors.
+- Non-claims: `dotnet format --verify-no-changes` reports whitespace findings only
+  in files this slice did not touch (Boards, Photographers, Search tests, stores) —
+  pre-existing on `main`, left alone. Coordinates, `setting` and field limits are
+  accepted by the schema but not yet validated or bound from the request (A1b);
+  `images`, `coverImageId`, `report` and `reportStatus` are constants until A4/B1.
+

@@ -11,6 +11,7 @@ using Loupe.Application.Deletions;
 using Loupe.Application.Maintenance;
 using Loupe.Application.Critiques;
 using Loupe.Application.References;
+using Loupe.Application.Locations;
 using Loupe.Infrastructure.Ai;
 using Loupe.Infrastructure.Images;
 using Microsoft.EntityFrameworkCore;
@@ -52,6 +53,7 @@ public static class PersistenceSetup
         services.AddSingleton<IReferenceAnalysisConfiguration, ReferenceAnalysisConfiguration>();
         services.AddScoped<Loupe.Application.ReferenceDrafts.IReferenceDraftStore, ReferenceDraftStore>();
         services.AddScoped<IReferenceTagStore, ReferenceTagStore>();
+        services.AddScoped<ILocationStore, LocationStore>();
         services.AddScoped<IBoardStore, BoardStore>();
         services.AddScoped<IReferenceImportStore, ReferenceImportStore>();
         services.AddSingleton<IReferenceImportConfiguration, ReferenceImportConfiguration>();

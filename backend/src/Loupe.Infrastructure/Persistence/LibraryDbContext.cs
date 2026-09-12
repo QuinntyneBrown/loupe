@@ -6,6 +6,7 @@ using Loupe.Domain.References;
 using Microsoft.EntityFrameworkCore;
 using Loupe.Domain.Boards;
 using Loupe.Domain.Photographers;
+using Loupe.Domain.Locations;
 
 namespace Loupe.Infrastructure.Persistence;
 
@@ -24,6 +25,7 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
     public DbSet<DeletionOperation> Deletions => Set<DeletionOperation>();
     public DbSet<BackgroundOperation> BackgroundOperations => Set<BackgroundOperation>();
     public DbSet<AnalysisDispatchCursor> AnalysisDispatchCursors => Set<AnalysisDispatchCursor>();
+    public DbSet<Location> Locations => Set<Location>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Loupe.Domain.Users.User>().ToTable("users").HasKey(u => u.Id);
@@ -82,6 +84,17 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Reference>().Property<string>("SourceHash").HasMaxLength(32)
             .HasComputedColumnSql("md5(loupe_normalize_source(\"SourceUrl\"))", stored: true);
         modelBuilder.Entity<Reference>().HasIndex("OwnerId", "SourceHash");
+        modelBuilder.Entity<Location>().ToTable("locations").HasKey(location => location.Id);
+        modelBuilder.Entity<Location>().HasAlternateKey(location => new { location.Id, location.OwnerId });
+        modelBuilder.Entity<Location>().HasIndex(location => new { location.OwnerId, location.CreatedAt, location.Id });
+        modelBuilder.Entity<Location>().Property(location => location.Revision).HasDefaultValue(1L).IsConcurrencyToken();
+        modelBuilder.Entity<Location>().Property(location => location.Latitude).HasPrecision(9, 6);
+        modelBuilder.Entity<Location>().Property(location => location.Longitude).HasPrecision(10, 6);
+        modelBuilder.Entity<Location>().Property(location => location.Setting).HasConversion<string>().HasMaxLength(16);
+        modelBuilder.Entity<LocationTag>().ToTable("location_tags").HasKey(tag => new { tag.LocationId, tag.NormalizedName });
+        modelBuilder.Entity<LocationTag>().HasIndex(tag => new { tag.OwnerId, tag.NormalizedName });
+        modelBuilder.Entity<LocationTag>().HasOne<Location>().WithMany(location => location.Tags)
+            .HasForeignKey(tag => new { tag.LocationId, tag.OwnerId }).HasPrincipalKey(location => new { location.Id, location.OwnerId }).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<AnalysisDispatchCursor>().ToTable("analysis_dispatch_cursor").HasKey(cursor => cursor.Id);
         modelBuilder.Entity<AnalysisDispatchCursor>().Property(cursor => cursor.OwnerId).HasMaxLength(64);
         modelBuilder.Entity<AnalysisDispatchCursor>().HasData(new AnalysisDispatchCursor());
