@@ -15,7 +15,7 @@ public sealed class LocationsController(ISender sender) : ControllerBase
     public async Task<IActionResult> Create(CreateLocationRequest request, [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new CreateLocationCommand(request.Name, request.AddressLine1, request.AddressLine2, request.Locality, request.Region,
-            request.PostalCode, request.Country, request.ScoutingBrief, request.Notes, request.Tags, operationKey), cancellationToken);
+            request.PostalCode, request.Country, request.Coordinates, request.Setting, request.ScoutingBrief, request.Notes, request.Tags, operationKey), cancellationToken);
         return Created($"/api/locations/{result.Id}", result);
     }
 

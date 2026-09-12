@@ -379,7 +379,7 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 - [ ] L2-055.4: Given a location with images, a scouting report, and tags, when only the name, address, coordinates, setting, or notes are edited and saved, then the images, image order, cover, report, report status, and tags are unchanged, and keyword search reflects the edit immediately while semantic search follows L2-062.
 - [ ] L2-055.5: Given a location with a current scouting report, when the scouting brief is edited and saved, then the report remains current and readable, its display identifies the brief snapshot it used, and the detail offers Regenerate to apply the new brief under L2-060.
 - [ ] L2-055.6: Given two editors loaded at the same revision, when both save, then the second receives the L2-030 conflict, retains its attempted values, and can reload before resubmitting; no partial field update is applied.
-- [ ] L2-055.7: Given HTML, script, SQL metacharacters, or template expressions in any address line, locality, or name, when saved, displayed, and searched, then they remain inert text under L2-039 and match keyword tokens as plain text.
+- [x] L2-055.7: Given HTML, script, SQL metacharacters, or template expressions in any address line, locality, or name, when saved, displayed, and searched, then they remain inert text under L2-039 and match keyword tokens as plain text.
 - [ ] L2-055.8: Given the Add location or Edit location dialog at every shared viewport, when opened with unsaved changes and closed by Close, Escape, backdrop, or navigation, then the L2-043 unsaved-change protection applies; Discard clears the draft and Keep editing preserves it.
 
 ## L2-056: Upload and manage location images

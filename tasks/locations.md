@@ -13,7 +13,7 @@ RED, implementation, GREEN, regressions, commit.
 ## Delivery checklist
 
 - [x] A1a Create a location and read it back (L2-055.1)
-- [ ] A1b Validate location details at their limits (L2-055.3, .7)
+- [x] A1b Validate location details at their limits (L2-055.3, .7)
 - [ ] A2 Edit details, brief, notes, and tags with revision protection (L2-055.2, .4, .5, .6)
 - [ ] A3 List owned locations with cursor paging (L2-057.1, .4)
 - [ ] A4 Add, remove, and choose the cover of location images (L2-056.1–.8)
@@ -76,4 +76,31 @@ recorded only when actually executed.
   pre-existing on `main`, left alone. Coordinates, `setting` and field limits are
   accepted by the schema but not yet validated or bound from the request (A1b);
   `images`, `coverImageId`, `report` and `reportStatus` are constants until A4/B1.
+
+### A1b — Validate location details at their limits (L2-055.3, .7)
+
+- Tests (`CreateLocationTests`, 23 new cases): every text field at its maximum
+  (200/200/200/100/100/20/100/2,000/10,000 runes, using `é`) round-trips and one
+  rune more → 400 `invalid_request` naming the field; `90.000000`/`-90`/
+  `±180.000000` coordinates persist and read back with six places; `90.000001`,
+  `-90.000001`, `±180.000001`, a seventh decimal place, `north`, and a lone
+  latitude or longitude name the offending field (the missing half of a pair);
+  `Indoor`/`Outdoor`/`Mixed` persist, blank becomes absent, `Underwater` → field
+  error `setting`; script/markup, SQL, and template text in name, address line and
+  locality are returned byte-for-byte and the library keeps accepting saves.
+- RED: `-Filter 'FullyQualifiedName~CreateLocationTests'` → `Failed: 13, Passed: 11`
+  — every coordinate and setting case returned `Created` instead of `BadRequest`
+  (or `coordinates`/`setting` came back null) because the request ignored those
+  fields; the 11 text-limit and hostile-text cases already passed on A1a's
+  `TextField` normalization, so they confirm rather than drive that behaviour.
+- Built: `CoordinatesInput`; `CreateLocationCommand`/`CreateLocationRequest` carry
+  `coordinates` and `setting`; `LocationDetailsValidator` parses invariant decimal
+  degrees (sign + point only, scale ≤ 6, |lat| ≤ 90, |lon| ≤ 180, pair required)
+  and the `LocationSetting` name case-insensitively; `LocationDetails` carries them.
+- GREEN: band `-Filter 'FullyQualifiedName~Locations|FullyQualifiedName~Search'` →
+  `Passed: 72`. `dotnet build` clean; `dotnet format` reports nothing under
+  `Locations`.
+- Non-claims: "previously saved values remain unchanged" is proven for edits in A2
+  (an invalid `PUT` leaves the record identical); "displayed" and "searched" for
+  L2-055.7 land with the detail page (A7) and keyword search (C1).
 
