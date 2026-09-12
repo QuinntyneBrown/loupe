@@ -27,7 +27,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] B3 Outdate, cancel, and retry scouting work (L2-060.3, .6; L2-056.5; L2-055.5; L2-031.7; L2-034.4)
 - [x] B4 Request and read the scouting report in the detail (L2-060.1–.8; L2-058.1, .7; L2-057.3; L2-055.5; L2-041.2; L2-045.3)
 - [x] B5 Release evaluation manifest and procedure (L2-059.5, .6; L2-050.2, .5 — procedure only)
-- [ ] C1 Find locations by keyword with shoot filters (L2-062.1, .2, .3, .7, .8; L2-061.2–.6)
+- [x] C1 Find locations by keyword with shoot filters (L2-062.1, .2, .3, .5, .7; L2-061.2–.5)
 - [ ] C2 Find a location page with keyword results (L2-061.1, .5, .6; L2-062.8; L2-043.2; L2-044.1)
 - [ ] C3a Record location index intents and report index status (L2-028.2; L2-062.4, .5)
 - [ ] C3b Embed location documents through Ollama and keep vectors current (L2-028.1, .4, .5; L2-062.4, .6, .7; L2-041)
@@ -627,4 +627,51 @@ recorded only when actually executed.
 - Recorded as a procedure: no evaluation has been run and nothing is described
   as passing. L2-059.1, .2, .5 and .6 stay open in `todo.md` until a named
   reviewer runs the evaluation against the production model.
+
+### C1 — Find locations by keyword with shoot filters (L2-062.1, .2, .3, .5, .7; L2-061.2–.5)
+
+- Tests: `backend/tests/Loupe.Api.Tests/ShootPlanning/FindLocationsKeywordTests.cs`
+  (6 cases); reports are published through the honest path — admission plus one
+  `RunScoutingReportCommand` per location against a queue of canned provider
+  results (`ScoutingReportFixture.Valid` mutated per case): every eligible field
+  (name, address line, locality, region, postal code, country, setting, brief,
+  notes, tag, report caution) matches its own token, `kew slippery` needs both
+  the name and the report text, a report-less location matches only its manual
+  fields, `citedImageIds` (a JSON key) matches nothing, `café` matches the
+  NFC-composed name; shoot types AND over Well suited/Workable (`Engagement` +
+  `Events` keeps only the location rated for both, results carry every
+  `suitability` rating); people 6 keeps only the 2–8 range and never Cannot
+  assess, clearing it restores all four, `groupSize` carries min/max/cannotAssess;
+  Golden hour OR Blue hour keeps three of four without duplicates and each
+  result lists its `recommendedPeriods`; setting and tags AND (case-insensitive
+  tags), a shoot-type, people or time-of-day filter excludes report-less
+  locations while setting/tag filters keep them labelled `None`, a blank query
+  with filters returns all matching; 11 tags, `Weddings`, `Noon`, `Underwater`,
+  people 0/501, a 501-rune query, `pageSize=0` and `mode=semantic` → 400 naming
+  the field; a stranger's location, a reference and a photograph never appear,
+  `/api/search?query=Kew` returns only the reference, a notes edit is found on the
+  very next read, a deleted location leaves `totalCount` 2 and never appears while
+  paging with a scoped cursor, and a cursor replayed with another page size or by
+  another owner → 400.
+- RED: `-Filter 'FullyQualifiedName~FindLocationsKeywordTests'` → `Failed: 6,
+  Passed: 0` — `GET /api/locations/search` returned 404. Two SQL faults surfaced
+  on the way to GREEN and were fixed: jsonpath does not accept a comma-separated
+  path list (one recursive string-value path is used instead) and Npgsql cannot
+  type a null scalar in `IS NULL` without a cast.
+- Built: `ScoutingReportJson` (stored report JSON now carries the shared enum
+  labels, used by the work store, admission reuse, the read query and the
+  results); `Loupe.Application/ShootPlanning/{FindLocationsQuery[Handler],
+  LocationSearchFilter, LocationSearchCursor, LocationSearchItem,
+  LocationSearchGroupSize, LocationSearchSuitability, LocationSearchPage,
+  ILocationSearchStore}`, `ScoutingVocabulary` (labels of the shared enums);
+  `LocationSearchStore` (parameterized SQL over the owner's locations: NFC and
+  case-insensitive substring per token over every eligible field plus every string
+  value of the current report, shoot-type/people/time-of-day filters over the
+  report JSON, setting and tag filters, report presence only when a report
+  filter is set, keyset paging), `LocationSearchRow`; `LocationSearchController`
+  `GET /api/locations/search` with `FindLocationsRequest`.
+- GREEN: same filter → `Passed: 6`. Band `ShootPlanning|Scouting|Locations|Search`
+  → `Passed: 139`. `dotnet build` clean; `dotnet format` clean.
+- Non-claims: Meaning mode (`mode=meaning`) is rejected with the shared 400 until
+  C4 delivers it; L2-062.8 (URL state) and L2-061.6/.7 (UI) land in C2/C5.
 

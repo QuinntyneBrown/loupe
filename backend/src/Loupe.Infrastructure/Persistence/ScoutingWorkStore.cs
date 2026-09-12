@@ -24,7 +24,7 @@ public sealed class ScoutingWorkStore(LibraryDbContext database, IOperationLease
         if (location is null || location.CurrentScoutingOperationId != operation.Id || location.ImageSetRevision != input.ImageSetRevision) return;
         var saved = new SavedScoutingReport(operation.Id, now, operation.Mode, operation.Model, operation.PromptVersion,
             input.ScoutingBrief, input.ImageSetRevision, input.Images.Count, report);
-        var json = JsonSerializer.Serialize(saved);
+        var json = ScoutingReportJson.Serialize(saved);
         location.ScoutingReportJson = json;
         location.Revision++;
         current.OutputJson = json;

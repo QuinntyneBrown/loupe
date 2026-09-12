@@ -1,6 +1,6 @@
 using System.Globalization;
-using System.Text.Json;
 using Loupe.Domain.Locations;
+using Loupe.Application.Scouting;
 using Loupe.Domain.Scouting;
 
 namespace Loupe.Application.Locations;
@@ -12,7 +12,7 @@ public sealed record LocationResult(Guid Id, string Name, string? AddressLine1, 
 {
     public static LocationResult From(Location location)
     {
-        var report = location.ScoutingReportJson is null ? null : JsonSerializer.Deserialize<SavedScoutingReport>(location.ScoutingReportJson);
+        var report = ScoutingReportJson.Deserialize(location.ScoutingReportJson);
         return new(location.Id, location.Name, location.AddressLine1, location.AddressLine2,
         location.Locality, location.Region, location.PostalCode, location.Country,
         location is { Latitude: { } latitude, Longitude: { } longitude } ? new Coordinates(Format(latitude), Format(longitude)) : null,

@@ -13,6 +13,7 @@ using Loupe.Application.Critiques;
 using Loupe.Application.References;
 using Loupe.Application.Locations;
 using Loupe.Application.Scouting;
+using Loupe.Application.ShootPlanning;
 using Loupe.Infrastructure.Ai;
 using Loupe.Infrastructure.Images;
 using Microsoft.EntityFrameworkCore;
@@ -57,6 +58,7 @@ public static class PersistenceSetup
         services.AddScoped<ILocationStore, LocationStore>();
         services.AddScoped<ILocationImageStore, LocationImageStore>();
         services.AddScoped<IScoutingStore, ScoutingStore>();
+        services.AddScoped<ILocationSearchStore, LocationSearchStore>();
         services.AddScoped<IScoutingWorkStore, ScoutingWorkStore>();
         services.AddScoped<IScoutingProvider, AzureOpenAiScoutingProvider>();
         services.AddSingleton<IScoutingConfiguration, ScoutingConfiguration>();

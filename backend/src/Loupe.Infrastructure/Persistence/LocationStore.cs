@@ -1,9 +1,8 @@
-using System.Text.Json;
 using Loupe.Application.Common;
 using Loupe.Application.Locations;
+using Loupe.Application.Scouting;
 using Loupe.Domain.Locations;
 using Loupe.Domain.Operations;
-using Loupe.Domain.Scouting;
 using Microsoft.EntityFrameworkCore;
 
 namespace Loupe.Infrastructure.Persistence;
@@ -44,7 +43,7 @@ public sealed class LocationStore(LibraryDbContext context, TimeProvider clock) 
             .ToListAsync(cancellationToken);
         return rows.Select(row => new LocationSummary(row.Id, row.Name, row.Locality,
             row.CoverImageId == null ? null : LocationImageUrls.Preview(row.Id, row.CoverImageId.Value), row.ImageCount,
-            LocationReportStatus.Derive(row.Operation, row.ScoutingReportJson == null ? null : JsonSerializer.Deserialize<SavedScoutingReport>(row.ScoutingReportJson), row.ImageSetRevision),
+            LocationReportStatus.Derive(row.Operation, ScoutingReportJson.Deserialize(row.ScoutingReportJson), row.ImageSetRevision),
             row.CreatedAt)).ToArray();
     }
 
