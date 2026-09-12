@@ -17,7 +17,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] A2 Edit details, brief, notes, and tags with revision protection (L2-055.2, .4, .5, .6)
 - [x] A3 List owned locations with cursor paging (L2-057.1, .4)
 - [x] A4 Add, remove, and choose the cover of location images (L2-056.1–.8)
-- [ ] A5 Delete a location and complete its cleanup (L2-057.6, .7; L2-031.5, .7; L2-032.2)
+- [x] A5 Delete a location and complete its cleanup (L2-057.6, .7; L2-031.5, .7; L2-032.2)
 - [ ] A6a Browse the Locations area (L2-057.1, .4; L2-043.1, .2, .5; L2-044.1; L2-045.1, .6)
 - [ ] A6b Add a location from the grid (L2-055.1, .3, .8; L2-043.7; L2-044.6; L2-045.2)
 - [ ] A7 Inspect a location and edit its details (L2-055.2, .4, .5, .6, .8; L2-057.2, .3, .4, .6; L2-044.2)
@@ -206,4 +206,32 @@ recorded only when actually executed.
   then clean under `Locations`.
 - Non-claims: the L2-056.5 report-outdating half and L2-056.7's deleted-location
   case land with B3 and A5; criteria .3 (per-file queue UI), .4 and .9 are A8.
+
+### A5 — Delete a location and complete its cleanup (L2-057.6, .7; L2-031.5, .7; L2-032.2; L2-056.7)
+
+- Tests: `backend/tests/Loupe.Api.Tests/Locations/DeleteLocationTests.cs` (3 cases):
+  deleting a two-image location with notes and tags → 200 `Pending` deletion
+  naming the location; detail, both images and both previews → 404 at once; the
+  grid holds only the kept location with `totalCount` 1; the cleanup worker
+  (`CleanupProcess`) completes the deletion and the four doomed files are gone
+  while the kept location's image, the reference and the photograph stay readable;
+  a replay after an API restart returns the same deletion id and the kept location
+  is intact. A stranger's, an unknown id's, a stale and a zero revision → 404/404/
+  409/400 with the record unchanged. A deleted location's upload, cover and
+  remove routes → 404 and no file is written (L2-056.7's deleted half).
+- RED: `-Filter 'FullyQualifiedName~DeleteLocationTests'` → `Failed: 3, Passed: 0`
+  — `DELETE /api/locations/{id}` returned `MethodNotAllowed`. Two later failures
+  were the test's own: it asserted the deletion `Completed` before the journal row
+  committed, and counted every file in the shared media folder (a sibling case's
+  pending deletion removed two more); it now polls the deletion status and tracks
+  the doomed files by path.
+- Built: `DeleteLocationCommand[Handler]`, `IDeletionStore.DeleteLocationAsync` in
+  `DeletionStore` (previous-deletion replay, row lock `FOR UPDATE`, revision check,
+  `journal.deletions` row `location` with every image and preview key, cascade
+  removal of images and tags, transient Npgsql → 503), `DELETE /api/locations/{id}?revision`.
+- GREEN: band `Locations|Search|Cleanup|Deletion` → `Passed: 128`. `dotnet build`
+  clean; `dotnet format` clean under `Locations`/`DeletionStore`.
+- Non-claims: cancelling an active scouting job on deletion (L2-031.7's job
+  clause) and removing the location's search vector land with B3 and C3b; the
+  confirmation dialog and immediate UI revocation are A7.
 

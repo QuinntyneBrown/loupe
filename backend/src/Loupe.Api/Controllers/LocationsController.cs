@@ -1,4 +1,5 @@
 using Loupe.Api.Locations;
+using Loupe.Application.Deletions;
 using Loupe.Application.Images;
 using Loupe.Application.Locations;
 using MediatR;
@@ -32,6 +33,10 @@ public sealed class LocationsController(ISender sender) : ControllerBase
     public Task<LocationResult> Update(Guid id, UpdateLocationRequest request, CancellationToken cancellationToken) =>
         sender.Send(new UpdateLocationCommand(id, request.Revision, new LocationDetailsInput(request.Name, request.AddressLine1, request.AddressLine2,
             request.Locality, request.Region, request.PostalCode, request.Country, request.Coordinates, request.Setting)), cancellationToken);
+
+    [HttpDelete("{id:guid}")]
+    public Task<DeletionResult> Delete(Guid id, [FromQuery] long revision, CancellationToken cancellationToken) =>
+        sender.Send(new DeleteLocationCommand(id, revision), cancellationToken);
 
     [HttpPut("{id:guid}/scouting-brief")]
     public Task<LocationResult> ScoutingBrief(Guid id, UpdateLocationTextRequest request, CancellationToken cancellationToken) =>
