@@ -1,0 +1,10 @@
+export const items = [
+  { id: 'morning', type: 'reference', title: 'Morning by the window', author: 'Mara Lindqvist', notes: 'Soft light from a north-facing window.', tags: ['window light', 'soft light'], boards: ['Window light'], preview: true },
+  { id: 'missing', type: 'reference', title: 'Window study without a preview', author: 'Mara Lindqvist', notes: 'A saved window light study whose image is unavailable.', tags: ['window light'], boards: ['Window light'], preview: false },
+  { id: 'mara', type: 'photographer', title: 'Mara Lindqvist', notes: 'Portraits in available window light, with a restrained warm palette.', tags: ['window light', 'soft light'], boards: [], count: 2 },
+  { id: 'studio', type: 'reference', title: 'Studio sitting no. 4', author: 'Saoirse Quinn', notes: 'A slow sitting with one window and soft light.', tags: ['soft light'], boards: ['Portrait sittings'], preview: true },
+  { id: 'desk', type: 'reference', title: 'At the desk', author: 'Saoirse Quinn', notes: 'A quiet window portrait with negative space.', tags: ['negative space'], boards: ['Window light', 'Portrait sittings'], preview: true },
+  { id: 'saoirse', type: 'photographer', title: 'Saoirse Quinn', notes: 'Black and white portraits lit by one window.', tags: ['soft light', 'negative space'], boards: [], count: 2 },
+  { id: 'architecture', type: 'reference', title: 'Quiet architecture with a long study title about light, geometry, and the spaces between buildings', author: 'Inez Okafor', notes: 'An architecture study in hard sunlight.', tags: ['negative space', 'architecturalgeometryanduninterruptedshadowstudies'], boards: ['Quiet architecture'], preview: true },
+  { id: 'inez', type: 'photographer', title: 'Inez Okafor', notes: 'Minimal architecture and high contrast. No linked reference previews yet.', tags: ['negative space', 'architecturalgeometryanduninterruptedshadowstudies'], boards: [], count: 0 },
+].map(item => ({ ...item, source: `https://example.com/synthetic/${item.id}/photography-and-saved-source` }));

@@ -1,0 +1,48 @@
+:host {
+  display: block;
+}
+.results-head {
+  margin: var(--lp-space-6) var(--lp-zero);
+  color: var(--lp-color-text-2);
+  font-size: var(--lp-text-sm);
+}
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--lp-tile-min), 1fr));
+  gap: var(--lp-space-5) var(--lp-space-4);
+  align-items: start;
+}
+lp-photographer-card {
+  grid-column: span 2;
+}
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--lp-space-4);
+  padding: var(--lp-space-11) var(--lp-zero);
+  text-align: center;
+}
+.empty h2,
+.empty p {
+  margin: var(--lp-zero);
+  overflow-wrap: anywhere;
+}
+.empty h2 {
+  font-size: var(--lp-text-xl);
+}
+.empty p {
+  color: var(--lp-color-text-2);
+}
+.more {
+  display: flex;
+  margin: var(--lp-space-6) auto var(--lp-zero);
+}
+.skeleton-tile {
+  aspect-ratio: var(--lp-reference-ratio);
+}
+@media (width < 640px) {
+  .results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--lp-space-3);
+  }
+}

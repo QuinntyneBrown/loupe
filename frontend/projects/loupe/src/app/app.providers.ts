@@ -1,5 +1,10 @@
 import { REFERENCE_IMPORT_SERVICE, ReferenceImportService } from 'api';
-import { PHOTOGRAPHER_SUMMARY_SERVICE, PhotographerSummaryService } from 'api';
+import {
+  PHOTOGRAPHER_SUMMARY_SERVICE,
+  PhotographerSummaryService,
+  SEARCH_SERVICE,
+  SearchService,
+} from 'api';
 import { REFERENCE_ANALYSIS_SERVICE, ReferenceAnalysisService } from 'api';
 import { REFERENCE_SERVICE, ReferenceService } from 'api';
 import { provideHttpClient, withXhr } from '@angular/common/http';
@@ -13,6 +18,7 @@ import { PHOTOGRAPHER_DRAFT_SERVICE, PhotographerDraftService } from 'api';
 import { REFERENCE_DRAFT_SERVICE, ReferenceDraftService } from 'api';
 
 export const appProviders = [
+  { provide: SEARCH_SERVICE, useClass: SearchService },
   { provide: PHOTOGRAPHER_SUMMARY_SERVICE, useClass: PhotographerSummaryService },
   { provide: PHOTOGRAPHER_DRAFT_SERVICE, useClass: PhotographerDraftService },
   { provide: PHOTOGRAPHER_SERVICE, useClass: PhotographerService },

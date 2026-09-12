@@ -2,6 +2,11 @@
   display: block;
   min-width: var(--lp-zero);
 }
+.result-type {
+  color: var(--lp-color-text-3);
+  font-size: var(--lp-text-xs);
+  font-family: var(--lp-font-mono);
+}
 article {
   position: relative;
   display: grid;

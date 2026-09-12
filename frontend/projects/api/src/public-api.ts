@@ -58,3 +58,8 @@ export * from './lib/photographer-summary/photographer-suggestions';
 export * from './lib/photographer-summary/photographer-suggestion-review';
 export * from './lib/photographer-summary/photographer-summary.service.contract';
 export * from './lib/photographer-summary/photographer-summary.service';
+export * from './lib/search/search-request';
+export * from './lib/search/search-tag-facet';
+export * from './lib/search/search-result';
+export * from './lib/search/search.service.contract';
+export * from './lib/search/search.service';

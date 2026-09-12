@@ -1,0 +1,109 @@
+<dialog
+  #modal
+  class="lp-dialog"
+  aria-labelledby="search-filters-title"
+  (cancel)="cancel($event)"
+  (keydown)="trapFocus($event)"
+>
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 id="search-filters-title" class="lp-dialog__title">Boards and tags</h2>
+        <p class="lp-dialog__text">Filters combine with whatever you typed.</p>
+      </div>
+      <button type="button" class="lp-icon-button" aria-label="Close" (click)="cancel()">
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body">
+      <section class="filter-group">
+        <h3>Boards</h3>
+        @if (boardsFailed()) {
+          <p role="alert">Boards could not be loaded. Your selections are unchanged.</p>
+          <button class="lp-button lp-button--secondary" type="button" (click)="retryBoards.emit()">
+            Retry boards
+          </button>
+        } @else if (boards() === null) {
+          <p role="status">Loading boards…</p>
+        } @else if (!boards()?.length) {
+          <p>No boards yet.</p>
+        }
+        <div
+          class="choices"
+          role="group"
+          aria-label="Boards"
+          [attr.aria-describedby]="boardError() ? 'filter-boards-error' : null"
+        >
+          @for (board of boardChoices(); track board.id) {
+            <button
+              class="lp-chip"
+              type="button"
+              [attr.aria-label]="board.name"
+              [attr.aria-describedby]="
+                board.referenceCount !== null ? 'search-board-count-' + board.id : null
+              "
+              [attr.aria-pressed]="draftBoards().includes(board.id)"
+              (click)="toggleBoard(board.id)"
+            >
+              {{ board.name }}
+              @if (board.referenceCount !== null) {
+                <span class="board-count" [id]="'search-board-count-' + board.id"
+                  >{{ board.referenceCount }}<span class="visually-hidden"> references</span></span
+                >
+              }
+            </button>
+          }
+        </div>
+        @if (boardError()) {
+          <p id="filter-boards-error" role="alert">{{ boardError() }}</p>
+        }
+        <p>Match any selected board. Only references belong to boards.</p>
+      </section>
+      <section class="filter-group">
+        <h3>Tags</h3>
+        @if (tagsFailed()) {
+          <p role="alert">Tags could not be loaded. Your selections are unchanged.</p>
+          <button class="lp-button lp-button--secondary" type="button" (click)="retryTags.emit()">
+            Retry tags
+          </button>
+        } @else if (tags() === null) {
+          <p role="status">Loading tags…</p>
+        } @else if (!tags()?.length) {
+          <p>No active library tags yet.</p>
+        }
+        <div
+          class="choices"
+          role="group"
+          aria-label="Tags"
+          [attr.aria-describedby]="tagError() ? 'filter-tags-error' : null"
+        >
+          @for (tag of tagChoices(); track tag) {
+            <button
+              class="lp-chip"
+              type="button"
+              [attr.aria-pressed]="hasTag(tag)"
+              (click)="toggleTag(tag)"
+            >
+              {{ tagLabel(tag) }}
+            </button>
+          }
+        </div>
+        @if (tagError()) {
+          <p id="filter-tags-error" role="alert">{{ tagError() }}</p>
+        }
+        <p>Match every selected tag, across references and photographers.</p>
+      </section>
+    </div>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--ghost" type="button" (click)="clear()">
+        Clear filters
+      </button>
+      <button class="lp-button lp-button--secondary" type="button" (click)="cancel()">
+        Cancel
+      </button>
+      <button class="lp-button lp-button--primary" type="button" (click)="apply()">
+        Apply filters
+      </button>
+    </footer>
+  </div>
+</dialog>

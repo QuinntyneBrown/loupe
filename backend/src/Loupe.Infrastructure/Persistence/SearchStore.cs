@@ -6,6 +6,18 @@ namespace Loupe.Infrastructure.Persistence;
 
 public sealed class SearchStore(LibraryDbContext database) : ISearchStore
 {
+    public async Task<IReadOnlyList<SearchTagCount>> ListTagsAsync(string ownerId, CancellationToken cancellationToken) =>
+        await database.Database.SqlQuery<SearchTagCount>($"""
+            SELECT min(tags."Name" COLLATE "C") AS "Name", count(*)::integer AS "Count", tags."NormalizedName"
+            FROM (
+                SELECT "Name", "NormalizedName" FROM reference_tags WHERE "OwnerId" = {ownerId}
+                UNION ALL
+                SELECT "Name", "NormalizedName" FROM photographer_tags WHERE "OwnerId" = {ownerId}
+            ) tags
+            GROUP BY tags."NormalizedName"
+            ORDER BY count(*) DESC, tags."NormalizedName" COLLATE "C"
+            """).ToListAsync(cancellationToken);
+
     public Task<int> CountAsync(string ownerId, SearchFilter filter, CancellationToken cancellationToken) =>
         Filtered(ownerId, filter).CountAsync(cancellationToken);
 

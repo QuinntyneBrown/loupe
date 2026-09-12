@@ -8,6 +8,7 @@ import { SESSION_SERVICE } from 'api';
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
+  host: { '(document:keydown)': 'searchShortcut($event)' },
 })
 export class App {
   protected readonly session = inject(SESSION_SERVICE);
@@ -17,18 +18,59 @@ export class App {
   protected readonly error = signal('');
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
+  private lastPath = '';
 
   constructor() {
     this.router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
       if (event instanceof NavigationEnd) {
+        const path = event.urlAfterRedirects.split(/[?#]/)[0];
+        const focusSearch =
+          path === '/search' &&
+          this.router.currentNavigation()?.extras.state?.['focusSearch'] === true;
         this.currentArea.set(
-          event.urlAfterRedirects.startsWith('/inspiration') ? 'inspiration' : 'my-work',
+          ['inspiration', 'photographers', 'search'].find(
+            (area) => path === '/' + area || path.startsWith('/' + area + '/'),
+          ) ?? 'my-work',
         );
-        afterNextRender(() => this.document.querySelector('main')?.focus(), {
-          injector: this.injector,
-        });
+        if (path !== '/search' || this.lastPath !== path)
+          afterNextRender(
+            () => (focusSearch ? this.focusSearch() : this.document.querySelector('main')?.focus()),
+            { injector: this.injector },
+          );
+        this.lastPath = path;
       }
     });
+  }
+
+  protected async searchShortcut(event: KeyboardEvent): Promise<void> {
+    if (
+      event.key !== '/' ||
+      event.defaultPrevented ||
+      event.repeat ||
+      event.isComposing ||
+      event.ctrlKey ||
+      event.altKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      !this.session.current() ||
+      this.document.querySelector('dialog[open], [role="dialog"][aria-modal="true"]') ||
+      event
+        .composedPath()
+        .some(
+          (target) =>
+            target instanceof HTMLElement &&
+            (target.isContentEditable ||
+              target.matches('input, textarea, select, [role="textbox"], [role="combobox"]')),
+        )
+    )
+      return;
+    event.preventDefault();
+    if (this.currentArea() === 'search') this.focusSearch();
+    else await this.router.navigateByUrl('/search', { state: { focusSearch: true } });
+  }
+
+  private focusSearch(): void {
+    this.document.querySelector<HTMLInputElement>('main input[type="search"]')?.focus();
   }
 
   protected async signOut(): Promise<void> {

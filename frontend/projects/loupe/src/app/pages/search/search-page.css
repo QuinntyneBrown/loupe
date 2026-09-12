@@ -1,0 +1,112 @@
+.search-hero {
+  display: grid;
+  gap: var(--lp-space-6);
+  max-width: var(--lp-search-max);
+  margin: var(--lp-space-11) auto var(--lp-zero);
+}
+.search-hero--top {
+  margin-top: var(--lp-zero);
+  max-width: none;
+  gap: var(--lp-space-4);
+}
+.search-hero > * {
+  min-width: var(--lp-zero);
+}
+.intro {
+  display: grid;
+  gap: var(--lp-space-2);
+  text-align: center;
+}
+.intro p,
+.hint {
+  margin: var(--lp-zero);
+  color: var(--lp-color-text-2);
+}
+.hint {
+  text-align: center;
+  font-size: var(--lp-text-sm);
+}
+form {
+  position: relative;
+}
+form .lp-icon {
+  position: absolute;
+  top: var(--lp-space-4);
+  left: var(--lp-space-4);
+  color: var(--lp-color-text-3);
+}
+form input {
+  width: var(--lp-full);
+  height: calc(var(--lp-control-height) + var(--lp-space-4));
+  padding-left: calc(var(--lp-space-4) * 2 + var(--lp-icon-size));
+  font-size: var(--lp-text-lg);
+}
+.examples,
+.selected-filters,
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--lp-space-2);
+}
+.search-hero--top .filters {
+  justify-content: flex-start;
+}
+.examples button {
+  flex: 0 1 auto;
+  font-style: italic;
+  white-space: normal;
+  height: auto;
+  padding-block: var(--lp-space-1);
+}
+.segmented {
+  display: inline-flex;
+  background: var(--lp-color-surface-2);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+  padding: var(--lp-space-1);
+}
+.segmented label {
+  position: relative;
+  cursor: pointer;
+}
+.segmented input {
+  position: absolute;
+  opacity: var(--lp-zero);
+}
+.segmented span {
+  display: block;
+  padding: var(--lp-space-2) var(--lp-space-3);
+  border-radius: var(--lp-radius-sm);
+  font-size: var(--lp-text-sm);
+  color: var(--lp-color-text-2);
+}
+.segmented input:checked + span {
+  background: var(--lp-color-surface);
+  color: var(--lp-color-text);
+}
+.segmented input:focus-visible + span {
+  outline: var(--lp-ring-width) solid var(--lp-color-focus);
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+  margin: var(--lp-zero);
+}
+.selected-filters button {
+  max-width: var(--lp-full);
+  height: auto;
+  min-height: var(--lp-control-height-sm);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.clear-filters {
+  justify-self: start;
+}
+@media (width < 640px) {
+  .search-hero {
+    margin-top: var(--lp-space-8);
+  }
+  .search-hero--top {
+    margin-top: var(--lp-zero);
+  }
+}

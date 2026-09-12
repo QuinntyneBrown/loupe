@@ -22,7 +22,7 @@
   top: 0;
   z-index: var(--lp-z-topbar);
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   height: var(--lp-topbar-height);
   padding: 0 var(--lp-gutter);
@@ -34,10 +34,17 @@
   justify-content: flex-end;
   align-items: center;
   gap: var(--lp-space-3);
+  min-width: var(--lp-zero);
+}
+.lp-topbar__end button {
+  flex-shrink: 0;
 }
 .lp-topbar__user {
   font-size: var(--lp-text-sm);
   color: var(--lp-color-text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .lp-nav {
   display: flex;
@@ -81,7 +88,7 @@
     bottom: 0;
     z-index: var(--lp-z-topbar);
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 0;
     height: calc(var(--lp-tabbar-height) + env(safe-area-inset-bottom));
     padding: 0 var(--lp-space-2) env(safe-area-inset-bottom);

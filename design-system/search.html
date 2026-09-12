@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Keyword search · Loupe design system</title>
+    <link rel="stylesheet" href="/src/tokens.css">
+    <link rel="stylesheet" href="/src/reference.css">
+    <link rel="stylesheet" href="/src/search.css">
+    <script type="module" src="/src/search.js"></script>
+  </head>
+  <body class="search-example">
+    <a class="skip" href="#main">Skip to content</a>
+    <header><a class="wordmark" href="/">loupe<span> / design system</span></a><a href="/#gallery">All examples</a></header>
+    <main id="main" tabindex="-1">
+      <p class="eyebrow">KEYWORD SEARCH / SYNTHETIC LIBRARY</p>
+      <p class="caption">An independent interaction example. No application, API, or external images are connected.</p>
+      <div class="search-scenarios">
+        <label for="example-state">Example state</label>
+        <select id="example-state" aria-describedby="scenario-help">
+          <option>Initial</option><option>Results</option><option>Loading</option><option>Empty</option><option>Failure</option><option>Pagination recovery</option><option>Unavailable filters</option>
+        </select>
+        <button class="secondary" id="complete-loading" type="button" hidden>Complete loading</button>
+        <p id="scenario-help" class="caption">Choose a starting condition, then use the real controls below. Loading waits for “Complete loading”; failures recover on retry.</p>
+      </div>
+      <div class="search-hero" id="search-hero">
+        <div id="search-intro"><h1>Describe what you're looking for.</h1><p class="intro">The light, the subject, the mood, a technique. Or the tag you gave it.</p></div>
+        <form id="search-form" role="search">
+          <label class="search-label" for="search-query">Search your library</label>
+          <div class="search-input"><input id="search-query" type="search" placeholder="Try window or architecture" aria-describedby="keyword-help"><button type="submit">Search</button></div>
+        </form>
+        <p class="caption" id="keyword-help"><span class="pill">Keyword</span> Keyword matches titles, tags, and notes. Meaning search is not available in this example.</p>
+        <div class="actions search-examples" aria-label="Example searches">
+          <button class="tag" type="button" data-query="window" aria-label="Try “window”">“window”</button>
+          <button class="tag" type="button" data-query="architecture" aria-label="Try “architecture”">“architecture”</button>
+          <button class="tag" type="button" data-query="soft light" aria-label="Try “soft light”">“soft light”</button>
+        </div>
+        <div class="search-filters">
+          <fieldset class="search-types"><legend>Type</legend>
+            <label><input type="radio" name="type" value="all" checked><span>All</span></label>
+            <label><input type="radio" name="type" value="reference"><span>References</span></label>
+            <label><input type="radio" name="type" value="photographer"><span>Photographers</span></label>
+          </fieldset>
+          <button id="open-filters" type="button" class="tag" aria-label="Boards and tags" aria-pressed="false" aria-haspopup="dialog">Boards and tags</button>
+        </div>
+        <div class="search-active-filters" id="active-filters" role="group" aria-label="Active filters"></div>
+      </div>
+      <p role="status" aria-label="Search feedback" aria-live="polite" id="search-feedback"></p>
+      <section class="search-results" aria-label="Search results" id="search-results"></section>
+    </main>
+    <dialog id="search-detail" aria-labelledby="detail-title">
+      <h2 id="detail-title"></h2><p class="eyebrow">Synthetic saved item</p><p id="detail-notes"></p>
+      <button type="button" id="close-detail">Close example</button>
+    </dialog>
+    <dialog id="search-filters-dialog" aria-labelledby="filters-title" aria-describedby="filters-help">
+      <form id="filter-form">
+        <header class="search-dialog-header">
+          <div><h2 id="filters-title">Boards and tags</h2><p class="caption" id="filters-help">Choose up to 10 of each. Filters combine with whatever you typed.</p></div>
+          <button id="close-filters" class="secondary" type="button" aria-label="Close filters">×</button>
+        </header>
+        <div class="search-dialog-body">
+          <fieldset><legend>Boards</legend><div class="actions" id="board-choices"></div>
+            <p class="caption">Boards hold references only, so choosing one excludes photographers from results.</p>
+          </fieldset>
+          <fieldset><legend>Tags</legend><div class="actions" id="tag-choices"></div>
+            <p class="caption">Match every selected tag and any selected board. Different groups combine.</p>
+          </fieldset>
+          <p role="status" aria-label="Filter selection" id="filter-selection"></p>
+          <p class="caption" role="alert" id="filter-error" hidden></p>
+        </div>
+        <footer class="search-dialog-footer">
+          <button class="secondary" id="clear-draft" type="button">Clear</button>
+          <button class="secondary" id="cancel-filters" type="button">Cancel</button>
+          <button type="submit">Apply</button>
+        </footer>
+      </form>
+    </dialog>
+    <footer>Loupe · Made for the practice of photography.<span>Synthetic examples. No library connection.</span></footer>
+  </body>
+</html>

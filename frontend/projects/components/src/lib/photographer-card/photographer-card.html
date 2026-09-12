@@ -1,4 +1,7 @@
 <article>
+  @if (searchResult()) {
+    <span class="result-type">Photographer</span>
+  }
   <a #link class="card-link" [routerLink]="destination()" [attr.aria-label]="'Open ' + name()"></a>
   <div class="head">
     <h2>{{ name() }}</h2>

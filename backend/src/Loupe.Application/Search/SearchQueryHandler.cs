@@ -13,11 +13,12 @@ public sealed class SearchQueryHandler(ICurrentOwner owner, ISearchStore search,
 {
     public async Task<SearchPage> Handle(SearchQuery request, CancellationToken cancellationToken)
     {
+        if (request.Mode != "keyword") throw new RequestValidationException("mode", "Only keyword search is supported.");
         if (request.PageSize is < 1 or > 100) throw new RequestValidationException("pageSize", "Choose between 1 and 100 items.");
         if (request.Type is not ("all" or "references" or "photographers")) throw new RequestValidationException("type", "Choose All, References or Photographers.");
         if (request.Query?.Contains('\0') == true) throw new RequestValidationException("query", "Remove the null character from the query.");
         var query = TextField.Normalize(request.Query?.Normalize(NormalizationForm.FormC), 500, "query") ?? "";
-        if (request.Tags?.Length > 10 || request.Tags?.Any(tag => tag.Contains('\0')) == true) throw new RequestValidationException("tags", "Choose up to 10 valid tags.");
+        if (request.Tags?.Length > 10 || request.Tags?.Any(tag => tag?.Contains('\0') == true) == true) throw new RequestValidationException("tags", "Choose up to 10 valid tags.");
         if (request.BoardIds?.Length > 10) throw new RequestValidationException("boardIds", "Choose up to 10 boards.");
         var tags = (request.Tags ?? []).Select(tag => TagName.Validate(tag).ToUpperInvariant()).Distinct().Order(StringComparer.Ordinal).ToArray();
         var boardIds = (request.BoardIds ?? []).Distinct().Order().ToArray();

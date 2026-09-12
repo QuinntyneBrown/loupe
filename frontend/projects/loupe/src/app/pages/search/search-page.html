@@ -1,0 +1,146 @@
+<main id="main" class="lp-main" tabindex="-1">
+  <div class="search-hero" [class.search-hero--top]="started()">
+    @if (!started()) {
+      <div class="intro">
+        <h1 class="lp-title">Describe what you're looking for.</h1>
+        <p>The light, the subject, the mood, a technique. Or the tag you gave it.</p>
+      </div>
+    } @else {
+      <h1 class="visually-hidden">Search</h1>
+    }
+    <form role="search" (ngSubmit)="submit()">
+      <svg class="lp-icon" aria-hidden="true"><use href="#i-search" /></svg>
+      <input
+        #queryInput
+        class="lp-input"
+        type="search"
+        name="query"
+        aria-label="Search your library"
+        placeholder="moody portraits with soft window light"
+        [ngModel]="query()"
+        (ngModelChange)="query.set($event)"
+        [attr.aria-invalid]="!!error()"
+        [attr.aria-describedby]="error() ? 'search-error' : null"
+      />
+    </form>
+    @if (error()) {
+      <p id="search-error" role="alert">{{ error() }}</p>
+    }
+    @if (fieldErrors()['mode']) {
+      <div>
+        <p role="alert">{{ fieldErrors()['mode'] }} No search has been run with this mode.</p>
+        <button class="lp-button lp-button--secondary" type="button" (click)="useKeyword()">
+          Use Keyword
+        </button>
+      </div>
+    }
+    @if (!started()) {
+      <p class="hint">Keyword matches the words you type in your saved library.</p>
+      <div class="examples" aria-label="Example searches">
+        @for (example of examples; track example) {
+          <button class="lp-chip" (click)="useExample(example)">“{{ example }}”</button>
+        }
+      </div>
+    }
+    <div class="filters">
+      <div
+        class="segmented"
+        role="radiogroup"
+        aria-label="Type"
+        [attr.aria-describedby]="fieldErrors()['type'] ? 'search-type-error' : null"
+      >
+        @for (option of types; track option) {
+          <label
+            ><input
+              type="radio"
+              name="type"
+              [value]="option"
+              [checked]="type() === option"
+              (change)="chooseType(option)"
+            /><span>{{
+              option === 'all' ? 'All' : option === 'references' ? 'References' : 'Photographers'
+            }}</span></label
+          >
+        }
+      </div>
+      @if (fieldErrors()['type']) {
+        <p id="search-type-error" role="alert">{{ fieldErrors()['type'] }}</p>
+      }
+      @if (fieldErrors()['tags']) {
+        <p role="alert">{{ fieldErrors()['tags'] }}</p>
+      }
+      @if (fieldErrors()['boardIds']) {
+        <p role="alert">{{ fieldErrors()['boardIds'] }}</p>
+      }
+      <button
+        class="lp-chip"
+        type="button"
+        (click)="openFilters()"
+        [attr.aria-pressed]="!!(selectedTags().length || selectedBoards().length)"
+      >
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-filter" /></svg>
+        Boards and tags
+      </button>
+    </div>
+    <div class="selected-filters" role="group" aria-label="Selected filters">
+      @for (tag of selectedTags(); track $index) {
+        <button
+          class="lp-chip"
+          type="button"
+          [attr.aria-label]="'Remove ' + (tag || 'empty tag')"
+          (click)="removeTag(tag)"
+        >
+          {{ tag || 'Empty tag' }} ×
+        </button>
+      }
+      @for (id of selectedBoards(); track $index) {
+        <button
+          class="lp-chip"
+          type="button"
+          [attr.aria-label]="'Remove ' + boardName(id)"
+          (click)="removeBoard(id)"
+        >
+          {{ boardName(id) }} ×
+        </button>
+      }
+    </div>
+    @if (selectedTags().length || selectedBoards().length) {
+      <button
+        class="lp-button lp-button--ghost clear-filters"
+        type="button"
+        (click)="clearFilters()"
+      >
+        Clear filters
+      </button>
+    }
+    @if (selectedBoards().length && boardsFailed()) {
+      <div>
+        <p role="alert">Board names could not be loaded. Your selections are unchanged.</p>
+        <button class="lp-button lp-button--secondary" type="button" (click)="loadBoards()">
+          Retry boards
+        </button>
+      </div>
+    }
+  </div>
+  <lp-search-results
+    [request]="request()"
+    (filtersRequested)="openFilters()"
+    (queryEditRequested)="focusQuery()"
+    (filtersClearRequested)="clearFilters()"
+    (invalidRequest)="showValidation($event)"
+  />
+</main>
+@if (dialogOpen()) {
+  <lp-search-filters-dialog
+    [tags]="tags()"
+    [boards]="boards()"
+    [tagsFailed]="tagsFailed()"
+    [boardsFailed]="boardsFailed()"
+    [selectedTags]="selectedTags()"
+    [selectedBoards]="selectedBoards()"
+    (retryTags)="loadTags()"
+    (retryBoards)="loadBoards()"
+    (closed)="dialogOpen.set(false)"
+    (applied)="applyFilters($event)"
+  />
+}

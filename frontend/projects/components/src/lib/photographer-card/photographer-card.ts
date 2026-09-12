@@ -8,6 +8,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './photographer-card.css',
 })
 export class PhotographerCard {
+  readonly searchResult = input(false);
   private readonly link = viewChild.required<ElementRef<HTMLAnchorElement>>('link');
   focus(): void {
     this.link().nativeElement.focus();

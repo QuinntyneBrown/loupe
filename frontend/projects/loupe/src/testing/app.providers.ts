@@ -1,4 +1,6 @@
 import { REFERENCE_IMPORT_SERVICE } from 'api';
+import { SEARCH_SERVICE } from 'api';
+import { MockSearchService } from './mock-search.service';
 import { PHOTOGRAPHER_SUMMARY_SERVICE } from 'api';
 import { MockPhotographerSummaryService } from './mock-photographer-summary.service';
 import { REFERENCE_ANALYSIS_SERVICE } from 'api';
@@ -23,6 +25,7 @@ import { REFERENCE_DRAFT_SERVICE } from 'api';
 import { MockReferenceDraftService } from './mock-reference-draft.service';
 
 export const appProviders = [
+  { provide: SEARCH_SERVICE, useClass: MockSearchService },
   { provide: PHOTOGRAPHER_SUMMARY_SERVICE, useClass: MockPhotographerSummaryService },
   { provide: PHOTOGRAPHER_DRAFT_SERVICE, useClass: MockPhotographerDraftService },
   { provide: PHOTOGRAPHER_SERVICE, useClass: MockPhotographerService },

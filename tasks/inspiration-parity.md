@@ -522,3 +522,112 @@ be established without printing credentials. Live quality checks are mandatory.
 
 ### Search card details and immediate changes
 - RED: the photographer result lacked referenceCount. GREEN: all 8 Search API cases passed after adding bounded thumbnail URLs/counts, including rename/unlink/delete visibility, notes, unknown tags and filter limits.
+
+### Keyword search completion scope
+- The completion scope was explicitly narrowed to keyword search end-to-end:
+  combined filters, private mixed results, full paging, URL history, recovery,
+  four-area navigation, guarded slash shortcut and search-specific design delivery.
+  Meaning, embeddings, durable indexing, semantic related references, Settings
+  redesign and unrelated branch parity remain deferred. The broader Search
+  checklist above therefore remains unchecked.
+- Existing uncommitted search work was preserved. Baseline: 8 Search API and
+  6 Chromium search cases passed. Port 4207 was occupied by an unrelated server;
+  acceptance used an isolated server on 4217 with the existing Chromium runner.
+  No commits, push or PR were made.
+
+### Keyword API boundaries and complete filter choices
+- RED: unsupported modes returned keyword results, tag facets returned 404, and
+  empty tag bindings returned 500. GREEN: explicit keyword mode, corrective
+  validation and a private active-tag union now work across both library types.
+- Search coverage includes eligible active fields, pending suggestion/My Work
+  exclusion, Unicode limits, owner/query/filter/page-size cursor scope, stable
+  ties, immediate edits/deletions and three real private image previews.
+- Review found that JavaScript uppercase merged `straße` and `strasse` despite
+  distinct persisted .NET identities. RED: API facet identity/alias cases and
+  Chromium independent-selection cases failed. GREEN: facets now supply
+  `normalizedName` and server-resolved `selectedNames`; the dialog does not guess
+  .NET casing. Unknown and invalid URL selections remain explicitly correctable.
+- Final API command: `.\backend\Test.ps1 -Filter` with Search plus affected
+  BoardTests, BoardMembershipTests, ReferenceTagTests, ReferenceFilterTests,
+  ReferenceSuggestionReviewTests, ReferenceTextTests, ReplaceReferenceImageTests,
+  EditPhotographerTests, DeletePhotographerTests, PhotographerReferencesTests and
+  PhotographerSummaryWorkerTests. All 85 passed, including 47 Search cases.
+
+### Keyword filters, result recovery and navigation
+- Incremental REDs covered missing filter controls/limits, URL removal and reset,
+  unavailable-board explanations, independent choice retries, invalid URL fields,
+  mode correction, ambiguous singleton parameters and board-ID casing.
+- Given draft selections, Apply commits all filter groups; Cancel/Escape discard
+  changes. Tags use AND, boards use OR, and boards exclude photographers without
+  ignoring the selected type. Clear retains query/type/mode, and history/reload
+  restore filters. Choices are not limited to a loaded results page.
+- Result slices exposed broken media placeholders, missing empty-state actions,
+  repeated requests, missing explicit focus recovery, passive focus stealing,
+  ambiguous status and invalid-cursor handling. Retained pages retry once, stale
+  responses cannot overwrite newer state, and real saved-item/source navigation
+  is exercised through injected detail fixtures.
+- Review reproduced delayed Load more stealing focus from an unsubmitted query.
+  The added RED now passes: results still append, but automatic card focus is
+  skipped when the user has moved focus to another control.
+- Navigation RED: two links instead of four, and slash did not open Search or
+  invoke unsaved guards. GREEN: desktop links/mobile tabs mark all four areas,
+  the shortcut focuses Search without erasing its query, and editable controls,
+  modifiers, composition and open dialogs do not trigger it. Keep editing/Discard
+  remain effective.
+- Visual RED: missing mock-specific Boards and tags presentation; subsequent
+  keyboard checks exposed Tab leaving the native modal for browser chrome.
+  The dialog now shows boards first with accessible counts and contains keyboard
+  focus using the same boundary-handling pattern as existing application dialogs.
+- Inspected initial/results/filter screenshots at desktop and 320px. Behavioral
+  layout/Axe coverage includes 320, 375, 639, 640, 768, 1023, 1024 and 1440px;
+  375x667 and 844x390 dialogs; long metadata and increased text spacing; and
+  640/320px reflow equivalents of 200%/400% on a 1280px viewport. This is not a
+  claim of native browser-zoom or manual screen-reader certification.
+- Final Chromium command: `npm --prefix .\e2e test --` with the isolated session
+  config, `--project=chromium --reporter=dot`, all five search spec files, plus
+  inspiration, photographers, photographer-detail, reference-filters, boards,
+  my-work, sign-in and photograph-unsaved. All 160 passed.
+- Rebuilding Angular libraries while an existing dev server was running initially
+  produced stale-bundle failures. Restarting the owned server after rebuilding
+  resolved them without changing assertions.
+
+### Production keyword adapter smoke
+- The built production `SearchService`, injected through `SEARCH_SERVICE`, and
+  real Angular `HttpClient` were exercised over local HTTP against `ApiFactory`
+  production API handlers and an isolated PostgreSQL container. The test-host
+  bridge used the controlled identity fixture and only synthetic saved records;
+  no live identity, Azure provider, private library or credentials were used.
+- Passed: 26 mixed results across two pages, no duplicate identities, combined
+  board/two-tag filtering to 25 references, distinct Unicode facet aliases, and
+  structured mode/cursor validation errors. The bridge and database were
+  gracefully disposed afterward. This supplements mocked-browser acceptance;
+  it is not a deployed-browser/OIDC smoke or a semantic-provider quality claim.
+
+### Independent keyword search design delivery
+- Added `design-system/search.html`, linked from the reference site and included
+  in its independent static build. Local synthetic data demonstrates initial,
+  mixed-result, loading, empty, failure, unavailable-filter and paging-recovery
+  states, working filter drafts and saved-item/source actions. No application,
+  API, external image, dependency or additional token is required.
+- Review REDs exposed OR instead of AND for multiple tags, Tab escaping the
+  filter dialog, an accepted eleventh tag, and delayed paging stealing query
+  focus. GREEN: every selected tag is required, any selected board can match,
+  the dialog shares the existing editor's extracted focus-boundary behavior,
+  excess selections receive an explicit error, and paging respects moved focus.
+  The earlier draft-clear case was corrected to require an empty intersection,
+  rather than accepting results that matched only one selected tag.
+- Final command on the isolated runner-owned port 4199:
+  `npm --prefix .\design-system test -- search.spec.js search-filters.spec.js search-recovery.spec.js search-layout.spec.js gallery.spec.js reference.spec.js editor.spec.js --project=chromium --output=artifacts\search-final-review --reporter=dot`.
+  All 53 Chromium cases passed, including the existing reference/gallery/editor
+  regressions; the runner built the standalone site and stopped its server.
+- Coverage includes 320, 375, 639, 640, 641, 768, 1023, 1024, 1025 and 1440px
+  layouts; 320x667, 375x667 and 844x390 dialogs; long content, increased text
+  spacing, reduced motion, keyboard boundary/return focus and Chromium Axe.
+  Final screenshots are retained under `design-system/artifacts/search-final-review`.
+  This remains automated/reflow evidence, not full screen-reader certification.
+- Final `npm --prefix .\frontend run build` passed for all three libraries and
+  the application, including authoritative token mirroring. The existing
+  initial-bundle budget warning remains (761.09 kB against a 500 kB warning
+  budget); global load-budget certification is outside this keyword delivery.
+- Keyword delivery is complete and uncommitted. Meaning/indexing and the
+  broader branch checklist remain explicitly deferred.

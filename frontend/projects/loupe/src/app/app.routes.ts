@@ -20,6 +20,12 @@ import { ComparePage } from './pages/compare/compare-page';
 
 export const routes: Routes = [
   {
+    path: 'search',
+    loadComponent: () => import('./pages/search/search-page').then((module) => module.SearchPage),
+    canActivate: [sessionGuard],
+    title: 'Search · Loupe',
+  },
+  {
     path: 'photographers/:id',
     canDeactivate: [photographerUnsavedGuard],
     loadComponent: () =>

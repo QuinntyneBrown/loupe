@@ -8,6 +8,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './reference-card.css',
 })
 export class ReferenceCard {
+  readonly boardActions = input(true);
   readonly inBoard = input(false);
   readonly busy = input(false);
   readonly boardsRequested = output<void>();
