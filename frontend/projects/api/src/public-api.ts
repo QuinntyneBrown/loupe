@@ -66,3 +66,4 @@ export * from './lib/search/search.service';
 export * from './lib/location/location-result';
 export * from './lib/location/location.service.contract';
 export * from './lib/location/location.service';
+export * from './lib/location/location-input';

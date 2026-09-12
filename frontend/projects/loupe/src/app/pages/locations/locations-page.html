@@ -1,3 +1,19 @@
 <main id="main" class="lp-main" tabindex="-1">
-  <lp-location-collection />
+  <lp-location-collection (addRequested)="openAdd()" />
+  @if (adding()) {
+    <lp-add-location (saved)="added($event)" (closed)="close()" />
+  }
+  @if (notice()) {
+    <div class="notice" role="status">
+      <span>{{ notice() }}</span
+      ><button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Dismiss notification"
+        (click)="notice.set('')"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </div>
+  }
 </main>

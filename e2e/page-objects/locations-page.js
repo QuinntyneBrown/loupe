@@ -39,7 +39,7 @@ export class LocationsPage {
   }
   async expectCount(count) {
     await expect(
-      this.page.getByText(`${count} locations`, { exact: true }),
+      this.page.getByText(`${count} ${count === 1 ? "location" : "locations"}`, { exact: true }),
     ).toBeVisible();
   }
   cards() {
@@ -156,5 +156,155 @@ export class LocationsPage {
         () => document.documentElement.scrollWidth <= window.innerWidth,
       ),
     ).toBe(true);
+  }
+  addTrigger(entry = "header") {
+    return this.page
+      .getByRole("button", { name: "Add location", exact: true })
+      .nth(entry === "empty" ? 1 : 0);
+  }
+  async openAdd(entry = "header") {
+    await this.addTrigger(entry).click();
+    await expect(this.dialog()).toBeVisible();
+  }
+  dialog() {
+    return this.page.getByRole("dialog", { name: "Add location", exact: true });
+  }
+  discardDialog() {
+    return this.page.getByRole("dialog", {
+      name: "Discard unsaved changes?",
+      exact: true,
+    });
+  }
+  field(label) {
+    return this.dialog().getByLabel(new RegExp("^" + label + "( optional.*)?$"));
+  }
+  async fill(values) {
+    for (const [label, value] of Object.entries(values)) {
+      if (label === "Setting") await this.field(label).selectOption(value);
+      else await this.field(label).fill(value);
+    }
+  }
+  async addTag(name) {
+    const input = this.dialog().getByRole("textbox", { name: "Add a tag", exact: true });
+    await input.fill(name);
+    await input.press("Enter");
+  }
+  async save() {
+    await this.dialog()
+      .getByRole("button", { name: "Save location", exact: true })
+      .click();
+  }
+  async cancel() {
+    await this.dialog()
+      .getByRole("button", { name: "Cancel", exact: true })
+      .click();
+  }
+  async close() {
+    await this.dialog()
+      .getByRole("button", { name: "Close", exact: true })
+      .click();
+  }
+  async escape() {
+    await this.page.keyboard.press("Escape");
+  }
+  async clickBackdrop() {
+    await this.page.mouse.click(2, 2);
+  }
+  async visitInspirationThenReturn() {
+    await this.navigation()
+      .getByRole("link", { name: "Inspiration", exact: true })
+      .click();
+    await expect(this.page).toHaveURL(/\/inspiration$/);
+    await this.navigateFromLibrary();
+    await expect(this.page).toHaveURL(/\/locations$/);
+  }
+  async navigateAway() {
+    await this.page.evaluate(() => history.back());
+  }
+  async expectStayed() {
+    await expect(this.page).toHaveURL(/\/locations$/);
+    await expect(this.dialog()).toBeVisible();
+  }
+  async expectLeft() {
+    await expect(this.page).toHaveURL(/\/inspiration$/);
+  }
+  async expectValue(label, value) {
+    await expect(this.field(label)).toHaveValue(value);
+  }
+  async expectFieldError(label, message) {
+    const field = this.field(label);
+    await expect(field).toHaveAttribute("aria-invalid", "true");
+    await expect(field).toBeFocused();
+    await expect(this.dialog().getByText(message, { exact: true })).toBeVisible();
+  }
+  async expectNoFieldError(label) {
+    await expect(this.field(label)).not.toHaveAttribute("aria-invalid", "true");
+  }
+  async expectSaveFailure() {
+    await expect(this.dialog().getByRole("alert")).toContainText(
+      "Couldn't save this location",
+    );
+  }
+  async retrySave() {
+    await this.dialog()
+      .getByRole("button", { name: "Try again", exact: true })
+      .click();
+  }
+  async expectDiscardChoice() {
+    await expect(this.discardDialog()).toBeVisible();
+    await expect(
+      this.discardDialog().getByRole("button", { name: "Keep editing", exact: true }),
+    ).toBeFocused();
+  }
+  async expectNoDiscardChoice() {
+    await expect(this.discardDialog()).toHaveCount(0);
+  }
+  async keepEditing() {
+    await this.discardDialog()
+      .getByRole("button", { name: "Keep editing", exact: true })
+      .click();
+  }
+  async discardChanges() {
+    await this.discardDialog()
+      .getByRole("button", { name: "Discard", exact: true })
+      .click();
+  }
+  async expectClosed() {
+    await expect(this.dialog()).toHaveCount(0);
+  }
+  async expectTriggerFocused(entry = "header") {
+    await expect(this.addTrigger(entry)).toBeFocused();
+  }
+  async expectNotice(text) {
+    await expect(this.page.getByRole("status")).toContainText(text);
+  }
+  async expectFocusContained() {
+    for (let index = 0; index < 24; index++) {
+      await this.page.keyboard.press("Tab");
+      expect(
+        await this.dialog().evaluate((dialog) => dialog.contains(document.activeElement)),
+      ).toBe(true);
+    }
+  }
+  async expectDialogFits() {
+    const bounds = await this.dialog().boundingBox();
+    const viewport = this.page.viewportSize();
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.y).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width + 1);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height + 1);
+    if (viewport.width < 640) {
+      expect(bounds.width).toBe(viewport.width);
+      expect(Math.abs(bounds.y + bounds.height - viewport.height)).toBeLessThanOrEqual(1);
+      expect(bounds.height).toBeLessThanOrEqual(viewport.height * 0.9 + 1);
+    } else {
+      expect(bounds.width).toBeLessThanOrEqual(560);
+      expect(Math.abs(bounds.x + bounds.width / 2 - viewport.width / 2)).toBeLessThanOrEqual(1);
+    }
+    const save = this.dialog().getByRole("button", { name: "Save location", exact: true });
+    await save.scrollIntoViewIfNeeded();
+    await expect(save).toBeInViewport();
+    await this.field("Name").scrollIntoViewIfNeeded();
+    await expect(this.field("Name")).toBeInViewport();
   }
 }

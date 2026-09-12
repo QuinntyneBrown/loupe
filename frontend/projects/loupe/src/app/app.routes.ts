@@ -10,6 +10,7 @@ import { InspirationPage } from './pages/inspiration/inspiration-page';
 import { ReferenceDetailPage } from './pages/reference-detail/reference-detail-page';
 import { Routes } from '@angular/router';
 import { sessionGuard } from './session.guard';
+import { locationsUnsavedGuard } from './locations-unsaved.guard';
 import { SignIn } from './pages/sign-in/sign-in';
 import { MyWork } from './pages/my-work/my-work';
 import { PhotographDetailPage } from './pages/photograph-detail/photograph-detail-page';
@@ -24,6 +25,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/locations/locations-page').then((module) => module.LocationsPage),
     canActivate: [sessionGuard],
+    canDeactivate: [locationsUnsavedGuard],
     title: 'Locations \u00b7 Loupe',
   },
   {

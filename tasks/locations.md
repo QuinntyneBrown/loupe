@@ -19,7 +19,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] A4 Add, remove, and choose the cover of location images (L2-056.1–.8)
 - [x] A5 Delete a location and complete its cleanup (L2-057.6, .7; L2-031.5, .7; L2-032.2)
 - [x] A6a Browse the Locations area (L2-057.1, .4; L2-043.1, .2; L2-044.1; L2-045.1, .6)
-- [ ] A6b Add a location from the grid (L2-055.1, .3, .8; L2-043.7; L2-044.6; L2-045.2)
+- [x] A6b Add a location from the grid (L2-055.1, .3, .8; L2-043.7; L2-044.6; L2-045.2)
 - [ ] A7 Inspect a location and edit its details (L2-055.2, .4, .5, .6, .8; L2-057.2, .3, .4, .6; L2-044.2)
 - [ ] A8 Manage location images in the gallery (L2-056.1–.6, .9; L2-057.2, .5)
 - [ ] B1 Admit a scouting report request (L2-060.1, .2, .5, .7; L2-033.1, .5; L2-035)
@@ -268,4 +268,49 @@ recorded only when actually executed.
   three touched templates.
 - Non-claims: the Add location dialog (L2-043.5/.7, L2-055.8) is A6b; the grid's
   Delete action and the detail page are A7.
+
+### A6b — Add a location from the grid (L2-055.1, .3, .8 UI; L2-043.2, .7; L2-044.6; L2-045.2)
+
+- Spec: `e2e/specs/locations-add.spec.js` (12 cases) through the `LocationsPage`
+  page object and the fixture's `create` operation (receipted by `operationKey`,
+  server-style validation, `errors.create` queue): a name-only save from the header
+  closes the dialog, shows `“Kew Bridge foreshore” saved.`, prepends the card and
+  sends null coordinates/setting, empty tags and a visible-ASCII key; the empty
+  state's Add location saves the full form (address, locality, coordinates,
+  setting, brief, notes, a tag) and the card replaces the empty state; a blank name
+  → `Enter a name.` at the focused Name field with no create call and Locality
+  kept, latitude alone → the longitude error with the latitude kept, a server
+  `invalid_request` on `name` → shown at Name with every value kept, a transport
+  failure → alert + Try again → saved; Escape, backdrop, Close, Cancel and browser
+  Back on a dirty form → Discard unsaved changes? with Keep editing preserving the
+  draft (Back keeps the URL and dialog) and Discard closing (or leaving) with a
+  fresh empty dialog afterwards; a clean dialog focuses Name, contains Tab focus,
+  closes without a prompt and returns focus to the empty-state or header trigger,
+  with axe clean; the dialog is a full-width bottom sheet ≤ 90dvh at 375×667 and
+  844×390 and a centred ≤ 560 px panel at 1440×900 with Name and Save location
+  reachable.
+- RED: `cd e2e && npx playwright test specs/locations-add.spec.js` → 12 failed
+  (no `Add location` dialog). Later failures were the spec's own: optional-field
+  labels carry an "optional" suffix (page object matches `^Label( optional…)?$`),
+  singular `1 location`, and in-app navigation is blocked by the native modal, so
+  the navigation case uses browser Back as the upload dialog spec does. One
+  implementation fix: the invalid field could not take focus while `NgModel`
+  re-enabled it in a microtask, so the form focuses after that microtask.
+- Built: `api` `LocationInput`/`LocationTagInput`/`LocationDetailsInput`,
+  `ILocationService.create`, `LocationService.create` (POST with
+  `Idempotency-Key` and CSRF token, field errors parsed into `ServiceError`);
+  `domain` `LocationForm` (all fields, tag chips, client validation mirroring the
+  server limits and coordinate rules, server error mapping, first-invalid focus,
+  `dirty()`/`value()`/`reset()`); `loupe` `AddLocation` dialog (native modal,
+  backdrop/Escape/Close → `UnsavedChanges`, focus trap, retry, operation key),
+  `LocationsPage` open/added/close with notice and trigger focus restore,
+  `LocationCollection.add/focusAdd`, `locationsUnsavedGuard` on the route;
+  `MockLocationService.create`.
+- GREEN: `specs/locations-add.spec.js` → 12 passed; band `locations-add`,
+  `locations`, `search-navigation`, `photographers`, `add-photographer` → 50
+  passed; `npm run build` clean apart from the pre-existing budget warning;
+  prettier clean.
+- Non-claims: the Edit location dialog reuse of `LocationForm` and the detail
+  page land in A7; L2-045.2's "next relevant control if the trigger was deleted"
+  is exercised by Delete in A7.
 

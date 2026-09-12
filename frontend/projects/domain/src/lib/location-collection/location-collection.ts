@@ -10,7 +10,7 @@ import {
   viewChild,
   viewChildren,
 } from '@angular/core';
-import { LOCATION_SERVICE, LocationSummary } from 'api';
+import { LOCATION_SERVICE, LocationResult, LocationSummary } from 'api';
 import { LocationCard } from 'components';
 
 @Component({
@@ -26,6 +26,7 @@ export class LocationCollection {
   private readonly injector = inject(Injector);
   private readonly cards = viewChildren(LocationCard);
   private readonly emptyHeading = viewChild<ElementRef<HTMLElement>>('emptyHeading');
+  private readonly addButton = viewChild.required<ElementRef<HTMLButtonElement>>('addButton');
   private generation = 0;
   private failedRefresh = false;
   readonly items = signal<LocationSummary[]>([]);
@@ -36,6 +37,32 @@ export class LocationCollection {
   readonly skeletons = [0, 1, 2, 3, 4, 5, 6, 7];
   constructor() {
     void this.load();
+  }
+  add(item: LocationResult): void {
+    ++this.generation;
+    this.loading.set(false);
+    if (this.total() === null) {
+      void this.refresh();
+      return;
+    }
+    if (this.items().some((existing) => existing.id === item.id)) return;
+    const cover = item.images.find((image) => image.id === item.coverImageId);
+    this.items.update((items) => [
+      {
+        id: item.id,
+        name: item.name,
+        locality: item.locality,
+        coverPreviewUrl: cover?.previewUrl ?? null,
+        imageCount: item.images.length,
+        reportStatus: item.reportStatus,
+        createdAt: item.createdAt,
+      },
+      ...items,
+    ]);
+    this.total.update((total) => (total ?? 0) + 1);
+  }
+  focusAdd(): void {
+    this.addButton().nativeElement.focus();
   }
   refresh(): Promise<void> {
     ++this.generation;

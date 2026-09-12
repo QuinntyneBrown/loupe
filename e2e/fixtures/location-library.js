@@ -7,8 +7,10 @@ const coverUrl =
 export class LocationLibrary {
   constructor(count = 7) {
     this.failures = { list: 0, get: 0, create: 0 };
+    this.errors = { create: [] };
     this.gates = {};
     this.calls = [];
+    this.receipts = new Map();
     this.coverUrl = coverUrl;
     this.items = Array.from({ length: count }, (_, index) =>
       LocationLibrary.location(index),
@@ -62,6 +64,54 @@ export class LocationLibrary {
       createdAt: item.createdAt,
     };
   }
+  create(input) {
+    if (this.receipts.has(input.operationKey))
+      return { data: this.receipts.get(input.operationKey) };
+    const errors = LocationLibrary.validate(input);
+    if (Object.keys(errors).length) return { error: "invalid_request", errors };
+    const item = {
+      ...LocationLibrary.location(this.items.length),
+      id: `created-${this.items.length + 1}`,
+      name: input.name.trim(),
+      addressLine1: input.addressLine1?.trim() || null,
+      addressLine2: input.addressLine2?.trim() || null,
+      locality: input.locality?.trim() || null,
+      region: input.region?.trim() || null,
+      postalCode: input.postalCode?.trim() || null,
+      country: input.country?.trim() || null,
+      coordinates: input.coordinates
+        ? {
+            latitude: Number(input.coordinates.latitude).toFixed(6),
+            longitude: Number(input.coordinates.longitude).toFixed(6),
+          }
+        : null,
+      setting: input.setting || null,
+      scoutingBrief: input.scoutingBrief?.trim() || null,
+      notes: input.notes?.trim() || null,
+      tags: input.tags ?? [],
+      images: [],
+      coverImageId: null,
+      reportStatus: "None",
+      revision: 1,
+    };
+    this.items.unshift(item);
+    this.receipts.set(input.operationKey, item);
+    return { data: item };
+  }
+  static validate(input) {
+    const errors = {};
+    if (!input.name?.trim()) errors.name = ["Enter a name."];
+    else if ([...input.name.trim()].length > 200)
+      errors.name = ["Use 200 characters or fewer."];
+    const latitude = input.coordinates?.latitude?.trim() ?? "";
+    const longitude = input.coordinates?.longitude?.trim() ?? "";
+    if (latitude && !longitude)
+      errors.longitude = ["Enter a longitude to go with the latitude."];
+    if (longitude && !latitude)
+      errors.latitude = ["Enter a latitude to go with the longitude."];
+    if (!input.operationKey) errors.operationKey = ["Provide an Idempotency-Key."];
+    return errors;
+  }
   hold(operation) {
     let release;
     const promise = new Promise((resolve) => (release = resolve));
@@ -87,6 +137,9 @@ export class LocationLibrary {
           },
         };
       }
+      const custom = this.errors[operation]?.shift();
+      if (custom) return custom;
+      if (operation === "create") return this.create(input);
       throw new Error("Unexpected location operation: " + operation);
     });
   }

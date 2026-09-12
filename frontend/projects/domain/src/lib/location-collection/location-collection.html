@@ -10,7 +10,12 @@
     </p>
   </div>
   <div class="lp-page-header__actions">
-    <button class="lp-button lp-button--primary" type="button" (click)="addRequested.emit()">
+    <button
+      #addButton
+      class="lp-button lp-button--primary"
+      type="button"
+      (click)="addRequested.emit()"
+    >
       <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-plus" /></svg>Add location
     </button>
   </div>

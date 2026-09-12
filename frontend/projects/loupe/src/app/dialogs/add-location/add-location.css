@@ -1,0 +1,12 @@
+.lp-dialog__privacy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lp-space-2);
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-text-2);
+  margin-right: auto;
+}
+.lp-dialog__body > [role='alert'],
+.lp-dialog__body > .lp-button {
+  margin-top: var(--lp-space-4);
+}

@@ -1,0 +1,212 @@
+<div #root class="lp-form">
+  <div class="lp-field" [class.is-invalid]="errors().name">
+    <label class="lp-field__label" [for]="idPrefix() + '-name'">Name</label
+    ><input
+      class="lp-input"
+      [id]="idPrefix() + '-name'"
+      name="name"
+      data-field="name"
+      autofocus
+      placeholder="Kew Bridge foreshore"
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event); clear('name')"
+      [disabled]="busy()"
+      [attr.aria-invalid]="errors().name ? 'true' : null"
+      [attr.aria-describedby]="errors().name ? idPrefix() + '-name-error' : null"
+    />
+    @if (errors().name; as message) {
+      <p class="lp-field__error" [id]="idPrefix() + '-name-error'">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
+        >{{ message }}
+      </p>
+    }
+  </div>
+  <fieldset class="lp-form">
+    <legend class="lp-form__legend">
+      Address
+      <span class="lp-field__optional">optional · typed by you, never read from a photo</span>
+    </legend>
+    @for (line of addressLines; track line.key) {
+      <div class="lp-field" [class.is-invalid]="errors()[line.key]">
+        <label class="lp-field__label" [for]="idPrefix() + '-' + line.key">{{ line.label }}</label
+        ><input
+          class="lp-input"
+          [id]="idPrefix() + '-' + line.key"
+          [name]="line.key"
+          [attr.data-field]="line.key"
+          [ngModel]="line.value()"
+          (ngModelChange)="line.value.set($event); clear(line.key)"
+          [disabled]="busy()"
+          [attr.aria-invalid]="errors()[line.key] ? 'true' : null"
+          [attr.aria-describedby]="
+            errors()[line.key] ? idPrefix() + '-' + line.key + '-error' : null
+          "
+        />
+        @if (errors()[line.key]; as message) {
+          <p class="lp-field__error" [id]="idPrefix() + '-' + line.key + '-error'">
+            <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
+            >{{ message }}
+          </p>
+        }
+      </div>
+    }
+    @for (row of rows; track row[0].key) {
+      <div class="lp-form__row">
+        @for (field of row; track field.key) {
+          <div class="lp-field" [class.is-invalid]="errors()[field.key]">
+            <label class="lp-field__label" [for]="idPrefix() + '-' + field.key">{{
+              field.label
+            }}</label
+            ><input
+              class="lp-input"
+              [class.lp-input--mono]="field.mono"
+              [id]="idPrefix() + '-' + field.key"
+              [name]="field.key"
+              [attr.data-field]="field.key"
+              [attr.inputmode]="
+                field.key === 'latitude' || field.key === 'longitude' ? 'decimal' : null
+              "
+              [placeholder]="field.placeholder"
+              [ngModel]="field.value()"
+              (ngModelChange)="field.value.set($event); clear(field.key)"
+              [disabled]="busy()"
+              [attr.aria-invalid]="errors()[field.key] ? 'true' : null"
+              [attr.aria-describedby]="
+                errors()[field.key]
+                  ? idPrefix() + '-' + field.key + '-error'
+                  : field.key === 'longitude'
+                    ? idPrefix() + '-coordinates-hint'
+                    : null
+              "
+            />
+            @if (errors()[field.key]; as message) {
+              <p class="lp-field__error" [id]="idPrefix() + '-' + field.key + '-error'">
+                <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
+                >{{ message }}
+              </p>
+            } @else if (field.key === 'longitude') {
+              <p class="lp-field__hint" [id]="idPrefix() + '-coordinates-hint'">
+                Decimal degrees, both or neither. Shown to six places.
+              </p>
+            }
+          </div>
+        }
+      </div>
+    }
+  </fieldset>
+  <div class="lp-field" [class.is-invalid]="errors().setting">
+    <label class="lp-field__label" [for]="idPrefix() + '-setting'"
+      >Setting <span class="lp-field__optional">optional</span></label
+    >
+    <div class="lp-select-wrap">
+      <select
+        class="lp-select"
+        [id]="idPrefix() + '-setting'"
+        name="setting"
+        data-field="setting"
+        [ngModel]="setting()"
+        (ngModelChange)="setting.set($event); clear('setting')"
+        [disabled]="busy()"
+        [attr.aria-invalid]="errors().setting ? 'true' : null"
+      >
+        <option value="">Not set</option>
+        @for (option of settings; track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-down" /></svg>
+    </div>
+    @if (errors().setting; as message) {
+      <p class="lp-field__error">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
+        >{{ message }}
+      </p>
+    }
+  </div>
+  <div class="lp-field" [class.is-invalid]="errors().scoutingBrief">
+    <label class="lp-field__label" [for]="idPrefix() + '-brief'"
+      >Scouting brief <span class="lp-field__optional">optional</span></label
+    ><textarea
+      class="lp-textarea"
+      [id]="idPrefix() + '-brief'"
+      name="scoutingBrief"
+      data-field="scoutingBrief"
+      rows="2"
+      placeholder="Couple sessions at low tide, two people, nothing staged."
+      [ngModel]="scoutingBrief()"
+      (ngModelChange)="scoutingBrief.set($event); clear('scoutingBrief')"
+      [disabled]="busy()"
+      [attr.aria-invalid]="errors().scoutingBrief ? 'true' : null"
+      [attr.aria-describedby]="idPrefix() + '-brief-hint'"
+    ></textarea>
+    @if (errors().scoutingBrief; as message) {
+      <p class="lp-field__error">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
+        >{{ message }}
+      </p>
+    }
+    <p class="lp-field__hint" [id]="idPrefix() + '-brief-hint'">
+      What you'd shoot here. Sent with the images when you request a scouting report.
+    </p>
+  </div>
+  <div class="lp-field" [class.is-invalid]="errors().notes">
+    <label class="lp-field__label" [for]="idPrefix() + '-notes'"
+      >Notes <span class="lp-field__optional">optional</span></label
+    ><textarea
+      class="lp-textarea"
+      [id]="idPrefix() + '-notes'"
+      name="notes"
+      data-field="notes"
+      rows="2"
+      placeholder="Parking, access, who to ask. Notes stay with you; they're never sent to the AI."
+      [ngModel]="notes()"
+      (ngModelChange)="notes.set($event); clear('notes')"
+      [disabled]="busy()"
+      [attr.aria-invalid]="errors().notes ? 'true' : null"
+    ></textarea>
+    @if (errors().notes; as message) {
+      <p class="lp-field__error">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
+        >{{ message }}
+      </p>
+    }
+  </div>
+  <div class="lp-field" [class.is-invalid]="errors().tags">
+    <label class="lp-field__label" [for]="idPrefix() + '-tags'"
+      >Tags <span class="lp-field__optional">optional</span></label
+    >
+    <div class="lp-chip-input">
+      @for (tag of tags(); track tag) {
+        <span class="lp-tag"
+          >{{ tag
+          }}<button
+            class="lp-tag__action"
+            type="button"
+            [attr.aria-label]="'Remove tag ' + tag"
+            [disabled]="busy()"
+            (click)="removeTag(tag)"
+          >
+            <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg></button
+        ></span>
+      }
+      <input
+        [id]="idPrefix() + '-tags'"
+        name="tag"
+        data-field="tags"
+        type="text"
+        placeholder="Add a tag"
+        aria-label="Add a tag"
+        [ngModel]="tag()"
+        (ngModelChange)="tag.set($event); clear('tags')"
+        (keydown.enter)="addTag($event)"
+        [disabled]="busy()"
+      />
+    </div>
+    @if (errors().tags; as message) {
+      <p class="lp-field__error">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
+        >{{ message }}
+      </p>
+    }
+  </div>
+</div>
