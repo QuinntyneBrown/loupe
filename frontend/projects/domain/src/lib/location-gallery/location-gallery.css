@@ -99,3 +99,12 @@
 .lp-gallery__capacity {
   color: var(--lp-color-text-2);
 }
+.actions {
+  display: flex;
+  gap: var(--lp-space-2);
+}
+.error {
+  margin: var(--lp-zero);
+  color: var(--lp-color-danger);
+  font-size: var(--lp-text-sm);
+}

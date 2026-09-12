@@ -21,7 +21,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] A6a Browse the Locations area (L2-057.1, .4; L2-043.1, .2; L2-044.1; L2-045.1, .6)
 - [x] A6b Add a location from the grid (L2-055.1, .3, .8; L2-043.7; L2-044.6; L2-045.2)
 - [x] A7 Inspect a location and edit its details (L2-055.2, .4, .5, .6, .8; L2-057.2, .3, .4, .6; L2-044.2)
-- [ ] A8 Manage location images in the gallery (L2-056.1–.6, .9; L2-057.2, .5)
+- [x] A8 Manage location images in the gallery (L2-056.1–.6, .9; L2-057.2, .5)
 - [ ] B1 Admit a scouting report request (L2-060.1, .2, .5, .7; L2-033.1, .5; L2-035)
 - [ ] B2 Generate, validate, and publish a scouting report (L2-058.1–.7; L2-059.3, .4; L2-060.4; L2-034.1–.3; L2-036.6)
 - [ ] B3 Outdate, cancel, and retry scouting work (L2-060.3, .6; L2-056.5; L2-031.7; L2-033.4; L2-034.4)
@@ -374,4 +374,57 @@ recorded only when actually executed.
   pill mapping exists but the fixture only produces `None`/`Ready` today);
   upload, remove and cover actions in the gallery are A8; L2-057.5's keyboard
   arrow selection is asserted in A8 with the radio group already in place.
+
+### A8 — Manage location images in the gallery (L2-056.1–.6, .9 UI; L2-057.5)
+
+- Spec: `e2e/specs/location-images.spec.js` (7 cases) with the fixture's
+  `addImage` (per-key receipts, cap, `unsupported_media`, per-key gates,
+  `abortUpload` tracking, `reportProgress` on `loupe-location-upload-progress`),
+  `removeImage` (renumbering, cover hand-off) and `setCover`: two chosen files
+  become two `addImage` calls with distinct keys, each row shows `Uploading…`,
+  a progress event for one key drives only that row's `<progress>` (400/1000),
+  both rows show `Saved`, the gallery grows to five with `5 of 10 images` while the
+  dialog is still open, Done closes and image 5 is selectable on the stage; with
+  three files, the first saves, the second fails with `didn't upload` + Retry/
+  Remove, the `image/tiff` file is refused client-side with `a format Loupe can't
+  read` + Remove and never reaches the bridge, Retry saves it and Remove clears
+  the row; eight existing images + three chosen → `You chose 3 images, but only 2
+  more fit.` before any call, two then save and Add images is disabled with `10 of
+  10 images. Remove one to add another.`; Remove image 2 → dialog `Remove image
+  2?`, Cancel keeps three, confirm → two with image 1 still the cover and `2 of 10
+  images`, removing the cover moves it to the next; Set as cover is disabled on
+  the cover, choosing image 3 persists across reload and the grid card shows a
+  cover; Cancel remaining while a transfer is held aborts it (bridge `abortUpload`),
+  leaves three images, shows `Uploads stopped… Refresh to check.` and Refresh
+  reveals what the server finished; arrow keys move the radio selection with the
+  stage and announced caption following, axe clean.
+- RED: `cd e2e && npx playwright test specs/location-images.spec.js` → 6 failed
+  (no `Add images` dialog, no Set as cover/Remove controls); the keyboard case
+  already passed on A7's radio group and confirms rather than drives it. Two
+  spec fixes after wiring: the dialog's accessible name changes to `Uploading N
+  images…`/`N of M images added` as the mock does, and the grid check needed the
+  sign-in step after navigation.
+- Built: `api` `ILocationService.addImage(id, file, operationKey, onProgress?,
+  signal?)`, `removeImage`, `setCover` (multipart POST with progress events and
+  abort, DELETE with revision, PUT cover); mock bridge with progress filtering by
+  key and `abortUpload`; `domain` `LocationImageUpload` (capacity check before any
+  transfer, per-file queue with own key, progress, `AbortController`, client-side
+  format/size rejection, Retry/Remove per row, Cancel remaining), `LocationGallery`
+  Set as cover (service call, conflict message) and Remove request, focus helper;
+  `loupe` `AddLocationImages` (title by phase, Cancel/Upload → Cancel remaining/
+  Done), `RemoveLocationImage` (revision-checked, reload on conflict),
+  `LocationDetailPage` wiring with the `Uploads stopped` notice and Refresh, and
+  uploads cancelled when leaving the page after the unsaved prompt.
+- GREEN: `specs/location-images.spec.js` → 7 passed; `npm run build` clean apart
+  from the pre-existing budget warning; prettier clean. Full `cd frontend && npm
+  test` (end of group A) → 675 passed, 1 failed: `search-layout.spec.js` at
+  640×800 with increased text spacing flagged the fifth navigation link as
+  obscured by Sign out (axe `target-size`) — a real regression from the fifth
+  area, not a flake. Fixed in `app.css`: between 640 and 767 px the Library
+  navigation shows icons with visually hidden labels (accessible names unchanged),
+  and `search-layout`, `search-navigation`, `locations` and `sign-in-layout` pass
+  again (34 cases).
+- Non-claims: the report-outdating half of L2-056.5 lands with B3/B4 (the remove
+  dialog states it); drag-and-drop is not offered (the file picker is the non-drag
+  path); HEIC previews come from the server preview URL, not the browser.
 

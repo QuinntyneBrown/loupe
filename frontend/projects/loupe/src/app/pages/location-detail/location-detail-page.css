@@ -24,3 +24,12 @@
     bottom: calc(var(--lp-tabbar-height) + var(--lp-space-4));
   }
 }
+.refresh-notice {
+  color: inherit;
+  text-decoration: underline;
+  background: none;
+  border: var(--lp-zero);
+  padding: var(--lp-zero);
+  font: inherit;
+  cursor: pointer;
+}

@@ -1,5 +1,17 @@
-import { Component, computed, effect, input, output, signal, untracked } from '@angular/core';
-import { LocationResult } from 'api';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  untracked,
+  ElementRef,
+  viewChild,
+} from '@angular/core';
+import { LOCATION_SERVICE, LocationImage, LocationResult, ServiceError } from 'api';
 
 @Component({
   selector: 'lp-location-gallery',
@@ -9,6 +21,20 @@ import { LocationResult } from 'api';
 export class LocationGallery {
   readonly location = input.required<LocationResult>();
   readonly addImagesRequested = output<void>();
+  readonly removeRequested = output<LocationImage>();
+  readonly saved = output<LocationResult>();
+  private readonly service = inject(LOCATION_SERVICE);
+  private readonly destroy = inject(DestroyRef);
+  readonly busy = signal(false);
+  readonly error = signal('');
+  private readonly root = viewChild.required<ElementRef<HTMLElement>>('root');
+  focus(): void {
+    const element = this.root().nativeElement;
+    (
+      element.querySelector<HTMLElement>('input[type=radio]:checked') ??
+      element.querySelector<HTMLElement>('button')
+    )?.focus();
+  }
   readonly maximum = 10;
   readonly selectedId = signal<string | null>(null);
   readonly images = computed(() => this.location().images);
@@ -31,5 +57,28 @@ export class LocationGallery {
   }
   select(id: string): void {
     this.selectedId.set(id);
+  }
+  async setCover(): Promise<void> {
+    const image = this.selected();
+    const location = this.location();
+    if (!image || this.busy() || this.isCover(image.id)) return;
+    this.busy.set(true);
+    this.error.set('');
+    try {
+      const result = await this.service.setCover(location.id, image.id, location.revision);
+      if (!this.destroy.destroyed) this.saved.emit(result);
+    } catch (error) {
+      if (this.destroy.destroyed) return;
+      const code = error instanceof ServiceError ? error.code : '';
+      this.error.set(
+        code === 'revision_conflict'
+          ? 'This location changed. Reload the page before changing the cover.'
+          : code === 'item_unavailable'
+            ? 'This image is no longer available.'
+            : "Couldn't change the cover. Try again.",
+      );
+    } finally {
+      if (!this.destroy.destroyed) this.busy.set(false);
+    }
   }
 }

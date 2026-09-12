@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { LOCATION_SERVICE, LocationResult, ServiceError } from 'api';
+import { LOCATION_SERVICE, LocationImage, LocationResult, ServiceError } from 'api';
 import { LocationGallery } from '../location-gallery/location-gallery';
 import { LocationTextEditor } from '../location-text/location-text-editor';
 import { LocationTags } from '../location-tags/location-tags';
@@ -30,12 +30,14 @@ export class LocationDetailPanel {
   readonly editRequested = output<LocationResult>();
   readonly deleteRequested = output<LocationResult>();
   readonly addImagesRequested = output<LocationResult>();
+  readonly removeImageRequested = output<{ location: LocationResult; image: LocationImage }>();
   private readonly service = inject(LOCATION_SERVICE);
   private readonly injector = inject(Injector);
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
   private readonly actions = viewChild<ElementRef<HTMLElement>>('actions');
   private readonly texts = viewChildren(LocationTextEditor);
   private readonly tags = viewChild(LocationTags);
+  private readonly gallery = viewChild(LocationGallery);
   readonly location = signal<LocationResult | null>(null);
   readonly loading = signal(true);
   readonly unavailable = signal(false);
@@ -120,6 +122,9 @@ export class LocationDetailPanel {
   }
   focusActions(): void {
     this.actions()?.nativeElement.focus();
+  }
+  focusGallery(): void {
+    this.gallery()?.focus();
   }
   request(menu: HTMLDetailsElement, item: LocationResult, action: 'edit' | 'delete'): void {
     menu.open = false;

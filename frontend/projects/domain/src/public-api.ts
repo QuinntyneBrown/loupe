@@ -20,3 +20,4 @@ export * from './lib/location-detail/location-detail-panel';
 export * from './lib/location-gallery/location-gallery';
 export * from './lib/location-text/location-text-editor';
 export * from './lib/location-tags/location-tags';
+export * from './lib/location-image-upload/location-image-upload';

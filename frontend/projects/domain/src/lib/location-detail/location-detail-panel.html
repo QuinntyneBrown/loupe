@@ -76,7 +76,12 @@
       }
     </div>
     <div class="lp-detail__media">
-      <lp-location-gallery [location]="item" (addImagesRequested)="addImagesRequested.emit(item)" />
+      <lp-location-gallery
+        [location]="item"
+        (addImagesRequested)="addImagesRequested.emit(item)"
+        (removeRequested)="removeImageRequested.emit({ location: item, image: $event })"
+        (saved)="location.set($event)"
+      />
       @if (addressLines().length) {
         <address class="lp-address">
           @for (line of addressLines(); track $index; let last = $last) {

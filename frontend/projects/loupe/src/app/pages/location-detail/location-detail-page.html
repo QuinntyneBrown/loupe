@@ -7,11 +7,16 @@
     [id]="id()"
     (editRequested)="editing.set($event)"
     (deleteRequested)="deleting.set($event)"
+    (addImagesRequested)="addingImages.set($event)"
+    (removeImageRequested)="removingImage.set($event)"
   />
   @if (notice()) {
     <div class="notice" role="status">
-      <span>{{ notice() }}</span
-      ><button
+      <span>{{ notice() }}</span>
+      @if (refreshable()) {
+        <button class="refresh-notice" type="button" (click)="refresh()">Refresh</button>
+      }
+      <button
         class="lp-icon-button"
         type="button"
         aria-label="Dismiss notification"
@@ -24,6 +29,23 @@
 </main>
 @if (editing(); as item) {
   <lp-edit-location [location]="item" (saved)="saved($event)" (closed)="closeEdit()" />
+}
+@if (addingImages(); as item) {
+  <lp-add-location-images
+    [location]="item"
+    (saved)="imageSaved($event)"
+    (closed)="closeImages()"
+    (canceled)="canceledUploads()"
+  />
+}
+@if (removingImage(); as target) {
+  <lp-remove-location-image
+    [location]="target.location"
+    [image]="target.image"
+    (closed)="closeRemove()"
+    (removed)="imageRemoved($event)"
+    (reviewed)="detail()?.location.set($event)"
+  />
 }
 @if (deleting(); as item) {
   <lp-delete-location
@@ -38,8 +60,10 @@
   [warning]="
     deleteDialog()?.busy()
       ? 'Deletion may finish after you leave. Check Locations before trying again.'
-      : detail()?.saving()
-        ? 'This save may finish after you leave. Reopen the location to check its details.'
-        : null
+      : imagesDialog()?.uploading()
+        ? 'Uploads in progress are stopped when you leave. Check the gallery before adding them again.'
+        : detail()?.saving()
+          ? 'This save may finish after you leave. Reopen the location to check its details.'
+          : null
   "
 />

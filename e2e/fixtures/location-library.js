@@ -6,8 +6,9 @@ const coverUrl =
 
 export class LocationLibrary {
   constructor(count = 7) {
-    this.failures = { list: 0, get: 0, create: 0, update: 0, updateText: 0, setTags: 0, deleteLocation: 0 };
-    this.errors = { create: [], update: [], updateText: [], setTags: [], deleteLocation: [] };
+    this.failures = { list: 0, get: 0, create: 0, update: 0, updateText: 0, setTags: 0, deleteLocation: 0, addImage: 0, removeImage: 0, setCover: 0 };
+    this.errors = { create: [], update: [], updateText: [], setTags: [], deleteLocation: [], addImage: [], removeImage: [], setCover: [] };
+    this.aborted = [];
     this.deletions = [];
     this.gates = {};
     this.calls = [];
@@ -104,6 +105,28 @@ export class LocationLibrary {
     this.receipts.set(input.operationKey, item);
     return { data: item };
   }
+  addImage(input) {
+    if (this.receipts.has(input.operationKey)) return { data: this.receipts.get(input.operationKey) };
+    const item = this.items.find((item) => item.id === input.id);
+    if (!item) return { error: "item_unavailable" };
+    if (!["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"].includes(input.contentType))
+      return { error: "unsupported_media" };
+    if (item.images.length >= 10) return { error: "invalid_request", errors: { images: ["A location holds up to 10 images."] } };
+    const image = {
+      id: `${item.id}-image-${item.images.length + 1}-${input.filename}`,
+      position: item.images.length + 1,
+      imageUrl: coverUrl,
+      previewUrl: coverUrl,
+      width: 480,
+      height: 600,
+    };
+    item.images = [...item.images, image];
+    item.coverImageId ??= image.id;
+    item.revision += 1;
+    item.updatedAt = "2026-09-13T09:30:00Z";
+    this.receipts.set(input.operationKey, item);
+    return { data: item };
+  }
   static validate(input) {
     const errors = {};
     if (!input.name?.trim()) errors.name = ["Enter a name."];
@@ -118,16 +141,26 @@ export class LocationLibrary {
     if (!input.operationKey) errors.operationKey = ["Provide an Idempotency-Key."];
     return errors;
   }
-  hold(operation) {
+  hold(operation, operationKey) {
     let release;
     const promise = new Promise((resolve) => (release = resolve));
-    this.gates[operation] = { promise, release };
+    this.gates[operationKey ? operation + ":" + operationKey : operation] = { promise, release };
     return release;
+  }
+  async reportProgress(page, operationKey, transferred, total) {
+    await page.evaluate(
+      (detail) => window.dispatchEvent(new CustomEvent("loupe-location-upload-progress", { detail })),
+      { operationKey, transferred, total },
+    );
   }
   async attach(page) {
     await page.exposeFunction("loupeLocations", async (operation, input) => {
       this.calls.push({ operation, ...input });
-      await this.gates[operation]?.promise;
+      if (operation === "abortUpload") {
+        this.aborted.push(input.operationKey);
+        return { data: null };
+      }
+      await (this.gates[operation + ":" + input.operationKey] ?? this.gates[operation])?.promise;
       if (this.failures[operation] > 0) {
         this.failures[operation]--;
         return { error: "request_failed" };
@@ -150,7 +183,8 @@ export class LocationLibrary {
         const item = this.items.find((item) => item.id === input.id);
         return item ? { data: item } : { error: "item_unavailable" };
       }
-      if (["update", "updateText", "setTags", "deleteLocation"].includes(operation)) {
+      if (operation === "addImage") return this.addImage(input);
+      if (["update", "updateText", "setTags", "deleteLocation", "removeImage", "setCover"].includes(operation)) {
         const item = this.items.find((item) => item.id === input.id);
         if (!item) return { error: "item_unavailable" };
         if (item.revision !== input.revision) return { error: "revision_conflict" };
@@ -175,7 +209,17 @@ export class LocationLibrary {
           });
         } else if (operation === "updateText") item[input.field] = input.text?.trim() || null;
         else if (operation === "setTags") item.tags = input.tags.map((tag) => ({ name: tag.name, category: tag.category ?? null }));
-        else {
+        else if (operation === "setCover") {
+          if (!item.images.some((image) => image.id === input.imageId)) return { error: "item_unavailable" };
+          item.coverImageId = input.imageId;
+        } else if (operation === "removeImage") {
+          const removed = item.images.find((image) => image.id === input.imageId);
+          if (!removed) return { error: "item_unavailable" };
+          item.images = item.images.filter((image) => image.id !== input.imageId).map((image, index) => ({ ...image, position: index + 1 }));
+          if (item.coverImageId === removed.id)
+            item.coverImageId = (item.images.find((image) => image.position >= removed.position) ?? item.images[0])?.id ?? null;
+          this.removedImages = [...(this.removedImages ?? []), removed.id];
+        } else {
           this.items = this.items.filter((other) => other.id !== item.id);
           this.deletions.push(item.id);
           return {

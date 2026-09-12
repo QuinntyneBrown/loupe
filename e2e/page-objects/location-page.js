@@ -277,4 +277,124 @@ export class LocationPage {
       ),
     ).toBe(true);
   }
+  addImagesButton() {
+    return this.main().getByRole("button", { name: "Add images", exact: true });
+  }
+  async openAddImages() {
+    await this.addImagesButton().click();
+    await expect(this.imagesDialog()).toBeVisible();
+  }
+  async expectAddImagesDisabled(reason) {
+    await expect(this.addImagesButton()).toBeDisabled();
+    await expect(this.main().getByText(reason, { exact: true })).toBeVisible();
+  }
+  imagesDialog() {
+    return this.page.getByRole("dialog", {
+      name: /^(Add images|Uploading \d+ images?…|\d+ of \d+ images? added)$/,
+    });
+  }
+  async chooseFiles(files) {
+    await this.imagesDialog()
+      .getByLabel("Images", { exact: true })
+      .setInputFiles(
+        files.map((file) => ({
+          name: file.name,
+          mimeType: file.type,
+          buffer: Buffer.from(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=",
+            "base64",
+          ),
+        })),
+      );
+  }
+  async startUpload() {
+    await this.imagesDialog().getByRole("button", { name: "Upload", exact: true }).click();
+  }
+  async expectCapacityRejection(message) {
+    await expect(this.imagesDialog().getByRole("alert")).toContainText(message);
+    await expect(this.imagesDialog().getByRole("button", { name: "Upload", exact: true })).toHaveCount(0);
+  }
+  uploadRow(name) {
+    return this.imagesDialog().getByRole("listitem").filter({ hasText: name });
+  }
+  async expectUploadRow(name, state) {
+    await expect(this.uploadRow(name)).toContainText(state);
+  }
+  async expectRowProgress(name, transferred, total) {
+    const bar = this.uploadRow(name).getByRole("progressbar");
+    await expect(bar).toHaveJSProperty("value", transferred);
+    await expect(bar).toHaveJSProperty("max", total);
+  }
+  async retryRow(name) {
+    await this.uploadRow(name).getByRole("button", { name: "Retry", exact: true }).click();
+  }
+  async removeRow(name) {
+    await this.uploadRow(name).getByRole("button", { name: "Remove", exact: true }).click();
+  }
+  async expectRowActions(name, actions) {
+    for (const action of ["Retry", "Remove"]) {
+      await expect(this.uploadRow(name).getByRole("button", { name: action, exact: true })).toHaveCount(
+        actions.includes(action) ? 1 : 0,
+      );
+    }
+  }
+  async expectNoRow(name) {
+    await expect(this.uploadRow(name)).toHaveCount(0);
+  }
+  async cancelRemaining() {
+    await this.imagesDialog().getByRole("button", { name: "Cancel remaining", exact: true }).click();
+  }
+  async finishUploads() {
+    await this.imagesDialog().getByRole("button", { name: "Done", exact: true }).click();
+    await expect(this.imagesDialog()).toHaveCount(0);
+  }
+  async expectUploadNotice(text) {
+    await expect(this.page.getByRole("status").filter({ hasText: text })).toBeVisible();
+  }
+  async refreshFromNotice() {
+    await this.page.getByRole("button", { name: "Refresh", exact: true }).click();
+  }
+  async expectGalleryCount(count) {
+    await expect(this.gallery().getByRole("radio")).toHaveCount(count);
+  }
+  async expectSelected(index, cover) {
+    await expect(
+      this.gallery().getByRole("radio", { name: `Image ${index}${cover ? ", cover" : ""}`, exact: true }),
+    ).toBeChecked();
+    await expect(
+      this.main().getByText(`Image ${index}${cover ? " · Cover" : ""}`, { exact: true }),
+    ).toBeVisible();
+  }
+  async focusThumbnail(index) {
+    await this.gallery()
+      .getByRole("radio", { name: new RegExp(`^Image ${index}(, cover)?$`) })
+      .focus();
+  }
+  async pressKey(key) {
+    await this.page.keyboard.press(key);
+  }
+  async setAsCover() {
+    await this.main().getByRole("button", { name: "Set as cover", exact: true }).click();
+  }
+  async expectSetAsCoverDisabled() {
+    await expect(this.main().getByRole("button", { name: "Set as cover", exact: true })).toBeDisabled();
+  }
+  async removeSelected() {
+    await this.main().getByRole("button", { name: "Remove", exact: true }).click();
+  }
+  removeDialog() {
+    return this.page.getByRole("dialog", { name: /^Remove image \d+\?$/ });
+  }
+  async expectRemoveDialog(index) {
+    await expect(this.page.getByRole("dialog", { name: `Remove image ${index}?`, exact: true })).toBeVisible();
+    await expect(this.removeDialog().getByRole("button", { name: "Cancel", exact: true })).toBeFocused();
+  }
+  async cancelRemove() {
+    await this.removeDialog().getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(this.removeDialog()).toHaveCount(0);
+  }
+  async confirmRemove() {
+    await this.removeDialog().getByRole("button", { name: "Remove", exact: true }).click();
+    await expect(this.removeDialog()).toHaveCount(0);
+  }
 }

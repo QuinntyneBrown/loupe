@@ -1,66 +1,90 @@
-@if (images().length) {
-  <div class="lp-gallery">
-    <figure class="lp-photo-stage lp-photo-stage--contain">
-      @if (selected(); as image) {
-        <img
-          [src]="image.imageUrl"
-          [alt]="location().name + ', image ' + (selectedIndex() + 1)"
-          [attr.width]="image.width"
-          [attr.height]="image.height"
-          decoding="async"
-        />
-      }
-    </figure>
-    <div class="lp-gallery__thumbs" role="radiogroup" aria-label="Images">
-      @for (image of images(); track image.id; let index = $index) {
-        <label class="lp-gallery__thumb">
-          <input
-            type="radio"
-            name="location-gallery"
-            [value]="image.id"
-            [checked]="image.id === selected()?.id"
-            [attr.aria-label]="'Image ' + (index + 1) + (isCover(image.id) ? ', cover' : '')"
-            (change)="select(image.id)"
+<div #root>
+  @if (images().length) {
+    <div class="lp-gallery">
+      <figure class="lp-photo-stage lp-photo-stage--contain">
+        @if (selected(); as image) {
+          <img
+            [src]="image.imageUrl"
+            [alt]="location().name + ', image ' + (selectedIndex() + 1)"
+            [attr.width]="image.width"
+            [attr.height]="image.height"
+            decoding="async"
           />
-          <img [src]="image.previewUrl" alt="" loading="lazy" decoding="async" />
-          @if (isCover(image.id)) {
-            <span class="lp-pill" aria-hidden="true">Cover</span>
-          }
-        </label>
+        }
+      </figure>
+      <div class="lp-gallery__thumbs" role="radiogroup" aria-label="Images">
+        @for (image of images(); track image.id; let index = $index) {
+          <label class="lp-gallery__thumb">
+            <input
+              type="radio"
+              name="location-gallery"
+              [value]="image.id"
+              [checked]="image.id === selected()?.id"
+              [attr.aria-label]="'Image ' + (index + 1) + (isCover(image.id) ? ', cover' : '')"
+              (change)="select(image.id)"
+            />
+            <img [src]="image.previewUrl" alt="" loading="lazy" decoding="async" />
+            @if (isCover(image.id)) {
+              <span class="lp-pill" aria-hidden="true">Cover</span>
+            }
+          </label>
+        }
+      </div>
+      <div class="lp-gallery__caption">
+        <span aria-live="polite"
+          >Image {{ selectedIndex() + 1
+          }}{{ selected() && isCover(selected()!.id) ? ' · Cover' : '' }}</span
+        >
+        <span class="actions">
+          <button
+            class="lp-button lp-button--ghost lp-button--sm"
+            type="button"
+            [disabled]="busy() || !selected() || isCover(selected()!.id)"
+            (click)="setCover()"
+          >
+            Set as cover
+          </button>
+          <button
+            class="lp-button lp-button--ghost lp-button--sm"
+            type="button"
+            [disabled]="busy() || !selected()"
+            (click)="removeRequested.emit(selected()!)"
+          >
+            Remove
+          </button>
+        </span>
+      </div>
+      @if (error()) {
+        <p class="error" role="alert">{{ error() }}</p>
       }
+      <div class="lp-gallery__capacity">
+        <span>{{
+          remaining() > 0
+            ? images().length + ' of ' + maximum + ' images'
+            : maximum + ' of ' + maximum + ' images. Remove one to add another.'
+        }}</span>
+        <button
+          class="lp-button lp-button--secondary lp-button--sm"
+          type="button"
+          [disabled]="remaining() <= 0"
+          (click)="addImagesRequested.emit()"
+        >
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-upload" /></svg>Add
+          images
+        </button>
+      </div>
     </div>
-    <div class="lp-gallery__caption" aria-live="polite">
-      <span
-        >Image {{ selectedIndex() + 1
-        }}{{ selected() && isCover(selected()!.id) ? ' · Cover' : '' }}</span
-      >
-    </div>
-    <div class="lp-gallery__capacity">
-      <span>{{
-        remaining() > 0
-          ? images().length + ' of ' + maximum + ' images'
-          : maximum + ' of ' + maximum + ' images. Remove one to add another.'
-      }}</span>
+  } @else {
+    <div class="lp-photo-stage lp-photo-stage--empty">
+      <svg class="lp-icon" aria-hidden="true"><use href="#i-pin" /></svg>
+      <span>No images yet. Add up to ten; the scouting report works from them.</span>
       <button
         class="lp-button lp-button--secondary lp-button--sm"
         type="button"
-        [disabled]="remaining() <= 0"
         (click)="addImagesRequested.emit()"
       >
         <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-upload" /></svg>Add images
       </button>
     </div>
-  </div>
-} @else {
-  <div class="lp-photo-stage lp-photo-stage--empty">
-    <svg class="lp-icon" aria-hidden="true"><use href="#i-pin" /></svg>
-    <span>No images yet. Add up to ten; the scouting report works from them.</span>
-    <button
-      class="lp-button lp-button--secondary lp-button--sm"
-      type="button"
-      (click)="addImagesRequested.emit()"
-    >
-      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-upload" /></svg>Add images
-    </button>
-  </div>
-}
+  }
+</div>
