@@ -62,7 +62,7 @@ $ErrorActionPreference = 'Stop'
 Set-Location $RepoRoot
 
 $postgres = "$Prefix-postgres"; $api = "$Prefix-api"; $worker = "$Prefix-worker"; $network = "$Prefix-net"; $image = "$Prefix-runtime"
-$ollama = "$Prefix-ollama"
+$ollamaContainer = "$Prefix-ollama"
 $appOrigin = "https://localhost:$AppPort"
 $hostConnection = "Host=localhost;Port=$DbPort;Database=loupe_demo;Username=loupe;Password=loupe-demo-only"
 $containerConnection = "Host=$postgres;Port=5432;Database=loupe_demo;Username=loupe;Password=loupe-demo-only"
@@ -116,11 +116,11 @@ docker network connect $network $postgres 2>$null | Out-Null
 
 $env:Jwt__SigningKey = [Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
 if ($Ollama) {
-  Write-Host "== 5b. Start Ollama ($ollama) and pull bge-m3 for local embeddings ==" -ForegroundColor Cyan
-  docker rm -f $ollama 2>$null | Out-Null
-  docker run -d --name $ollama --network $network -v "${Prefix}-ollama-models:/root/.ollama" ollama/ollama | Out-Null
-  docker exec $ollama ollama pull bge-m3
-  $env:Embeddings__Endpoint = "http://${ollama}:11434"
+  Write-Host "== 5b. Start Ollama ($ollamaContainer) and pull bge-m3 for local embeddings ==" -ForegroundColor Cyan
+  docker rm -f $ollamaContainer 2>$null | Out-Null
+  docker run -d --name $ollamaContainer --network $network -v "${Prefix}-ollama-models:/root/.ollama" ollama/ollama | Out-Null
+  docker exec $ollamaContainer ollama pull bge-m3
+  $env:Embeddings__Endpoint = "http://${ollamaContainer}:11434"
   $env:Embeddings__Model = 'bge-m3'
 }
 

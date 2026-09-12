@@ -34,7 +34,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] C4 Rank locations by meaning (L2-061.1, .4, .7, .8; L2-062.5, .7)
 - [x] C5 Meaning mode in the Find a location page (L2-061.1, .6, .7, .8; L2-062.4–.6)
 - [x] C6 Relevance evaluation corpus and procedure (L2-061.9; L2-047)
-- [ ] D Design-system examples, README, final evidence, PR
+- [x] D Design-system examples, README, final evidence, PR
 
 ## Evidence
 
@@ -983,4 +983,39 @@ recorded only when actually executed.
 - Non-claims: L2-052.1 visual review and L2-052.2 baselines are review
   obligations, not automated here; the design-system item L2-051.3 covers every
   area and stays a shared tick.
+
+### Final verification (end of branch)
+
+- Backend: `./backend/Test.ps1` (full) → `Passed: 685, Failed: 0` (8 m 32 s);
+  the eleven `RobotsPolicyTests` failures recorded on `main` did not reproduce in
+  this run. `dotnet build` clean; `dotnet format` clean on every file this branch
+  touched (pre-existing whitespace findings in untouched files remain a
+  non-claim).
+- Frontend: `cd frontend && npm test` (full Playwright, Chromium) → `703 passed`
+  (17.7 m); `npm run build` clean (the 500 kB initial-bundle budget warning is
+  pre-existing).
+- Design system: `npm test` in `design-system/` → `79 passed`.
+- Real-stack smoke through `docs/demo/harness/setup.ps1 -Prefix loupe-loc-smoke
+  -Ollama` (real Api and Worker in Linux containers, PostgreSQL/pgvector, a local
+  `ollama/ollama` container with `bge-m3` pulled): sign-in 200; create a location
+  with locality, region, country, setting, brief, notes and two tags → 201 with
+  `indexStatus: updating`; two PNG uploads → 201 each (cover set); the scouting
+  request → 503 `integration_not_configured` because no Azure OpenAI
+  credentials are configured on this machine — **the scouting report against a
+  real provider is recorded as not run**; the `LocationIndex` operation reached
+  `Succeeded` ("Search is current.") through the real Ollama endpoint and the
+  detail reported `current`; `GET /api/locations/search?query=arches&setting=Outdoor&tags=river`
+  → 1 result; `mode=meaning&query=golden hour couple session by the river` →
+  the location (real `bge-m3` similarity above 0.20); a blank Meaning query →
+  400; `GET /api/locations/search/tags` → the two tags with counts. Through the
+  served Angular app (real HTTP adapters, same-origin proxy): sign in, Find a
+  location in Meaning mode → "1 location for …" with the `Matched by meaning`
+  pill, the result opens the detail, which shows the request-a-report call to
+  action and no index-status pill (current). Torn down with `teardown.ps1`.
+- Non-claims: the Azure-backed scouting report and the reviewer-run evaluations
+  (`docs/evaluation/scouting`, `docs/evaluation/shoot-planning`) were not run;
+  the `L2-047` capacity run was not run; `L2-052` visual review is a review
+  obligation. The harness's `ng serve` had to be restarted by hand once because
+  the `domain` library build was cut short when the setup script was moved to
+  the background — a session artefact, not a harness defect.
 
