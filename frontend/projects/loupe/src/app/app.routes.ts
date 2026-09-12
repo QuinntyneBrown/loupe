@@ -22,6 +22,13 @@ import { ComparePage } from './pages/compare/compare-page';
 
 export const routes: Routes = [
   {
+    path: 'locations/find',
+    loadComponent: () =>
+      import('./pages/find-location/find-location-page').then((module) => module.FindLocationPage),
+    canActivate: [sessionGuard],
+    title: 'Find a location \u00b7 Loupe',
+  },
+  {
     path: 'locations/:id',
     loadComponent: () =>
       import('./pages/location-detail/location-detail-page').then(

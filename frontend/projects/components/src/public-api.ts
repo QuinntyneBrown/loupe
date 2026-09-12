@@ -5,3 +5,5 @@ export * from './lib/critique-content/critique-content';
 export * from './lib/critique-content/critique-presentation';
 export * from './lib/location-card/location-card';
 export * from './lib/scouting-report-content/scouting-report-content';
+export * from './lib/location-result-card/location-result-card';
+export * from './lib/location-search-filters/location-search-filters';

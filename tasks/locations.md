@@ -28,7 +28,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] B4 Request and read the scouting report in the detail (L2-060.1–.8; L2-058.1, .7; L2-057.3; L2-055.5; L2-041.2; L2-045.3)
 - [x] B5 Release evaluation manifest and procedure (L2-059.5, .6; L2-050.2, .5 — procedure only)
 - [x] C1 Find locations by keyword with shoot filters (L2-062.1, .2, .3, .5, .7; L2-061.2–.5)
-- [ ] C2 Find a location page with keyword results (L2-061.1, .5, .6; L2-062.8; L2-043.2; L2-044.1)
+- [x] C2 Find a location page with keyword results (L2-061.1, .5, .6; L2-062.8; L2-043.2; L2-044.1)
 - [ ] C3a Record location index intents and report index status (L2-028.2; L2-062.4, .5)
 - [ ] C3b Embed location documents through Ollama and keep vectors current (L2-028.1, .4, .5; L2-062.4, .6, .7; L2-041)
 - [ ] C4 Rank locations by meaning (L2-061.1, .4, .7, .8; L2-062.5, .7)
@@ -674,4 +674,73 @@ recorded only when actually executed.
   → `Passed: 139`. `dotnet build` clean; `dotnet format` clean.
 - Non-claims: Meaning mode (`mode=meaning`) is rejected with the shared 400 until
   C4 delivers it; L2-062.8 (URL state) and L2-061.6/.7 (UI) land in C2/C5.
+
+### C2 — Find a location page with keyword results (L2-061.1 card fields, .5, .6 keyword half; L2-062.8; L2-043.2; L2-044.1; L2-045)
+
+- Tests: `e2e/specs/find-location.spec.js` (16 cases) with page object
+  `e2e/page-objects/find-location-page.js` and fixture
+  `e2e/fixtures/location-search-library.js` (ten named locations over the
+  `LocationLibrary` records, reports shaped per location for the shoot filters,
+  keyword and filter semantics mirrored in the mock, `loupeLocationSearch`
+  bridge); plus one backend seam in `FindLocationsKeywordTests`
+  (`L2_061_Tag_filter_choices…`): the filters dialog needs the owner's location
+  tags, so `GET /api/locations/search/tags` lists them grouped by identity with
+  counts, never a reference's tags or a stranger's. UI cases: the page opens from
+  the Locations header link and explains modes and filters without an alert or a
+  request (L2-043.2), an example chip runs the search and lands in the URL;
+  keyword results show cover or `No images yet` placeholder, name,
+  `Locality · N images`, `Recommended · Morning, Golden hour`, `2–8 people` /
+  `Group size · Cannot assess`, one `Shoot type · Rating` pill per selected shoot
+  type, `No scouting report` on report-less locations, and the card opens the
+  detail (L2-061.1, .5); filters combine by AND with a blank query, a people count
+  drops Cannot assess and out-of-range locations, Dawn OR Morning, setting, and
+  `Clear all` restores the whole library (L2-061.3, .4, .6 keyword half);
+  `?q=…&shootTypes=…&people=…&timesOfDay=…&setting=…&tags=…` restores every
+  control and re-runs the same request on reload, Back and Forward, No results
+  offers Edit query and Clear filters and is distinct from the retryable
+  `Find a location isn't available right now.` alert, mode `meaning` round-trips
+  through the URL (L2-062.8); the filters dialog lists tags with counts, traps
+  focus, Escape and Apply restore focus to their trigger, an eleventh tag is
+  refused, a tag load failure offers Retry (L2-045.2, .3); eleven viewport widths
+  assert 1/1/1/2/2/3/3/3/3/4/4 columns, the dialog-only filters below 768 px with
+  a `5 filters` summary, reachable ≥ 24 px controls, and axe A/AA (L2-044.1,
+  L2-045.5, .6).
+- RED: backend `-Filter 'FullyQualifiedName~L2_061_Tag_filter_choices'` →
+  `Failed: 1` (404); `npx playwright test specs/find-location.spec.js` →
+  `16 failed` — no `Find a location` link, no `Describe the shoot` searchbox, no
+  `Matching locations` region.
+- Built: `ListLocationTagsQuery[Handler]`, `ILocationSearchStore.ListTagsAsync`
+  (`location_tags` grouped by `NormalizedName`), `LocationSearchController.Tags`;
+  `api/src/lib/location-search/{location-search-request (SHOOT_TYPES,
+  TIMES_OF_DAY, LocationSearchFilters, LocationSearchRequest),
+  location-search-result, location-search.service.contract
+  (ILocationSearchService.search/tags, LOCATION_SEARCH_SERVICE),
+  location-search.service}` + `MockLocationSearchService` and both provider sets;
+  `components` `LocationResultCard` and `LocationSearchFilters` (chip rows, people,
+  setting segmented control, Tags/Filters trigger with count, Clear all; `domain`
+  `LocationSearchResults` (results head, `--lp-collection-columns` grid, skeleton,
+  No results, invalid-request, cursor-refresh and retryable error states, Load
+  more with focus continuity); `loupe` `FindLocationPage` (URL-held query, mode
+  and filters, validation of URL values, tag loading) and
+  `LocationSearchFiltersDialog`; route `locations/find` ahead of
+  `locations/:id`; `Find a location` header link in `LocationCollection`; token
+  `--lp-collection-columns` (1/2/3/3/4) in `design-system/src/tokens.css`; shared
+  `.lp-chips`, `.lp-segmented*`, `.lp-input--count`, `.lp-small` in `styles.css`;
+  `App` keeps focus in place for query-only navigation on `/locations/find` as it
+  already did for `/search`.
+- GREEN: spec → `16 passed`; band `locations`, `locations-add`,
+  `location-detail`, `search`, `search-navigation`, `search-layout`,
+  `search-filters`, `sign-in` → `107 passed`; backend band
+  `ShootPlanning|Search` → `Passed: 55`; `dotnet build` clean; `dotnet format`
+  clean for touched files; `npm run build` clean; prettier clean.
+- Review notes: `LocationSearchFilters` sits in `components` rather than the
+  design's `domain` because it injects no service — the placement rule in
+  `AGENTS.md` decides. The results card shows ratings only for the selected shoot
+  types (the design's rule); a location with a report and no selected type shows
+  no pill.
+- Non-claims: Meaning mode is selectable and round-trips through the URL, but
+  its results label, blank-query prompt, unavailable and refresh-required states
+  are C5 (the production API still answers `mode=meaning` with the shared 400
+  until C4); L2-061.1 and L2-061.6 stay open for their Meaning halves;
+  L2-043/044/045 are cross-area criteria and stay unticked on this branch.
 

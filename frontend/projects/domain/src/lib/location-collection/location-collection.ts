@@ -11,11 +11,12 @@ import {
   viewChildren,
 } from '@angular/core';
 import { LOCATION_SERVICE, LocationResult, LocationSummary } from 'api';
+import { RouterLink } from '@angular/router';
 import { LocationCard } from 'components';
 
 @Component({
   selector: 'lp-location-collection',
-  imports: [LocationCard],
+  imports: [LocationCard, RouterLink],
   templateUrl: './location-collection.html',
   styleUrl: './location-collection.css',
 })

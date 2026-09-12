@@ -1,0 +1,24 @@
+:host {
+  display: block;
+}
+.results-head {
+  margin: var(--lp-space-6) var(--lp-zero);
+  color: var(--lp-color-text-2);
+  font-size: var(--lp-text-sm);
+  overflow-wrap: anywhere;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--lp-collection-columns), minmax(var(--lp-zero), 1fr));
+  gap: var(--lp-space-4);
+  align-items: start;
+}
+.skeleton-card {
+  height: calc(var(--lp-thumb-size-lg) * 1.25 + 2 * var(--lp-space-4));
+  border-radius: var(--lp-radius-lg);
+}
+.more {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--lp-space-6);
+}

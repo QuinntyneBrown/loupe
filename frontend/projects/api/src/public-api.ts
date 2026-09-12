@@ -70,3 +70,7 @@ export * from './lib/location/location-input';
 export * from './lib/scouting-report/scouting-report-result';
 export * from './lib/scouting-report/scouting-report.service.contract';
 export * from './lib/scouting-report/scouting-report.service';
+export * from './lib/location-search/location-search-request';
+export * from './lib/location-search/location-search-result';
+export * from './lib/location-search/location-search.service.contract';
+export * from './lib/location-search/location-search.service';

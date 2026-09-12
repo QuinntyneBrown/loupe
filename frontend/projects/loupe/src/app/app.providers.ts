@@ -1,5 +1,6 @@
 import { REFERENCE_IMPORT_SERVICE, ReferenceImportService } from 'api';
 import { LOCATION_SERVICE, LocationService } from 'api';
+import { LOCATION_SEARCH_SERVICE, LocationSearchService } from 'api';
 import { SCOUTING_REPORT_SERVICE, ScoutingReportService } from 'api';
 import {
   PHOTOGRAPHER_SUMMARY_SERVICE,
@@ -21,6 +22,7 @@ import { REFERENCE_DRAFT_SERVICE, ReferenceDraftService } from 'api';
 
 export const appProviders = [
   { provide: LOCATION_SERVICE, useClass: LocationService },
+  { provide: LOCATION_SEARCH_SERVICE, useClass: LocationSearchService },
   { provide: SCOUTING_REPORT_SERVICE, useClass: ScoutingReportService },
   { provide: SEARCH_SERVICE, useClass: SearchService },
   { provide: PHOTOGRAPHER_SUMMARY_SERVICE, useClass: PhotographerSummaryService },

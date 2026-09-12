@@ -206,6 +206,30 @@ public sealed class FindLocationsKeywordTests(PostgreSqlFixture database) : ICla
         Assert.Equal(HttpStatusCode.BadRequest, strangerCursor.StatusCode);
     }
 
+    // L2-061 tag filter: the filter choices are the owner's active location tags, grouped by identity and counted, never a reference's tags or a stranger's.
+    [Fact]
+    public async Task L2_061_Tag_filter_choices_list_the_owners_location_tags_by_count()
+    {
+        await using var factory = Factory();
+        using var owner = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        using var stranger = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        await CreateAsync(owner, new { name = "Kew", tags = new[] { new { name = "river", category = (string?)"subject" }, new { name = "low tide", category = (string?)null } } });
+        await CreateAsync(owner, new { name = "Putney", tags = new[] { new { name = "River", category = (string?)null } } });
+        await CreateAsync(stranger, new { name = "Elsewhere", tags = new[] { new { name = "rooftop", category = (string?)null } } });
+        using var reference = await ReferenceFixture.SubmitAsync(owner, new Dictionary<string, string> { ["title"] = "Kew reference" });
+        reference.EnsureSuccessStatusCode();
+        var referenceId = (await reference.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        using var tagged = await owner.PutAsJsonAsync($"/api/references/{referenceId}/tags", new { revision = 1, tags = new[] { new { name = "portrait" } } });
+        tagged.EnsureSuccessStatusCode();
+
+        var tags = (await owner.GetFromJsonAsync<JsonElement>("/api/locations/search/tags")).EnumerateArray().ToArray();
+        Assert.Equal(["RIVER", "LOW TIDE"], tags.Select(tag => tag.GetProperty("normalizedName").GetString()!).ToArray());
+        Assert.Equal([2, 1], tags.Select(tag => tag.GetProperty("count").GetInt32()).ToArray());
+        Assert.Equal("River", tags[0].GetProperty("name").GetString());
+        Assert.Equal("low tide", tags[1].GetProperty("name").GetString());
+        Assert.Equal(["ROOFTOP"], (await stranger.GetFromJsonAsync<JsonElement>("/api/locations/search/tags")).EnumerateArray().Select(tag => tag.GetProperty("normalizedName").GetString()!).ToArray());
+    }
+
     private ApiFactory Factory() => new(database.ConnectionString, database.MediaRoot)
     {
         Settings = new Dictionary<string, string?> { ["Ai:Mode"] = "Live", ["Ai:ApiKey"] = "fixture-only" },

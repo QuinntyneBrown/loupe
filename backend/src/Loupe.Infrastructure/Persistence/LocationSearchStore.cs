@@ -1,6 +1,7 @@
 using Loupe.Application.Common;
 using Loupe.Application.Locations;
 using Loupe.Application.Scouting;
+using Loupe.Application.Search;
 using Loupe.Application.ShootPlanning;
 using Loupe.Domain.Operations;
 using Loupe.Domain.Scouting;
@@ -12,6 +13,15 @@ public sealed class LocationSearchStore(LibraryDbContext database) : ILocationSe
 {
     public Task<int> CountAsync(string ownerId, LocationSearchFilter filter, CancellationToken cancellationToken) =>
         Filtered(ownerId, filter).CountAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<SearchTagCount>> ListTagsAsync(string ownerId, CancellationToken cancellationToken) =>
+        await database.Database.SqlQuery<SearchTagCount>($"""
+            SELECT min(t."Name" COLLATE "C") AS "Name", count(*)::integer AS "Count", t."NormalizedName"
+            FROM location_tags t
+            WHERE t."OwnerId" = {ownerId}
+            GROUP BY t."NormalizedName"
+            ORDER BY count(*) DESC, t."NormalizedName" COLLATE "C"
+            """).ToListAsync(cancellationToken);
 
     public async Task<IReadOnlyList<LocationSearchItem>> ListAsync(string ownerId, LocationSearchFilter filter, int count, CreatedCursor? cursor, CancellationToken cancellationToken)
     {

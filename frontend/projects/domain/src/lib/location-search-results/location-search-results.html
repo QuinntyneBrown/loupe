@@ -1,0 +1,112 @@
+@if (request(); as search) {
+  <section aria-label="Matching locations" [attr.aria-busy]="loading()">
+    <p class="results-head" role="status">{{ status() }}</p>
+    @if (items().length) {
+      <div class="grid">
+        @for (item of cards(); track item.id) {
+          <lp-location-result-card
+            [destination]="'/locations/' + item.id"
+            [name]="item.name"
+            [locality]="item.locality"
+            [coverPreviewUrl]="item.coverPreviewUrl"
+            [imageCount]="item.imageCount"
+            [recommendedPeriods]="item.recommendedPeriods"
+            [groupSize]="item.groupSize"
+            [ratings]="item.ratings"
+          />
+        }
+      </div>
+    }
+    @if (loading()) {
+      @if (!items().length) {
+        <div class="grid" aria-hidden="true">
+          @for (tile of [1, 2, 3, 4, 5, 6]; track tile) {
+            <div class="lp-skeleton skeleton-card"></div>
+          }
+        </div>
+      }
+    } @else if (failed()) {
+      <div class="lp-empty" role="alert">
+        @if (invalidCursor()) {
+          <h2 class="lp-empty__title">These results need refreshing.</h2>
+          <p class="lp-empty__text">
+            The next page can no longer be loaded. Refresh to start again with the same query and
+            filters.
+          </p>
+          <div class="lp-empty__action">
+            <button class="lp-button lp-button--secondary" type="button" (click)="load(true, true)">
+              Refresh results
+            </button>
+          </div>
+        } @else if (failure()?.code === 'invalid_request') {
+          <h2 class="lp-empty__title">Check your search.</h2>
+          <p class="lp-empty__text">
+            Correct the query or the selected filters, then search again.
+          </p>
+          <div class="lp-empty__action">
+            <button
+              class="lp-button lp-button--secondary"
+              type="button"
+              (click)="filtersRequested.emit()"
+            >
+              Review filters
+            </button>
+          </div>
+        } @else {
+          <h2 class="lp-empty__title">Find a location isn't available right now.</h2>
+          <p class="lp-empty__text">
+            Try again in a moment. Your locations are fine; only search is affected.
+          </p>
+          <div class="lp-empty__action">
+            <button
+              class="lp-button lp-button--secondary"
+              type="button"
+              (click)="load(!items().length, true)"
+            >
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg>Try
+              again
+            </button>
+          </div>
+        }
+      </div>
+    } @else if (!items().length) {
+      <div class="lp-empty">
+        <h2 #emptyHeading tabindex="-1" class="lp-empty__title">
+          {{
+            search.query
+              ? 'No locations match “' + search.query + '”.'
+              : 'No locations match these filters.'
+          }}
+        </h2>
+        <p class="lp-empty__text">
+          Edit the query, or clear a filter. Shoot type, people, and time of day only match
+          locations with a scouting report.
+        </p>
+        <div class="lp-empty__action">
+          <button
+            class="lp-button lp-button--secondary"
+            type="button"
+            (click)="queryEditRequested.emit()"
+          >
+            Edit query
+          </button>
+          @if (hasFilters()) {
+            <button
+              class="lp-button lp-button--secondary"
+              type="button"
+              (click)="filtersClearRequested.emit()"
+            >
+              Clear filters
+            </button>
+          }
+        </div>
+      </div>
+    } @else if (cursor()) {
+      <div class="more">
+        <button class="lp-button lp-button--secondary" type="button" (click)="load(false, true)">
+          Load more
+        </button>
+      </div>
+    }
+  </section>
+}
