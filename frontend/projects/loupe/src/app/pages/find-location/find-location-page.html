@@ -1,0 +1,117 @@
+<main id="main" class="lp-main" tabindex="-1">
+  <a class="lp-back" routerLink="/locations">
+    <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-left" /></svg
+    >Locations
+  </a>
+  <div class="hero" [class.hero--top]="started()">
+    @if (!started()) {
+      <div class="intro">
+        <h1 class="lp-title">Describe the shoot.</h1>
+        <p>
+          Who it's for, how many people, the light you want, a technique. Loupe ranks your own
+          locations by what their scouting reports say.
+        </p>
+      </div>
+    } @else {
+      <h1 class="visually-hidden">Find a location</h1>
+    }
+    <form role="search" (ngSubmit)="submit()">
+      <svg class="lp-icon" aria-hidden="true"><use href="#i-search" /></svg>
+      <input
+        #queryInput
+        class="lp-input"
+        type="search"
+        name="q"
+        aria-label="Describe the shoot"
+        placeholder="golden hour engagement session with leading lines for two people"
+        [ngModel]="query()"
+        (ngModelChange)="query.set($event)"
+        [attr.aria-invalid]="fieldErrors()['query'] ? true : null"
+        [attr.aria-describedby]="fieldErrors()['query'] ? 'find-query-error' : null"
+      />
+    </form>
+    @if (fieldErrors()['query']; as error) {
+      <p id="find-query-error" class="lp-field__error" role="alert">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>{{ error }}
+      </p>
+    }
+    <div class="lp-segmented mode" role="radiogroup" aria-label="Search mode">
+      @for (option of modes; track option.value) {
+        <label class="lp-segmented__option"
+          ><input
+            type="radio"
+            name="mode"
+            [value]="option.value"
+            [checked]="mode() === option.value"
+            (change)="chooseMode(option.value)"
+          /><span class="lp-segmented__label">{{ option.label }}</span></label
+        >
+      }
+    </div>
+    @if (!started()) {
+      <p class="hint">
+        Keyword matches the words you type against a location's details and report. Meaning ranks by
+        what they describe, even without the exact words.
+      </p>
+      <div class="examples" role="group" aria-label="Example searches">
+        @for (example of examples; track example) {
+          <button class="lp-chip" type="button" (click)="useExample(example)">
+            “{{ example }}”
+          </button>
+        }
+      </div>
+    }
+    <lp-location-search-filters
+      [shootTypeOptions]="shootTypes"
+      [periodOptions]="periods"
+      [value]="filters()"
+      (valueChange)="changeFilters($event)"
+      (dialogRequested)="openFilters()"
+    />
+    @for (error of filterErrors(); track error) {
+      <p class="lp-field__error" role="alert">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>{{ error }}
+      </p>
+    }
+    @if (!started()) {
+      <p class="hint hint--small">
+        Shoot type, people, and time of day come from the scouting report, so locations without a
+        report drop out while any of those is set.
+      </p>
+    }
+  </div>
+  @if (queryRequired()) {
+    <div class="lp-empty lp-empty--compact">
+      <h2 class="lp-empty__title">Describe the shoot to search by meaning.</h2>
+      <p class="lp-empty__text">
+        Meaning needs a few words to rank against. Keyword mode can browse your locations by filters
+        alone.
+      </p>
+      <div class="lp-empty__action">
+        <button class="lp-button lp-button--secondary" type="button" (click)="useKeyword()">
+          Switch to Keyword
+        </button>
+      </div>
+    </div>
+  }
+  <lp-location-search-results
+    [request]="request()"
+    (queryEditRequested)="focusQuery()"
+    (filtersClearRequested)="clearFilters()"
+    (filtersRequested)="openFilters()"
+    (keywordRequested)="useKeyword()"
+    (invalidRequest)="showValidation($event)"
+  />
+</main>
+@if (dialogOpen()) {
+  <lp-location-search-filters-dialog
+    [shootTypeOptions]="shootTypes"
+    [periodOptions]="periods"
+    [tags]="tags()"
+    [tagsFailed]="tagsFailed()"
+    [value]="filters()"
+    (retryTags)="loadTags()"
+    (closed)="dialogOpen.set(false)"
+    (applied)="applyFilters($event)"
+  />
+}

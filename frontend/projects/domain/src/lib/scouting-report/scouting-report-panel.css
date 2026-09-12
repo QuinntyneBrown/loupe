@@ -1,0 +1,106 @@
+:host {
+  display: block;
+}
+.lp-ai-block {
+  display: grid;
+  gap: var(--lp-space-3);
+  padding: var(--lp-space-4) var(--lp-space-5);
+  border-radius: var(--lp-radius-md);
+  background: var(--lp-color-ai-bg);
+  border: var(--lp-hairline) solid var(--lp-color-ai-border);
+}
+.lp-ai-block--quiet {
+  background: var(--lp-color-surface-2);
+  border-color: var(--lp-color-border);
+}
+.lp-ai-block--quiet .lp-kicker--ai {
+  color: var(--lp-color-text-2);
+}
+.lp-ai-block__head {
+  display: grid;
+  gap: var(--lp-space-2);
+}
+.head-row {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-2);
+  flex-wrap: wrap;
+}
+.head-row h2 {
+  margin: var(--lp-zero);
+}
+.lp-ai-block__text {
+  margin: var(--lp-zero);
+  line-height: var(--lp-leading-relaxed);
+}
+.lp-ai-block__note {
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-ai);
+}
+.lp-ai-block--quiet .lp-ai-block__note {
+  color: var(--lp-color-text-2);
+}
+.lp-ai-block__actions {
+  display: flex;
+  gap: var(--lp-space-2);
+  flex-wrap: wrap;
+}
+.lp-processing {
+  display: grid;
+  gap: var(--lp-space-2);
+  padding: var(--lp-space-4);
+  border-radius: var(--lp-radius-lg);
+  background: var(--lp-color-ai-bg);
+  border: var(--lp-hairline) solid var(--lp-color-ai-border);
+}
+.lp-processing__title {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-3);
+  font-weight: var(--lp-weight-medium);
+  color: var(--lp-color-ai);
+}
+.lp-processing__text {
+  margin: var(--lp-zero);
+  font-size: var(--lp-text-sm);
+  color: var(--lp-color-ai);
+}
+.lp-spinner {
+  width: var(--lp-icon-size-sm);
+  height: var(--lp-icon-size-sm);
+  border-radius: var(--lp-radius-full);
+  border: var(--lp-stroke) solid currentColor;
+  border-right-color: transparent;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lp-spinner {
+    animation: lp-spin 0.8s linear infinite;
+  }
+}
+@keyframes lp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.lp-notice__body {
+  flex: var(--lp-fraction);
+  display: grid;
+  gap: var(--lp-space-1);
+}
+.lp-notice__title {
+  font-weight: var(--lp-weight-medium);
+}
+.lp-notice__actions {
+  display: flex;
+  gap: var(--lp-space-3);
+  margin-top: var(--lp-space-1);
+}
+.lp-notice--warning {
+  background: var(--lp-color-warning-bg);
+  color: var(--lp-color-warning);
+}
+.error {
+  margin: var(--lp-zero);
+  color: var(--lp-color-danger);
+  font-size: var(--lp-text-sm);
+}

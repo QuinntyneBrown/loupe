@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Request, regenerate, and outdate a scouting report
+Person(owner, "Library owner", "Uses this capability")
+System_Boundary(loupe, "Loupe") {
+Container(spa, "Loupe web", "Angular", "LocationDetailPage, ScoutingReportPanel, RequestScoutingReport")
+Container(api, "Loupe API", "ASP.NET Core", "ScoutingReportsController, OperationsController")
+Container(worker, "Loupe worker", ".NET hosted service", "Leases persisted work and dispatches Application handlers")
+ContainerDb(db, "Library store", "PostgreSQL via LibraryDbContext", "Locations, background_operations, operation_receipts, report JSON")
+}
+System_Ext(external, "Configured external services", "Azure OpenAI responses endpoint")
+Rel(owner, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls via interface-bound HTTP adapter", "JSON / HTTPS")
+Rel(api, db, "Admits durable work and reads status in one transaction", "Infrastructure adapter")
+Rel(worker, db, "Leases durable work and conditionally publishes", "Infrastructure adapter")
+Rel(worker, external, "Calls bounded adapters", "HTTPS")
+@enduml

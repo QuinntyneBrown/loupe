@@ -17,7 +17,7 @@ public sealed class ReferenceAnalysisQueue(LibraryDbContext database, IReference
         var identity = configuration.GetIdentity();
         var now = clock.GetUtcNow();
         var full = await database.BackgroundOperations.CountAsync(operation => operation.OwnerId == reference.OwnerId
-            && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running), cancellationToken) >= 5;
+            && operation.Type != OperationType.LocationIndex && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running), cancellationToken) >= 5;
         var operation = new BackgroundOperation
         {
             OwnerId = reference.OwnerId, ResourceId = reference.Id, Type = OperationType.ReferenceAnalysis, Mode = identity.Mode,

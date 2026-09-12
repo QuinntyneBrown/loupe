@@ -3,6 +3,8 @@ using System.Text.Json;
 using Loupe.Application.Common;
 using Loupe.Application.Operations;
 using Loupe.Application.Photographs;
+using Loupe.Application.Scouting;
+using Loupe.Application.ShootPlanning;
 using Loupe.Application.Security;
 using Loupe.Domain.Critiques;
 using Loupe.Domain.Operations;
@@ -11,12 +13,17 @@ using MediatR;
 namespace Loupe.Application.Critiques;
 
 public sealed class RetryCritiqueCommandHandler(ICurrentOwner owner, IPhotographStore photographs, IBackgroundOperationStore operations,
-    IOperationReceiptStore receipts, ICritiqueConfiguration configuration, TimeProvider clock) : IRequestHandler<RetryCritiqueCommand, OperationResult>
+    IOperationReceiptStore receipts, ICritiqueConfiguration configuration, TimeProvider clock, ISender sender) : IRequestHandler<RetryCritiqueCommand, OperationResult>
 {
     public async Task<OperationResult> Handle(RetryCritiqueCommand request, CancellationToken cancellationToken)
     {
         var key = RetryCritiqueCommandValidator.Validate(request);
         var source = await operations.FindOwnedAsync(request.OperationId, owner.Id, cancellationToken) ?? throw new ResourceNotFoundException();
+        // The shared retry route dispatches by operation type; the critique branch below is unchanged.
+        if (source.Type == OperationType.LocationScouting)
+            return await sender.Send(new RetryScoutingReportCommand(request.OperationId, request.Revision, key), cancellationToken);
+        if (source.Type == OperationType.LocationIndex)
+            return await sender.Send(new RetryLocationIndexCommand(request.OperationId, request.Revision, key), cancellationToken);
         _ = await photographs.FindOwnedAsync(source.ResourceId, owner.Id, cancellationToken) ?? throw new ResourceNotFoundException();
         var fingerprint = Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { request.OperationId, request.Revision })));
         var id = await receipts.ExecuteAsync(owner.Id, "retry-critique", key, fingerprint, async token =>

@@ -1,0 +1,61 @@
+<section class="lp-block" aria-label="Your tags">
+  <div class="lp-block__head">
+    <label class="lp-subheading" for="location-tag-input">Your tags</label
+    ><span
+      class="save-status"
+      [class.saved]="status() === 'Saved'"
+      [class.failed]="failed()"
+      aria-live="polite"
+      >{{ status() }}</span
+    >
+  </div>
+  <div class="lp-chip-input">
+    @for (tag of tags(); track tag.name) {
+      <span class="lp-tag"
+        >{{ tag.name
+        }}<button
+          type="button"
+          class="lp-tag__action"
+          [attr.aria-label]="'Remove tag ' + tag.name"
+          [disabled]="busy()"
+          (click)="remove(tag.name)"
+        >
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg></button
+      ></span>
+    }
+    <input
+      id="location-tag-input"
+      name="tag"
+      type="text"
+      placeholder="Add a tag"
+      aria-label="Add a tag"
+      [ngModel]="draft()"
+      (ngModelChange)="draft.set($event)"
+      (keydown.enter)="add($event)"
+      [disabled]="busy()"
+    />
+  </div>
+  @if (error()) {
+    <p role="alert">{{ error() }}</p>
+  }
+  <div class="foot">
+    @if (conflict() && !unavailable()) {
+      <button
+        type="button"
+        class="lp-button lp-button--secondary lp-button--sm"
+        [disabled]="busy()"
+        (click)="reload()"
+      >
+        Load latest tags
+      </button>
+    }
+    <button
+      type="button"
+      class="lp-button lp-button--secondary lp-button--sm"
+      [disabled]="!dirty() || busy() || conflict() || unavailable()"
+      (click)="save()"
+    >
+      Save
+    </button>
+  </div>
+</section>

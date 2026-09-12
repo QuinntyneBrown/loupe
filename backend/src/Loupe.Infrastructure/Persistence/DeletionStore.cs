@@ -73,7 +73,10 @@ public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock,
         if (reference.Revision != revision) throw new RevisionConflictException();
         var operation = new DeletionOperation
         {
-            OwnerId = ownerId, ResourceType = "reference", ResourceId = id, DeletedAt = now,
+            OwnerId = ownerId,
+            ResourceType = "reference",
+            ResourceId = id,
+            DeletedAt = now,
             MediaKeys = new[] { reference.ImageKey, reference.PreviewKey }.OfType<string>().ToArray()
         };
         database.Deletions.Add(operation);
@@ -82,6 +85,42 @@ public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock,
         catch (DbUpdateConcurrencyException) { throw new RevisionConflictException(); }
         await transaction.CommitAsync(cancellationToken);
         return operation;
+    }
+
+    public async Task<DeletionOperation> DeleteLocationAsync(Guid id, string ownerId, long revision, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
+            var previous = await database.Deletions.AsNoTracking().SingleOrDefaultAsync(item => item.OwnerId == ownerId
+                && item.ResourceType == "location" && item.ResourceId == id, cancellationToken);
+            if (previous is not null) return previous;
+            await ScoutingCancellation.CancelAsync(database, id, ownerId, "The location was deleted.", clock.GetUtcNow(), cancellationToken);
+            await LocationIndexIntent.CancelAsync(database, id, ownerId, "The location was deleted.", clock.GetUtcNow(), cancellationToken);
+            await database.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM search_vectors WHERE \"OwnerId\" = {ownerId} AND \"ItemType\" = 'location' AND \"ItemId\" = {id}", cancellationToken);
+            var location = await database.Locations.FromSqlInterpolated($"SELECT * FROM locations WHERE \"Id\" = {id} AND \"OwnerId\" = {ownerId} FOR UPDATE")
+                .SingleOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException();
+            if (location.Revision != revision) throw new RevisionConflictException();
+            var keys = await database.LocationImages.Where(image => image.LocationId == id && image.OwnerId == ownerId)
+                .Select(image => new { image.ImageKey, image.PreviewKey }).ToListAsync(cancellationToken);
+            var operation = new DeletionOperation
+            {
+                OwnerId = ownerId,
+                ResourceType = "location",
+                ResourceId = id,
+                DeletedAt = clock.GetUtcNow(),
+                MediaKeys = keys.SelectMany(image => new[] { image.ImageKey, image.PreviewKey }).ToArray()
+            };
+            database.Deletions.Add(operation);
+            database.Locations.Remove(location);
+            await database.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return operation;
+        }
+        catch (DbUpdateConcurrencyException) { throw new RevisionConflictException(); }
+        catch (Exception exception) when (exception is NpgsqlException { IsTransient: true }
+            or DbUpdateException { InnerException: NpgsqlException { IsTransient: true } })
+        { throw new ServiceUnavailableException(); }
     }
 
     public Task<DeletionOperation?> FindOwnedAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>

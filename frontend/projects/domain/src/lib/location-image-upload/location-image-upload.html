@@ -1,0 +1,101 @@
+@if (!started()) {
+  @if (rejection()) {
+    <div class="lp-notice lp-notice--error" role="alert">
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>
+      <div class="lp-notice__body">
+        <span class="lp-notice__title">{{ rejection() }}</span>
+        <span>{{ rejectionDetail() }}</span>
+      </div>
+    </div>
+  }
+  <label class="lp-dropzone" [class.lp-dropzone--compact]="!!rejection()">
+    <svg class="lp-icon" aria-hidden="true"><use href="#i-upload" /></svg>
+    <span class="lp-dropzone__title">
+      Drop up to {{ remaining() }} {{ remaining() === 1 ? 'image' : 'images' }} here, or browse
+    </span>
+    <span id="location-images-help"
+      >JPEG, PNG, HEIC or WebP, up to 25 MB each. {{ location().images.length }} of
+      {{ maximum }} used. Each file is its own upload.</span
+    >
+    @if (selected().length) {
+      <span class="lp-field__hint">{{
+        selected().length === 1 ? selected()[0].name : selected().length + ' files chosen'
+      }}</span>
+    }
+    <input
+      #fileInput
+      type="file"
+      class="file-input"
+      aria-label="Images"
+      autofocus
+      multiple
+      accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+      aria-describedby="location-images-help"
+      (change)="choose(fileInput.files)"
+    />
+  </label>
+  <p class="lp-field__hint">
+    Location data inside a file is stripped on upload. Your coordinates are never read from a photo.
+    The first image becomes the cover.
+  </p>
+} @else {
+  <p class="lp-muted">
+    Each image is its own upload. One failing doesn't stop the others, and what's already in stays
+    in.
+  </p>
+  <ul class="rows" aria-live="polite">
+    @for (item of items(); track item.key) {
+      <li class="row">
+        @if (item.state === 'failed' || item.state === 'invalid') {
+          <div class="lp-notice lp-notice--error" role="alert">
+            <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>
+            <div class="lp-notice__body">
+              <span class="lp-notice__title">{{ title(item) }}</span>
+              <span>{{ item.reason }}</span>
+              <div class="lp-notice__actions">
+                @if (item.retryable) {
+                  <button
+                    class="lp-button lp-button--secondary lp-button--sm"
+                    type="button"
+                    (click)="retry(item.key)"
+                  >
+                    <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg
+                    >Retry
+                  </button>
+                }
+                <button
+                  class="lp-button lp-button--ghost lp-button--sm"
+                  type="button"
+                  (click)="remove(item.key)"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <progress
+            [attr.aria-label]="'Upload progress for ' + item.file.name"
+            [attr.max]="item.progress?.total || 1"
+            [attr.value]="
+              item.state === 'saved' ? 1 : item.progress?.total ? item.progress?.transferred : null
+            "
+          ></progress>
+          <div class="meta">
+            <span>{{ item.file.name }}</span>
+            @if (item.state === 'saved') {
+              <span class="lp-pill lp-pill--success">Saved</span>
+            } @else if (item.progress?.total) {
+              <span
+                >{{ item.progress!.transferred | number: '1.0-0' }} of
+                {{ item.progress!.total | number: '1.0-0' }} bytes</span
+              >
+            } @else {
+              <span>{{ item.state === 'queued' ? 'Queued' : 'Uploading…' }}</span>
+            }
+          </div>
+        }
+      </li>
+    }
+  </ul>
+}

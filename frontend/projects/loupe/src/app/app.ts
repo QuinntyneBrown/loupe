@@ -28,11 +28,12 @@ export class App {
           path === '/search' &&
           this.router.currentNavigation()?.extras.state?.['focusSearch'] === true;
         this.currentArea.set(
-          ['inspiration', 'photographers', 'search'].find(
+          ['inspiration', 'photographers', 'locations', 'search'].find(
             (area) => path === '/' + area || path.startsWith('/' + area + '/'),
           ) ?? 'my-work',
         );
-        if (path !== '/search' || this.lastPath !== path)
+        // Query-only navigation inside a search screen keeps the focus where the user left it.
+        if (!['/search', '/locations/find'].includes(path) || this.lastPath !== path)
           afterNextRender(
             () => (focusSearch ? this.focusSearch() : this.document.querySelector('main')?.focus()),
             { injector: this.injector },

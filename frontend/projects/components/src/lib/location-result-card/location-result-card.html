@@ -1,0 +1,47 @@
+<article class="card">
+  <a #link class="card__link" [routerLink]="destination()" [attr.aria-label]="'Open ' + name()"></a>
+  <div class="card__cover">
+    @if (coverPreviewUrl() && coverPreviewUrl() !== failedImage()) {
+      <img
+        [src]="coverPreviewUrl()"
+        [alt]="name()"
+        loading="lazy"
+        decoding="async"
+        (error)="failedImage.set(coverPreviewUrl())"
+      />
+    } @else {
+      <div class="card__placeholder" role="img" aria-label="No images yet">
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-pin" /></svg>
+      </div>
+    }
+  </div>
+  <div class="card__body">
+    <h2 class="card__name">{{ name() }}</h2>
+    <span class="card__place">{{ place() }}</span>
+    @if (recommended()) {
+      <span class="card__line">{{ recommended() }}</span>
+    }
+    @if (group()) {
+      <span class="card__line">{{ group() }}</span>
+    }
+    @if (ratings().length || !hasReport()) {
+      <ul class="card__ratings" aria-label="Suitability">
+        @if (hasReport()) {
+          @for (rating of ratings(); track rating.shootType) {
+            <li
+              class="lp-pill"
+              [class.lp-pill--success]="rating.rating === 'Well suited'"
+              [class.lp-pill--outline]="
+                rating.rating === 'Not recommended' || rating.rating === 'Cannot assess'
+              "
+            >
+              {{ rating.shootType }} · {{ rating.rating }}
+            </li>
+          }
+        } @else {
+          <li class="lp-pill lp-pill--outline">No scouting report</li>
+        }
+      </ul>
+    }
+  </div>
+</article>

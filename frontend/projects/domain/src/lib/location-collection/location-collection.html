@@ -1,0 +1,82 @@
+<div class="lp-page-header">
+  <div class="lp-page-header__text">
+    <h1 class="lp-title">Locations</h1>
+    <p class="lp-page-header__sub">
+      {{
+        total()
+          ? total() + ' ' + (total() === 1 ? 'location' : 'locations')
+          : 'Your scouting library'
+      }}
+    </p>
+  </div>
+  <div class="lp-page-header__actions">
+    <a class="lp-button lp-button--secondary" routerLink="/locations/find">
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-search" /></svg>Find a
+      location
+    </a>
+    <button
+      #addButton
+      class="lp-button lp-button--primary"
+      type="button"
+      (click)="addRequested.emit()"
+    >
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-plus" /></svg>Add location
+    </button>
+  </div>
+</div>
+<section aria-label="Your locations" [attr.aria-busy]="loading()">
+  <div class="grid">
+    @if (loading() && total() === null) {
+      @for (tile of skeletons; track tile) {
+        <div class="lp-skeleton lp-skeleton--tile" aria-hidden="true"></div>
+      }
+    }
+    @for (item of items(); track item.id) {
+      <lp-location-card
+        [destination]="'/locations/' + item.id"
+        [name]="item.name"
+        [locality]="item.locality"
+        [coverPreviewUrl]="item.coverPreviewUrl"
+        [imageCount]="item.imageCount"
+        [reportStatus]="item.reportStatus"
+        (deleteRequested)="deleteRequested.emit(item)"
+      />
+    }
+  </div>
+  @if (total() === 0 && !failed()) {
+    <div class="lp-empty">
+      <h2 #emptyHeading tabindex="-1" class="lp-empty__title">Keep the places you've scouted.</h2>
+      <p class="lp-empty__text">
+        Save a location with a few photographs and Loupe can tell you what shoots it suits, and
+        when.
+      </p>
+      <div class="lp-empty__action">
+        <button class="lp-button lp-button--primary" type="button" (click)="addRequested.emit()">
+          Add location
+        </button>
+      </div>
+    </div>
+  }
+  @if (failed()) {
+    <div class="lp-empty" role="alert">
+      <h2 class="lp-empty__title">Couldn't load your locations.</h2>
+      <p class="lp-empty__text">Check your connection and try again. Nothing you saved is lost.</p>
+      <div class="lp-empty__action">
+        <button class="lp-button lp-button--secondary" type="button" (click)="retry()">
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg>Try again
+        </button>
+      </div>
+    </div>
+  } @else if (cursor()) {
+    <div class="more">
+      <button
+        class="lp-button lp-button--secondary"
+        type="button"
+        [disabled]="loading()"
+        (click)="load(true)"
+      >
+        {{ loading() ? 'Loading…' : 'Load more' }}
+      </button>
+    </div>
+  }
+</section>

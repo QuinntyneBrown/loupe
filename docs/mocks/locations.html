@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Locations · Loupe</title>
+<meta name="description" content="The scouting library: an image-first grid of saved places with their report status. Separate from My Work and Inspiration.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<link rel="stylesheet" href="assets/mock.css">
+</head>
+<body class="lp-shell">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3zM12 10v4M12 17.5v.5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+</svg>
+
+<a class="lp-skip" href="#main">Skip to content</a>
+<header class="lp-topbar">
+  <a class="lp-wordmark" href="my-work.html" aria-label="Loupe">L<span class="lp-wordmark__o"></span>upe</a>
+  <nav class="lp-nav" aria-label="Primary">
+    <a href="my-work.html"><svg class="lp-icon"><use href="#i-image"/></svg><span>My Work</span></a>
+    <a href="inspiration.html"><svg class="lp-icon"><use href="#i-grid"/></svg><span>Inspiration</span></a>
+    <a href="photographers.html"><svg class="lp-icon"><use href="#i-user"/></svg><span>Photographers</span></a>
+    <a href="search.html"><svg class="lp-icon"><use href="#i-search"/></svg><span>Search</span></a>
+    <a href="locations.html" aria-current="page"><svg class="lp-icon"><use href="#i-pin"/></svg><span>Locations</span></a>
+  </nav>
+  <div class="lp-topbar__end">
+    <span class="lp-topbar__hint"><span class="lp-kbd">/</span> to search</span>
+    <a class="lp-avatar" href="settings.html" aria-label="Settings">QB</a>
+  </div>
+</header>
+<div class="lp-banner lp-banner--demo" data-demo-only role="status">
+  <span class="lp-kicker">Demo mode</span>
+  <span>No provider is configured, so scouting reports can't be requested. Everything else works.</span>
+  <a href="settings.html?demo=1">Connect a provider</a>
+</div>
+
+<main id="main" class="lp-main">
+
+  <!-- Page header -->
+  <div class="lp-page-header">
+    <div class="lp-page-header__text">
+      <h1 class="lp-title">Locations</h1>
+      <p class="lp-page-header__sub" data-state="default">12 locations</p>
+      <p class="lp-page-header__sub" data-state="empty loading error">Your scouting library</p>
+    </div>
+    <div class="lp-page-header__actions">
+      <a class="lp-button lp-button--secondary" href="find-location.html"><svg class="lp-icon lp-icon--sm"><use href="#i-search"/></svg>Find a location</a>
+      <button class="lp-button lp-button--primary" type="button" data-open="add-location:form"><svg class="lp-icon lp-icon--sm"><use href="#i-plus"/></svg>Add location</button>
+    </div>
+  </div>
+
+  <div class="lp-content">
+
+    <!-- Grid: cover or placeholder, name, locality, image count, report status (L2-057.1) -->
+    <div class="lp-photo-grid" data-state="default">
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-l1/480/600" width="480" height="600" alt="Kew Bridge foreshore" loading="lazy">
+        <a class="lp-tile__link" href="location.html" aria-label="Open Kew Bridge foreshore"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Report</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Kew Bridge foreshore</div><div class="lp-tile__meta">Richmond · 4 images</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-location" aria-label="Delete location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-l2/480/600" width="480" height="600" alt="Cornmill Gardens bandstand" loading="lazy">
+        <a class="lp-tile__link" href="location.html" aria-label="Open Cornmill Gardens bandstand"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Report</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Cornmill Gardens bandstand</div><div class="lp-tile__meta">Lewisham · 3 images</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-location" aria-label="Delete location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-l3/480/600" width="480" height="600" alt="Bermondsey wall" loading="lazy">
+        <a class="lp-tile__link" href="location.html?state=outdated" aria-label="Open Bermondsey wall"></a>
+        <span class="lp-status lp-status--outdated lp-status--on-image lp-tile__status">Outdated</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Bermondsey wall</div><div class="lp-tile__meta">Southwark · 5 images</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-location" aria-label="Delete location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-l4/480/600" width="480" height="600" alt="Old Street underpass" loading="lazy">
+        <a class="lp-tile__link" href="location.html?state=scouting" aria-label="Open Old Street underpass"></a>
+        <span class="lp-status lp-status--analyzing lp-status--on-image lp-tile__status">Scouting</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Old Street underpass</div><div class="lp-tile__meta">Hackney · 2 images</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-location" aria-label="Delete location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-l5/480/600" width="480" height="600" alt="St Dunstan in the East" loading="lazy">
+        <a class="lp-tile__link" href="location.html" aria-label="Open St Dunstan in the East"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Report</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">St Dunstan in the East</div><div class="lp-tile__meta">City of London · 6 images</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-location" aria-label="Delete location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-l6/480/600" width="480" height="600" alt="Leadenhall arcade" loading="lazy">
+        <a class="lp-tile__link" href="location.html?state=failed" aria-label="Open Leadenhall arcade"></a>
+        <span class="lp-status lp-status--failed lp-status--on-image lp-tile__status">Failed</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Leadenhall arcade</div><div class="lp-tile__meta">City of London · 3 images</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-location" aria-label="Delete location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-l7/480/600" width="480" height="600" alt="Walthamstow wetlands" loading="lazy">
+        <a class="lp-tile__link" href="location.html" aria-label="Open Walthamstow wetlands"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Report</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Walthamstow wetlands</div><div class="lp-tile__meta">Waltham Forest · 4 images</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-location" aria-label="Delete location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-l8/480/600" width="480" height="600" alt="Peckham multi-storey roof" loading="lazy">
+        <a class="lp-tile__link" href="location.html" aria-label="Open Peckham multi-storey roof"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Report</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Peckham multi-storey roof</div><div class="lp-tile__meta">Southwark · 5 images</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-location" aria-label="Delete location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-l9/480/600" width="480" height="600" alt="Barbican conservatory" loading="lazy">
+        <a class="lp-tile__link" href="location.html?state=no-report" aria-label="Open Barbican conservatory"></a>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Barbican conservatory</div><div class="lp-tile__meta">City of London · 2 images · No scouting report</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-location" aria-label="Delete location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-l10/480/600" width="480" height="600" alt="Hampstead ponds path" loading="lazy">
+        <a class="lp-tile__link" href="location.html" aria-label="Open Hampstead ponds path"></a>
+        <span class="lp-status lp-status--ready lp-status--on-image lp-tile__status">Report</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Hampstead ponds path</div><div class="lp-tile__meta">Camden · 3 images</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-location" aria-label="Delete location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile">
+        <img src="https://picsum.photos/seed/lp-l11/480/600" width="480" height="600" alt="Deptford creek stairs" loading="lazy">
+        <a class="lp-tile__link" href="location.html?state=queued" aria-label="Open Deptford creek stairs"></a>
+        <span class="lp-status lp-status--queued lp-status--on-image lp-tile__status">Queued</span>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Deptford creek stairs</div><div class="lp-tile__meta">Lewisham · 1 image</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-location" aria-label="Delete location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+      <article class="lp-tile lp-tile--placeholder">
+        <svg class="lp-icon"><use href="#i-pin"/></svg>
+        <a class="lp-tile__link" href="location.html?state=no-images" aria-label="Open Nunhead cemetery gate"></a>
+        <div class="lp-tile__scrim"><div class="lp-tile__title">Nunhead cemetery gate</div><div class="lp-tile__meta">No images · No scouting report</div></div>
+        <div class="lp-tile__actions"><button class="lp-icon-button lp-icon-button--on-image" type="button" data-open="delete-location" aria-label="Delete location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg></button></div>
+      </article>
+    </div>
+
+    <!-- Loading -->
+    <div class="lp-photo-grid" data-state="loading" aria-busy="true" aria-label="Loading locations">
+      <div class="lp-skeleton lp-skeleton--tile"></div><div class="lp-skeleton lp-skeleton--tile"></div><div class="lp-skeleton lp-skeleton--tile"></div><div class="lp-skeleton lp-skeleton--tile"></div>
+      <div class="lp-skeleton lp-skeleton--tile"></div><div class="lp-skeleton lp-skeleton--tile"></div><div class="lp-skeleton lp-skeleton--tile"></div><div class="lp-skeleton lp-skeleton--tile"></div>
+    </div>
+
+    <!-- Empty: first run (L2-043.2 offers Add location) -->
+    <div class="lp-empty" data-state="empty">
+      <h2 class="lp-empty__title">Keep the places you've scouted.</h2>
+      <p class="lp-empty__text">Save a location with a few photographs and Loupe can tell you what shoots it suits, and when.</p>
+      <div class="lp-empty__action"><button class="lp-button lp-button--primary" type="button" data-open="add-location:form">Add location</button></div>
+    </div>
+
+    <!-- Error (L2-043.3) -->
+    <div class="lp-empty" data-state="error" role="alert">
+      <h2 class="lp-empty__title">Couldn't load your locations.</h2>
+      <p class="lp-empty__text">Check your connection and try again. Nothing you saved is lost.</p>
+      <div class="lp-empty__action"><button class="lp-button lp-button--secondary" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Try again</button></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ============ Dialogs ============ -->
+
+<!-- Add location: form, field errors, discard prompt (L2-055) -->
+<dialog class="lp-dialog" data-dialog="add-location" aria-labelledby="add-location-title">
+  <form method="dialog" class="lp-dialog__panel">
+
+    <section data-step="form">
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title" id="add-location-title">Add location</h2><p class="lp-dialog__text">Only a name is needed. Add images from the location once it's saved.</p></div>
+        <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-field">
+          <label class="lp-field__label" for="add-location-name">Name</label>
+          <input class="lp-input" id="add-location-name" type="text" placeholder="Kew Bridge foreshore" autofocus>
+        </div>
+        <fieldset class="lp-form">
+          <legend class="lp-form__legend">Address <span class="lp-field__optional">optional · typed by you, never read from a photo</span></legend>
+          <div class="lp-field">
+            <label class="lp-field__label" for="add-location-address-1">Address line 1</label>
+            <input class="lp-input" id="add-location-address-1" type="text">
+          </div>
+          <div class="lp-field">
+            <label class="lp-field__label" for="add-location-address-2">Address line 2</label>
+            <input class="lp-input" id="add-location-address-2" type="text">
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="add-location-locality">Locality</label>
+              <input class="lp-input" id="add-location-locality" type="text" placeholder="Richmond">
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="add-location-region">Region</label>
+              <input class="lp-input" id="add-location-region" type="text" placeholder="London">
+            </div>
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="add-location-postal">Postal code</label>
+              <input class="lp-input lp-input--mono" id="add-location-postal" type="text">
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="add-location-country">Country</label>
+              <input class="lp-input" id="add-location-country" type="text" placeholder="United Kingdom">
+            </div>
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="add-location-lat">Latitude</label>
+              <input class="lp-input lp-input--mono" id="add-location-lat" type="text" inputmode="decimal" placeholder="51.487213">
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="add-location-lng">Longitude</label>
+              <input class="lp-input lp-input--mono" id="add-location-lng" type="text" inputmode="decimal" placeholder="-0.287604">
+              <p class="lp-field__hint">Decimal degrees, both or neither. Shown to six places.</p>
+            </div>
+          </div>
+        </fieldset>
+        <div class="lp-field">
+          <label class="lp-field__label" for="add-location-setting">Setting <span class="lp-field__optional">optional</span></label>
+          <div class="lp-select-wrap">
+            <select class="lp-select" id="add-location-setting">
+              <option selected>Not set</option><option>Indoor</option><option>Outdoor</option><option>Mixed</option>
+            </select>
+            <svg class="lp-icon lp-icon--sm"><use href="#i-chevron-down"/></svg>
+          </div>
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="add-location-brief">Scouting brief <span class="lp-field__optional">optional</span></label>
+          <textarea class="lp-textarea" id="add-location-brief" rows="2" placeholder="Couple sessions at low tide, two people, nothing staged."></textarea>
+          <p class="lp-field__hint">What you'd shoot here. Sent with the images when you request a scouting report.</p>
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="add-location-notes">Notes <span class="lp-field__optional">optional</span></label>
+          <textarea class="lp-textarea" id="add-location-notes" rows="2" placeholder="Parking, access, who to ask. Notes stay with you; they're never sent to the AI."></textarea>
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="add-location-tags">Tags <span class="lp-field__optional">optional</span></label>
+          <div class="lp-chip-input">
+            <span class="lp-tag">river<button class="lp-tag__action" type="button" aria-label="Remove tag river"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span>
+            <input id="add-location-tags" type="text" placeholder="Add a tag" aria-label="Add a tag">
+          </div>
+        </div>
+      </div>
+      <footer class="lp-dialog__footer">
+        <span class="lp-dialog__privacy"><svg class="lp-icon lp-icon--sm"><use href="#i-lock"/></svg>Private. Address and coordinates stay on the server.</span>
+        <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+        <button class="lp-button lp-button--primary" type="button" data-toast-open="saved">Save location</button>
+      </footer>
+    </section>
+
+    <section data-step="invalid" hidden>
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title">Add location</h2><p class="lp-dialog__text">Two fields need attention. Everything else you typed is kept.</p></div>
+        <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-field is-invalid">
+          <label class="lp-field__label" for="add-location-invalid-name">Name</label>
+          <input class="lp-input" id="add-location-invalid-name" type="text" value="" aria-invalid="true" aria-describedby="add-location-invalid-name-error" autofocus>
+          <p class="lp-field__error" id="add-location-invalid-name-error"><svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>A name is required.</p>
+        </div>
+        <fieldset class="lp-form">
+          <legend class="lp-form__legend">Address <span class="lp-field__optional">optional · typed by you, never read from a photo</span></legend>
+          <div class="lp-field">
+            <label class="lp-field__label" for="add-location-invalid-address-1">Address line 1</label>
+            <input class="lp-input" id="add-location-invalid-address-1" type="text" value="Thames Path">
+          </div>
+          <div class="lp-field">
+            <label class="lp-field__label" for="add-location-invalid-address-2">Address line 2</label>
+            <input class="lp-input" id="add-location-invalid-address-2" type="text" value="">
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="add-location-invalid-locality">Locality</label>
+              <input class="lp-input" id="add-location-invalid-locality" type="text" value="Richmond">
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="add-location-invalid-region">Region</label>
+              <input class="lp-input" id="add-location-invalid-region" type="text" value="London">
+            </div>
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="add-location-invalid-postal">Postal code</label>
+              <input class="lp-input lp-input--mono" id="add-location-invalid-postal" type="text" value="TW8 0EE">
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="add-location-invalid-country">Country</label>
+              <input class="lp-input" id="add-location-invalid-country" type="text" value="United Kingdom">
+            </div>
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="add-location-invalid-lat">Latitude</label>
+              <input class="lp-input lp-input--mono" id="add-location-invalid-lat" type="text" inputmode="decimal" value="51.487213">
+            </div>
+            <div class="lp-field is-invalid">
+              <label class="lp-field__label" for="add-location-invalid-lng">Longitude</label>
+              <input class="lp-input lp-input--mono" id="add-location-invalid-lng" type="text" inputmode="decimal" value="" aria-invalid="true" aria-describedby="add-location-invalid-lng-error">
+              <p class="lp-field__error" id="add-location-invalid-lng-error"><svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>Enter a longitude as well, or clear the latitude.</p>
+            </div>
+          </div>
+        </fieldset>
+        <div class="lp-field">
+          <label class="lp-field__label" for="add-location-invalid-setting">Setting <span class="lp-field__optional">optional</span></label>
+          <div class="lp-select-wrap">
+            <select class="lp-select" id="add-location-invalid-setting">
+              <option>Not set</option><option>Indoor</option><option selected>Outdoor</option><option>Mixed</option>
+            </select>
+            <svg class="lp-icon lp-icon--sm"><use href="#i-chevron-down"/></svg>
+          </div>
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="add-location-invalid-brief">Scouting brief <span class="lp-field__optional">optional</span></label>
+          <textarea class="lp-textarea" id="add-location-invalid-brief" rows="2">Couple sessions at low tide, two people, nothing staged.</textarea>
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="add-location-invalid-notes">Notes <span class="lp-field__optional">optional</span></label>
+          <textarea class="lp-textarea" id="add-location-invalid-notes" rows="2">Check the tide table; the foreshore floods fast.</textarea>
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="add-location-invalid-tags">Tags <span class="lp-field__optional">optional</span></label>
+          <div class="lp-chip-input">
+            <span class="lp-tag">river<button class="lp-tag__action" type="button" aria-label="Remove tag river"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span>
+            <span class="lp-tag">low tide<button class="lp-tag__action" type="button" aria-label="Remove tag low tide"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span>
+            <input id="add-location-invalid-tags" type="text" placeholder="Add a tag" aria-label="Add a tag">
+          </div>
+        </div>
+      </div>
+      <footer class="lp-dialog__footer">
+        <span class="lp-dialog__privacy"><svg class="lp-icon lp-icon--sm"><use href="#i-lock"/></svg>Private. Address and coordinates stay on the server.</span>
+        <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+        <button class="lp-button lp-button--primary" type="button" data-toast-open="saved">Save location</button>
+      </footer>
+    </section>
+
+    <section data-step="discard" hidden>
+      <header class="lp-dialog__header">
+        <div>
+          <h2 class="lp-dialog__title">Discard this location?</h2>
+          <p class="lp-dialog__text">Nothing has been saved yet. Keep editing to go back to the form as you left it.</p>
+        </div>
+      </header>
+      <footer class="lp-dialog__footer">
+        <button class="lp-button lp-button--secondary" type="button" data-open="add-location:form" autofocus>Keep editing</button>
+        <button class="lp-button lp-button--danger" type="button" data-close>Discard</button>
+      </footer>
+    </section>
+
+  </form>
+</dialog>
+
+<!-- Delete location: names the item and its effects (L2-057.6, L2-031) -->
+<dialog class="lp-dialog" data-dialog="delete-location" aria-labelledby="delete-location-title">
+  <form method="dialog" class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="delete-location-title">Delete “Kew Bridge foreshore”?</h2>
+        <p class="lp-dialog__text">Its 4 images, scouting report, notes, tags, and search record are all removed. This can't be undone.</p>
+      </div>
+      <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+    </header>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" data-close autofocus>Cancel</button>
+      <button class="lp-button lp-button--danger" type="button" data-toast-open="deleted">Delete</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- ============ Toasts ============ -->
+<div class="lp-toast" data-toast="saved" role="status"><span class="lp-toast__text">Location saved.</span><a class="lp-toast__action" href="location.html?state=no-images">Add images</a><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+<div class="lp-toast" data-toast="deleted" role="status"><span class="lp-toast__text">Location deleted.</span><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+
+<script src="assets/mock.js"></script>
+</body>
+</html>

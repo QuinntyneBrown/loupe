@@ -5,6 +5,7 @@ export interface IDeletionService {
   deletePhotographer(id: string, revision: number): Promise<DeletionResult>;
   deleteReference(id: string, revision: number): Promise<DeletionResult>;
   deletePhotograph(id: string, revision: number): Promise<DeletionResult>;
+  deleteLocation(id: string, revision: number): Promise<DeletionResult>;
   get(id: string): Promise<DeletionResult>;
 }
 

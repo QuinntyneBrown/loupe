@@ -18,6 +18,7 @@
   <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></symbol>
   <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
   <symbol id="i-external" viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></symbol>
 </svg>
@@ -30,6 +31,7 @@
     <a href="inspiration.html"><svg class="lp-icon"><use href="#i-grid"/></svg><span>Inspiration</span></a>
     <a href="photographers.html"><svg class="lp-icon"><use href="#i-user"/></svg><span>Photographers</span></a>
     <a href="search.html"><svg class="lp-icon"><use href="#i-search"/></svg><span>Search</span></a>
+    <a href="locations.html"><svg class="lp-icon"><use href="#i-pin"/></svg><span>Locations</span></a>
   </nav>
   <div class="lp-topbar__end">
     <span class="lp-topbar__hint"><span class="lp-kbd">/</span> to search</span>
@@ -62,8 +64,8 @@
       <h2 class="lp-kicker" id="ai-title">AI</h2>
       <div class="lp-settings-row">
         <div class="lp-settings-row__text">
-          <span class="lp-settings-row__title">Critiques, tags, summaries, and search by meaning</span>
-          <span class="lp-settings-row__hint" data-live-only>A provider is configured on the server. Your images are sent to it only when you request a critique or save a reference, and never stored by Loupe anywhere else.</span>
+          <span class="lp-settings-row__title">Critiques, tags, summaries, scouting reports, and search by meaning</span>
+          <span class="lp-settings-row__hint" data-live-only>A provider is configured on the server. Your images are sent to it only when you request a critique, save a reference, or request a scouting report, and never stored by Loupe anywhere else.</span>
           <span class="lp-settings-row__hint" data-demo-only>No provider is configured on the server, so every AI feature returns clearly labeled sample output and search falls back to keyword matching. Nothing leaves your library.</span>
         </div>
         <span class="lp-pill lp-pill--success" data-live-only>Connected</span>
@@ -82,7 +84,7 @@
       <h2 class="lp-kicker" id="data-title">Your data</h2>
       <div class="lp-settings-row">
         <div class="lp-settings-row__text">
-          <span class="lp-settings-row__title">12 photographs, 142 references, 7 photographers</span>
+          <span class="lp-settings-row__title">12 photographs, 142 references, 7 photographers, 12 locations</span>
           <span class="lp-settings-row__hint">Delete anything from its own page. Deleting removes the file, its AI output, your notes, and its search record. There is no bulk delete.</span>
         </div>
       </div>

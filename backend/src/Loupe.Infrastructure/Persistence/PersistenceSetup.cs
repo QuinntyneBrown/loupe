@@ -11,6 +11,9 @@ using Loupe.Application.Deletions;
 using Loupe.Application.Maintenance;
 using Loupe.Application.Critiques;
 using Loupe.Application.References;
+using Loupe.Application.Locations;
+using Loupe.Application.Scouting;
+using Loupe.Application.ShootPlanning;
 using Loupe.Infrastructure.Ai;
 using Loupe.Infrastructure.Images;
 using Microsoft.EntityFrameworkCore;
@@ -52,6 +55,22 @@ public static class PersistenceSetup
         services.AddSingleton<IReferenceAnalysisConfiguration, ReferenceAnalysisConfiguration>();
         services.AddScoped<Loupe.Application.ReferenceDrafts.IReferenceDraftStore, ReferenceDraftStore>();
         services.AddScoped<IReferenceTagStore, ReferenceTagStore>();
+        services.AddScoped<ILocationStore, LocationStore>();
+        services.AddScoped<ILocationImageStore, LocationImageStore>();
+        services.AddScoped<IScoutingStore, ScoutingStore>();
+        services.AddScoped<ILocationSearchStore, LocationSearchStore>();
+        services.AddScoped<IScoutingWorkStore, ScoutingWorkStore>();
+        services.AddScoped<IScoutingProvider, AzureOpenAiScoutingProvider>();
+        services.AddSingleton<IScoutingConfiguration, ScoutingConfiguration>();
+        services.AddSingleton<Loupe.Application.Search.IEmbeddingConfiguration, EmbeddingConfiguration>();
+        services.AddScoped<Loupe.Application.Search.IEmbeddingProvider, OllamaEmbeddingProvider>();
+        services.AddScoped<ILocationIndexWorkStore, LocationIndexWorkStore>();
+        services.AddHttpClient("ollama", client => client.Timeout = Timeout.InfiniteTimeSpan)
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false, UseCookies = false, ConnectTimeout = TimeSpan.FromSeconds(10) })
+            .RemoveAllLoggers();
+        services.AddOptions<EmbeddingOptions>().BindConfiguration("Embeddings")
+            .Validate(options => options.HasValidEndpoint, "Embeddings:Endpoint must be an absolute HTTP or HTTPS URL without credentials, query, or fragment.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Model), "Embeddings:Model must name a model.").ValidateOnStart();
         services.AddScoped<IBoardStore, BoardStore>();
         services.AddScoped<IReferenceImportStore, ReferenceImportStore>();
         services.AddSingleton<IReferenceImportConfiguration, ReferenceImportConfiguration>();

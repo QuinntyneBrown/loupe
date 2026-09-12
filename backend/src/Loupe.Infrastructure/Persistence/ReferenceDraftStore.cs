@@ -29,7 +29,7 @@ public sealed class ReferenceDraftStore(LibraryDbContext database, IReferenceSto
         if (existing is null && configured)
         {
             if (await database.BackgroundOperations.CountAsync(operation => operation.OwnerId == ownerId
-                && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running), cancellationToken) >= 5)
+                && operation.Type != OperationType.LocationIndex && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running), cancellationToken) >= 5)
                 throw new AnalysisLimitException();
             var normalizedSource = await database.Database.SqlQuery<string>($"SELECT loupe_normalize_source({source}) AS \"Value\"").SingleAsync(cancellationToken);
             draft.ImportOperation = new BackgroundOperation

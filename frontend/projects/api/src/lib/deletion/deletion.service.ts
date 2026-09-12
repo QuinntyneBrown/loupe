@@ -35,6 +35,20 @@ export class DeletionService implements IDeletionService {
       throw this.failure(error);
     }
   }
+  async deleteLocation(id: string, revision: number): Promise<DeletionResult> {
+    const token = await this.session.getRequestToken();
+    try {
+      return await firstValueFrom(
+        this.http.delete<DeletionResult>(`/api/locations/${encodeURIComponent(id)}`, {
+          params: { revision },
+          headers: { 'X-CSRF-Token': token },
+          timeout: 15000,
+        }),
+      );
+    } catch (error) {
+      throw this.failure(error);
+    }
+  }
   private readonly http = inject(HttpClient);
   private readonly session = inject(SESSION_SERVICE);
   async deletePhotograph(id: string, revision: number): Promise<DeletionResult> {

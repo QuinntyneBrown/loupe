@@ -1,0 +1,47 @@
+<div class="lp-report">
+  @for (section of sections(); track section.id) {
+    <section class="lp-report__section" [attr.aria-labelledby]="'report-' + section.id">
+      <h3 class="lp-kicker lp-kicker--ai" [id]="'report-' + section.id">{{ section.heading }}</h3>
+      @if (section.rows.length) {
+        <div class="lp-report__rows">
+          @for (row of section.rows; track $index) {
+            <div class="lp-report__row">
+              <div class="lp-report__row-head">
+                <span class="lp-report__label">{{ row.label }}</span>
+                @if (row.rating) {
+                  <span
+                    class="lp-pill"
+                    [class.lp-pill--success]="row.tone === 'success'"
+                    [class.lp-pill--warning]="row.tone === 'warning'"
+                    [class.lp-pill--outline]="row.tone === 'outline'"
+                    >{{ row.rating }}</span
+                  >
+                }
+                <span class="lp-basis" [class.lp-basis--inferred]="row.basis === 'Inferred'">{{
+                  row.basis
+                }}</span>
+                <span class="lp-report__cites">
+                  @for (image of cited(row.citedImageIds); track image.id) {
+                    <button
+                      class="lp-report__cite"
+                      type="button"
+                      [attr.aria-label]="'Show image ' + image.index"
+                      (click)="imageSelected.emit(image.id)"
+                    >
+                      <img class="lp-thumb" [src]="image.previewUrl" alt="" loading="lazy" />
+                    </button>
+                  }
+                </span>
+              </div>
+              @if (row.text) {
+                <p class="lp-report__reason">{{ row.text }}</p>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="lp-report__reason">None noted.</p>
+      }
+    </section>
+  }
+</div>

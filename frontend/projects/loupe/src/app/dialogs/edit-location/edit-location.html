@@ -1,0 +1,84 @@
+<dialog
+  #modal
+  class="lp-dialog"
+  aria-labelledby="edit-location-title"
+  (cancel)="cancel($event)"
+  (click)="backdrop($event)"
+  (keydown)="trapFocus($event)"
+>
+  <form class="lp-dialog__panel" novalidate (submit)="$event.preventDefault(); save()">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="edit-location-title">Edit location</h2>
+        <p class="lp-dialog__text">Images, the report, and your tags aren't touched by this.</p>
+      </div>
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Close"
+        [disabled]="saving() || reloading()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body">
+      @if (error()) {
+        <div class="lp-notice" role="alert">
+          <p>{{ error() }}</p>
+          @if (stale()) {
+            <button
+              class="lp-button lp-button--secondary lp-button--sm"
+              type="button"
+              [disabled]="reloading()"
+              (click)="reload()"
+            >
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg
+              >{{ reloading() ? 'Reloading…' : 'Reload latest' }}
+            </button>
+          } @else if (retryable()) {
+            <button
+              class="lp-button lp-button--secondary lp-button--sm"
+              type="button"
+              [disabled]="saving()"
+              (click)="save()"
+            >
+              Try again
+            </button>
+          }
+        </div>
+      }
+      <lp-location-form
+        idPrefix="edit-location"
+        mode="details"
+        [initial]="location()"
+        [busy]="saving() || reloading()"
+      />
+    </div>
+    <footer class="lp-dialog__footer">
+      <button
+        class="lp-button lp-button--secondary"
+        type="button"
+        [disabled]="saving() || reloading()"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+      <button
+        class="lp-button lp-button--primary"
+        type="submit"
+        [disabled]="saving() || reloading() || stale() || unavailable()"
+      >
+        {{ saving() ? 'Saving…' : 'Save changes' }}
+      </button>
+    </footer>
+  </form>
+</dialog>
+<lp-unsaved-changes
+  [dirty]="dirty"
+  [warning]="
+    saving()
+      ? 'This save may finish after you leave. Reopen the location to check its details.'
+      : null
+  "
+/>

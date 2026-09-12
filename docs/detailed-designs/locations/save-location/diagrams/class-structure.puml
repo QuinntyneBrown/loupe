@@ -1,0 +1,143 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Save a location and edit its details
+enum LocationSetting {
+  Indoor
+  Outdoor
+  Mixed
+}
+class Coordinates {
+  +Latitude: decimal
+  +Longitude: decimal
+}
+class Location {
+  +Id: Guid
+  +OwnerId: string
+  +Name: string
+  +AddressLine1: string?
+  +AddressLine2: string?
+  +Locality: string?
+  +Region: string?
+  +PostalCode: string?
+  +Country: string?
+  +Coordinates: Coordinates?
+  +Setting: LocationSetting?
+  +ScoutingBrief: string?
+  +Notes: string?
+  +CreatedAt: DateTimeOffset
+  +UpdatedAt: DateTimeOffset
+  +ImageSetRevision: long
+  +Revision: long
+  +Tags: ICollection<LocationTag>
+}
+class LocationTag {
+  +LocationId: Guid
+  +OwnerId: string
+  +NormalizedName: string
+  +Name: string
+  +Category: string?
+}
+Location --> LocationSetting : has
+Location *-- Coordinates : owns
+Location "1" *-- "*" LocationTag : owns
+interface ILocationStore {
+  +SaveAsync(location: Location, ct: CancellationToken): Task
+  +UpdateAsync(id: Guid, ownerId: string, revision: long, details: LocationDetails, ct: CancellationToken): Task<Location>
+  +UpdateTextAsync(id: Guid, ownerId: string, revision: long, field: LocationTextField, text: string?, ct: CancellationToken): Task<Location>
+  +ReplaceTagsAsync(id: Guid, ownerId: string, revision: long, tags: IReadOnlyList<LocationTagInput>, ct: CancellationToken): Task<Location>
+  +FindOwnedAsync(id: Guid, ownerId: string, ct: CancellationToken): Task<Location?>
+}
+class LocationDetailsValidator {
+  +{static} Normalize(request: CreateLocationCommand): LocationDetails
+  +{static} Coordinates(latitude: string?, longitude: string?): Coordinates?
+  +{static} Setting(value: string?): LocationSetting?
+}
+class CreateLocationCommand {
+  +Name: string?
+  +AddressLine1: string?
+  +AddressLine2: string?
+  +Locality: string?
+  +Region: string?
+  +PostalCode: string?
+  +Country: string?
+  +Coordinates: Coordinates?
+  +Setting: string?
+  +ScoutingBrief: string?
+  +Notes: string?
+  +Tags: LocationTagInput[]?
+  +OperationKey: string?
+}
+class CreateLocationCommandHandler {
+  +Handle(request: CreateLocationCommand, cancellation: CancellationToken): Task<LocationResult>
+}
+class UpdateLocationCommand {
+  +Id: Guid
+  +Revision: long
+  +Details: LocationDetails
+}
+class UpdateLocationCommandHandler {
+  +Handle(request: UpdateLocationCommand, cancellation: CancellationToken): Task<LocationResult>
+}
+class UpdateLocationTextCommand {
+  +Id: Guid
+  +Revision: long
+  +Field: LocationTextField
+  +Text: string?
+}
+class SetLocationTagsCommand {
+  +Id: Guid
+  +Revision: long
+  +Tags: LocationTagInput[]?
+}
+CreateLocationCommandHandler ..> CreateLocationCommand : handles
+CreateLocationCommandHandler ..> LocationDetailsValidator : normalizes
+CreateLocationCommandHandler --> Location : creates
+CreateLocationCommandHandler ..> ILocationStore : persists
+UpdateLocationCommandHandler ..> UpdateLocationCommand : handles
+UpdateLocationCommandHandler ..> LocationDetailsValidator : normalizes
+UpdateLocationCommandHandler ..> ILocationStore : conditional update
+UpdateLocationTextCommand ..> ILocationStore : UpdateTextAsync
+SetLocationTagsCommand ..> ILocationStore : ReplaceTagsAsync
+interface ILocationService {
+  +list(cursor?: string): Promise<LocationPage>
+  +get(id: string): Promise<LocationResult>
+  +create(input: LocationInput, operationKey: string): Promise<LocationResult>
+  +update(id: string, revision: number, details: LocationDetails): Promise<LocationResult>
+  +updateText(id: string, revision: number, field: 'scoutingBrief' | 'notes', text: string): Promise<LocationResult>
+  +setTags(id: string, revision: number, tags: LocationTagInput[]): Promise<LocationResult>
+}
+class LocationService {
+  -http: HttpClient
+}
+LocationService ..|> ILocationService
+class LocationForm {
+  -service: ILocationService
+  +draft: Signal<LocationInput>
+  +errors: Signal<Record<string, string[]>>
+}
+class LocationTextEditor {
+  -service: ILocationService
+  +status: Signal<'Unsaved' | 'Saving' | 'Saved' | 'Failed'>
+}
+LocationForm ..> ILocationService : inject token
+LocationTextEditor ..> ILocationService : inject token
+@enduml

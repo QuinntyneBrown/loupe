@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import breakpoints from './src/breakpoints.json' with { type: 'json' };
 
 export default defineConfig({
-  build: { rollupOptions: { input: { reference: 'index.html', search: 'search.html' } } },
+  build: { rollupOptions: { input: { reference: 'index.html', search: 'search.html', locations: 'locations.html' } } },
   plugins: [{
     name: 'loupe-grid-breakpoints',
     transform(code, id) {

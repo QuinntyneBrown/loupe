@@ -76,6 +76,23 @@
 .lp-nav .lp-icon {
   display: none;
 }
+/* Five areas do not fit as labelled links between the tab bar and tablet widths: show icons with hidden labels. */
+@media (640px <= width < 768px) {
+  .lp-nav a {
+    padding: 0 var(--lp-space-2);
+  }
+  .lp-nav .lp-icon {
+    display: block;
+  }
+  .lp-nav a span {
+    position: absolute;
+    width: var(--lp-hairline);
+    height: var(--lp-hairline);
+    overflow: hidden;
+    clip-path: var(--lp-sr-clip);
+    white-space: nowrap;
+  }
+}
 
 @media (width < 640px) {
   .lp-topbar {
@@ -88,7 +105,7 @@
     bottom: 0;
     z-index: var(--lp-z-topbar);
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 0;
     height: calc(var(--lp-tabbar-height) + env(safe-area-inset-bottom));
     padding: 0 var(--lp-space-2) env(safe-area-inset-bottom);

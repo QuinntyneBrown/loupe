@@ -1,0 +1,24 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Request, regenerate, and outdate a scouting report
+Container(spa, "ScoutingReportPanel / RequestScoutingReport", "Angular domain", "Inject SCOUTING_REPORT_SERVICE; poll while active")
+Container_Boundary(api, "Loupe API and Application") {
+Component(ctrl, "ScoutingReportsController\nOperationsController", "API controllers", "Bind, dispatch, return 202 / 200 / 204")
+Component(handler, "RequestScoutingReportCommandHandler\nGetScoutingReportQueryHandler\nGetScoutingOperationQueryHandler\nRetryCritiqueCommandHandler (type dispatch)", "Application / MediatR 12.5.0", "Validates, authorizes, coordinates slice")
+Component(entity, "BackgroundOperation / SavedScoutingReport", "Domain", "Durable job, saved report, status derivation")
+Component(store, "IScoutingStore", "Application port", "AdmitAsync: input snapshot, reuse, active, cap")
+Component(receipts, "IOperationReceiptStore", "Application port", "Idempotency-Key receipts")
+Component(config, "IScoutingConfiguration", "Application port", "Live identity or Integration not configured")
+}
+ContainerDb(db, "Library store", "Infrastructure adapter", "Authoritative data and durable work")
+Container(worker, "Loupe worker", ".NET", "Processes durable admitted work")
+Rel(spa, ctrl, "Calls through IScoutingReportService", "HTTPS")
+Rel(ctrl, handler, "Dispatches request", "MediatR")
+Rel(handler, config, "Resolves identity first")
+Rel(handler, receipts, "Keys the request")
+Rel(handler, store, "Uses inward-defined port")
+Rel(handler, entity, "Reads or applies behavior")
+Rel(store, db, "Implemented by Infrastructure")
+Rel(worker, db, "Claims the admitted operation later")
+@enduml

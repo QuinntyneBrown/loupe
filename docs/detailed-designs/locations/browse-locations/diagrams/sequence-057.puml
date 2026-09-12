@@ -1,0 +1,59 @@
+@startuml
+title L2-057 - Browse, inspect, and delete locations
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "LocationCollection / LocationDetailPanel" as page
+participant "LocationService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "LocationsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "ListLocationsQueryHandler / GetLocationQueryHandler" as handler
+participant "Location" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Open Locations
+page -> client : pageSize?, cursor?
+client -> controller : GET /api/locations
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch ListLocationsQuery
+handler -> db : Owned locations only, creation-date desc then id, page + 1 [L2-057]
+db --> handler : LocationSummary rows: cover or placeholder, name, locality, image count, report status
+handler --> controller : 200 LocationPage with next cursor and count; photographs and references never included
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals; empty state offers Add location; failure offers Try again
+actor -> page : Open a location directly or reload it
+page -> client : id
+client -> controller : GET /api/locations/{id}
+controller -> handler : MediatR dispatch GetLocationQuery
+handler -> db : FindOwnedAsync(id, owner)
+alt owned location
+db --> handler : Location with images, tags, report JSON
+handler -> entity : Derive report status from current operation and ImageSetRevision
+handler --> controller : 200 LocationResult: gallery, address lines, coordinates, setting, brief, notes, tags, report or status, timestamps
+else absent or foreign id
+db --> handler : No row
+handler --> controller : 404 item_unavailable
+end
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

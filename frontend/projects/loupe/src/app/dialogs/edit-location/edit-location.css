@@ -1,0 +1,13 @@
+.lp-notice {
+  display: grid;
+  gap: var(--lp-space-2);
+  justify-items: start;
+  margin-bottom: var(--lp-space-4);
+  padding: var(--lp-space-3) var(--lp-space-4);
+  border-radius: var(--lp-radius-md);
+  background: var(--lp-color-warning-bg);
+  color: var(--lp-color-warning);
+}
+.lp-notice p {
+  margin: var(--lp-zero);
+}

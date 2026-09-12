@@ -50,3 +50,15 @@ The runner builds and owns its preview server unless
 Layout acceptance includes 320px reflow, both sides of 640/1024px, narrow and
 short-height dialogs, keyboard focus, text spacing, reduced motion, and Axe.
 Automated checks do not establish full screen-reader conformance.
+
+## Locations
+
+Open **Locations** from the reference navigation, or visit `/locations.html`.
+The page shows location cards with every report status and the no-image
+placeholder, Find a location result cards on the one/two/three/three/four column
+rule with the Keyword/Meaning control, shoot-type chips and the Matched by meaning
+pill, a gallery whose radio thumbnails switch the full-frame stage by click or
+arrow key with the selection announced and a Set as cover action, a scouting
+report with its six sections, rating and evidence-basis pills and cited-image
+buttons that select the gallery image, and the search-index status pills with a
+Retry action. Everything is synthetic and local; no request leaves the page.

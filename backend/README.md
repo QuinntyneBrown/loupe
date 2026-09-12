@@ -198,6 +198,43 @@ rate limits require capacity or retry, and `invalid_output` requires checking mo
 support and output quality. Do not describe controlled transport acceptance tests as
 a live Azure check or as proof of photographic critique quality.
 
+For the scouting report, create a location, upload two or three synthetic or
+explicitly permitted images, set a brief without logistics detail, and request a
+scouting report (`POST /api/locations/{id}/scouting-report`). Verify the durable
+operation, that the worker completes it, and that the detail shows the six sections
+with the configured model and `location-scouting-v1`. Repeat the request to check
+reuse without a provider call, then Regenerate to check a new job. Record the same
+safe details as above. The release evaluation in `docs/evaluation/scouting/` is a
+separate, reviewer-run procedure; a connection check is not evidence of report
+quality.
+
+### Local embeddings for Find a location
+
+Meaning search over locations and the search index worker use a local
+[Ollama](https://ollama.com) instance beside the API, so notes and briefs never
+reach an external provider:
+
+```
+Embeddings__Endpoint=http://ollama:11434
+Embeddings__Model=bge-m3
+```
+
+`Embeddings:Model` defaults to `bge-m3` (1024 dimensions); pull it on the Ollama
+host (`ollama pull bge-m3`) before starting the worker. Vectors live in the
+PostgreSQL `search_vectors` table, created by the `SearchVectors` migration with
+`CREATE EXTENSION IF NOT EXISTS vector`, so the database must ship the pgvector
+extension (the `pgvector/pgvector` images do). Without an endpoint the API reports
+each location's search status as not configured, keyword search is unaffected, index
+intents are still recorded, and the worker stays idle until the endpoint is set.
+Vectors carry the model identity they were built with; changing `Embeddings:Model`
+means every location re-indexes on its next save, and Meaning cursors minted under
+the previous model are refused.
+
+Connection check: with the endpoint configured, save a location and watch its
+`indexStatus` move from `updating` to `current` (`GET /api/locations/{id}`); an
+`Embeddings:Endpoint` that is unreachable shows `failed` with a retryable
+operation.
+
 ### Retiring historical samples
 
 Stop API/worker processes before applying `20260910000000_ArchiveDemoCritiques`,

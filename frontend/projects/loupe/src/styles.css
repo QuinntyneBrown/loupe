@@ -204,6 +204,71 @@ button:disabled {
 .lp-chip--ghost {
   border-style: dashed;
 }
+.lp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lp-space-2);
+}
+.lp-segmented {
+  display: inline-flex;
+  padding: var(--lp-space-1);
+  border-radius: var(--lp-radius-md);
+  background: var(--lp-color-surface-2);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+}
+.lp-segmented__option {
+  position: relative;
+  cursor: pointer;
+}
+.lp-segmented input {
+  position: absolute;
+  inset: var(--lp-zero);
+  opacity: var(--lp-zero);
+  margin: var(--lp-zero);
+  cursor: pointer;
+}
+.lp-segmented__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lp-space-2);
+  height: calc(var(--lp-control-height-sm) - var(--lp-space-2));
+  padding: var(--lp-zero) var(--lp-space-3);
+  border-radius: var(--lp-radius-sm);
+  font-size: var(--lp-text-sm);
+  font-weight: var(--lp-weight-medium);
+  color: var(--lp-color-text-2);
+  white-space: nowrap;
+  transition:
+    background-color var(--lp-duration-fast) var(--lp-ease),
+    color var(--lp-duration-fast) var(--lp-ease);
+}
+.lp-segmented input:checked + .lp-segmented__label {
+  background: var(--lp-color-surface);
+  color: var(--lp-color-text);
+  box-shadow: var(--lp-shadow-sm);
+}
+.lp-segmented input:focus-visible + .lp-segmented__label {
+  outline: var(--lp-stroke) solid var(--lp-color-focus);
+}
+.lp-segmented--block {
+  display: flex;
+}
+.lp-segmented--block .lp-segmented__option {
+  flex: 1;
+}
+.lp-segmented--block .lp-segmented__label {
+  width: var(--lp-full);
+  justify-content: center;
+}
+.lp-input--count {
+  width: var(--lp-space-11);
+  min-height: var(--lp-control-height-sm);
+  font-family: var(--lp-font-mono);
+  font-size: var(--lp-text-sm);
+}
+.lp-small {
+  font-size: var(--lp-text-sm);
+}
 .lp-tag {
   display: inline-flex;
   align-items: center;
@@ -486,6 +551,19 @@ body:has(dialog[open]) {
   background: var(--lp-color-surface-2);
   color: var(--lp-color-text-2);
 }
+.lp-notice__body {
+  flex: 1;
+  display: grid;
+  gap: var(--lp-space-1);
+}
+.lp-notice__title {
+  font-weight: var(--lp-weight-medium);
+}
+.lp-notice__actions {
+  display: flex;
+  gap: var(--lp-space-3);
+  margin-top: var(--lp-space-1);
+}
 .lp-auth {
   min-height: 100vh;
   display: grid;
@@ -742,6 +820,9 @@ body:has(dialog[open]) {
 }
 .lp-status--failed {
   color: var(--lp-color-danger);
+}
+.lp-status--outdated {
+  color: var(--lp-color-warning);
 }
 .lp-status--on-image {
   position: absolute;
