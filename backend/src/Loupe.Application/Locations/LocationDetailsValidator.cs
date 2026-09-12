@@ -1,25 +1,38 @@
 using System.Globalization;
 using Loupe.Application.Common;
+using Loupe.Application.References;
 using Loupe.Domain.Locations;
 
 namespace Loupe.Application.Locations;
 
 public static class LocationDetailsValidator
 {
-    public static LocationDetails Normalize(CreateLocationCommand request)
+    public static LocationDetails Normalize(LocationDetailsInput input)
     {
-        var (latitude, longitude) = Coordinates(request.Coordinates);
+        var (latitude, longitude) = Coordinates(input.Coordinates);
         return new(
-            TextField.Normalize(request.Name, 200, "name") ?? throw new RequestValidationException("name", "Enter a name."),
-            TextField.Normalize(request.AddressLine1, 200, "addressLine1"),
-            TextField.Normalize(request.AddressLine2, 200, "addressLine2"),
-            TextField.Normalize(request.Locality, 100, "locality"),
-            TextField.Normalize(request.Region, 100, "region"),
-            TextField.Normalize(request.PostalCode, 20, "postalCode"),
-            TextField.Normalize(request.Country, 100, "country"),
-            latitude, longitude, Setting(request.Setting),
-            TextField.Normalize(request.ScoutingBrief, 2000, "scoutingBrief"),
-            TextField.Normalize(request.Notes, 10000, "notes"));
+            TextField.Normalize(input.Name, 200, "name") ?? throw new RequestValidationException("name", "Enter a name."),
+            TextField.Normalize(input.AddressLine1, 200, "addressLine1"),
+            TextField.Normalize(input.AddressLine2, 200, "addressLine2"),
+            TextField.Normalize(input.Locality, 100, "locality"),
+            TextField.Normalize(input.Region, 100, "region"),
+            TextField.Normalize(input.PostalCode, 20, "postalCode"),
+            TextField.Normalize(input.Country, 100, "country"),
+            latitude, longitude, Setting(input.Setting));
+    }
+
+    public static string? Text(LocationTextField field, string? text) => field switch
+    {
+        LocationTextField.ScoutingBrief => TextField.Normalize(text, 2000, "scoutingBrief"),
+        LocationTextField.Notes => TextField.Normalize(text, 10000, "notes"),
+        _ => throw new ArgumentOutOfRangeException(nameof(field))
+    };
+
+    public static LocationTagInput[] Tags(LocationTagInput[]? tags)
+    {
+        if (tags?.Length > 50 || tags?.Any(tag => tag is null) == true) throw new RequestValidationException("tags", "Supply up to 50 tags.");
+        return (tags ?? []).Select(tag => new LocationTagInput(TagName.Validate(tag.Name), TagName.Category(tag.Category)))
+            .DistinctBy(tag => tag.Name!.ToUpperInvariant()).ToArray();
     }
 
     private static (decimal? Latitude, decimal? Longitude) Coordinates(CoordinatesInput? input)

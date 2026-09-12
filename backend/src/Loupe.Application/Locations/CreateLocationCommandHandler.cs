@@ -2,7 +2,6 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Loupe.Application.Common;
 using Loupe.Application.Operations;
-using Loupe.Application.References;
 using Loupe.Application.Security;
 using Loupe.Domain.Locations;
 using MediatR;
@@ -16,11 +15,11 @@ public sealed class CreateLocationCommandHandler(ICurrentOwner owner, ILocationS
     {
         var key = request.OperationKey is { Length: > 0 and <= 128 } value && value.All(character => character is >= '!' and <= '~')
             ? value : throw new RequestValidationException("operationKey", "Provide an Idempotency-Key of 1 to 128 visible ASCII characters.");
-        var details = LocationDetailsValidator.Normalize(request);
-        if (request.Tags?.Length > 50 || request.Tags?.Any(tag => tag is null) == true) throw new RequestValidationException("tags", "Supply up to 50 tags.");
-        var tags = (request.Tags ?? []).Select(tag => new LocationTagInput(TagName.Validate(tag.Name), TagName.Category(tag.Category)))
-            .DistinctBy(tag => tag.Name!.ToUpperInvariant()).ToArray();
-        var fingerprint = Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { details, tags })));
+        var details = LocationDetailsValidator.Normalize(request.Details);
+        var scoutingBrief = LocationDetailsValidator.Text(LocationTextField.ScoutingBrief, request.ScoutingBrief);
+        var notes = LocationDetailsValidator.Text(LocationTextField.Notes, request.Notes);
+        var tags = LocationDetailsValidator.Tags(request.Tags);
+        var fingerprint = Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { details, scoutingBrief, notes, tags })));
         var id = await receipts.ExecuteAsync(owner.Id, "location", key, fingerprint, async token =>
         {
             var now = clock.GetUtcNow();
@@ -38,8 +37,8 @@ public sealed class CreateLocationCommandHandler(ICurrentOwner owner, ILocationS
                 Latitude = details.Latitude,
                 Longitude = details.Longitude,
                 Setting = details.Setting,
-                ScoutingBrief = details.ScoutingBrief,
-                Notes = details.Notes,
+                ScoutingBrief = scoutingBrief,
+                Notes = notes,
                 CreatedAt = now,
                 UpdatedAt = now
             };

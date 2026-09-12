@@ -14,7 +14,7 @@ RED, implementation, GREEN, regressions, commit.
 
 - [x] A1a Create a location and read it back (L2-055.1)
 - [x] A1b Validate location details at their limits (L2-055.3, .7)
-- [ ] A2 Edit details, brief, notes, and tags with revision protection (L2-055.2, .4, .5, .6)
+- [x] A2 Edit details, brief, notes, and tags with revision protection (L2-055.2, .4, .5, .6)
 - [ ] A3 List owned locations with cursor paging (L2-057.1, .4)
 - [ ] A4 Add, remove, and choose the cover of location images (L2-056.1–.8)
 - [ ] A5 Delete a location and complete its cleanup (L2-057.6, .7; L2-031.5, .7; L2-032.2)
@@ -103,4 +103,37 @@ recorded only when actually executed.
 - Non-claims: "previously saved values remain unchanged" is proven for edits in A2
   (an invalid `PUT` leaves the record identical); "displayed" and "searched" for
   L2-055.7 land with the detail page (A7) and keyword search (C1).
+
+### A2 — Edit details, brief, notes, and tags with revision protection (L2-055.2, .3, .4, .6)
+
+- Test: `backend/tests/Loupe.Api.Tests/Locations/UpdateLocationTests.cs` (11 cases):
+  `PUT {id}` with every optional field, then `PUT {id}/scouting-brief`, `/notes`,
+  `/tags` → the reload shows trimmed values, a blank second address line as absent,
+  `51.487210`/`-0.287600`, `Outdoor` from `outdoor`, CRLF-normalized notes, tags
+  sorted with their categories, revision 5 and `updatedAt` after `createdAt`
+  (test clock advanced); details and notes edits leave the tags byte-identical;
+  an empty name, a 201-rune address line, `Underwater`, or latitude 91 → 400
+  naming the field and the record reads back identical; brief 2,000 / notes
+  10,000 accepted and one more rejected with the record unchanged; 51 tags → 400
+  `tags`; after one editor wins at revision 1, every stale edit route → 409
+  `revision_conflict` with the record unchanged and revision 2 succeeds; a
+  stranger → 404 on every edit route.
+- RED: `-Filter 'FullyQualifiedName~UpdateLocationTests'` → `Failed: 11, Passed: 0`
+  — `PUT /api/locations/{id}` returned `MethodNotAllowed`, the text and tag routes
+  `NotFound`. One later failure was the test's own: `updatedAt > createdAt` under
+  the frozen `TestClock`; fixed by advancing the clock, not by relaxing the assert.
+- Built: `LocationDetailsInput`, `LocationTextField`, `UpdateLocationCommand[Handler]`,
+  `UpdateLocationTextCommand[Handler]`, `SetLocationTagsCommand[Handler]`;
+  `LocationDetailsValidator` now exposes `Normalize(input)`, `Text(field, text)`
+  and `Tags(tags)` shared by create and edit; `ILocationStore.UpdateAsync/
+  UpdateTextAsync/ReplaceTagsAsync` in `LocationStore` (owner-scoped load, revision
+  check, `UpdatedAt` from `TimeProvider`, `Revision++`, `DbUpdateConcurrencyException`
+  → 409, diff-merge of tags); `PUT {id}`, `PUT {id}/scouting-brief`, `PUT {id}/notes`,
+  `PUT {id}/tags` with `UpdateLocationRequest`, `UpdateLocationTextRequest`,
+  `SetLocationTagsRequest`.
+- GREEN: band `-Filter 'FullyQualifiedName~Locations|FullyQualifiedName~Search'` →
+  `Passed: 83`. `dotnet build` clean; `dotnet format` reports nothing under `Locations`.
+- Non-claims: L2-055.4's images, cover, report and report status are proven
+  unchanged once they exist (A4, B3); L2-055.5 (brief edit keeps the report current
+  and offers Regenerate) lands with B3; the UI halves of .2/.4/.6 land in A7.
 
