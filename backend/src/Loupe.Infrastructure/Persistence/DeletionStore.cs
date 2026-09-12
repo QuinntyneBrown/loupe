@@ -96,6 +96,7 @@ public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock,
                 && item.ResourceType == "location" && item.ResourceId == id, cancellationToken);
             if (previous is not null) return previous;
             await ScoutingCancellation.CancelAsync(database, id, ownerId, "The location was deleted.", clock.GetUtcNow(), cancellationToken);
+            await LocationIndexIntent.CancelAsync(database, id, ownerId, "The location was deleted.", clock.GetUtcNow(), cancellationToken);
             var location = await database.Locations.FromSqlInterpolated($"SELECT * FROM locations WHERE \"Id\" = {id} AND \"OwnerId\" = {ownerId} FOR UPDATE")
                 .SingleOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException();
             if (location.Revision != revision) throw new RevisionConflictException();

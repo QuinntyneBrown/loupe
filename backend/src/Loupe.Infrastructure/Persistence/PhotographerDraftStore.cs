@@ -20,7 +20,7 @@ public sealed class PhotographerDraftStore(LibraryDbContext database, IPhotograp
             ExpiresAt = now.AddHours(24), CommittedPhotographerId = existing?.Id };
         if (existing is null && configured)
         {
-            if (await database.BackgroundOperations.CountAsync(item => item.OwnerId == ownerId && (item.Status == OperationStatus.Queued || item.Status == OperationStatus.Running), cancellationToken) >= 5)
+            if (await database.BackgroundOperations.CountAsync(item => item.OwnerId == ownerId && item.Type != OperationType.LocationIndex && (item.Status == OperationStatus.Queued || item.Status == OperationStatus.Running), cancellationToken) >= 5)
                 throw new AnalysisLimitException();
             draft.ImportOperation = new BackgroundOperation { OwnerId = ownerId, ResourceId = draft.Id, Type = OperationType.PhotographerDraftImport,
                 Mode = ExecutionMode.Live, Model = "loupe-portfolio-import-v1", PromptVersion = "portfolio-import-v1", InputJson = JsonSerializer.Serialize(portfolioUrl), CreatedAt = now, UpdatedAt = now };

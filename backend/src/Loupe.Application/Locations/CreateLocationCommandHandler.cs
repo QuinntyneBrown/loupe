@@ -4,11 +4,12 @@ using Loupe.Application.Common;
 using Loupe.Application.Operations;
 using Loupe.Application.Security;
 using Loupe.Domain.Locations;
+using Loupe.Application.Search;
 using MediatR;
 
 namespace Loupe.Application.Locations;
 
-public sealed class CreateLocationCommandHandler(ICurrentOwner owner, ILocationStore locations, IOperationReceiptStore receipts, TimeProvider clock)
+public sealed class CreateLocationCommandHandler(ICurrentOwner owner, ILocationStore locations, IOperationReceiptStore receipts, TimeProvider clock, IEmbeddingConfiguration embeddings)
     : IRequestHandler<CreateLocationCommand, LocationResult>
 {
     public async Task<LocationResult> Handle(CreateLocationCommand request, CancellationToken cancellationToken)
@@ -47,6 +48,6 @@ public sealed class CreateLocationCommandHandler(ICurrentOwner owner, ILocationS
             await locations.SaveAsync(location, token);
             return location.Id;
         }, cancellationToken);
-        return LocationResult.From(await locations.FindOwnedAsync(id, owner.Id, cancellationToken) ?? throw new ResourceNotFoundException());
+        return LocationResult.From(await locations.FindOwnedAsync(id, owner.Id, cancellationToken) ?? throw new ResourceNotFoundException(), embeddings.IsConfigured);
     }
 }

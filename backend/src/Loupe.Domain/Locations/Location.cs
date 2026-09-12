@@ -25,6 +25,8 @@ public sealed class Location
     public Guid? CurrentScoutingOperationId { get; set; }
     public BackgroundOperation? CurrentScoutingOperation { get; set; }
     public string? ScoutingReportJson { get; set; }
+    public Guid? CurrentIndexOperationId { get; set; }
+    public BackgroundOperation? CurrentIndexOperation { get; set; }
     public long Revision { get; set; } = 1;
     public ICollection<LocationTag> Tags { get; } = new List<LocationTag>();
     public ICollection<LocationImage> Images { get; } = new List<LocationImage>();

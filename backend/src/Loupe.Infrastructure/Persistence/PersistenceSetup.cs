@@ -62,6 +62,10 @@ public static class PersistenceSetup
         services.AddScoped<IScoutingWorkStore, ScoutingWorkStore>();
         services.AddScoped<IScoutingProvider, AzureOpenAiScoutingProvider>();
         services.AddSingleton<IScoutingConfiguration, ScoutingConfiguration>();
+        services.AddSingleton<Loupe.Application.Search.IEmbeddingConfiguration, EmbeddingConfiguration>();
+        services.AddOptions<EmbeddingOptions>().BindConfiguration("Embeddings")
+            .Validate(options => options.HasValidEndpoint, "Embeddings:Endpoint must be an absolute HTTP or HTTPS URL without credentials, query, or fragment.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Model), "Embeddings:Model must name a model.").ValidateOnStart();
         services.AddScoped<IBoardStore, BoardStore>();
         services.AddScoped<IReferenceImportStore, ReferenceImportStore>();
         services.AddSingleton<IReferenceImportConfiguration, ReferenceImportConfiguration>();

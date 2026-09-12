@@ -1,23 +1,25 @@
 using Loupe.Application.Common;
 using Loupe.Application.Locations;
 using Loupe.Application.Scouting;
+using Loupe.Application.Search;
 using Loupe.Domain.Locations;
 using Loupe.Domain.Operations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Loupe.Infrastructure.Persistence;
 
-public sealed class LocationStore(LibraryDbContext context, TimeProvider clock) : ILocationStore
+public sealed class LocationStore(LibraryDbContext context, TimeProvider clock, IEmbeddingConfiguration embeddings) : ILocationStore
 {
     public async Task SaveAsync(Location location, CancellationToken cancellationToken)
     {
         context.Locations.Add(location);
+        await LocationIndexIntent.RecordAsync(context, location, embeddings.Model, clock.GetUtcNow(), cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
 
     public Task<Location?> FindOwnedAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>
         context.Locations.AsNoTracking().Include(location => location.Tags).Include(location => location.Images).Include(location => location.CurrentScoutingOperation)
-            .SingleOrDefaultAsync(location => location.Id == id && location.OwnerId == ownerId, cancellationToken);
+            .Include(location => location.CurrentIndexOperation).SingleOrDefaultAsync(location => location.Id == id && location.OwnerId == ownerId, cancellationToken);
 
     public Task<int> CountAsync(string ownerId, CancellationToken cancellationToken) =>
         context.Locations.CountAsync(location => location.OwnerId == ownerId, cancellationToken);
@@ -90,11 +92,13 @@ public sealed class LocationStore(LibraryDbContext context, TimeProvider clock) 
     private async Task<Location> EditAsync(Guid id, string ownerId, long revision, Action<Location> apply, CancellationToken cancellationToken)
     {
         var location = await context.Locations.Include(item => item.Tags).Include(item => item.Images).Include(item => item.CurrentScoutingOperation)
+            .Include(item => item.CurrentIndexOperation)
             .SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken) ?? throw new ResourceNotFoundException();
         if (location.Revision != revision) throw new RevisionConflictException();
         apply(location);
         location.UpdatedAt = clock.GetUtcNow();
         location.Revision++;
+        await LocationIndexIntent.RecordAsync(context, location, embeddings.Model, location.UpdatedAt, cancellationToken);
         try { await context.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateConcurrencyException) { throw new RevisionConflictException(); }
         return location;

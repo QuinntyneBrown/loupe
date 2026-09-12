@@ -16,7 +16,7 @@ public sealed class PhotographerSummaryStore(LibraryDbContext database, TimeProv
         var photographer = await database.Photographers.FromSqlInterpolated($"SELECT * FROM photographers WHERE \"Id\" = {id} AND \"OwnerId\" = {ownerId} FOR UPDATE")
             .SingleOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException();
         if (photographer.Revision != revision) throw new RevisionConflictException();
-        var active = database.BackgroundOperations.Where(operation => operation.OwnerId == ownerId && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running));
+        var active = database.BackgroundOperations.Where(operation => operation.OwnerId == ownerId && operation.Type != OperationType.LocationIndex && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running));
         var existing = await active.SingleOrDefaultAsync(operation => operation.Type == OperationType.PhotographerSummary && operation.ResourceId == id, cancellationToken);
         if (existing is not null)
         {

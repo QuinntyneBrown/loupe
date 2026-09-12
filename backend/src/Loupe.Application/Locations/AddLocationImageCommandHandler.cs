@@ -4,12 +4,13 @@ using Loupe.Application.Common;
 using Loupe.Application.Images;
 using Loupe.Application.Operations;
 using Loupe.Application.Security;
+using Loupe.Application.Search;
 using MediatR;
 
 namespace Loupe.Application.Locations;
 
 public sealed class AddLocationImageCommandHandler(ICurrentOwner owner, ILocationStore locations, ILocationImageStore locationImages,
-    IImageIngestor ingestor, IImageStore images, IOperationReceiptStore receipts) : IRequestHandler<AddLocationImageCommand, LocationResult>
+    IImageIngestor ingestor, IImageStore images, IOperationReceiptStore receipts, IEmbeddingConfiguration embeddings) : IRequestHandler<AddLocationImageCommand, LocationResult>
 {
     public async Task<LocationResult> Handle(AddLocationImageCommand request, CancellationToken cancellationToken)
     {
@@ -47,6 +48,6 @@ public sealed class AddLocationImageCommandHandler(ICurrentOwner owner, ILocatio
             // Preserve staged files after an uncertain commit; cleanup verifies live references.
             return request.Id;
         }, cancellationToken);
-        return LocationResult.From(await locations.FindOwnedAsync(request.Id, owner.Id, cancellationToken) ?? throw new ResourceNotFoundException());
+        return LocationResult.From(await locations.FindOwnedAsync(request.Id, owner.Id, cancellationToken) ?? throw new ResourceNotFoundException(), embeddings.IsConfigured);
     }
 }

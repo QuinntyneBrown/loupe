@@ -29,7 +29,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] B5 Release evaluation manifest and procedure (L2-059.5, .6; L2-050.2, .5 — procedure only)
 - [x] C1 Find locations by keyword with shoot filters (L2-062.1, .2, .3, .5, .7; L2-061.2–.5)
 - [x] C2 Find a location page with keyword results (L2-061.1, .5, .6; L2-062.8; L2-043.2; L2-044.1)
-- [ ] C3a Record location index intents and report index status (L2-028.2; L2-062.4, .5)
+- [x] C3a Record location index intents and report index status (L2-028.2; L2-062.4, .5)
 - [ ] C3b Embed location documents through Ollama and keep vectors current (L2-028.1, .4, .5; L2-062.4, .6, .7; L2-041)
 - [ ] C4 Rank locations by meaning (L2-061.1, .4, .7, .8; L2-062.5, .7)
 - [ ] C5 Meaning mode in the Find a location page (L2-061.1, .6, .7, .8; L2-062.4–.6)
@@ -743,4 +743,45 @@ recorded only when actually executed.
   are C5 (the production API still answers `mode=meaning` with the shared 400
   until C4); L2-061.1 and L2-061.6 stay open for their Meaning halves;
   L2-043/044/045 are cross-area criteria and stay unticked on this branch.
+
+### C3a — Record location index intents and report index status (L2-028.2; L2-062.4, .5 — status half)
+
+- Tests: `backend/tests/Loupe.Api.Tests/Search/LocationIndexTests.cs` (3 cases):
+  create, details, notes, tags, image add and image remove each acknowledge with
+  `indexStatus: "updating"` and one queued `LocationIndex` operation
+  (`indexOperationId`, readable at `/api/operations/{id}` with `resourceId` =
+  the location) that coalesces while queued, and deleting the location cancels
+  it; a requested scouting report reports `processing-report` while queued or
+  running and a refused report (`unsupported_input`, run through the hosted
+  `AnalysisWorker`) leaves the location `updating` on its prior intent; without
+  `Embeddings:Endpoint` the status is `not-configured` while the record and
+  keyword search behave the same.
+- RED: `-Filter 'FullyQualifiedName~LocationIndexTests'` → `Failed: 3` —
+  `indexStatus` absent from the location body (`KeyNotFoundException`).
+- Built: `OperationType.LocationIndex`; `Location.CurrentIndexOperationId` +
+  navigation (migration `LocationIndex`, FK set-null, index);
+  `IEmbeddingConfiguration` (Application/Search) with `EmbeddingOptions`
+  (`Embeddings:Endpoint`, `Embeddings:Model` default `bge-m3`, validated on
+  start) and `EmbeddingConfiguration`; `LocationIndexIntent.RecordAsync`
+  (queued intents coalesce, a running one is superseded and canceled, the new
+  operation carries the model identity and `location-document-v1`) called from
+  every revision bump — `LocationStore.SaveAsync/EditAsync`,
+  `LocationImageStore` add/remove/cover, `ScoutingStore` report reuse,
+  `ScoutingWorkStore.PublishAsync` — and `LocationIndexIntent.CancelAsync` from
+  `DeletionStore.DeleteLocationAsync`; `LocationIndexStatus.Derive`
+  (not-configured → processing-report → current/failed/updating);
+  `LocationResult.IndexStatus/IndexOperationId` through every location handler;
+  the nine requested-job caps (`>= 5` active) now exclude `LocationIndex`, the
+  maintenance type the design exempts.
+- GREEN: same filter → `Passed: 3`. Band
+  `Locations|Scouting|ShootPlanning|Search|Critiques|References|Photographer|Deletion`
+  → `Passed: 512`. `dotnet build` clean; `dotnet format` reports no finding on a
+  changed line (the pre-existing whitespace findings in `PhotographerDraftStore`,
+  `ReferenceAnalysisStore/Queue`, `PhotographerSummaryStore/Queue` sit on
+  untouched lines).
+- Non-claims: the `search_vectors` table and `CREATE EXTENSION vector` the plan
+  listed here move to C3b, where the first test writes a vector; `current` needs
+  the worker (C3b) and stale-vector exclusion the query-time join (C4), so
+  L2-062.4/.5 stay open; the frontend `LocationResult` shape gains
+  `indexStatus` in C5 where it is rendered.
 

@@ -1,13 +1,14 @@
 using Loupe.Application.Common;
 using Loupe.Application.Images;
 using Loupe.Application.Locations;
+using Loupe.Application.Search;
 using Loupe.Domain.Deletions;
 using Loupe.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Loupe.Infrastructure.Persistence;
 
-public sealed class LocationImageStore(LibraryDbContext database, TimeProvider clock) : ILocationImageStore
+public sealed class LocationImageStore(LibraryDbContext database, TimeProvider clock, IEmbeddingConfiguration embeddings) : ILocationImageStore
 {
     public Task<int> CountAsync(Guid locationId, string ownerId, CancellationToken cancellationToken) =>
         database.LocationImages.CountAsync(image => image.LocationId == locationId && image.OwnerId == ownerId, cancellationToken);
@@ -36,7 +37,7 @@ public sealed class LocationImageStore(LibraryDbContext database, TimeProvider c
         database.LocationImages.Add(added);
         location.Images.Add(added);
         location.CoverImageId ??= added.Id;
-        Touch(location);
+        await TouchAsync(location, cancellationToken);
         await database.SaveChangesAsync(cancellationToken);
     }
 
@@ -62,7 +63,7 @@ public sealed class LocationImageStore(LibraryDbContext database, TimeProvider c
             DeletedAt = clock.GetUtcNow(),
             MediaKeys = [image.ImageKey, image.PreviewKey]
         });
-        Touch(location);
+        await TouchAsync(location, cancellationToken);
         try { await database.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateConcurrencyException) { throw new RevisionConflictException(); }
         await transaction.CommitAsync(cancellationToken);
@@ -78,6 +79,7 @@ public sealed class LocationImageStore(LibraryDbContext database, TimeProvider c
         location.CoverImageId = imageId;
         location.UpdatedAt = clock.GetUtcNow();
         location.Revision++;
+        await LocationIndexIntent.RecordAsync(database, location, embeddings.Model, location.UpdatedAt, cancellationToken);
         try { await database.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateConcurrencyException) { throw new RevisionConflictException(); }
         return location;
@@ -86,10 +88,11 @@ public sealed class LocationImageStore(LibraryDbContext database, TimeProvider c
     private IQueryable<Location> Lock(Guid locationId, string ownerId) =>
         database.Locations.FromSqlInterpolated($"SELECT * FROM \"locations\" WHERE \"Id\" = {locationId} AND \"OwnerId\" = {ownerId} FOR UPDATE");
 
-    private void Touch(Location location)
+    private async Task TouchAsync(Location location, CancellationToken cancellationToken)
     {
         location.UpdatedAt = clock.GetUtcNow();
         location.ImageSetRevision++;
         location.Revision++;
+        await LocationIndexIntent.RecordAsync(database, location, embeddings.Model, location.UpdatedAt, cancellationToken);
     }
 }

@@ -2,13 +2,14 @@ using System.Text.Json;
 using Loupe.Application.Common;
 using Loupe.Application.Operations;
 using Loupe.Application.Scouting;
+using Loupe.Application.Search;
 using Loupe.Domain.Operations;
 using Loupe.Domain.Scouting;
 using Microsoft.EntityFrameworkCore;
 
 namespace Loupe.Infrastructure.Persistence;
 
-public sealed class ScoutingStore(LibraryDbContext database, TimeProvider clock) : IScoutingStore
+public sealed class ScoutingStore(LibraryDbContext database, TimeProvider clock, IEmbeddingConfiguration embeddings) : IScoutingStore
 {
     public async Task<Guid> AdmitAsync(Guid locationId, string ownerId, long revision, bool regenerate, AnalysisIdentity identity, CancellationToken cancellationToken)
     {
@@ -20,7 +21,7 @@ public sealed class ScoutingStore(LibraryDbContext database, TimeProvider clock)
         if (location.Images.Count == 0) throw new RequestValidationException("images", "Add an image before requesting a scouting report.");
         var inputJson = JsonSerializer.Serialize(ScoutingInputBuilder.From(location));
         var active = database.BackgroundOperations.Where(operation => operation.OwnerId == ownerId
-            && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running));
+            && operation.Type != OperationType.LocationIndex && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running));
         var existing = await active.SingleOrDefaultAsync(operation => operation.Type == OperationType.LocationScouting && operation.ResourceId == locationId, cancellationToken);
         if (existing is not null)
         {
@@ -42,6 +43,7 @@ public sealed class ScoutingStore(LibraryDbContext database, TimeProvider clock)
                 {
                     location.ScoutingReportJson = completed.OutputJson;
                     location.Revision++;
+                    await LocationIndexIntent.RecordAsync(database, location, embeddings.Model, clock.GetUtcNow(), cancellationToken);
                 }
                 location.CurrentScoutingOperationId = completed.Id;
                 await database.SaveChangesAsync(cancellationToken);

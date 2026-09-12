@@ -8,9 +8,9 @@ namespace Loupe.Application.Locations;
 public sealed record LocationResult(Guid Id, string Name, string? AddressLine1, string? AddressLine2, string? Locality, string? Region,
     string? PostalCode, string? Country, Coordinates? Coordinates, LocationSetting? Setting, string? ScoutingBrief, string? Notes,
     IReadOnlyList<LocationTagResult> Tags, IReadOnlyList<LocationImageResult> Images, Guid? CoverImageId, SavedScoutingReport? Report,
-    string ReportStatus, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, long Revision)
+    string ReportStatus, string IndexStatus, Guid? IndexOperationId, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, long Revision)
 {
-    public static LocationResult From(Location location)
+    public static LocationResult From(Location location, bool indexingConfigured)
     {
         var report = ScoutingReportJson.Deserialize(location.ScoutingReportJson);
         return new(location.Id, location.Name, location.AddressLine1, location.AddressLine2,
@@ -19,7 +19,8 @@ public sealed record LocationResult(Guid Id, string Name, string? AddressLine1, 
         location.Setting, location.ScoutingBrief, location.Notes,
         location.Tags.OrderBy(tag => tag.Name, StringComparer.OrdinalIgnoreCase).Select(tag => new LocationTagResult(tag.Name, tag.Category)).ToArray(),
         location.Images.OrderBy(image => image.Position).Select(image => LocationImageResult.From(location.Id, image)).ToArray(),
-        location.CoverImageId, report, LocationReportStatus.Derive(location, report), location.CreatedAt, location.UpdatedAt, location.Revision);
+        location.CoverImageId, report, LocationReportStatus.Derive(location, report), LocationIndexStatus.Derive(location, indexingConfigured),
+        location.CurrentIndexOperationId, location.CreatedAt, location.UpdatedAt, location.Revision);
     }
 
     private static string Format(decimal value) => value.ToString("0.000000", CultureInfo.InvariantCulture);
