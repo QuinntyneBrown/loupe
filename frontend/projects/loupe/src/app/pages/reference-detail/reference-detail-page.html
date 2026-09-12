@@ -1,12 +1,59 @@
 <main id="main" tabindex="-1" class="lp-main">
-  <a class="lp-back" routerLink="/inspiration"><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-left" /></svg>Back to Inspiration</a
-  ><lp-reference-detail-panel [id]="id()" (discardRequested)="requestDiscard($event)" />
+  <a class="lp-back" routerLink="/inspiration"
+    ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-left" /></svg>Back to
+    Inspiration</a
+  ><lp-reference-detail-panel
+    [id]="id()"
+    (discardRequested)="requestDiscard($event)"
+    (replaceImageRequested)="replacingImage.set($event)"
+    (deleteRequested)="deletingReference.set($event)"
+    (boardsRequested)="pickingBoards.set($event)"
+    (photographerRequested)="linkingPhotographer.set($event)"
+  />
 </main>
+@if (linkingPhotographer(); as item) {
+  <lp-reference-photographer
+    [reference]="item"
+    (closed)="closePhotographer(undefined, $event)"
+    (saved)="closePhotographer($event)"
+    (reviewed)="detail()?.reference.set($event)"
+  />
+}
+@if (photographerNotice(); as photographer) {
+  <div class="photographer-notice" role="status">
+    <span>Linked to {{ photographer.name }}.</span
+    ><a [routerLink]="'/photographers/' + photographer.id">View</a
+    ><button class="lp-icon-button" aria-label="Dismiss" (click)="photographerNotice.set(null)">
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
+    </button>
+  </div>
+}
+@if (pickingBoards(); as item) {
+  <lp-board-picker [reference]="item" (closed)="closeBoards()" (saved)="closeBoards($event)" />
+}
+@if (deletingReference(); as item) {
+  <lp-delete-reference
+    [reference]="item"
+    (closed)="closeDeletion()"
+    (deleted)="deletionComplete()"
+    (reviewed)="detail()?.reference.set($event)"
+  />
+}
+@if (replacingImage(); as item) {
+  <lp-reference-image-dialog
+    [reference]="item"
+    (closed)="closeImage()"
+    (saved)="closeImage($event)"
+    (reviewed)="detail()?.reference.set($event)"
+  />
+}
 <lp-unsaved-changes
   [dirty]="dirty"
   [warning]="
-    detail()?.saving()
-      ? 'This save may finish after you leave. Reopen the reference to check its saved metadata.'
-      : null
+    deletionDialog()?.busy()
+      ? 'Deletion may finish after you leave. Check Inspiration before trying again.'
+      : detail()?.saving() || imageDialog()?.busy()
+        ? 'This save may finish after you leave. Reopen the reference to check its saved metadata.'
+        : null
   "
 />

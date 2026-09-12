@@ -2,4 +2,4 @@ using MediatR;
 
 namespace Loupe.Application.References;
 
-public sealed record ListReferencesQuery(int PageSize, string? Cursor) : IRequest<ReferencePage>;
+public sealed record ListReferencesQuery(int PageSize, string? Cursor, Guid? BoardId = null, string[]? Tags = null) : IRequest<ReferencePage>;

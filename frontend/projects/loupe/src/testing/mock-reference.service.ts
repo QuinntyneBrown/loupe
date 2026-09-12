@@ -1,10 +1,58 @@
-import { ReferenceMetadata, ReferenceLink, ReferenceLinkResult } from 'api';
+import {
+  ReferenceMetadata,
+  ReferenceLink,
+  ReferenceLinkResult,
+  CreateReferencePhotographer,
+} from 'api';
 import { ReferenceUpload, UploadProgress } from 'api';
 import { Injectable } from '@angular/core';
 import { IReferenceService, ReferencePage, ReferenceResult, ServiceError } from 'api';
+import { ReferenceTag, ReferenceTagFacet } from 'api';
 
 @Injectable()
 export class MockReferenceService implements IReferenceService {
+  createPhotographer(id: string, input: CreateReferencePhotographer): Promise<ReferenceResult> {
+    return this.call('createPhotographer', { id, ...input });
+  }
+  setPhotographer(
+    id: string,
+    revision: number,
+    photographerId: string | null,
+  ): Promise<ReferenceResult> {
+    return this.call('setPhotographer', { id, revision, photographerId });
+  }
+  updateText(
+    id: string,
+    revision: number,
+    field: 'description' | 'notes',
+    text: string,
+  ): Promise<ReferenceResult> {
+    return this.call('updateText', { id, revision, field, text });
+  }
+  async replaceImage(
+    id: string,
+    revision: number,
+    image: File,
+    operationKey: string,
+  ): Promise<ReferenceResult> {
+    let bytes: ArrayBuffer;
+    try {
+      bytes = await image.arrayBuffer();
+    } catch {
+      throw new ServiceError('file_unavailable');
+    }
+    const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), (value) =>
+      value.toString(16).padStart(2, '0'),
+    ).join('');
+    return this.call('replaceImage', { id, revision, operationKey, hash, contentType: image.type });
+  }
+  setTags(
+    id: string,
+    revision: number,
+    tags: Pick<ReferenceTag, 'name' | 'category'>[],
+  ): Promise<ReferenceResult> {
+    return this.call('setTags', { id, revision, tags });
+  }
   saveLink(input: ReferenceLink): Promise<ReferenceLinkResult> {
     return this.call('saveLink', input);
   }
@@ -44,8 +92,11 @@ export class MockReferenceService implements IReferenceService {
   update(id: string, revision: number, metadata: ReferenceMetadata): Promise<ReferenceResult> {
     return this.call('update', { id, revision, ...metadata });
   }
-  list(cursor?: string): Promise<ReferencePage> {
-    return this.call('list', { cursor });
+  tags(boardId?: string): Promise<ReferenceTagFacet[]> {
+    return this.call('tags', { boardId });
+  }
+  list(cursor?: string, boardId?: string, tags: string[] = []): Promise<ReferencePage> {
+    return this.call('list', { cursor, boardId, tags });
   }
   get(id: string): Promise<ReferenceResult> {
     return this.call('get', { id });

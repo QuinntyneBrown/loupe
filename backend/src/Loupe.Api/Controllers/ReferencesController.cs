@@ -1,4 +1,9 @@
 using Loupe.Api.References;
+using Loupe.Api.Photographers;
+using Loupe.Application.Photographers;
+using Loupe.Application.Deletions;
+using Loupe.Api.Boards;
+using Loupe.Application.Boards;
 using Loupe.Application.Images;
 using Loupe.Application.References;
 using MediatR;
@@ -12,6 +17,33 @@ namespace Loupe.Api.Controllers;
 [Route("api/references")]
 public sealed class ReferencesController(ISender sender) : ControllerBase
 {
+    [HttpPost("{id:guid}/photographer")]
+    public Task<ReferenceResult> CreatePhotographer(Guid id, CreateLinkedPhotographerRequest request,
+        [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken) =>
+        sender.Send(new CreateLinkedPhotographerCommand(id, request.Revision, request.Name, request.PortfolioUrl, operationKey), cancellationToken);
+
+    [HttpPut("{id:guid}/photographer")]
+    public Task<ReferenceResult> SetPhotographer(Guid id, SetReferencePhotographerRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new SetReferencePhotographerCommand(id, request.Revision, request.PhotographerId), cancellationToken);
+
+    [HttpPut("{id:guid}/description")]
+    public Task<ReferenceResult> Description(Guid id, UpdateReferenceTextRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new UpdateReferenceTextCommand(id, request.Revision, ReferenceTextField.Description, request.Text), cancellationToken);
+    [HttpPut("{id:guid}/notes")]
+    public Task<ReferenceResult> Notes(Guid id, UpdateReferenceTextRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new UpdateReferenceTextCommand(id, request.Revision, ReferenceTextField.Notes, request.Text), cancellationToken);
+    [HttpDelete("{id:guid}")]
+    public Task<DeletionResult> Delete(Guid id, [FromQuery] long revision, CancellationToken cancellationToken) =>
+        sender.Send(new DeleteReferenceCommand(id, revision), cancellationToken);
+    [HttpGet("tags")]
+    public Task<IReadOnlyList<ReferenceTagFacet>> Tags(CancellationToken cancellationToken, [FromQuery] Guid? boardId = null) =>
+        sender.Send(new ListReferenceTagsQuery(boardId), cancellationToken);
+    [HttpPut("{id:guid}/tags")]
+    public Task<ReferenceResult> SetTags(Guid id, SetReferenceTagsRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new SetReferenceTagsCommand(id, request.Revision, request.Tags), cancellationToken);
+    [HttpPut("{id:guid}/boards")]
+    public Task<ReferenceResult> SetBoards(Guid id, SetReferenceBoardsRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new SetReferenceBoardsCommand(id, request.Revision, request.BoardIds), cancellationToken);
     [HttpPost("links")]
     public async Task<ActionResult<SaveReferenceUrlResult>> SaveLink(SaveReferenceUrlRequest request,
         [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken)
@@ -21,8 +53,8 @@ public sealed class ReferencesController(ISender sender) : ControllerBase
     }
 
     [HttpGet]
-    public Task<ReferencePage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null) =>
-        sender.Send(new ListReferencesQuery(pageSize, cursor), cancellationToken);
+    public Task<ReferencePage> List(CancellationToken cancellationToken, [FromQuery] int pageSize = 24, [FromQuery] string? cursor = null, [FromQuery] Guid? boardId = null, [FromQuery] string[]? tags = null) =>
+        sender.Send(new ListReferencesQuery(pageSize, cursor, boardId, tags), cancellationToken);
 
     [HttpPost("images")]
     [RequestSizeLimit(UploadLimits.RequestBytes)]
@@ -41,6 +73,14 @@ public sealed class ReferencesController(ISender sender) : ControllerBase
     [HttpPut("{id:guid}")]
     public Task<ReferenceResult> Update(Guid id, UpdateReferenceRequest request, CancellationToken cancellationToken) =>
         sender.Send(new UpdateReferenceCommand(id, request.Revision, request.Title, request.SourceUrl, request.Attribution, request.Notes), cancellationToken);
+
+    [HttpPut("{id:guid}/image")]
+    [RequestSizeLimit(UploadLimits.RequestBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = UploadLimits.RequestBytes)]
+    public Task<ReferenceResult> ReplaceImage(Guid id, [FromForm] ReplaceReferenceImageRequest request,
+        [FromHeader(Name = "Idempotency-Key")] string? operationKey, CancellationToken cancellationToken) =>
+        sender.Send(new ReplaceReferenceImageCommand(id, request.Revision, new ImageUpload(request.Image.OpenReadStream,
+            request.Image.FileName, request.Image.ContentType, request.Image.Length), operationKey, Request.Form.Files.Count), cancellationToken);
 
     [HttpGet("{id:guid}/image")]
     public async Task<IActionResult> Image(Guid id, CancellationToken cancellationToken)

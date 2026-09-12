@@ -1,0 +1,173 @@
+.preview {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lp-space-4);
+}
+.preview img {
+  width: var(--lp-thumb-size-lg);
+  aspect-ratio: var(--lp-reference-ratio);
+  object-fit: cover;
+  border-radius: var(--lp-radius-sm);
+}
+.fields {
+  display: grid;
+  gap: var(--lp-space-4);
+  min-width: var(--lp-zero);
+  flex: 1;
+}
+.upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--lp-space-3);
+  padding: var(--lp-space-6);
+  border: var(--lp-hairline) dashed var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+}
+.upload input {
+  max-width: var(--lp-full);
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}
+.segmented {
+  display: flex;
+  padding: var(--lp-space-1);
+  border-radius: var(--lp-radius-md);
+  background: var(--lp-color-surface-2);
+}
+.segmented label {
+  flex: 1;
+  position: relative;
+}
+.segmented input {
+  position: absolute;
+  opacity: var(--lp-zero);
+}
+.segmented span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lp-space-2);
+  padding: var(--lp-space-2);
+  font-size: var(--lp-text-sm);
+  border-radius: var(--lp-radius-sm);
+  cursor: pointer;
+}
+.segmented input:checked + span {
+  background: var(--lp-color-surface);
+  box-shadow: var(--lp-shadow-sm);
+}
+.segmented input:focus-visible + span {
+  outline: var(--lp-ring-width) solid var(--lp-color-focus);
+  outline-offset: var(--lp-space-1);
+}
+.upload:focus-within {
+  outline: var(--lp-ring-width) solid var(--lp-color-focus);
+}
+.import-progress progress {
+  width: var(--lp-full);
+  accent-color: var(--lp-color-ink);
+}
+progress {
+  width: var(--lp-full);
+  accent-color: var(--lp-color-ink);
+}
+.import-progress > div {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--lp-space-2);
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-text-2);
+}
+.fallback {
+  padding: var(--lp-space-4);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+  font-size: var(--lp-text-sm);
+}
+.lp-dialog__privacy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lp-space-1);
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-text-2);
+  margin-right: auto;
+}
+.board-picker {
+  min-width: var(--lp-zero);
+  padding: var(--lp-zero);
+  margin: var(--lp-zero);
+  border: var(--lp-zero);
+}
+.board-list {
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+  max-height: var(--lp-picker-max);
+  overflow: auto;
+}
+.board-picker legend {
+  margin-bottom: var(--lp-space-3);
+}
+.board-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-3);
+  padding: var(--lp-space-2) var(--lp-space-3);
+  cursor: pointer;
+  font-size: var(--lp-text-sm);
+}
+.board-choice:hover {
+  background: var(--lp-color-surface-2);
+}
+.board-choice > span:nth-child(2) {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.board-choice input {
+  accent-color: var(--lp-color-ink);
+  width: var(--lp-space-4);
+  height: var(--lp-space-4);
+  margin: var(--lp-zero);
+}
+.board-count {
+  font-size: var(--lp-text-xs);
+  font-family: var(--lp-font-mono);
+  color: var(--lp-color-text-2);
+}
+.board-new {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-2);
+  padding: var(--lp-space-2) var(--lp-space-3);
+  border-top: var(--lp-hairline) solid var(--lp-color-border);
+}
+.board-new input {
+  min-width: var(--lp-zero);
+  min-height: var(--lp-control-height-sm);
+}
+.upload--compact {
+  flex-direction: row;
+  padding: var(--lp-space-4);
+}
+.upload .visually-hidden:focus {
+  position: absolute;
+  width: var(--lp-hairline);
+  height: var(--lp-hairline);
+  clip-path: var(--lp-sr-clip);
+}
+.lp-field__optional {
+  font-weight: var(--lp-weight-regular);
+  color: var(--lp-color-text-2);
+  font-size: var(--lp-text-xs);
+  margin-left: var(--lp-space-1);
+}
+.lp-dialog__title,
+.lp-field__hint,
+.fallback p {
+  margin: var(--lp-zero);
+}
+.lp-dialog__text {
+  margin-bottom: var(--lp-zero);
+}

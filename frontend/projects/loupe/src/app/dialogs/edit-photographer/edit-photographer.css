@@ -1,0 +1,13 @@
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(var(--lp-zero), var(--lp-fraction)));
+  gap: var(--lp-space-4);
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}
+@media (width < 640px) {
+  .fields {
+    grid-template-columns: minmax(var(--lp-zero), var(--lp-fraction));
+  }
+}

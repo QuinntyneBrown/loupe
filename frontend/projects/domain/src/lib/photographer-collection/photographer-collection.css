@@ -1,0 +1,23 @@
+:host {
+  display: block;
+}
+.lp-page-header__actions {
+  align-self: flex-start;
+}
+h1,
+p {
+  margin: var(--lp-zero);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(var(--lp-full), var(--lp-card-min)), var(--lp-fraction))
+  );
+  gap: var(--lp-space-4);
+}
+.more {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--lp-space-6);
+}

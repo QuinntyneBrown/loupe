@@ -1,0 +1,7 @@
+[role='alert'] {
+  color: var(--lp-color-danger);
+}
+section p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

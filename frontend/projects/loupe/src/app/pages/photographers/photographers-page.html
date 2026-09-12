@@ -1,0 +1,27 @@
+<main id="main" class="lp-main" tabindex="-1">
+  <lp-unsaved-changes
+    [dirty]="dirty"
+    [warning]="
+      dialog()?.saving()
+        ? 'This save may finish after you leave. Check Photographers before adding it again.'
+        : null
+    "
+  />
+  <lp-photographer-collection (addRequested)="adding.set(true)" />
+  @if (adding()) {
+    <lp-add-photographer (saved)="added($event)" (closed)="close($event)" />
+  }
+  @if (notice()) {
+    <div class="notice" role="status">
+      <span>{{ notice() }}</span
+      ><button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Dismiss notification"
+        (click)="notice.set('')"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </div>
+  }
+</main>

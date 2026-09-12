@@ -4,15 +4,22 @@ using Loupe.Domain.Operations;
 using Loupe.Domain.Deletions;
 using Loupe.Domain.References;
 using Microsoft.EntityFrameworkCore;
+using Loupe.Domain.Boards;
+using Loupe.Domain.Photographers;
 
 namespace Loupe.Infrastructure.Persistence;
 
 public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options) : DbContext(options)
 {
     public DbSet<Loupe.Domain.Users.User> Users => Set<Loupe.Domain.Users.User>();
+    public DbSet<Photographer> Photographers => Set<Photographer>();
+    public DbSet<PhotographerDraft> PhotographerDrafts => Set<PhotographerDraft>();
+    public DbSet<Board> Boards => Set<Board>();
+    public DbSet<BoardReference> BoardReferences => Set<BoardReference>();
     public DbSet<ApplicationSession> Sessions => Set<ApplicationSession>();
     public DbSet<Photograph> Photographs => Set<Photograph>();
     public DbSet<Reference> References => Set<Reference>();
+    public DbSet<ReferenceDraft> ReferenceDrafts => Set<ReferenceDraft>();
     public DbSet<OperationReceipt> OperationReceipts => Set<OperationReceipt>();
     public DbSet<DeletionOperation> Deletions => Set<DeletionOperation>();
     public DbSet<BackgroundOperation> BackgroundOperations => Set<BackgroundOperation>();
@@ -23,9 +30,55 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Loupe.Domain.Users.User>().HasIndex(u => u.NormalizedEmail).IsUnique();
         modelBuilder.Entity<Loupe.Domain.Users.User>().Property(u => u.NormalizedEmail).HasMaxLength(254);
         modelBuilder.Entity<Loupe.Domain.Users.User>().Property(u => u.PasswordVersion).HasDefaultValue("");
+        modelBuilder.Entity<PhotographerDraft>().ToTable("photographer_drafts").HasKey(item => item.Id);
+        modelBuilder.Entity<PhotographerDraft>().HasIndex(item => new { item.OwnerId, item.ExpiresAt });
+        modelBuilder.Entity<PhotographerDraft>().Property(item => item.Revision).IsConcurrencyToken();
+        modelBuilder.Entity<PhotographerDraft>().Property(item => item.SourceJson).HasColumnType("jsonb");
+        modelBuilder.Entity<PhotographerDraft>().HasOne(item => item.ImportOperation).WithMany().HasForeignKey(item => item.ImportOperationId).OnDelete(DeleteBehavior.SetNull);
+        modelBuilder.Entity<Photographer>().ToTable("photographers").HasKey(item => item.Id);
+        modelBuilder.Entity<Photographer>().HasAlternateKey(item => new { item.Id, item.OwnerId });
+        modelBuilder.Entity<Photographer>().Property(item => item.Revision).HasDefaultValue(1L).IsConcurrencyToken();
+        modelBuilder.Entity<Photographer>().Property(item => item.SourceRevision).HasDefaultValue(1L);
+        modelBuilder.Entity<Photographer>().Property(item => item.SourceJson).HasColumnType("jsonb");
+        modelBuilder.Entity<Photographer>().Property(item => item.SuggestionsJson).HasColumnType("jsonb");
+        modelBuilder.Entity<Photographer>().Property(item => item.SuggestionUndoJson).HasColumnType("jsonb");
+        modelBuilder.Entity<Photographer>().HasIndex(item => new { item.OwnerId, item.CreatedAt, item.Id });
+        modelBuilder.Entity<Photographer>().Property<string>("PortfolioHash").HasMaxLength(32).HasComputedColumnSql("md5(loupe_normalize_source(\"PortfolioUrl\"))", stored: true);
+        modelBuilder.Entity<Photographer>().HasIndex("OwnerId", "PortfolioHash");
+        modelBuilder.Entity<PhotographerTag>().ToTable("photographer_tags").HasKey(tag => new { tag.PhotographerId, tag.NormalizedName });
+        modelBuilder.Entity<PhotographerTag>().HasIndex(tag => new { tag.OwnerId, tag.NormalizedName });
+        modelBuilder.Entity<PhotographerTag>().HasOne<Photographer>().WithMany(item => item.Tags)
+            .HasForeignKey(tag => new { tag.PhotographerId, tag.OwnerId }).HasPrincipalKey(item => new { item.Id, item.OwnerId }).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ReferenceDraft>().ToTable("reference_drafts").HasKey(draft => draft.Id);
+        modelBuilder.Entity<ReferenceDraft>().HasIndex(draft => new { draft.OwnerId, draft.ExpiresAt });
+        modelBuilder.Entity<ReferenceDraft>().Property(draft => draft.Revision).IsConcurrencyToken();
+        modelBuilder.Entity<ReferenceDraft>().HasOne(draft => draft.ImportOperation).WithMany()
+            .HasForeignKey(draft => draft.ImportOperationId).OnDelete(DeleteBehavior.SetNull);
+        modelBuilder.Entity<ReferenceTag>().ToTable("reference_tags").HasKey(tag => new { tag.ReferenceId, tag.NormalizedName });
+        modelBuilder.Entity<ReferenceTag>().HasIndex(tag => new { tag.OwnerId, tag.NormalizedName });
+        modelBuilder.Entity<ReferenceTag>().HasOne<Reference>().WithMany(reference => reference.Tags)
+            .HasForeignKey(tag => new { tag.ReferenceId, tag.OwnerId }).HasPrincipalKey(reference => new { reference.Id, reference.OwnerId }).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Board>().ToTable("boards").HasKey(board => board.Id);
+        modelBuilder.Entity<Board>().HasAlternateKey(board => new { board.Id, board.OwnerId });
+        modelBuilder.Entity<Board>().HasIndex(board => new { board.OwnerId, board.NormalizedName }).IsUnique();
+        modelBuilder.Entity<Board>().Property(board => board.Revision).IsConcurrencyToken();
+        modelBuilder.Entity<Reference>().HasAlternateKey(reference => new { reference.Id, reference.OwnerId });
+        modelBuilder.Entity<Reference>().HasOne(reference => reference.Photographer).WithMany()
+            .HasForeignKey(reference => new { reference.PhotographerId, reference.OwnerId }).HasPrincipalKey(item => new { item.Id, item.OwnerId }).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Reference>().Navigation(reference => reference.Photographer).AutoInclude();
+        modelBuilder.Entity<BoardReference>().ToTable("board_references").HasKey(item => new { item.BoardId, item.ReferenceId });
+        modelBuilder.Entity<BoardReference>().HasOne<Board>().WithMany(board => board.References)
+            .HasForeignKey(item => new { item.BoardId, item.OwnerId }).HasPrincipalKey(board => new { board.Id, board.OwnerId }).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<BoardReference>().HasOne<Reference>().WithMany(reference => reference.Boards)
+            .HasForeignKey(item => new { item.ReferenceId, item.OwnerId }).HasPrincipalKey(reference => new { reference.Id, reference.OwnerId }).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Reference>().ToTable("references").HasKey(reference => reference.Id);
         modelBuilder.Entity<Reference>().HasIndex(reference => new { reference.OwnerId, reference.CreatedAt, reference.Id });
         modelBuilder.Entity<Reference>().Property(reference => reference.Revision).HasDefaultValue(1L).IsConcurrencyToken();
+        modelBuilder.Entity<Reference>().Property(reference => reference.ImageRevision).HasDefaultValue(1L);
+        modelBuilder.Entity<Reference>().Property(reference => reference.SuggestionsJson).HasColumnType("jsonb");
+        modelBuilder.Entity<Reference>().Property(reference => reference.SourceImportJson).HasColumnType("jsonb");
+        modelBuilder.Entity<ReferenceDraft>().Property(reference => reference.SourceImportJson).HasColumnType("jsonb");
+        modelBuilder.Entity<Reference>().Property(reference => reference.SuggestionUndoJson).HasColumnType("jsonb");
         modelBuilder.Entity<Reference>().Property<string>("SourceHash").HasMaxLength(32)
             .HasComputedColumnSql("md5(loupe_normalize_source(\"SourceUrl\"))", stored: true);
         modelBuilder.Entity<Reference>().HasIndex("OwnerId", "SourceHash");

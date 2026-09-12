@@ -1,0 +1,89 @@
+:host {
+  display: block;
+}
+.summary {
+  padding: var(--lp-space-4) var(--lp-space-5);
+  background: var(--lp-color-ai-bg);
+  border: var(--lp-hairline) solid var(--lp-color-ai-border);
+  border-radius: var(--lp-radius-md);
+  display: grid;
+  gap: var(--lp-space-3);
+}
+.quiet {
+  background: var(--lp-color-surface-2);
+  border-color: var(--lp-color-border);
+}
+header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--lp-space-3);
+}
+h2,
+p {
+  line-height: var(--lp-leading-relaxed);
+  margin: var(--lp-zero);
+}
+p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.note {
+  color: var(--lp-color-ai);
+  font-size: var(--lp-text-xs);
+}
+span.note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lp-space-2);
+}
+a {
+  display: inline-block;
+  min-height: var(--lp-space-6);
+}
+.proposal,
+.skeleton-lines {
+  display: grid;
+  gap: var(--lp-space-2);
+}
+.line {
+  background: var(--lp-color-surface);
+  height: var(--lp-space-3);
+  border-radius: var(--lp-radius-sm);
+}
+.long {
+  width: var(--lp-summary-skeleton-long);
+}
+.medium {
+  width: var(--lp-summary-skeleton-medium);
+}
+.short {
+  width: var(--lp-summary-skeleton-short);
+}
+.lp-button {
+  justify-self: start;
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}
+.actions,
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lp-space-2);
+}
+.proposal label {
+  display: grid;
+  gap: var(--lp-space-2);
+}
+.lp-textarea {
+  border-color: var(--lp-color-ai-border);
+}
+h3 {
+  margin: var(--lp-zero);
+}
+details summary {
+  cursor: pointer;
+}

@@ -1,5 +1,9 @@
 import { ReferenceImportPanel } from '../reference-import/reference-import-panel';
 import { ReferenceMetadataEditor } from '../reference-metadata/reference-metadata-editor';
+import { ReferenceTags } from '../reference-tags/reference-tags';
+import { ReferenceBoards } from '../reference-boards/reference-boards';
+import { ReferenceTextEditor } from '../reference-text/reference-text-editor';
+import { ReferenceSuggestionsPanel } from '../reference-suggestions/reference-suggestions-panel';
 import { computed, output } from '@angular/core';
 import {
   afterNextRender,
@@ -11,21 +15,76 @@ import {
   input,
   signal,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { REFERENCE_SERVICE, ReferenceResult, ServiceError } from 'api';
 
 @Component({
   selector: 'lp-reference-detail-panel',
-  imports: [DatePipe, ReferenceMetadataEditor, ReferenceImportPanel],
+  imports: [
+    DatePipe,
+    RouterLink,
+    ReferenceMetadataEditor,
+    ReferenceImportPanel,
+    ReferenceTags,
+    ReferenceBoards,
+    ReferenceTextEditor,
+    ReferenceSuggestionsPanel,
+  ],
   templateUrl: './reference-detail-panel.html',
   styleUrl: './reference-detail-panel.css',
 })
 export class ReferenceDetailPanel {
+  readonly photographerRequested = output<ReferenceResult>();
+  requestPhotographer(menu: HTMLDetailsElement, item: ReferenceResult): void {
+    menu.open = false;
+    this.photographerRequested.emit(item);
+  }
+  readonly boardsRequested = output<ReferenceResult>();
+  private readonly boardsPanel = viewChild(ReferenceBoards);
+  focusBoards(): void {
+    this.boardsPanel()?.focus();
+  }
+  readonly deleteRequested = output<ReferenceResult>();
+  requestDelete(menu: HTMLDetailsElement, item: ReferenceResult): void {
+    menu.open = false;
+    this.deleteRequested.emit(item);
+  }
+  readonly replaceImageRequested = output<ReferenceResult>();
+  private readonly actions = viewChild<ElementRef<HTMLElement>>('actions');
+  requestImage(menu: HTMLDetailsElement, item: ReferenceResult): void {
+    menu.open = false;
+    this.replaceImageRequested.emit(item);
+  }
+  focusActions(): void {
+    this.actions()?.nativeElement.focus();
+  }
   readonly discardRequested = output<() => void>();
   private readonly editor = viewChild(ReferenceMetadataEditor);
-  readonly dirty = computed(() => !!(this.editor()?.dirty() || this.editor()?.busy()));
-  readonly saving = computed(() => !!this.editor()?.saving());
+  private readonly tags = viewChild(ReferenceTags);
+  private readonly texts = viewChildren(ReferenceTextEditor);
+  private readonly suggestions = viewChild(ReferenceSuggestionsPanel);
+  readonly dirty = computed(() => this.metadataDirty() || !!this.suggestions()?.dirty());
+  readonly metadataDirty = computed(
+    () =>
+      !!(
+        this.editor()?.dirty() ||
+        this.editor()?.busy() ||
+        this.tags()?.dirty() ||
+        this.texts().some((editor) => editor.dirty() || editor.busy())
+      ),
+  );
+  readonly saving = computed(
+    () =>
+      !!(
+        this.editor()?.saving() ||
+        this.suggestions()?.busy() ||
+        this.tags()?.busy() ||
+        this.texts().some((editor) => editor.busy())
+      ),
+  );
   readonly id = input.required<string>();
   private readonly service = inject(REFERENCE_SERVICE);
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');

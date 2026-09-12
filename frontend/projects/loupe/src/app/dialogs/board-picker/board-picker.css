@@ -1,0 +1,42 @@
+.picker {
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+  max-height: var(--lp-picker-max);
+  overflow-y: auto;
+}
+.picker label {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-3);
+  padding: var(--lp-space-3) var(--lp-space-4);
+  font-size: var(--lp-text-sm);
+  cursor: pointer;
+}
+.picker label:hover {
+  background: var(--lp-color-surface-2);
+}
+.picker label span:nth-child(2) {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.picker input[type='checkbox'] {
+  accent-color: var(--lp-color-ink);
+}
+.count {
+  font-family: var(--lp-font-mono);
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-text-3);
+}
+.picker-new {
+  display: flex;
+  gap: var(--lp-space-2);
+  align-items: center;
+  padding: var(--lp-space-3);
+  border-top: var(--lp-hairline) solid var(--lp-color-border);
+}
+.picker-new input {
+  min-width: var(--lp-zero);
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}

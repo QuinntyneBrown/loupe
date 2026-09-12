@@ -1,0 +1,44 @@
+@if (loading()) {
+  <div class="chips" aria-label="Loading tag filters" aria-busy="true">
+    @for (tile of [1, 2, 3, 4]; track tile) {
+      <span class="lp-skeleton skeleton" aria-hidden="true"></span>
+    }
+  </div>
+} @else if (failed()) {
+  <p role="alert">Tag filters could not be loaded.</p>
+  <button type="button" class="lp-button lp-button--secondary" (click)="retry()">
+    Retry loading tags
+  </button>
+} @else if (choices().length) {
+  <div class="chips desktop" role="group" aria-label="Filter by tag">
+    @for (tag of visible(); track tag) {
+      <button
+        type="button"
+        class="lp-chip"
+        [attr.aria-pressed]="isSelected(tag)"
+        (click)="toggle(tag)"
+      >
+        {{ tag }}
+        @if (isSelected(tag)) {
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
+        }
+      </button>
+    }
+    <button type="button" class="lp-chip lp-chip--ghost" (click)="more.emit(tags())">
+      More tags
+    </button>
+  </div>
+  <button
+    type="button"
+    class="lp-chip mobile"
+    aria-label="Filter by tag"
+    [attr.aria-pressed]="selected().length > 0"
+    (click)="more.emit(tags())"
+  >
+    <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-filter" /></svg
+    >{{ selected().length ? selected().length + ' tags' : 'Filter by tag' }}
+  </button>
+}
+@if (error()) {
+  <p role="alert">{{ error() }}</p>
+}

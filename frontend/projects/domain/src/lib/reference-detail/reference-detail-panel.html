@@ -4,17 +4,73 @@
 @if (error()) {
   <h1 #heading tabindex="-1" class="lp-title">Reference</h1>
   <p role="alert">{{ error() }}</p>
-  <button type="button" class="lp-button lp-button--secondary" (click)="retry()">Retry loading reference</button>
+  <button type="button" class="lp-button lp-button--secondary" (click)="retry()">
+    Retry loading reference
+  </button>
 }
 @if (reference(); as item) {
   <div class="lp-detail">
     <div class="lp-detail__head">
       <div class="lp-detail__title-row">
         <h1 #heading tabindex="-1" class="lp-title">{{ item.title }}</h1>
+        <details #menu class="actions-menu">
+          <summary #actions class="lp-icon-button" aria-label="More actions">
+            <svg class="lp-icon" aria-hidden="true"><use href="#i-more" /></svg>
+          </summary>
+          <div class="actions-menu__list">
+            <button
+              type="button"
+              class="lp-button lp-button--ghost"
+              [disabled]="dirty()"
+              (click)="requestPhotographer(menu, item)"
+            >
+              Change photographer
+            </button>
+            <button
+              type="button"
+              class="lp-button lp-button--ghost"
+              [disabled]="dirty()"
+              (click)="requestImage(menu, item)"
+            >
+              Replace image
+            </button>
+            <button
+              type="button"
+              class="lp-button lp-button--ghost delete-action"
+              [disabled]="dirty()"
+              (click)="requestDelete(menu, item)"
+            >
+              Delete reference
+            </button>
+          </div>
+        </details>
       </div>
       <p class="lp-detail__meta">
-        Saved <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'mediumDate' }}</time>
+        @if (item.photographer; as photographer) {
+          by
+          <a class="lp-link" [routerLink]="'/photographers/' + photographer.id">{{
+            photographer.name
+          }}</a>
+        } @else {
+          <span>No photographer yet.</span
+          ><button
+            class="lp-button lp-button--ghost lp-button--sm"
+            [disabled]="dirty()"
+            (click)="photographerRequested.emit(item)"
+          >
+            Link a photographer
+          </button>
+        }
       </p>
+      <p class="lp-detail__meta">
+        Saved
+        <time [attr.datetime]="item.createdAt">{{ item.createdAt | date: 'mediumDate' }}</time>
+      </p>
+      <lp-reference-boards
+        [reference]="item"
+        [disabled]="dirty()"
+        (pickerRequested)="boardsRequested.emit($event)"
+      />
     </div>
     <div class="lp-detail__media">
       <figure>
@@ -31,6 +87,11 @@
       </figure>
     </div>
     <div class="lp-detail__body">
+      <lp-reference-suggestions
+        [reference]="item"
+        [metadataDirty]="metadataDirty()"
+        (saved)="reference.set($event)"
+      />
       <lp-reference-metadata-editor
         [reference]="item"
         (saved)="reference.set($event)"
@@ -57,10 +118,13 @@
         }
         <p class="plain-text">{{ item.attribution || 'Attribution unknown' }}</p>
       </section>
-      <section>
-        <h2 class="lp-kicker">Notes</h2>
-        <p class="plain-text">{{ item.notes || 'No notes saved.' }}</p>
-      </section>
+      <lp-reference-text-editor
+        [reference]="item"
+        field="description"
+        (saved)="reference.set($event)"
+      />
+      <lp-reference-tags [reference]="item" (saved)="reference.set($event)" />
+      <lp-reference-text-editor [reference]="item" field="notes" (saved)="reference.set($event)" />
     </div>
   </div>
 }

@@ -17,13 +17,14 @@ public sealed class RestrictedPageFetcher(IHttpClientFactory clients) : IRestric
 {
     private const int MaxRedirects = 5;
 
-    public async Task<HttpResponseMessage> FetchAsync(Uri source, CancellationToken cancellationToken)
+    public async Task<HttpResponseMessage> FetchAsync(Uri source, CancellationToken cancellationToken, Func<Uri, CancellationToken, Task>? authorize = null)
     {
         var current = source;
         for (var hop = 0; ; hop++)
         {
             ValidateSyntax(current);
             if (hop > MaxRedirects) throw new SourceFetchException(SourceFetchFailureKind.RedirectLimitExceeded);
+            if (authorize is not null) await authorize(current, cancellationToken);
             using var client = clients.CreateClient("sourceFetch");
             using var request = new HttpRequestMessage(HttpMethod.Get, current);
             HttpResponseMessage response;

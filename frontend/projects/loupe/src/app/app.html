@@ -1,20 +1,41 @@
 <a class="lp-skip" href="#main">Skip to content</a>
 @if (session.current(); as user) {
   <header class="lp-topbar">
-    <a routerLink="/my-work" class="lp-wordmark" aria-label="Loupe">L<span class="lp-wordmark__o"></span>upe</a>
+    <a routerLink="/my-work" class="lp-wordmark" aria-label="Loupe"
+      >L<span class="lp-wordmark__o"></span>upe</a
+    >
     <nav aria-label="Library" class="lp-nav">
       <a routerLink="/my-work" [attr.aria-current]="currentArea() === 'my-work' ? 'page' : null">
         <svg class="lp-icon" aria-hidden="true"><use href="#i-image" /></svg>
         <span>My Work</span>
       </a>
-      <a routerLink="/inspiration" [attr.aria-current]="currentArea() === 'inspiration' ? 'page' : null">
+      <a
+        routerLink="/inspiration"
+        [attr.aria-current]="currentArea() === 'inspiration' ? 'page' : null"
+      >
         <svg class="lp-icon" aria-hidden="true"><use href="#i-grid" /></svg>
         <span>Inspiration</span>
+      </a>
+      <a
+        routerLink="/photographers"
+        [attr.aria-current]="currentArea() === 'photographers' ? 'page' : null"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-user" /></svg>
+        <span>Photographers</span>
+      </a>
+      <a routerLink="/search" [attr.aria-current]="currentArea() === 'search' ? 'page' : null">
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-search" /></svg>
+        <span>Search</span>
       </a>
     </nav>
     <div class="lp-topbar__end">
       <span class="lp-topbar__user">{{ user.name }}</span>
-      <button type="button" class="lp-button lp-button--ghost" (click)="signOut()" [disabled]="endingSession()">
+      <button
+        type="button"
+        class="lp-button lp-button--ghost"
+        (click)="signOut()"
+        [disabled]="endingSession()"
+      >
         {{ endingSession() ? 'Signing out…' : 'Sign out' }}
       </button>
     </div>

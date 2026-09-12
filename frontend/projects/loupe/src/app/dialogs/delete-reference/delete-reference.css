@@ -1,0 +1,14 @@
+.lp-dialog__title,
+.lp-dialog__text {
+  margin: var(--lp-zero);
+}
+.lp-dialog__text {
+  margin-top: var(--lp-space-2);
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}
+section p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

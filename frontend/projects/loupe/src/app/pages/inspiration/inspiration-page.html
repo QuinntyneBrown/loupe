@@ -1,22 +1,138 @@
 <main id="main" tabindex="-1" class="lp-main">
+  <lp-unsaved-changes
+    [dirty]="dirty"
+    [warning]="
+      saveDialog()?.saving()
+        ? 'This save may finish after you leave. Check Inspiration before saving again.'
+        : null
+    "
+  />
   <div class="lp-page-header">
     <div class="lp-page-header__text">
-      <h1 class="lp-title">Inspiration</h1>
+      <div class="title-row">
+        <h1 class="lp-title">
+          {{ boardId() ? selectedBoard()?.name || 'Board unavailable' : 'Inspiration' }}
+        </h1>
+        @if (selectedBoard(); as board) {
+          <details #boardMenu class="board-menu">
+            <summary role="button" class="lp-icon-button" aria-label="Board actions">
+              <svg class="lp-icon" aria-hidden="true"><use href="#i-more" /></svg>
+            </summary>
+            <div class="board-menu__list">
+              <button type="button" (click)="boardMenu.open = false; editBoard(board)">
+                Rename board
+              </button>
+              <button type="button" (click)="boardMenu.open = false; editBoard(board, true)">
+                Delete board
+              </button>
+            </div>
+          </details>
+        }
+      </div>
       <p class="lp-page-header__sub">
-        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>
-        Private to you
+        @if (selectedBoard(); as board) {
+          {{ board.referenceCount ? board.referenceCount + ' references' : 'No references yet' }}
+        } @else if (libraryCount() !== null) {
+          {{
+            libraryCount()
+              ? libraryCount() + ' references on ' + boards().length + ' boards'
+              : 'Your reference library'
+          }}
+        }
       </p>
     </div>
     <div class="lp-page-header__actions">
-      <a class="lp-button lp-button--secondary" routerLink="/inspiration/link">
-        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-link" /></svg>
-        Save link
-      </a>
-      <a class="lp-button lp-button--primary" routerLink="/inspiration/upload">
-        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-upload" /></svg>
-        Upload reference
-      </a>
+      <button
+        type="button"
+        class="lp-button lp-button--primary"
+        (click)="savingReference.set(true)"
+      >
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-plus" /></svg>
+        Save reference
+      </button>
     </div>
   </div>
-  <lp-reference-collection />
+  <div class="inspiration-layout">
+    <lp-board-navigation
+      [selectedId]="boardId()"
+      [totalCount]="libraryCount()"
+      (loaded)="boards.set($event)"
+      (newBoard)="editBoard()"
+    />
+    <div class="reference-content">
+      <lp-reference-filters
+        [boardId]="boardId()"
+        [selected]="tags()"
+        (changed)="filterTags($event)"
+        (more)="tagDialog.set($event)"
+      />
+      <lp-reference-collection
+        [boardId]="boardId()"
+        [tags]="tags()"
+        (clearTags)="filterTags([])"
+        (saveRequested)="savingReference.set(true)"
+        [busy]="busy()"
+        (libraryCount)="libraryCount.set($event)"
+        (boardsRequested)="picker.set($event)"
+        (removeRequested)="remove($event)"
+      />
+    </div>
+  </div>
+  @if (editor(); as editor) {
+    <lp-board-dialog
+      [board]="editor.board"
+      [deleting]="editor.deleting"
+      (closed)="this.editor.set(null)"
+      (saved)="boardSaved($event)"
+    />
+  }
+  @if (savingReference()) {
+    <lp-save-reference
+      [boardId]="boardId()"
+      (closed)="savingReference.set(false)"
+      (saved)="referenceSaved($event)"
+    />
+  }
+  @if (picker(); as reference) {
+    <lp-board-picker
+      [reference]="reference"
+      (closed)="picker.set(null)"
+      (saved)="membershipSaved($event)"
+    />
+  }
+  @if (tagDialog(); as choices) {
+    <lp-tag-filters-dialog
+      [tags]="choices"
+      [selected]="tags()"
+      [boardId]="boardId()"
+      (applied)="filterTags($event)"
+      (closed)="tagDialog.set(null)"
+    />
+  }
+  @if (failure()) {
+    <p class="failure" role="alert">{{ failure() }}</p>
+  }
+  @if (notice()) {
+    <div class="notice" role="status">
+      <span>{{ notice() }}</span>
+      @if (undo()) {
+        <button
+          class="lp-button lp-button--ghost"
+          type="button"
+          (click)="undoRemoval()"
+          [disabled]="busy()"
+        >
+          Undo
+        </button>
+      }
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Dismiss notification"
+        (click)="notice.set(''); undo.set(null)"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </div>
+  }
 </main>

@@ -21,7 +21,7 @@ for(const optional of [false,true]) test(`L2-009.1/2: save reference with option
   await upload.save(); await expect.poll(()=>inspiration.library.items.length).toBe(1);
   await detail.expectSaved(inspiration.library.items[0]); await page.reload(); await signIn.continue(); await detail.expectSaved(inspiration.library.items[0]);
   expect(inspiration.library.items[0].title).toBe(optional?'Morning light':'Morning');
-  expect(work.library.photos).toHaveLength(0); expect(inspiration.library.calls.every(call=>['list','get','upload'].includes(call))).toBe(true);
+  expect(work.library.photos).toHaveLength(0); expect(inspiration.library.calls.every(call=>['list','get','tags','upload'].includes(call))).toBe(true);
 });
 for(const [field,maximum] of [['title',200],['sourceUrl',2048],['attribution',200],['notes',10000]]) test(`L2-009.4: ${field} rejects excess characters before saving`,async({page})=>{
   const {inspiration,upload}=await setup(page); await upload.chooseImage(); await upload.fill({[field]:'x'.repeat(maximum+1)});

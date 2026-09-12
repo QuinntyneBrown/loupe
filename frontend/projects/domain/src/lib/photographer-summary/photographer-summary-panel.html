@@ -1,0 +1,275 @@
+<section
+  class="summary"
+  aria-labelledby="summary-title"
+  [attr.aria-busy]="active() || loading()"
+  [class.quiet]="!!unavailable()"
+>
+  <header>
+    <h2 #heading tabindex="-1" class="lp-kicker lp-kicker--ai" id="summary-title">Summary</h2>
+    @if (suggestions(); as value) {
+      <span class="note">{{ value.mode }} · {{ value.createdAt | date: 'd MMM yyyy' }}</span>
+    }
+    @if (active()) {
+      <span class="note" role="status"
+        ><span class="lp-spinner" aria-hidden="true"></span>Reading the site…</span
+      >
+    }
+  </header>
+  @if (loadFailed()) {
+    <p role="alert">Couldn't load the summary status.</p>
+    <button class="lp-button lp-button--secondary lp-button--sm" (click)="load()">Try again</button>
+  } @else if (active() || loading()) {
+    <div class="skeleton-lines" aria-hidden="true">
+      <div class="lp-skeleton line long"></div>
+      <div class="lp-skeleton line medium"></div>
+      <div class="lp-skeleton line short"></div>
+    </div>
+    <p class="note">Usually under a minute. Only the bookmarked page Loupe can reach is read.</p>
+  } @else if (unavailable()) {
+    <p>{{ unavailable() }}</p>
+  } @else if (operation()?.status === 'Failed') {
+    <p role="alert">
+      {{
+        operation()?.failureCode === 'analysis_limit'
+          ? 'Your photographer is saved. Too many operations are active; try again when one finishes.'
+          : "Couldn't summarise the site this time. The page was reachable; the summary step failed."
+      }}
+    </p>
+    <button
+      class="lp-button lp-button--secondary lp-button--sm"
+      [disabled]="busy() || metadataDirty() || conflicted() || retryWaiting()"
+      (click)="request()"
+    >
+      Try again
+    </button>
+    @if (retryWaiting()) {
+      <p class="note">Retry available {{ operation()?.retryAvailableAt | date: 'shortTime' }}.</p>
+    }
+  }
+  @if (suggestions(); as value) {
+    @if (value.summaryStatus === 'pending') {
+      <div class="proposal">
+        <p class="note">
+          {{ previous() ? 'Suggestion from the previous portfolio URL' : 'Suggested summary' }}
+        </p>
+        <label
+          ><span class="lp-label">Suggested summary</span>
+          <textarea
+            class="lp-textarea"
+            rows="4"
+            [ngModel]="summaryDraft()"
+            (ngModelChange)="summaryDraft.set($event)"
+            [disabled]="busy() || previous()"
+            [attr.aria-invalid]="summaryInvalid()"
+          ></textarea>
+        </label>
+        @if (summaryInvalid()) {
+          <p class="note">Use 1 to 4,000 characters without null characters.</p>
+        }
+        <div class="actions">
+          <button
+            class="lp-button lp-button--secondary lp-button--sm"
+            [disabled]="reviewDisabled() || summaryInvalid()"
+            (click)="review('summary', 'accept')"
+          >
+            Accept summary
+          </button>
+          <button
+            class="lp-button lp-button--ghost lp-button--sm"
+            [disabled]="reviewDisabled()"
+            (click)="review('summary', 'dismiss')"
+          >
+            Dismiss summary
+          </button>
+          @if (summaryEdited()) {
+            <button
+              class="lp-button lp-button--ghost lp-button--sm"
+              [disabled]="busy()"
+              (click)="summaryDraft.set(value.summary ?? '')"
+            >
+              Cancel edits
+            </button>
+          }
+        </div>
+      </div>
+    }
+    @for (group of groups(); track group.category) {
+      <div class="proposal">
+        <h3 class="lp-kicker">{{ group.category | titlecase }}</h3>
+        <div class="tag-list">
+          @for (tag of group.tags; track tag.name) {
+            <span class="lp-tag lp-tag--ai"
+              >{{ tag.name }}
+              <button
+                class="lp-tag__action"
+                [attr.aria-label]="'Accept tag ' + tag.name"
+                [disabled]="reviewDisabled()"
+                (click)="review('tag', 'accept', tag)"
+              >
+                <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-check" /></svg>
+              </button>
+              <button
+                class="lp-tag__action"
+                [attr.aria-label]="'Edit tag ' + tag.name"
+                [disabled]="reviewDisabled()"
+                (click)="editTag(tag)"
+              >
+                <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-edit" /></svg>
+              </button>
+              <button
+                class="lp-tag__action"
+                [attr.aria-label]="'Dismiss tag ' + tag.name"
+                [disabled]="reviewDisabled()"
+                (click)="review('tag', 'dismiss', tag)"
+              >
+                <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
+              </button>
+            </span>
+          }
+        </div>
+      </div>
+    }
+    @if (editingTag(); as tag) {
+      <div class="proposal">
+        <label
+          ><span class="lp-label">Suggested tag</span
+          ><input
+            #tagField
+            class="lp-input"
+            [ngModel]="tagName()"
+            (ngModelChange)="tagName.set($event)"
+            [disabled]="busy()"
+            [attr.aria-invalid]="tagInvalid()"
+        /></label>
+        <label
+          ><span class="lp-label">Suggested category</span
+          ><select
+            class="lp-input"
+            [ngModel]="tagCategory()"
+            (ngModelChange)="tagCategory.set($event)"
+            [disabled]="busy()"
+          >
+            @for (category of categories; track category) {
+              <option [value]="category">{{ category | titlecase }}</option>
+            }
+          </select></label
+        >
+        <div class="actions">
+          <button
+            class="lp-button lp-button--secondary lp-button--sm"
+            [disabled]="reviewDisabled() || tagInvalid()"
+            (click)="review('tag', 'accept', tag, true)"
+          >
+            Accept edited tag</button
+          ><button
+            class="lp-button lp-button--ghost lp-button--sm"
+            [disabled]="busy()"
+            (click)="cancelTag()"
+          >
+            Cancel tag edit
+          </button>
+        </div>
+      </div>
+    }
+    @if (pending()) {
+      <div class="actions">
+        <button
+          class="lp-button lp-button--secondary lp-button--sm"
+          [disabled]="
+            reviewDisabled() ||
+            !!editingTag() ||
+            (value.summaryStatus === 'pending' && summaryInvalid())
+          "
+          (click)="review('all', 'accept')"
+        >
+          Accept all</button
+        ><button
+          class="lp-button lp-button--ghost lp-button--sm"
+          [disabled]="reviewDisabled() || !!editingTag()"
+          (click)="review('all', 'dismiss')"
+        >
+          Dismiss all
+        </button>
+      </div>
+    } @else {
+      <details>
+        <summary>Reviewed suggestions</summary>
+        <p class="note">Summary: {{ value.summaryStatus }}</p>
+        @for (tag of value.tags; track tag.name) {
+          <p class="note">{{ tag.name }} · {{ tag.state }}</p>
+        }
+      </details>
+    }
+    <p class="note">
+      <a
+        [href]="value.source.fetchedUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        referrerpolicy="no-referrer"
+        >Source page</a
+      >
+      · {{ value.source.retrievedAt | date: 'd MMM yyyy' }}
+    </p>
+    <p class="note">Only the page Loupe could read was used. Nothing behind a login.</p>
+  }
+  @if (photographer().summary) {
+    @if (suggestions() || active() || operation()?.status === 'Failed') {
+      <p class="note">Saved description</p>
+    }
+    <p>{{ photographer().summary }}</p>
+  } @else if (!operation() && !loading() && !suggestions()) {
+    <p>No summary available. Your notes and tags still help you find this bookmark.</p>
+  }
+  @if (photographer().source; as source) {
+    @if (!suggestions()) {
+      <p class="note">
+        <a
+          [href]="source.fetchedUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          referrerpolicy="no-referrer"
+          >{{ photographer().sourceIsCurrent ? 'Captured page' : 'Previous captured page' }}</a
+        >
+        · {{ source.retrievedAt | date: 'd MMM yyyy' }}
+      </p>
+    }
+  }
+  @if (error()) {
+    <p role="alert">{{ error() }}</p>
+  }
+  @if (notice()) {
+    <div class="actions" role="status">
+      <span>{{ notice() }}</span>
+      @if (undoRevision() !== null) {
+        <button
+          class="lp-button lp-button--ghost lp-button--sm"
+          [disabled]="busy() || metadataDirty()"
+          (click)="undo()"
+        >
+          Undo
+        </button>
+      }
+    </div>
+  }
+  @if (conflicted()) {
+    <button
+      class="lp-button lp-button--secondary lp-button--sm"
+      [disabled]="busy() || metadataDirty()"
+      (click)="reviewLatest()"
+    >
+      Review latest bookmark
+    </button>
+  }
+  @if (!operation() && !loading() && !loadFailed()) {
+    <button
+      class="lp-button lp-button--secondary lp-button--sm"
+      [disabled]="busy() || metadataDirty() || conflicted()"
+      (click)="request()"
+    >
+      Generate summary
+    </button>
+  }
+  @if (!loading() && !loadFailed() && (!operation() || operation()?.status === 'Failed')) {
+    <p class="note">Azure OpenAI receives the captured page title, description and main text to suggest a summary and tags. Your private notes are not sent.</p>
+  }
+</section>

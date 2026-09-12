@@ -1,4 +1,7 @@
 using Loupe.Application.ReferenceImports;
+using Loupe.Application.ReferenceAnalysis;
+using Loupe.Application.Photographers;
+using Loupe.Application.Boards;
 using Loupe.Infrastructure.ReferenceImports;
 using Loupe.Application.Sessions;
 using Loupe.Application.Photographs;
@@ -25,6 +28,31 @@ public static class PersistenceSetup
         services.AddScoped<ISessionStore, SessionStore>();
         services.AddScoped<IPhotographStore, PhotographStore>();
         services.AddScoped<IReferenceStore, ReferenceStore>();
+        services.AddScoped<IPhotographerStore, PhotographerStore>();
+        services.AddScoped<Loupe.Application.Search.ISearchStore, SearchStore>();
+        services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSummaryStore, PhotographerSummaryStore>();
+        services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSummaryQueue, PhotographerSummaryQueue>();
+        services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSuggestionStore, PhotographerSuggestionStore>();
+        services.AddSingleton<Loupe.Application.PhotographerSummaries.IPhotographerSummaryConfiguration, PhotographerSummaryConfiguration>();
+        services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSummaryProvider, AzureOpenAiPhotographerSummaryProvider>();
+        services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSummaryWorkStore, PhotographerSummaryWorkStore>();
+        services.AddScoped<Loupe.Application.PhotographerDrafts.IPhotographerDraftStore, PhotographerDraftStore>();
+        services.AddScoped<Loupe.Application.PhotographerImports.IPhotographerImportWorkStore, PhotographerImportWorkStore>();
+        services.AddScoped<Loupe.Application.PhotographerImports.IPortfolioSourceReader, Loupe.Infrastructure.PhotographerImports.PortfolioSourceReader>();
+        services.AddScoped<IReferencePhotographerStore, ReferencePhotographerStore>();
+        services.AddSingleton<IPortfolioUrlPolicy, PortfolioUrlPolicy>();
+        services.AddScoped<IReferenceImageStore, ReferenceImageStore>();
+        services.AddScoped<IReferenceTextStore, ReferenceTextStore>();
+        services.AddScoped<IReferenceAnalysisStore, ReferenceAnalysisStore>();
+        services.AddScoped<IReferenceAnalysisQueue, ReferenceAnalysisQueue>();
+        services.AddScoped<IReferenceSuggestionStore, ReferenceSuggestionStore>();
+        services.AddScoped<IReferenceAnalysisWorkStore, ReferenceAnalysisWorkStore>();
+        services.AddScoped<IReferenceAnalysisProvider, AzureOpenAiReferenceAnalysisProvider>();
+        services.AddScoped<IAnalysisFailureStore, AnalysisFailureStore>();
+        services.AddSingleton<IReferenceAnalysisConfiguration, ReferenceAnalysisConfiguration>();
+        services.AddScoped<Loupe.Application.ReferenceDrafts.IReferenceDraftStore, ReferenceDraftStore>();
+        services.AddScoped<IReferenceTagStore, ReferenceTagStore>();
+        services.AddScoped<IBoardStore, BoardStore>();
         services.AddScoped<IReferenceImportStore, ReferenceImportStore>();
         services.AddSingleton<IReferenceImportConfiguration, ReferenceImportConfiguration>();
         services.AddOptions<ReferenceImportOptions>().BindConfiguration("Imports")
@@ -32,6 +60,9 @@ public static class PersistenceSetup
         services.AddSingleton<IDnsResolver, DnsResolver>();
         services.AddSingleton<ISourceConnector, SocketSourceConnector>();
         services.AddScoped<IRestrictedPageFetcher, RestrictedPageFetcher>();
+        services.AddScoped<IRobotsPolicy, RobotsPolicy>();
+        services.AddScoped<IReferenceSourceReader, ReferenceSourceReader>();
+        services.AddScoped<IReferenceImportWorkStore, ReferenceImportWorkStore>();
         services.AddHttpClient("sourceFetch", client =>
             {
                 client.Timeout = TimeSpan.FromSeconds(30);
@@ -41,6 +72,7 @@ public static class PersistenceSetup
             {
                 AllowAutoRedirect = false,
                 UseCookies = false,
+                UseProxy = false,
                 ConnectTimeout = TimeSpan.FromSeconds(10),
                 ConnectCallback = async (context, cancellationToken) =>
                 {

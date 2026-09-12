@@ -1,0 +1,30 @@
+<section aria-label="Boards" class="lp-detail__actions">
+  <button
+    #button
+    type="button"
+    class="lp-button lp-button--primary"
+    [disabled]="disabled()"
+    (click)="pickerRequested.emit(reference())"
+  >
+    <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-board" /></svg>Add to boards
+  </button>
+  @if (failed()) {
+    <span role="alert">Boards could not be loaded.</span
+    ><button type="button" class="lp-link" (click)="retry()">Try again</button>
+  } @else if (loading()) {
+    <span class="lp-faint lp-small">Loading boards…</span>
+  } @else if (memberships().length) {
+    <div class="lp-tags">
+      @for (board of memberships(); track board.id) {
+        <a
+          class="lp-tag lp-tag--plain"
+          routerLink="/inspiration"
+          [queryParams]="{ boardId: board.id }"
+          >{{ board.name }}</a
+        >
+      }
+    </div>
+  } @else {
+    <span class="lp-faint lp-small">Not on any board</span>
+  }
+</section>

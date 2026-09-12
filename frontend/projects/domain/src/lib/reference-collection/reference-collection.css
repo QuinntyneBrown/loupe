@@ -4,17 +4,26 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(
-    var(--lp-image-columns),
-    minmax(var(--lp-zero), var(--lp-fraction))
+    auto-fill,
+    minmax(min(var(--lp-full), var(--lp-tile-min)), var(--lp-fraction))
   );
-  gap: var(--lp-space-6);
+  gap: var(--lp-space-5) var(--lp-space-4);
 }
-[role='alert'] {
-  color: var(--lp-color-danger);
+.lp-empty h2,
+.lp-empty p {
+  margin: var(--lp-zero);
+}
+.lp-empty--compact {
+  margin-block: var(--lp-space-8);
 }
 p[role='status'] {
   color: var(--lp-color-text-2);
 }
 .grid + .lp-button {
   margin-top: var(--lp-space-6);
+}
+@media (width < 640px) {
+  .grid {
+    gap: var(--lp-space-3);
+  }
 }

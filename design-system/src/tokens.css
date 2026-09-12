@@ -62,6 +62,8 @@
   --lp-example-height: 3rem;
   --lp-dialog-height: 90dvh;
   --lp-study-ratio: 4 / 3;
+  --lp-reference-ratio: 4 / 5;
+  --lp-image-caption-opacity: 0.85;
   --lp-study-circle: 40%;
   --lp-study-offset: 28%;
   --lp-no-duration: 0s;
@@ -110,6 +112,11 @@
   --lp-space-7: 32px;
   --lp-space-8: 40px;
   --lp-space-9: 48px;
+  --lp-tag-skeleton-width: 110px;
+  --lp-summary-skeleton-long: 95%;
+  --lp-summary-skeleton-medium: 88%;
+  --lp-summary-skeleton-short: 60%;
+  --lp-tag-input-min: 10ch;
   --lp-space-10: 64px;
   --lp-space-11: 96px;
   --lp-space-12: 128px;
@@ -173,6 +180,7 @@
   --lp-avatar-size: 32px;
   --lp-thumb-size: 48px;
   --lp-thumb-size-sm: 36px;
+  --lp-thumb-size-lg: 96px;
   --lp-tile-min: 220px;
   --lp-card-min: 300px;
   --lp-loupe-size: 56px;

@@ -176,6 +176,34 @@ button:disabled {
   font-family: var(--lp-font-mono);
 }
 
+.lp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lp-space-2);
+  height: var(--lp-control-height-sm);
+  min-height: var(--lp-control-height-sm);
+  padding: var(--lp-zero) var(--lp-space-3);
+  border-radius: var(--lp-radius-full);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  background: var(--lp-color-surface);
+  color: var(--lp-color-text-2);
+  font-size: var(--lp-text-sm);
+  white-space: nowrap;
+  flex: none;
+}
+.lp-chip:hover {
+  border-color: var(--lp-color-border-strong);
+  color: var(--lp-color-text);
+  background: var(--lp-color-surface);
+}
+.lp-chip[aria-pressed='true'] {
+  background: var(--lp-color-ink);
+  border-color: var(--lp-color-ink);
+  color: var(--lp-color-on-ink);
+}
+.lp-chip--ghost {
+  border-style: dashed;
+}
 .lp-tag {
   display: inline-flex;
   align-items: center;

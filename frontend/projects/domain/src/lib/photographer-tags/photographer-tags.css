@@ -1,0 +1,55 @@
+:host {
+  display: block;
+}
+section {
+  display: grid;
+  gap: var(--lp-space-3);
+}
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lp-space-3);
+}
+.lp-subheading {
+  font-size: var(--lp-text-md);
+  font-weight: var(--lp-weight-medium);
+}
+.status {
+  font-family: var(--lp-font-mono);
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-success);
+}
+.failed,
+[role='alert'] {
+  color: var(--lp-color-danger);
+}
+.chip-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lp-space-2);
+  align-items: center;
+  min-height: var(--lp-control-height);
+  padding: var(--lp-space-1) var(--lp-space-2);
+  border: var(--lp-hairline) solid var(--lp-color-border-strong);
+  border-radius: var(--lp-radius-md);
+}
+.chip-input:focus-within {
+  border-color: var(--lp-color-focus);
+  box-shadow: var(--lp-zero) var(--lp-zero) var(--lp-zero) var(--lp-ring-width) var(--lp-color-ring);
+}
+.chip-input input {
+  flex: var(--lp-fraction);
+  min-width: var(--lp-space-12);
+  height: var(--lp-control-height-xs);
+  border: var(--lp-zero);
+  background: none;
+  padding: var(--lp-zero) var(--lp-space-1);
+  font: inherit;
+  font-size: var(--lp-text-sm);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lp-space-2);
+}

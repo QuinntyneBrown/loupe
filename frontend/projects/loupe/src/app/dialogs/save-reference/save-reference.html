@@ -1,0 +1,316 @@
+<dialog #modal class="lp-dialog" aria-labelledby="save-reference-title" (cancel)="cancel($event)">
+  <form class="lp-dialog__panel" (ngSubmit)="phase() === 'form' ? preview() : save()">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="save-reference-title">{{ heading() }}</h2>
+        @if (phase() === 'importing') {
+          <p class="lp-dialog__text">
+            Reading the page for the image and attribution. This usually takes a few seconds.
+          </p>
+        }
+        @if (phase() === 'preview') {
+          <p class="lp-dialog__text">
+            {{
+              sourceHost()
+                ? 'Found on ' + sourceHost() + '. Check the details.'
+                : 'Check the details before saving.'
+            }}
+          </p>
+        }
+        @if (phase() === 'duplicate') {
+          <p class="lp-dialog__text">
+            This link is already in your library. Saving it again won't create a second copy.
+          </p>
+        }
+      </div>
+      <button
+        type="button"
+        class="lp-icon-button"
+        aria-label="Close"
+        [disabled]="closing() || saving()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body" [attr.aria-busy]="busy() || saving()">
+      @if (phase() === 'importing') {
+        <div role="status" class="import-progress">
+          <progress aria-label="Import progress"></progress>
+          <div>
+            <span>{{ sourceHost() }}</span
+            ><span>{{ draft()?.import?.message || 'Fetching image' }}</span>
+          </div>
+        </div>
+        @if (error()) {
+          <button type="button" class="lp-button lp-button--secondary" (click)="poll()">
+            Try again
+          </button>
+        }
+      } @else if (phase() === 'duplicate') {
+        <p class="lp-subheading">{{ draft()?.title }}</p>
+      } @else if (phase() === 'failed') {
+        <div class="fallback" role="status">
+          <strong>{{ sourceHost() }} could not be imported.</strong>
+          <p>Save the link anyway and add an image or notes yourself. The source stays attached.</p>
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="failed-source">Link</label
+          ><input id="failed-source" class="lp-input" [value]="draft()?.sourceUrl" readonly />
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="failed-title">Title</label
+          ><input
+            id="failed-title"
+            class="lp-input"
+            name="title"
+            [ngModel]="title()"
+            (ngModelChange)="title.set($event)"
+            [disabled]="saving()"
+          />
+        </div>
+        <label class="upload upload--compact"
+          ><svg class="lp-icon" aria-hidden="true"><use href="#i-upload" /></svg
+          ><span>Add an image <span class="lp-field__optional">optional</span></span
+          ><input
+            class="visually-hidden"
+            type="file"
+            aria-label="Add an image"
+            accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
+            [disabled]="busy() || saving()"
+            (change)="addImage($event)"
+        /></label>
+        <div class="lp-field">
+          <label class="lp-field__label" for="failed-notes"
+            >Notes <span class="lp-field__optional">optional</span></label
+          ><textarea
+            id="failed-notes"
+            class="lp-textarea"
+            name="notes"
+            [ngModel]="notes()"
+            (ngModelChange)="notes.set($event)"
+            [disabled]="saving()"
+            placeholder="What drew you to it?"
+          ></textarea>
+        </div>
+      } @else if (phase() === 'preview') {
+        <div class="preview">
+          @if (draft()?.previewUrl) {
+            <img [src]="draft()?.previewUrl" alt="Preview of the reference image" />
+          }
+          <div class="fields">
+            <div class="lp-field">
+              <label class="lp-field__label" for="draft-title">Title</label
+              ><input
+                id="draft-title"
+                class="lp-input"
+                name="title"
+                [ngModel]="title()"
+                (ngModelChange)="title.set($event)"
+                [disabled]="saving()"
+              />
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="draft-photographer">Photographer</label
+              ><input
+                id="draft-photographer"
+                class="lp-input"
+                name="photographer"
+                [ngModel]="photographer()"
+                (ngModelChange)="photographer.set($event)"
+                [disabled]="saving()"
+              />
+              <p class="lp-field__hint">
+                {{
+                  sourceKind() === 'link'
+                    ? "Detected from the page. Edit it if it's wrong."
+                    : "Add the photographer's name if you know it."
+                }}
+              </p>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="segmented" role="radiogroup" aria-label="Where is the image?">
+          <label
+            ><input
+              type="radio"
+              name="sourceKind"
+              value="link"
+              [ngModel]="sourceKind()"
+              (ngModelChange)="sourceKind.set($event)"
+              [disabled]="busy()"
+            /><span
+              ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-link" /></svg>From
+              a link</span
+            ></label
+          >
+          <label
+            ><input
+              type="radio"
+              name="sourceKind"
+              value="upload"
+              [ngModel]="sourceKind()"
+              (ngModelChange)="sourceKind.set($event)"
+              [disabled]="busy()"
+            /><span
+              ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-upload" /></svg
+              >Upload an image</span
+            ></label
+          >
+        </div>
+        @if (sourceKind() === 'link') {
+          <div class="lp-field">
+            <label class="lp-field__label" for="draft-link">Link to the photograph</label
+            ><input
+              id="draft-link"
+              type="url"
+              class="lp-input"
+              name="sourceUrl"
+              [ngModel]="source()"
+              (ngModelChange)="source.set($event)"
+              placeholder="https://"
+              autofocus
+            />
+            <p class="lp-field__hint">
+              Loupe fetches the image and the photographer's name from the page.
+            </p>
+          </div>
+        } @else {
+          <label class="upload"
+            ><svg class="lp-icon" aria-hidden="true"><use href="#i-upload" /></svg
+            ><span>{{ file()?.name || 'Drop an image here, or browse' }}</span
+            ><span class="lp-field__hint">JPEG, PNG, HEIC or WebP, up to 25 MB</span
+            ><input
+              class="visually-hidden"
+              type="file"
+              aria-label="Choose an image"
+              accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
+              (change)="choose($event)"
+              [disabled]="busy()"
+          /></label>
+          <div class="lp-field">
+            <label class="lp-field__label" for="draft-source"
+              >Where is it from? <span class="lp-field__optional">optional</span></label
+            ><input
+              id="draft-source"
+              type="url"
+              class="lp-input"
+              name="sourceUrl"
+              [ngModel]="source()"
+              (ngModelChange)="source.set($event)"
+              [disabled]="busy()"
+              placeholder="https://"
+            />
+          </div>
+        }
+      }
+      @if (phase() === 'preview') {
+        <fieldset class="board-picker">
+          <legend class="lp-field__label">
+            Boards <span class="lp-field__optional">optional</span>
+          </legend>
+          <div class="board-list">
+            @if (loadingBoards()) {
+              <p role="status">Loading boards…</p>
+            }
+            @for (board of boards(); track board.id) {
+              <label class="board-choice"
+                ><input
+                  type="checkbox"
+                  [attr.aria-label]="board.name"
+                  [checked]="selectedBoards().includes(board.id)"
+                  (change)="toggleBoard(board.id)"
+                  [disabled]="saving() || busy()"
+                /><span>{{ board.name }}</span
+                ><span class="board-count">{{ board.referenceCount }}</span></label
+              >
+            }
+            <div class="board-new">
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-plus" /></svg
+              ><input
+                class="lp-input"
+                name="newBoardName"
+                aria-label="New board name"
+                placeholder="New board"
+                [ngModel]="newBoardName()"
+                (ngModelChange)="newBoardName.set($event)"
+                [disabled]="saving() || busy()"
+              />
+            </div>
+          </div>
+        </fieldset>
+        <p class="lp-field__hint">
+          Boards are listed alphabetically. Tags and a description are suggested after saving; you
+          review them before they apply.
+        </p>
+      }
+      @if ((phase() === 'preview' || phase() === 'failed') && boardError()) {
+        <p role="alert">{{ boardError() }}</p>
+        <button type="button" class="lp-button lp-button--secondary" (click)="loadBoards()">
+          Try loading boards again
+        </button>
+      }
+      @if (busy() && phase() !== 'importing') {
+        <progress
+          aria-label="Upload progress"
+          [attr.value]="progress()?.total ? progress()?.transferred : null"
+          [attr.max]="progress()?.total || null"
+        ></progress>
+        <p role="status">Preparing preview…</p>
+      }
+      @if (saving()) {
+        <p role="status">Saving reference…</p>
+      }
+      @if (error()) {
+        <p role="alert">{{ error() }}</p>
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      @if (phase() !== 'importing' && phase() !== 'duplicate') {
+        <span class="lp-dialog__privacy"
+          ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>Private.
+          Only you can see this.</span
+        >
+      }
+      <button
+        type="button"
+        class="lp-button lp-button--secondary"
+        [disabled]="closing() || saving() || (phase() === 'preview' && busy())"
+        (click)="phase() === 'preview' ? back() : cancel()"
+      >
+        {{ phase() === 'duplicate' ? 'Close' : phase() === 'preview' ? 'Back' : 'Cancel' }}
+      </button>
+      @if (phase() === 'duplicate') {
+        <a
+          class="lp-button lp-button--primary"
+          [routerLink]="['/inspiration', draft()?.committedReferenceId]"
+          >View reference</a
+        >
+      } @else if (phase() !== 'importing') {
+        <button
+          type="submit"
+          class="lp-button lp-button--primary"
+          [disabled]="
+            busy() ||
+            closing() ||
+            saving() ||
+            ((phase() === 'preview' || phase() === 'failed') &&
+              (loadingBoards() || !!boardError())) ||
+            (phase() === 'form' && (sourceKind() === 'upload' ? !file() : !source().trim()))
+          "
+        >
+          {{
+            phase() === 'form'
+              ? sourceKind() === 'link'
+                ? 'Import'
+                : 'Continue'
+              : phase() === 'failed'
+                ? 'Save link'
+                : 'Save'
+          }}
+        </button>
+      }
+    </footer>
+  </form>
+</dialog>

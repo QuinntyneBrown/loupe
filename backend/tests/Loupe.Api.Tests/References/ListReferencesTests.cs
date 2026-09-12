@@ -12,6 +12,23 @@ namespace Loupe.Api.Tests.References;
 public sealed class ListReferencesTests(PostgreSqlFixture database) : IClassFixture<PostgreSqlFixture>
 {
     [Fact]
+    public async Task L2_012_Cards_include_owned_source_and_attribution_without_detail_reads()
+    {
+        await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot);
+        using var owner = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
+        using var upload = await ReferenceFixture.SubmitAsync(owner, new Dictionary<string, string>
+        {
+            ["attribution"] = "Mara Lindqvist",
+            ["sourceUrl"] = "https://example.com/photograph"
+        });
+        upload.EnsureSuccessStatusCode();
+        var page = await owner.GetFromJsonAsync<JsonElement>("/api/references");
+        var item = Assert.Single(page.GetProperty("items").EnumerateArray());
+        Assert.Equal("Mara Lindqvist", item.GetProperty("attribution").GetString());
+        Assert.Equal("https://example.com/photograph", item.GetProperty("sourceUrl").GetString());
+    }
+
+    [Fact]
     public async Task L2_009_1_012_1_References_page_in_stable_order_separately_from_My_Work_and_other_owners()
     {
         await using var factory = new ApiFactory(database.ConnectionString, database.MediaRoot);

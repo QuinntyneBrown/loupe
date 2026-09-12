@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lp-space-2);
+}
+.skeleton {
+  width: var(--lp-tag-skeleton-width);
+  height: var(--lp-control-height-sm);
+  border-radius: var(--lp-radius-full);
+}
+.mobile {
+  display: none;
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}
+@media (width < 640px) {
+  .desktop {
+    display: none;
+  }
+  .mobile {
+    display: inline-flex;
+  }
+}

@@ -1,4 +1,5 @@
 using Loupe.Application.References;
+using Loupe.Application.ReferenceAnalysis;
 using Loupe.Application.Common;
 using Loupe.Domain.References;
 using Microsoft.EntityFrameworkCore;
@@ -8,8 +9,14 @@ using System.Text.Json;
 
 namespace Loupe.Infrastructure.Persistence;
 
-public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
+public sealed class ReferenceStore(LibraryDbContext database, IReferenceAnalysisQueue analysis) : IReferenceStore
 {
+    public Task<Reference?> FindSourceOwnedAsync(string ownerId, string source, CancellationToken cancellationToken) =>
+        database.References.FromSqlInterpolated($"""
+            SELECT * FROM "references" WHERE "OwnerId" = {ownerId} AND "SourceHash" = md5(loupe_normalize_source({source}))
+              AND loupe_normalize_source("SourceUrl") = loupe_normalize_source({source})
+            """).AsNoTracking().Include(item => item.Boards).Include(item => item.Tags)
+            .OrderBy(item => item.CreatedAt).ThenBy(item => item.Id).FirstOrDefaultAsync(cancellationToken);
     public async Task<Reference> SaveSourceAsync(Reference reference, CancellationToken cancellationToken)
     {
         var source = await LockSourceAsync(reference.OwnerId, reference.SourceUrl, cancellationToken)
@@ -17,9 +24,10 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
         var existing = await database.References.FromSqlInterpolated($"""
             SELECT * FROM "references" WHERE "OwnerId" = {reference.OwnerId} AND "SourceHash" = {source.Hash}
               AND loupe_normalize_source("SourceUrl") = {source.NormalizedSource}
-            """).OrderBy(item => item.CreatedAt).ThenBy(item => item.Id).FirstOrDefaultAsync(cancellationToken);
+            """).Include(item => item.Boards).Include(item => item.Tags).OrderBy(item => item.CreatedAt).ThenBy(item => item.Id).FirstOrDefaultAsync(cancellationToken);
         if (existing is not null) return existing;
         database.References.Add(reference);
+        await analysis.QueueIfConfiguredAsync(reference, cancellationToken);
         await database.SaveChangesAsync(cancellationToken);
         return reference;
     }
@@ -41,7 +49,7 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         await LockSourceAsync(ownerId, metadata.SourceUrl, cancellationToken);
-        var reference = await database.References.SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken)
+        var reference = await database.References.Include(item => item.Boards).Include(item => item.Tags).SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken)
             ?? throw new ResourceNotFoundException();
         if (reference.Revision != revision) throw new RevisionConflictException();
         reference.Title = metadata.Title;
@@ -55,22 +63,34 @@ public sealed class ReferenceStore(LibraryDbContext database) : IReferenceStore
         return reference;
     }
 
-    public async Task<IReadOnlyList<ReferenceSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, CancellationToken cancellationToken)
+    private IQueryable<Reference> Filtered(string ownerId, Guid? boardId, string[] tags)
     {
-        var query = database.References.AsNoTracking().Where(reference => reference.OwnerId == ownerId);
+        var query = database.References.AsNoTracking()
+            .Where(reference => reference.OwnerId == ownerId && (boardId == null || reference.Boards.Any(item => item.BoardId == boardId)));
+        foreach (var tag in tags) query = query.Where(reference => reference.Tags.Any(item => item.NormalizedName == tag));
+        return query;
+    }
+
+    public Task<int> CountAsync(string ownerId, Guid? boardId, string[] tags, CancellationToken cancellationToken) => Filtered(ownerId, boardId, tags).CountAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<ReferenceSummary>> ListAsync(string ownerId, int count, CreatedCursor? cursor, Guid? boardId, string[] tags, CancellationToken cancellationToken)
+    {
+        var query = Filtered(ownerId, boardId, tags);
         if (cursor is not null) query = query.Where(reference => reference.CreatedAt < cursor.CreatedAt
             || reference.CreatedAt == cursor.CreatedAt && reference.Id.CompareTo(cursor.Id) > 0);
         return await query.OrderByDescending(reference => reference.CreatedAt).ThenBy(reference => reference.Id).Take(count)
             .Select(reference => new ReferenceSummary(reference.Id, reference.Title, reference.CreatedAt,
-                reference.Width, reference.Height, reference.PreviewKey == null ? null : $"/api/references/{reference.Id}/preview"))
+                reference.Width, reference.Height, reference.PreviewKey == null ? null : $"/api/references/{reference.Id}/preview" + (reference.ImageRevision > 1 ? $"?v={reference.ImageRevision}" : ""),
+                reference.SourceUrl, reference.Attribution))
             .ToListAsync(cancellationToken);
     }
     public async Task SaveAsync(Reference reference, CancellationToken cancellationToken)
     {
         await LockSourceAsync(reference.OwnerId, reference.SourceUrl, cancellationToken);
         database.References.Add(reference);
+        await analysis.QueueIfConfiguredAsync(reference, cancellationToken);
         await database.SaveChangesAsync(cancellationToken);
     }
     public Task<Reference?> FindOwnedAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>
-        database.References.AsNoTracking().SingleOrDefaultAsync(reference => reference.Id == id && reference.OwnerId == ownerId, cancellationToken);
+        database.References.AsNoTracking().Include(item => item.Boards).Include(item => item.Tags).SingleOrDefaultAsync(reference => reference.Id == id && reference.OwnerId == ownerId, cancellationToken);
 }

@@ -1,0 +1,294 @@
+<section
+  class="lp-ai-block"
+  [class.lp-ai-block--quiet]="!pending()"
+  aria-labelledby="suggestions-title"
+  [attr.aria-busy]="busy() || loading()"
+>
+  <div class="lp-ai-block__head">
+    <div class="lp-row">
+      <h2 #heading tabindex="-1" id="suggestions-title" class="lp-kicker lp-kicker--ai">
+        AI suggestions
+      </h2>
+      @if (suggestions() && !pending()) {
+        <span class="lp-small lp-muted"
+          >Reviewed · {{ acceptedCount() }} of {{ suggestions()!.tags.length }} tags accepted</span
+        >
+      }
+      @if (suggestions()?.mode === 'Demo') {
+        <span class="lp-pill lp-pill--ai">Demo output</span>
+      }
+    </div>
+    @if (pending()) {
+      <span class="lp-ai-block__note">Nothing applies until you accept it.</span>
+    }
+    @if (suggestions() && !pending()) {
+      <button
+        class="lp-button lp-button--ghost lp-button--sm"
+        type="button"
+        (click)="expanded.set(!expanded())"
+      >
+        {{ expanded() ? 'Hide' : 'Show' }}
+      </button>
+    }
+  </div>
+  @if (loading()) {
+    <p role="status" class="lp-ai-block__note">Loading suggestions…</p>
+  }
+  @if (loadFailed()) {
+    <p role="alert">Couldn't load suggestions. Your reference is saved.</p>
+    <button class="lp-button lp-button--secondary lp-button--sm" type="button" (click)="load()">
+      Try loading again
+    </button>
+  }
+  @if (error()) {
+    <p role="alert">{{ error() }}</p>
+    @if (failureCode() === 'revision_conflict') {
+      <button
+        class="lp-button lp-button--secondary lp-button--sm"
+        type="button"
+        [disabled]="busy()"
+        (click)="reviewLatest()"
+      >
+        Review latest metadata
+      </button>
+    }
+  }
+  @if (
+    decision() && failureCode() !== 'revision_conflict' && failureCode() !== 'item_unavailable'
+  ) {
+    <button
+      class="lp-button lp-button--secondary lp-button--sm"
+      type="button"
+      [disabled]="busy() || metadataDirty()"
+      (click)="retryReview()"
+    >
+      {{ busy() ? 'Saving review…' : 'Retry review' }}
+    </button>
+  }
+  @if (active()) {
+    <p role="status" class="lp-ai-block__status">
+      <span class="lp-spinner" aria-hidden="true"></span>Looking at the image…
+    </p>
+    <p class="lp-ai-block__note">
+      Usually under a minute. You can keep working; suggestions appear here when they're ready.
+    </p>
+  } @else if (operation()?.status === 'Failed') {
+    <p class="lp-ai-block__text lp-muted">
+      Couldn't generate a description or tags for this image. The image is saved; only the
+      suggestions failed.
+    </p>
+    <button
+      class="lp-button lp-button--secondary lp-button--sm"
+      type="button"
+      [disabled]="blocked()"
+      (click)="generate()"
+    >
+      Try again
+    </button>
+  }
+  @if (!reference().imageUrl) {
+    <p class="lp-ai-block__text lp-muted">Add an image to get a suggested description and tags.</p>
+  }
+  @if (pending() && suggestions(); as result) {
+    @if (result.descriptionState === 'pending') {
+      <div class="lp-field">
+        <label class="lp-field__label" for="suggested-description">Description</label>
+        <textarea
+          id="suggested-description"
+          class="lp-textarea"
+          rows="3"
+          [value]="description()"
+          [disabled]="busy() || !!decision() || !!editingTag()"
+          (input)="description.set($any($event.target).value)"
+          [attr.aria-invalid]="descriptionInvalid()"
+          aria-describedby="suggested-description-hint"
+        ></textarea>
+        <p id="suggested-description-hint" class="lp-field__hint">
+          Used for search. Edit it before accepting if it's not how you'd describe the image.
+        </p>
+        @if (descriptionInvalid()) {
+          <p class="lp-field__error">Enter a description of 4,000 characters or fewer.</p>
+        }
+        <div class="lp-ai-block__actions">
+          <button
+            type="button"
+            class="lp-button lp-button--secondary lp-button--sm"
+            [disabled]="blocked() || !!editingTag() || descriptionInvalid()"
+            (click)="review('description', 'accept')"
+          >
+            Accept description
+          </button>
+          <button
+            type="button"
+            class="lp-button lp-button--ghost lp-button--sm"
+            [disabled]="blocked() || !!editingTag()"
+            (click)="review('description', 'dismiss')"
+          >
+            Dismiss description
+          </button>
+        </div>
+      </div>
+    }
+    <div class="lp-ai-groups">
+      @for (group of groups(); track group.category) {
+        <div class="lp-ai-group">
+          <span class="lp-ai-group__label">{{ group.category | titlecase }}</span>
+          <div class="lp-tags">
+            @for (tag of group.tags; track tag.name) {
+              <span class="lp-tag lp-tag--ai">
+                <button
+                  type="button"
+                  class="tag-name"
+                  [attr.aria-label]="'Edit tag ' + tag.name"
+                  [disabled]="blocked() || !!editingTag()"
+                  (click)="editTag(tag)"
+                >
+                  {{ tag.name }}
+                </button>
+                <button
+                  type="button"
+                  class="lp-tag__action"
+                  [attr.aria-label]="'Accept tag ' + tag.name"
+                  [disabled]="blocked() || !!editingTag()"
+                  (click)="review('tag', 'accept', tag.name)"
+                >
+                  <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-check" /></svg>
+                </button>
+                <button
+                  type="button"
+                  class="lp-tag__action"
+                  [attr.aria-label]="'Dismiss tag ' + tag.name"
+                  [disabled]="blocked() || !!editingTag()"
+                  (click)="review('tag', 'dismiss', tag.name)"
+                >
+                  <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
+                </button>
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+    @if (editingTag(); as tag) {
+      <div class="lp-field">
+        <label class="lp-field__label" for="suggested-tag">Suggested tag</label>
+        <input
+          #tagField
+          id="suggested-tag"
+          class="lp-input"
+          type="text"
+          [value]="tagValue()"
+          (input)="tagValue.set($any($event.target).value)"
+          [disabled]="busy() || !!decision()"
+          [attr.aria-invalid]="tagInvalid()"
+          aria-describedby="suggested-tag-hint"
+        />
+        <p id="suggested-tag-hint" class="lp-field__hint">Use 50 characters or fewer.</p>
+        <label class="lp-field__label" for="suggested-category">Suggested category</label>
+        <select
+          id="suggested-category"
+          class="lp-select"
+          [value]="tagCategory()"
+          (change)="tagCategory.set($any($event.target).value)"
+          [disabled]="busy() || !!decision()"
+        >
+          @for (category of categories; track category) {
+            <option [value]="category">{{ category | titlecase }}</option>
+          }
+        </select>
+        <div class="lp-ai-block__actions">
+          <button
+            class="lp-button lp-button--secondary lp-button--sm"
+            type="button"
+            [disabled]="blocked() || tagInvalid()"
+            (click)="review('tag', 'accept', tag.name)"
+          >
+            Accept edited tag
+          </button>
+          <button
+            class="lp-button lp-button--ghost lp-button--sm"
+            type="button"
+            [disabled]="busy() || !!decision()"
+            (click)="cancelTag()"
+          >
+            Cancel tag edit
+          </button>
+        </div>
+      </div>
+    }
+    <div class="lp-ai-block__actions">
+      <button
+        type="button"
+        class="lp-button lp-button--primary lp-button--sm"
+        [disabled]="
+          blocked() ||
+          !!editingTag() ||
+          (result.descriptionState === 'pending' && descriptionInvalid())
+        "
+        (click)="review('all', 'accept')"
+      >
+        Accept all
+      </button>
+      <button
+        type="button"
+        class="lp-button lp-button--ghost lp-button--sm"
+        [disabled]="blocked() || !!editingTag()"
+        (click)="review('all', 'dismiss')"
+      >
+        Dismiss all
+      </button>
+    </div>
+    <p class="lp-ai-block__note">
+      Suggested {{ result.createdAt | date: 'd MMM y' }} · {{ result.mode }} analysis. A category
+      with nothing to suggest is left out rather than filled with a guess.
+    </p>
+  }
+  @if (expanded() && suggestions(); as result) {
+    <p class="lp-ai-block__text">
+      {{ result.description }}
+      <span class="lp-small lp-muted">({{ result.descriptionState }})</span>
+    </p>
+    <ul>
+      @for (tag of result.tags; track tag.name) {
+        <li>{{ tag.name }} · {{ tag.state }}</li>
+      }
+    </ul>
+  }
+  @if (
+    !loading() &&
+    !loadFailed() &&
+    !active() &&
+    operation()?.status !== 'Failed' &&
+    reference().imageUrl &&
+    !pending()
+  ) {
+    <button
+      type="button"
+      class="lp-button lp-button--ghost lp-button--sm"
+      [disabled]="blocked()"
+      (click)="generate()"
+    >
+      {{ suggestions() ? 'Generate new suggestions' : 'Generate suggestions' }}
+    </button>
+  }
+  @if (metadataDirty()) {
+    <p class="lp-ai-block__note">
+      Save or discard your metadata edits before reviewing suggestions.
+    </p>
+  }
+  @if (notice()) {
+    <div role="status" class="lp-ai-block__actions">
+      <span>{{ notice() }}</span>
+      @if (undoRevision()) {
+        <button
+          type="button"
+          class="lp-button lp-button--ghost lp-button--sm"
+          [disabled]="dirty() || metadataDirty()"
+          (click)="undo()"
+        >
+          Undo
+        </button>
+      }
+    </div>
+  }
+</section>

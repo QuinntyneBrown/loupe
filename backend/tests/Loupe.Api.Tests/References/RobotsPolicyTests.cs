@@ -119,4 +119,22 @@ public sealed class RobotsPolicyTests(PostgreSqlFixture database) : IClassFixtur
         Assert.Equal(RobotsDecision.Unavailable, await policy.EvaluateAsync(new Uri("http://unresolvable.example/photo.jpg"), default));
         Assert.Empty(connector.Attempts);
     }
+
+    [Theory]
+    [InlineData("User-agent: Loupe\nDisallow: /\nUser-agent: LOUPE\nAllow: /photo\n", "/photo", RobotsDecision.Allowed)]
+    [InlineData("User-agent: *\nDisallow: /*.jpg$\n", "/photo.jpg", RobotsDecision.Disallowed)]
+    [InlineData("User-agent: *\nDisallow: /*.jpg$\n", "/photo.jpg?download=1", RobotsDecision.Allowed)]
+    [InlineData("User-agent: *\nDisallow: /photo\nAllow: /photo\n", "/photo", RobotsDecision.Allowed)]
+    [InlineData("User-agent: *\nDisallow: /%70hoto\n", "/photo", RobotsDecision.Disallowed)]
+    [InlineData("User-agent: *\nDisallow: /a%2Fb\n", "/a/b", RobotsDecision.Allowed)]
+    [InlineData("User-agent: *\nDisallow:\n", "/photo", RobotsDecision.Allowed)]
+    public async Task Matching_combines_agent_groups_and_respects_pattern_and_octet_rules(string robots, string path, RobotsDecision expected)
+    {
+        var (factory, dns, connector) = Build();
+        await using var _ = factory;
+        dns.Map("rules.example", Public);
+        connector.EnqueueResponse(Response(200, "OK", robots));
+        var policy = await PolicyAsync(factory);
+        Assert.Equal(expected, await policy.EvaluateAsync(new Uri("http://rules.example" + path), default));
+    }
 }

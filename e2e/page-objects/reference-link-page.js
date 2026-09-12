@@ -1,9 +1,10 @@
 import { expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { SignInPage } from './sign-in-page.js';
 const labels = { title: 'Title (optional)', sourceUrl: 'Source URL', attribution: 'Attribution (optional)', notes: 'Notes (optional)' };
 export class ReferenceLinkPage {
   constructor(page) { this.page = page; }
-  async open() { await this.page.getByRole('link',{name:'Save link',exact:true}).click(); }
+  async open() { await this.page.goto('/inspiration/link'); await new SignInPage(this.page).continue(); }
   async expectOpen() { await expect(this.page.getByRole('heading',{name:'Save link',exact:true})).toBeVisible(); }
   async fill(values) { for (const [key,value] of Object.entries(values)) await this.page.getByLabel(labels[key], { exact: true }).fill(value); }
   async expectDraft(values) { for (const [key,value] of Object.entries(values)) await expect(this.page.getByLabel(labels[key], { exact: true })).toHaveValue(value); }

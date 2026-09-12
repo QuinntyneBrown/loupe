@@ -1,0 +1,104 @@
+@if (request(); as search) {
+  <section aria-label="Search results" [attr.aria-busy]="loading()">
+    <p class="results-head" role="status">{{ status() }}</p>
+    @if (items().length) {
+      <div class="results-grid">
+        @for (item of cards(); track item.type + ':' + item.id) {
+          @if (item.type === 'reference') {
+            <lp-reference-card
+              #resultCard
+              [destination]="'/inspiration/' + item.id"
+              [title]="item.title"
+              [attribution]="item.attribution"
+              [sourceUrl]="item.sourceUrl"
+              [previewUrl]="item.previewUrl"
+              [width]="item.width"
+              [height]="item.height"
+              [boardActions]="false"
+            />
+          } @else {
+            <lp-photographer-card
+              #resultCard
+              [destination]="'/photographers/' + item.id"
+              [name]="item.title"
+              [portfolioUrl]="item.sourceUrl ?? ''"
+              [summary]="item.description"
+              [referenceCount]="item.referenceCount"
+              [references]="item.references"
+              [searchResult]="true"
+            />
+          }
+        }
+      </div>
+    }
+    @if (loading()) {
+      @if (!items().length) {
+        <div class="results-grid" aria-hidden="true">
+          @for (tile of [1, 2, 3, 4, 5, 6, 7, 8]; track tile) {
+            <div class="lp-skeleton skeleton-tile"></div>
+          }
+        </div>
+      }
+    } @else if (failed()) {
+      <div class="empty" role="alert">
+        @if (invalidCursor()) {
+          <h2>These results need refreshing.</h2>
+          <p>
+            The next page can no longer be loaded. Refresh to start again with the same query and
+            filters.
+          </p>
+          <button class="lp-button lp-button--secondary" (click)="load(true, true)">
+            Refresh results
+          </button>
+        } @else if (failure()?.code === 'item_unavailable') {
+          <h2>A selected board is unavailable.</h2>
+          <p>
+            It may have been deleted or may not belong to your library. Your filters have not
+            changed.
+          </p>
+          <button class="lp-button lp-button--secondary" (click)="filtersRequested.emit()">
+            Review filters
+          </button>
+        } @else if (failure()?.code === 'invalid_request') {
+          <h2>Check your search.</h2>
+          <p>Correct the query or selected filters, then search again.</p>
+          <button class="lp-button lp-button--secondary" (click)="filtersRequested.emit()">
+            Review filters
+          </button>
+        } @else {
+          <h2>Search isn't available right now.</h2>
+          <p>Try again in a moment. Your library is fine; only search is affected.</p>
+          <button class="lp-button lp-button--secondary" (click)="load(!items().length, true)">
+            Try again
+          </button>
+        }
+      </div>
+    } @else if (!items().length) {
+      <div class="empty">
+        <h2 #emptyHeading tabindex="-1">
+          Nothing matched{{ search.query ? ' “' + search.query + '”' : '' }}.
+        </h2>
+        @if (search.type === 'photographers' && search.boardIds.length) {
+          <p>
+            Photographers do not belong to boards. Remove the board filters or choose All or
+            References.
+          </p>
+        } @else {
+          <p>Try a different query or widen the filters.</p>
+        }
+        <button class="lp-button lp-button--secondary" (click)="queryEditRequested.emit()">
+          Edit query
+        </button>
+        @if (search.tags.length || search.boardIds.length) {
+          <button class="lp-button lp-button--secondary" (click)="filtersClearRequested.emit()">
+            Clear filters
+          </button>
+        }
+      </div>
+    } @else if (cursor()) {
+      <button class="lp-button lp-button--secondary more" (click)="load(false, true)">
+        Load more
+      </button>
+    }
+  </section>
+}

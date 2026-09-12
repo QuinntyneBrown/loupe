@@ -1,4 +1,7 @@
 import { ReferenceLinkPage } from './pages/reference-link/reference-link-page';
+import { photographerUnsavedGuard } from './photographer-unsaved.guard';
+import { photographerDraftUnsavedGuard } from './photographer-draft-unsaved.guard';
+import { referenceDraftUnsavedGuard } from './reference-draft-unsaved.guard';
 import { referenceLinkUnsavedGuard } from './reference-link-unsaved.guard';
 import { referenceUnsavedGuard } from './reference-unsaved.guard';
 import { ReferenceUploadPage } from './pages/reference-upload/reference-upload-page';
@@ -17,9 +20,34 @@ import { ComparePage } from './pages/compare/compare-page';
 
 export const routes: Routes = [
   {
+    path: 'search',
+    loadComponent: () => import('./pages/search/search-page').then((module) => module.SearchPage),
+    canActivate: [sessionGuard],
+    title: 'Search · Loupe',
+  },
+  {
+    path: 'photographers/:id',
+    canDeactivate: [photographerUnsavedGuard],
+    loadComponent: () =>
+      import('./pages/photographer-detail/photographer-detail-page').then(
+        (module) => module.PhotographerDetailPage,
+      ),
+    canActivate: [sessionGuard],
+    title: 'Photographer · Loupe',
+  },
+  {
+    path: 'photographers',
+    loadComponent: () =>
+      import('./pages/photographers/photographers-page').then((module) => module.PhotographersPage),
+    canActivate: [sessionGuard],
+    canDeactivate: [photographerDraftUnsavedGuard],
+    title: 'Photographers · Loupe',
+  },
+  {
     path: 'inspiration',
     component: InspirationPage,
     canActivate: [sessionGuard],
+    canDeactivate: [referenceDraftUnsavedGuard],
     title: 'Inspiration \u00b7 Loupe',
   },
   {

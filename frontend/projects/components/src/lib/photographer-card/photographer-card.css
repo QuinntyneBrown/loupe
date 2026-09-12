@@ -1,0 +1,99 @@
+:host {
+  display: block;
+  min-width: var(--lp-zero);
+}
+.result-type {
+  color: var(--lp-color-text-3);
+  font-size: var(--lp-text-xs);
+  font-family: var(--lp-font-mono);
+}
+article {
+  position: relative;
+  display: grid;
+  gap: var(--lp-space-3);
+  padding: var(--lp-space-5);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-lg);
+  background: var(--lp-color-surface);
+  height: var(--lp-full);
+  overflow-wrap: anywhere;
+}
+article:hover {
+  border-color: var(--lp-color-border-strong);
+}
+.card-link {
+  position: absolute;
+  inset: var(--lp-zero);
+  border-radius: var(--lp-radius-lg);
+}
+.head {
+  display: grid;
+  gap: var(--lp-space-1);
+}
+h2,
+p {
+  margin: var(--lp-zero);
+}
+h2 {
+  font-size: var(--lp-text-lg);
+  font-weight: var(--lp-weight-semibold);
+  letter-spacing: var(--lp-tracking-tight);
+  line-height: var(--lp-leading-tight);
+}
+.domain {
+  min-height: var(--lp-space-6);
+  text-decoration: none;
+  position: relative;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lp-space-1);
+  font-family: var(--lp-font-mono);
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-text-2);
+}
+.domain:hover {
+  text-decoration: underline;
+}
+.domain svg {
+  flex: none;
+}
+.description {
+  font-size: var(--lp-text-sm);
+  color: var(--lp-color-text-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lp-space-3);
+  margin-top: var(--lp-space-1);
+}
+.thumbs {
+  display: flex;
+  gap: var(--lp-space-1);
+}
+img,
+.placeholder {
+  width: var(--lp-thumb-size-sm);
+  height: var(--lp-thumb-size-sm);
+  object-fit: cover;
+  border-radius: var(--lp-radius-sm);
+}
+.placeholder {
+  display: grid;
+  place-items: center;
+  background: var(--lp-color-surface-2);
+  color: var(--lp-color-text-2);
+}
+.count {
+  font-family: var(--lp-font-mono);
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-text-2);
+  text-align: right;
+}

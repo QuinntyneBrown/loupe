@@ -1,0 +1,236 @@
+<dialog #modal class="lp-dialog" aria-labelledby="add-photographer-title" (cancel)="escape($event)">
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 #heading tabindex="-1" class="lp-dialog__title" id="add-photographer-title">
+          {{ title() }}
+        </h2>
+        <p class="lp-dialog__text">
+          @if (phase() === 'form') {
+            Start with their website. You can edit what Loupe finds.
+          } @else if (phase() === 'reading') {
+            Fetching the title and description from {{ host() }}.
+          } @else if (phase() === 'preview') {
+            Found on {{ host() }}. Edit anything that's off.
+          }
+        </p>
+      </div>
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Close"
+        [disabled]="saving() || closing()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body">
+      @if (phase() === 'reading') {
+        <div class="reading" aria-live="polite">
+          <progress aria-label="Reading page metadata"></progress>
+          <p>{{ host() }} · Reading metadata</p>
+        </div>
+      } @else if (phase() === 'duplicate') {
+        <p>This portfolio is already in your photographers.</p>
+        <p>
+          <strong>{{ name() }}</strong
+          ><br />{{ host() }}
+        </p>
+      } @else {
+        @if (phase() === 'fallback') {
+          <div class="fallback">
+            <strong>{{ fallbackReason() }}</strong>
+            <p>
+              Add the details yourself. There will be no site summary, because Loupe only summarises
+              what it can actually read.
+            </p>
+          </div>
+        }
+        <div class="lp-form">
+          @if (phase() === 'form') {
+            <div class="lp-field">
+              <label class="lp-field__label" for="photographer-url">Website</label
+              ><input
+                id="photographer-url"
+                class="lp-input lp-input--mono"
+                type="url"
+                autofocus
+                [ngModel]="url()"
+                (ngModelChange)="url.set($event)"
+                [disabled]="locked()"
+                placeholder="https://photographer.com"
+              />
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="photographer-name"
+                >Name <span class="lp-field__optional">optional</span></label
+              ><input
+                id="photographer-name"
+                class="lp-input"
+                [ngModel]="name()"
+                (ngModelChange)="name.set($event)"
+                [disabled]="locked()"
+                placeholder="If you already know it"
+              />
+            </div>
+          } @else {
+            <div class="fields">
+              <div class="lp-field">
+                <label class="lp-field__label" for="photographer-name">Name</label
+                ><input
+                  id="photographer-name"
+                  class="lp-input"
+                  [ngModel]="name()"
+                  (ngModelChange)="name.set($event)"
+                  [disabled]="locked()"
+                />
+              </div>
+              <div class="lp-field">
+                <label class="lp-field__label" for="photographer-url">Website</label
+                ><input
+                  id="photographer-url"
+                  class="lp-input lp-input--mono"
+                  type="url"
+                  [ngModel]="url()"
+                  (ngModelChange)="url.set($event)"
+                  [readonly]="phase() === 'preview'"
+                  [disabled]="locked()"
+                />
+              </div>
+            </div>
+            @if (phase() === 'preview' || phase() === 'fallback') {
+              <div class="lp-field">
+                <label class="lp-field__label lp-field__label--row" for="photographer-description"
+                  ><span>Description</span
+                  ><span class="lp-field__optional">{{
+                    phase() === 'preview' ? 'from the page' : 'optional'
+                  }}</span></label
+                ><textarea
+                  id="photographer-description"
+                  class="lp-textarea"
+                  rows="2"
+                  [ngModel]="description()"
+                  (ngModelChange)="changeDescription($event)"
+                  [disabled]="locked()"
+                ></textarea>
+              </div>
+            }
+            <div class="lp-field">
+              <label class="lp-field__label" for="photographer-tags"
+                >Tags <span class="lp-field__optional">optional</span></label
+              >
+              <div class="lp-chip-input">
+                @for (tag of tags(); track tag) {
+                  <span class="lp-tag"
+                    >{{ tag
+                    }}<button
+                      class="lp-tag__action"
+                      type="button"
+                      [attr.aria-label]="'Remove tag ' + tag"
+                      [disabled]="locked()"
+                      (click)="removeTag(tag)"
+                    >
+                      <svg class="lp-icon lp-icon--sm" aria-hidden="true">
+                        <use href="#i-x" />
+                      </svg></button
+                  ></span>
+                }
+                <input
+                  id="photographer-tags"
+                  [ngModel]="tag()"
+                  (ngModelChange)="tag.set($event)"
+                  [disabled]="locked()"
+                  (keydown.enter)="addTag($event)"
+                  placeholder="Add a tag"
+                />
+              </div>
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="photographer-notes"
+                >Your notes <span class="lp-field__optional">optional</span></label
+              ><textarea
+                id="photographer-notes"
+                class="lp-textarea"
+                rows="2"
+                [ngModel]="notes()"
+                (ngModelChange)="notes.set($event)"
+                [disabled]="locked()"
+                placeholder="Why does this work matter to you?"
+              ></textarea>
+            </div>
+            @if (phase() === 'preview') {
+              <p class="lp-field__hint">
+                A summary of the site is generated after saving, from the page Loupe can read.
+              </p>
+            }
+          }
+        </div>
+      }
+      @if (error()) {
+        <p role="alert">{{ error() }}</p>
+        @if (conflict()) {
+          <button class="lp-button lp-button--secondary" type="button" (click)="reviewLatest()">
+            Review latest preview
+          </button>
+        } @else if (retryable()) {
+          <button
+            class="lp-button lp-button--secondary"
+            type="button"
+            [disabled]="saving() || closing()"
+            (click)="retry()"
+          >
+            Try again
+          </button>
+        }
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      @if (phase() !== 'preview') {
+        <button
+          class="lp-button lp-button--secondary"
+          type="button"
+          [disabled]="saving() || closing()"
+          (click)="cancel()"
+        >
+          {{ closing() ? 'Canceling…' : 'Cancel' }}
+        </button>
+      }
+      @if (phase() === 'form') {
+        <button
+          class="lp-button lp-button--primary"
+          type="button"
+          [disabled]="closing()"
+          (click)="read()"
+        >
+          Read the page
+        </button>
+      } @else if (phase() === 'duplicate') {
+        <a
+          class="lp-button lp-button--primary"
+          [routerLink]="'/photographers/' + draft()?.committedPhotographerId"
+          >Open photographer</a
+        >
+      } @else if (phase() === 'preview' || phase() === 'fallback') {
+        @if (phase() === 'preview') {
+          <button
+            class="lp-button lp-button--secondary"
+            type="button"
+            [disabled]="saving() || closing()"
+            (click)="cancel(true)"
+          >
+            Back
+          </button>
+        }
+        <button
+          class="lp-button lp-button--primary"
+          type="button"
+          [disabled]="saving() || closing() || conflict() || !!saveAttempt()"
+          (click)="save()"
+        >
+          {{ saving() ? 'Adding…' : 'Add photographer' }}
+        </button>
+      }
+    </footer>
+  </div>
+</dialog>

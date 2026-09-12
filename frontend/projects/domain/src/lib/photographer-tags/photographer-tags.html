@@ -1,0 +1,64 @@
+<section aria-label="Tags">
+  <div class="head">
+    <label class="lp-subheading" for="photographer-tag">Tags</label
+    ><span class="status" [class.failed]="error()" aria-live="polite">{{
+      busy() ? 'Saving' : action() ? "Couldn't save" : 'Saved'
+    }}</span>
+  </div>
+  <div class="chip-input">
+    @for (tag of photographer().tags; track tag.name) {
+      <span class="lp-tag"
+        >{{ tag.name
+        }}<button
+          class="lp-tag__action"
+          type="button"
+          [attr.aria-label]="'Remove tag ' + tag.name"
+          [disabled]="busy() || !!action()"
+          (click)="remove(tag.name)"
+        >
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg></button
+      ></span>
+    }
+    <input
+      #field
+      id="photographer-tag"
+      aria-label="Add a tag"
+      placeholder="Add a tag"
+      [ngModel]="draft()"
+      (ngModelChange)="draft.set($event)"
+      [disabled]="busy() || !!action()"
+      (keydown.enter)="add($event)"
+    />
+  </div>
+  @if (error()) {
+    <p role="alert">{{ error() }}</p>
+  }
+  @if (action()) {
+    <div class="actions">
+      @if (conflict() && !unavailable()) {
+        <button
+          class="lp-button lp-button--secondary lp-button--sm"
+          [disabled]="busy()"
+          (click)="review()"
+        >
+          Review latest tags
+        </button>
+      } @else if (!unavailable()) {
+        <button
+          class="lp-button lp-button--secondary lp-button--sm"
+          [disabled]="busy()"
+          (click)="retry()"
+        >
+          Retry
+        </button>
+      }
+      <button
+        class="lp-button lp-button--ghost lp-button--sm"
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        Cancel tag change
+      </button>
+    </div>
+  }
+</section>
