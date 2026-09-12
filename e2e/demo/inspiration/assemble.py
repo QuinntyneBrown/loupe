@@ -1,4 +1,4 @@
-"""Assemble the verified Chromium recording, synthetic narration and timed captions."""
+"""Assemble the verified Chromium recording of the real stack, synthetic narration and timed captions."""
 import json, subprocess, textwrap, math, re
 from pathlib import Path
 import imageio_ffmpeg
@@ -47,8 +47,9 @@ def event(a,b,style,text):
     return f'Dialogue: 0,{ass_time(a)},{ass_time(b)},{style},,0,0,0,,{text}\n'
 record=json.loads((SRC/'recording.json').read_text(encoding='utf-8'))
 narration={s['id']:s for s in json.loads((SRC/'narration.json').read_text(encoding='utf-8'))}
-assert record['errors']==[] and record['unexpectedRequests']==[] and record['critiqueRequests']==0 and record['notesSaved'] and record['linkSaved'] and record['importRequests']==0
-anchors={name:anchor(name) for name in ['desktop','mobile']}
+assert record['errors']==[] and record['unexpectedRequests']==[] and record['apiFailures']==[]
+assert record['persisted']['tagPersisted'] and record['persisted']['notesPersisted'] and record['persisted']['filteredSearchTotal']>0
+anchors={item['name']:anchor(item['name']) for item in record['recordings']}
 print('Calibration:',anchors,flush=True)
 all_cues=[]; chapters=[]; clips=[]; offset=0
 for index,scene in enumerate(record['timeline']):
@@ -57,10 +58,7 @@ for index,scene in enumerate(record['timeline']):
     assert speech['speechDuration']<duration
     chapter={'id':sid,'title':scene['title'],'start':offset,'duration':duration,'text':speech['text']};chapters.append(chapter)
     ass=HEADER+event(0,duration,'Header',r'{\pos(24,22)}'+f'{index+1:02}  /  '+scene['title'])
-    ass+=event(0,duration,'Badge',r'{\pos(1416,22)}FIXTURE REFERENCES  /  NO ANALYSIS CALLS')
-    if scene['capture']=='mobile':
-        ass+=event(0,duration,'Header',r'{\pos(100,440)}Mobile · 375 px')
-        ass+=event(0,duration,'Header',r'{\pos(100,476)}No horizontal overflow')
+    ass+=event(0,duration,'Badge',r'{\pos(1416,22)}REAL API  /  REAL DATABASE  /  NO AI CONFIGURED')
     for a,b,text in cues(speech):
         ass+=event(a,b,'Caption',r'{\pos(720,991)}'+r'\N'.join(textwrap.wrap(text,82)))
         all_cues.append((offset+a,offset+b,text))
@@ -75,8 +73,14 @@ run(['-y','-f','concat','-safe','0','-i','concat.txt','-c','copy','-movflags','+
 (OUT/'captions.srt').write_text('\n\n'.join(f'{i+1}\n{timestamp(a)} --> {timestamp(b)}\n{text}' for i,(a,b,text) in enumerate(all_cues))+'\n',encoding='utf-8')
 (OUT/'captions.vtt').write_text('WEBVTT\n\n'+'\n\n'.join(f'{timestamp(a,".")} --> {timestamp(b,".")}\n{text}' for a,b,text in all_cues)+'\n',encoding='utf-8')
 (OUT/'chapters.json').write_text(json.dumps(chapters,indent=2),encoding='utf-8')
-(OUT/'transcript.md').write_text('# Inspiration UI tour and mock comparison\n\nThis recording uses in-memory reference fixtures in the real Angular interface. No analysis or import requests were made. Narration is synthetic (Microsoft Edge Emma Multilingual).\n\n'+''.join(f"## {timestamp(c['start'],'.')[:8]} — {c['title']}\n\n{c['text']}\n\n" for c in chapters)+'Reference: `docs/mocks/inspiration.html`. Images are public Picsum placeholders cached in `e2e/demo/inspiration/images`. Titles and photographer names come from the mock and are fictional labels, not verified credits.\n',encoding='utf-8')
-run(['-y','-ss',str(chapters[2]['start']+2),'-i',str(OUT/'inspiration-tour.mp4'),'-frames:v','1',str(OUT/'poster.jpg')])
+INTRO=('# Inspiration library and keyword search\n\n'
+       'This recording drives the real Angular application against the real Loupe.Api, Loupe.Worker and PostgreSQL stack from `docs/demo/harness`. '
+       'Every save, board, tag, note and search result shown is real persisted state; no AI provider is configured and no AI request is made. '
+       'Narration is synthetic (Microsoft Edge Emma Multilingual).\n\n')
+OUTRO=('Images are public Picsum placeholder photographs cached in `e2e/demo/inspiration/images` (original URLs in `images.json`). '
+       'Titles, notes, tags, boards and photographer names are fictional demonstration labels from `library.json`, not verified credits.\n')
+(OUT/'transcript.md').write_text(INTRO+''.join(f"## {timestamp(c['start'],'.')[:8]} — {c['title']}\n\n{c['text']}\n\n" for c in chapters)+OUTRO,encoding='utf-8')
+run(['-y','-ss',str(chapters[1]['start']+12),'-i',str(OUT/'inspiration-tour.mp4'),'-frames:v','1',str(OUT/'poster.jpg')])
 player=OUT/'index.html'
 if player.exists():
     player.write_text(re.sub(r'const chapters=.*?;const video=', 'const chapters='+json.dumps(chapters)+';const video=', player.read_text(encoding='utf-8')),encoding='utf-8')

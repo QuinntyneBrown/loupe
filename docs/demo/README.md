@@ -7,19 +7,24 @@ Demo-only accounts are `photographer@example.com` and `api-demo@example.com`, wi
 the synthetic password `local acceptance password`. Never reuse these accounts
 or credentials in a deployed environment.
 
-Three recordings, all against real, running software — no product responses were
+Four recordings, all against real, running software — no product responses were
 mocked or invented for these takes. See "Integration substitutions and known
-limitations" below for exactly what stands in for what, and why.
+limitations" below for exactly what stands in for what, and why. The newest,
+[`inspiration/`](inspiration/README.md), is a narrated tour of the Inspiration
+library (boards, tags, upload, notes) and keyword search recorded on 2026-09-12
+against the current code with local JWT sign-in.
 
 ## Application inventory
 
 | Application | Status | Video |
 | --- | --- | --- |
 | `loupe` — the Angular web client | Recorded | [loupe.webm](loupe.webm) |
+| `loupe` — Inspiration library and keyword search, narrated | Recorded 2026-09-12 (real API, worker, database; local JWT sign-in) | [inspiration/inspiration-tour.mp4](inspiration/inspiration-tour.mp4) · [player](inspiration/index.html) · [details](inspiration/README.md) |
 | `Loupe.Api` + `Loupe.Worker` — the .NET backend and background worker | Recorded (combined; see below) | [loupe-api.webm](loupe-api.webm) |
 | `design-system` — the standalone token/component reference site | Recorded | [design-system.webm](design-system.webm) |
 | `Loupe.DemoIdentityProvider` | Demo-only harness, not a product application | — |
-| Boards, semantic search, photographer bookmarking | Not recorded — **out of scope**, not blocked: these exist only as requirements and static HTML mockups (`docs/detailed-designs/`, `docs/mocks/`), with no Angular routes or backend endpoints yet | — |
+| Boards, tag filters, keyword search | Recorded in the Inspiration tour above | see `inspiration/` |
+| Meaning (semantic) search, photographer bookmarking, AI suggestions/summaries | Not recorded — semantic search and AI features need a configured provider; photographer bookmarking is implemented but outside the Inspiration tour's scope | — |
 
 `Loupe.Api` and `Loupe.Worker` are two independently runnable executables, but
 `Loupe.Worker` has no interaction surface of its own — it only executes work the
@@ -176,7 +181,9 @@ Prerequisites: Docker Desktop, .NET SDK `10.0.303`+ (see `global.json`), Node
 ```powershell
 # 1. Stand up Postgres, local accounts, the containerized
 #    Loupe.Api/Loupe.Worker, and the Angular dev server (HTTPS, same-origin
-#    proxy). Prints the URLs to check once it's up.
+#    proxy). Prints the URLs to check once it's up. Defaults: prefix loupe-demo,
+#    Postgres 5433, Api 5001, app 4200; pass -Prefix/-DbPort/-ApiPort/-AppPort to
+#    run a second, fully isolated stack beside an existing one.
 pwsh docs/demo/harness/setup.ps1
 
 # 2. Record loupe-api.webm (requires step 1's stack running)
@@ -193,7 +200,10 @@ npx playwright test --config=playwright.demo-app.config.js
 cd ../../design-system/tests/demo
 npx playwright test --config=playwright.demo.config.js
 
-# 5. Tear down
+# 5. Record the narrated Inspiration tour — its own seed/record/assemble
+#    sequence and isolated stack are documented in docs/demo/inspiration/README.md
+
+# 6. Tear down (pass the same -Prefix/-AppPort you gave setup.ps1)
 pwsh ../../../docs/demo/harness/teardown.ps1
 ```
 
@@ -204,13 +214,12 @@ untouched. Recorded videos land under each config's own `test-results/`
 (already covered by the repository's `**/test-results/` gitignore rule) before
 being promoted here.
 
-If a `loupe.webm` or `loupe-api.webm` re-run reuses the same demo Postgres
-database across takes, clear the content tables first to avoid duplicate-title
-ambiguity in the UI:
+If a re-run reuses the same demo Postgres database across takes, empty the
+library content first (accounts, sessions and the worker's singleton dispatch
+cursor are kept; the script refuses any container setup.ps1 did not create):
 
-```sh
-docker exec loupe-demo-postgres psql -U loupe -d loupe_demo \
-  -c 'TRUNCATE photographs, "references", background_operations, operation_receipts, journal.deletions CASCADE;'
+```powershell
+pwsh docs/demo/harness/reset-content.ps1            # or -Prefix <your prefix>
 ```
 
 ## What setup.ps1 actually does (and why)
@@ -223,7 +232,10 @@ docker exec loupe-demo-postgres psql -U loupe -d loupe_demo \
   the API/Worker with PostgreSQL. A fresh random signing key is supplied only to
   the API through its environment; rerunning setup invalidates prior sessions.
 - Provisions both demo accounts by piping synthetic passwords to the Admin CLI.
-- Serves Angular over HTTPS with `/api` proxied same-origin to the API.
+- Serves Angular over HTTPS with `/api` proxied same-origin to the API. The
+  proxy configuration is generated per stack into the scratch directory
+  (`%TEMP%\<prefix>-harness\proxy.conf.json`), and the dev server's output is
+  kept beside it in `ng-serve.log` / `ng-serve.err.log`.
 
-`teardown.ps1` stops the demo containers and Angular dev server and removes the
-scratch cert/media directory. It does not modify repository source.
+`teardown.ps1` stops that prefix's demo containers and Angular dev server and
+removes its scratch cert/media directory. It does not modify repository source.

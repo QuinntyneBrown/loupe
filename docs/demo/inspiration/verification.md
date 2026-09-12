@@ -1,13 +1,36 @@
 # Recording verification
 
-Verified on 2026-09-11 using Chromium and FFmpeg.
+Verified on 2026-09-12 using Chromium (Playwright 1.63.0) and FFmpeg 7.1 (imageio-ffmpeg).
 
-- Duration: 146.58 seconds; 1440 × 1040; nine chapters.
-- Browser rehearsal and timed recording passed assertions for 24-to-25 item pagination, metadata save, link-only save, simulated failure and retry, and 375-pixel viewport fit.
-- Zero browser page errors, unexpected external requests, analysis requests, and source-import requests.
-- MP4 played successfully; all nine chapter buttons sought to their expected timestamps.
-- Complete video/audio decode passed without errors. Mean audio level: -16.2 dB; peak: -1.5 dB.
-- All nine rendered chapter frames were visually reviewed, including full-size comparison and mobile frames. Headers and captions occupy separate strips outside the recorded UI.
-- The comparison documents the missing boards, counts, tag filters, card actions, and navigation destinations. It does not claim mock parity.
+- Stack: isolated `loupe-insp-demo` containers built from the working tree
+  (`docs/demo/harness/setup.ps1 -Prefix loupe-insp-demo -DbPort 5434 -ApiPort 5011 -AppPort 4210`),
+  real EF Core migrations, real `Loupe.Api`/`Loupe.Worker`, Angular over HTTPS on 4210.
+  The pre-existing `loupe-demo-*` containers (27 hours old, older code and identity
+  configuration) were left untouched.
+- Seeding through the real API: 15 image uploads with real libvips processing,
+  3 boards, 2 linked photographers (`seed.mjs`; refuses a non-empty library).
+- Rehearsal (`record.mjs --dry`) and the timed take both passed every browser
+  assertion: sign-in, 15 → 16 references, first card is the upload, board counts
+  3 → 4 and 0 → 1 → 2, tag filter 3 → 16, tag `stone` saved, note saved, search
+  totals 3 / 3 / 10 / 3, result titles, and the `stone` tag on the opened result.
+- Persisted state re-read through the API after the take: 16 references; the
+  upload has attribution `Mara Lindqvist` and sits on `Window light`; `Portrait
+  studies` holds 2; `Doorway, late light` carries `stone` and the appended note;
+  `query=light&boardIds=<Architecture>` returns 3.
+- Zero page errors, zero non-localhost requests (all blocked and counted), zero
+  API responses ≥ 500. Worker log quiet after the take (a first-attempt reset that
+  truncated the worker's singleton dispatch-cursor row was corrected before the
+  recorded take; `reset-content.ps1` now resets that row instead).
+- Encoded MP4: 142.38 s, 1440 × 1040; the chaptered player loads it, plays, and
+  every one of the nine chapter buttons seeks within two seconds of its start.
+- Complete video/audio decode without errors. Narration mean −16.3 dB, peak −1.5 dB.
+- All nine chapter frames plus eleven mid-action frames were extracted from the
+  encoded file and visually reviewed: headings, hover overlays, the decoded draft
+  preview, board notices, pressed tag chip, saved tag/note states, search result
+  counts and the applied board filter are all legible; header and captions stay
+  in their own strips outside the recorded interface.
+- Poster: frame extracted from the encoded video at 26.5 s (chapter 2, hover
+  overlay visible).
 
-The recording used a separate Angular e2e server at `http://localhost:4217` because the existing port-4207 server returned HTTP 500 for `main.js`. The mock was served at port 8765. Only fixture bindings were used for application data. Detailed machine output and review frames are in ignored `source/`; reproduction commands are in `README.md`.
+Machine output (`recording.json`, `playback-check.json`, `media-check.json`,
+`final-*.jpg`, `review-*.jpg`) is in the ignored `source/` directory.

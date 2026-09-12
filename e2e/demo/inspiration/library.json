@@ -1,0 +1,36 @@
+{
+  "liveUpload": "lp-s33",
+  "boards": [
+    "Window light",
+    "Architecture",
+    "Streets from above"
+  ],
+  "photographers": [
+    {
+      "name": "Mara Lindqvist",
+      "portfolioUrl": "https://maralindqvist.example"
+    },
+    {
+      "name": "Tomas Ferreira",
+      "portfolioUrl": "https://tomasferreira.example"
+    }
+  ],
+  "references": [
+    {"seed": "lp-s33", "title": "Kitchen light", "attribution": "Mara Lindqvist", "photographer": "Mara Lindqvist", "boards": ["Window light"], "tags": [["window light", "lighting"], ["still life", "genre"], ["steam", "subject"]], "notes": "Steam catches the window light. Keep the background dark so it reads."},
+    {"seed": "lp-s11", "title": "Coffee, knitted sleeves", "attribution": "Mara Lindqvist", "photographer": "Mara Lindqvist", "boards": ["Window light"], "tags": [["window light", "lighting"], ["still life", "genre"], ["soft light", "lighting"]], "notes": "Soft, even window light with almost no shadow. Warm against cool wool."},
+    {"seed": "lp-s12", "title": "Writing at the desk", "attribution": "Reuben Hale", "boards": ["Window light"], "tags": [["window light", "lighting"], ["hands", "subject"], ["documentary", "genre"]], "notes": "Side light from a window rakes across the page and the hands."},
+    {"seed": "lp-s31", "title": "At the keyboard", "attribution": "Reuben Hale", "boards": ["Window light"], "tags": [["window light", "lighting"], ["hands", "subject"], ["documentary", "genre"]], "notes": "Shallow depth of field. The window behind the desk lifts the whole scene."},
+    {"seed": "lp-s10", "title": "Backlit at golden hour", "attribution": "Saoirse Quinn", "boards": [], "tags": [["backlight", "lighting"], ["portrait", "genre"], ["golden hour", "lighting"]], "notes": "Rim light on the hair. Expose for the highlights and let the face fall soft."},
+    {"seed": "lp-s41", "title": "Harbour lights, evening", "attribution": "Saoirse Quinn", "boards": [], "tags": [["portrait", "genre"], ["backlight", "lighting"], ["bokeh", "technique"]], "notes": "Warm evening light and out-of-focus lamps behind the subject."},
+    {"seed": "lp-s9", "title": "Studio sitting no. 4", "attribution": "Saoirse Quinn", "boards": [], "tags": [["portrait", "genre"], ["black and white", "palette"], ["low key", "lighting"]], "notes": "Low key. The shoulders carry the frame; the face is left in shadow."},
+    {"seed": "lp-s18", "title": "Concrete apex, noon", "attribution": "Tomas Ferreira", "photographer": "Tomas Ferreira", "boards": ["Architecture"], "tags": [["architecture", "subject"], ["minimalist", "composition"], ["leading lines", "composition"]], "notes": "One vanishing point. Hard noon light keeps the grid crisp."},
+    {"seed": "lp-s25", "title": "Doorway, late light", "attribution": "Tomas Ferreira", "photographer": "Tomas Ferreira", "boards": ["Architecture"], "tags": [["architecture", "subject"], ["doorway", "subject"], ["warm light", "lighting"]], "notes": "Late light warms the stone. Centre the door and keep the verticals straight."},
+    {"seed": "lp-s30", "title": "Facade, midday", "attribution": "Tomas Ferreira", "photographer": "Tomas Ferreira", "boards": ["Architecture"], "tags": [["architecture", "subject"], ["black and white", "palette"], ["pattern", "composition"]], "notes": "Fire escapes as rhythm. Midday light flattens the facade into pattern."},
+    {"seed": "lp-s35", "title": "Skyline, blue hour", "attribution": "Lea Brandt", "boards": ["Architecture"], "tags": [["cityscape", "subject"], ["blue hour", "lighting"], ["muted", "palette"]], "notes": "Blue hour haze. Muted palette, almost monochrome."},
+    {"seed": "lp-s21", "title": "City from above, dusk", "attribution": "Kenji Arai", "boards": ["Streets from above"], "tags": [["cityscape", "subject"], ["aerial", "technique"], ["dusk", "lighting"]], "notes": "High vantage point at dusk. The lake edge gives the frame a horizon."},
+    {"seed": "lp-s37", "title": "Crossing, from above", "attribution": "Kenji Arai", "boards": ["Streets from above"], "tags": [["aerial", "technique"], ["street", "genre"], ["black and white", "palette"]], "notes": "Straight down onto the crossing. Cars become graphic shapes."},
+    {"seed": "lp-s42", "title": "Harbour haze", "attribution": "Ines Okafor", "boards": [], "tags": [["harbour", "subject"], ["haze", "mood"], ["minimalist", "composition"]], "notes": "Flat water and haze. Almost nothing in the frame, and that is the point."},
+    {"seed": "lp-s15", "title": "Deer in morning fog", "attribution": "Ines Okafor", "boards": [], "tags": [["wildlife", "subject"], ["fog", "mood"], ["golden hour", "lighting"]], "notes": "Fog and low sun turn the deer into a silhouette."},
+    {"seed": "lp-s54", "title": "Burnt forest, storm light", "attribution": "Lea Brandt", "boards": [], "tags": [["landscape", "genre"], ["storm", "mood"], ["trees", "subject"]], "notes": "Bare trunks against a moving sky. Wait for the light to break."}
+  ]
+}

@@ -1,41 +1,41 @@
-# Inspiration UI tour and mock comparison
+# Inspiration library and keyword search
 
-This recording uses in-memory reference fixtures in the real Angular interface. No analysis or import requests were made. Narration is synthetic (Microsoft Edge Emma Multilingual).
+This recording drives the real Angular application against the real Loupe.Api, Loupe.Worker and PostgreSQL stack from `docs/demo/harness`. Every save, board, tag, note and search result shown is real persisted state; no AI provider is configured and no AI request is made. Narration is synthetic (Microsoft Edge Emma Multilingual).
 
-## 00:00:00 — The Inspiration mock
+## 00:00:00 — A private library, running for real
 
-The Inspiration mock puts the image collection beside a boards sidebar, with tag filters above it. Card overlays show titles and photographer labels. These names and images are demonstration placeholders.
+Loupe is a private library for the photographs that inspire you. This recording drives the real Angular application against the real API, worker, and database, signing in with a locally provisioned account.
 
-## 00:00:15 — The working Inspiration page
+## 00:00:14 — Browse the Inspiration library
 
-Here is the real Angular interface with the same first twelve images. The heading, navigation, restrained colours, and image grid carry through. This recording uses in-memory fixtures, with no production writes or AI requests.
+Inspiration opens on the whole collection: fifteen references across three boards. Boards and their counts sit in the sidebar, the most used tags line up above the grid, and hovering a card reveals its title, photographer, and a link to the original source.
 
-## 00:00:31 — Mock and implementation side by side
+## 00:00:32 — Save a reference by uploading an image
 
-The difference is visible side by side. The mock has boards, counts, and tag filters. The current page uses the full width for references, with saved status and dates in the card captions. Boards, filtering, and on-card board actions are still mock-only.
+Saving starts from one button. Upload an image and Loupe reads it, shows a preview, and asks for a title and photographer. Tick a board, save, and the reference appears at the front of the library with the board count updated.
 
-## 00:00:49 — Browse the saved collection
+## 00:00:48 — Organise references into boards
 
-The collection opens with twenty-four references. Load more brings in the remaining item. Titles open each saved reference, keeping browsing separate from the detailed source information and personal study notes.
+Boards organise the library. Create a new board, then add references to it straight from their cards. The sidebar count follows each change, and opening the board shows only what belongs there.
 
-## 00:01:04 — Keep the source and your notes
+## 00:01:02 — Filter the collection by tag
 
-A reference opens into its own detail page. The photograph stays connected to its source, attribution, and notes. Edit metadata lets us record what to study, then save that context back to the fixture library.
+Tags work as filters. Choosing window light narrows the collection to the references carrying that tag, and the chip stays pressed until it is cleared. Clearing the tag restores the full library.
 
-## 00:01:20 — Save a source for later
+## 00:01:15 — Tags and notes on a reference
 
-Save link keeps a source URL with an optional title, attribution, and notes. Saving opens a link-only reference. It does not invent a preview or fetch the source. The separate import action is shown here but is not submitted.
+Every reference has its own page: the full image, photographer, boards, source and attribution, tags and notes. Adding a tag saves straight away, and notes save with one click, so the context travels with the photograph.
 
-## 00:01:37 — A recoverable loading failure
+## 00:01:32 — Keyword search across the library
 
-This is a deliberately simulated loading failure. The page gives a clear error and a retry action. Retrying restores the image collection. The demonstration verifies the recovery as well as the successful browsing path.
+Search covers everything you have saved. Keyword search matches the words you typed, across titles, notes, tags, attribution, and photographers. Searching for a photographer's name returns the photographer alongside the references that credit them.
 
-## 00:01:53 — Inspiration at mobile width
+## 00:01:50 — Narrow results by board
 
-At three hundred and seventy-five pixels, the working collection reflows to fit the screen without horizontal scrolling. The save and upload entry points remain available, and each reference still opens through its title.
+Results narrow by type, boards, and tags. Searching for light and filtering to the Architecture board leaves only the architecture references that mention light. Opening a result lands on the reference page, with the tag added a moment ago.
 
-## 00:02:08 — What matches, and what remains
+## 00:02:07 — Saved for real
 
-The working page delivers collection browsing, reference details, notes, and saving source links. The mock goes further with boards and tag filtering. This comparison preserves those visible gaps, so the video demonstrates the current product honestly.
+Everything shown was saved for real: the upload, the board, the tags and the note are in the database, and search found them a moment later. That is the Inspiration library today: browse, save, organise, and find.
 
-Reference: `docs/mocks/inspiration.html`. Images are public Picsum placeholders cached in `e2e/demo/inspiration/images`. Titles and photographer names come from the mock and are fictional labels, not verified credits.
+Images are public Picsum placeholder photographs cached in `e2e/demo/inspiration/images` (original URLs in `images.json`). Titles, notes, tags, boards and photographer names are fictional demonstration labels from `library.json`, not verified credits.
