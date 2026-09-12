@@ -93,6 +93,9 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<Location>().Property(location => location.Longitude).HasPrecision(10, 6);
         modelBuilder.Entity<Location>().Property(location => location.Setting).HasConversion<string>().HasMaxLength(16);
         modelBuilder.Entity<Location>().Property(location => location.ImageSetRevision).HasDefaultValue(1L);
+        modelBuilder.Entity<Location>().Property(location => location.ScoutingReportJson).HasColumnType("jsonb");
+        modelBuilder.Entity<Location>().HasOne(location => location.CurrentScoutingOperation).WithMany()
+            .HasForeignKey(location => location.CurrentScoutingOperationId).OnDelete(DeleteBehavior.SetNull);
         modelBuilder.Entity<LocationImage>().ToTable("location_images").HasKey(image => image.Id);
         modelBuilder.Entity<LocationImage>().HasIndex(image => new { image.LocationId, image.Position });
         modelBuilder.Entity<LocationImage>().ComplexProperty(image => image.Exif).ToJson();

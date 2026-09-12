@@ -1,3 +1,5 @@
+using Loupe.Domain.Operations;
+
 namespace Loupe.Domain.Locations;
 
 public sealed class Location
@@ -20,6 +22,9 @@ public sealed class Location
     public required DateTimeOffset UpdatedAt { get; set; }
     public Guid? CoverImageId { get; set; }
     public long ImageSetRevision { get; set; } = 1;
+    public Guid? CurrentScoutingOperationId { get; set; }
+    public BackgroundOperation? CurrentScoutingOperation { get; set; }
+    public string? ScoutingReportJson { get; set; }
     public long Revision { get; set; } = 1;
     public ICollection<LocationTag> Tags { get; } = new List<LocationTag>();
     public ICollection<LocationImage> Images { get; } = new List<LocationImage>();

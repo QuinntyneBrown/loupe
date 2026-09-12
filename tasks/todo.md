@@ -421,12 +421,12 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 
 ## L2-060: Request, regenerate, and outdate the scouting report
 - [ ] L2-060.1: Given a location with at least one image and no report, when Request scouting report is selected, then a durable operation is acknowledged with a status location, the detail shows Queued or Running without waiting for the provider, browsing and editing remain available, and the nearby disclosure names the configured provider and states that the images, brief, and camera settings are sent.
-- [ ] L2-060.2: Given a location with no images, when a report is requested through the UI or directly through the API, then the UI explains that an image is needed, the API returns a field error, and no provider call is made.
+- [x] L2-060.2: Given a location with no images, when a report is requested through the UI or directly through the API, then the UI explains that an image is needed, the API returns a field error, and no provider call is made.
 - [ ] L2-060.3: Given a current report, when an image is added or removed, then the report is labeled Outdated with the image count and timestamp it used, it stays readable, and Regenerate is offered; the report remains current for search until a replacement commits.
 - [ ] L2-060.4: Given a validated regenerated report, when it commits, then the new report, generation timestamp, execution mode, model provenance, brief snapshot, and image-set revision become current together, and personal notes are unchanged; while regeneration is running or after it fails, the previous report remains visible.
 - [ ] L2-060.5: Given repeated requests for an unchanged image set, brief, model, prompt version, and execution mode, when submitted without explicit Regenerate, then the completed report is reused without a provider call; explicit Regenerate creates one new job under L2-035, and a second request while that job is active returns the active job.
 - [ ] L2-060.6: Given transient, invalid-output, unsupported-input, or credential failures, when the job runs, then L2-034 retry classes apply, a failed job shows a safe reason with Retry, and any earlier report stays readable.
-- [ ] L2-060.7: Given missing live credentials, when a report is requested, then the API reports Integration not configured without queuing work and the location remains editable; the Azure configuration rules in L2-036 apply to scouting reports.
+- [x] L2-060.7: Given missing live credentials, when a report is requested, then the API reports Integration not configured without queuing work and the location remains editable; the Azure configuration rules in L2-036 apply to scouting reports.
 - [ ] L2-060.8: Given a report is displayed, when inspected, then it is labeled AI generated with its timestamp, model provenance, brief snapshot, and image-set revision, and it is rendered separately from personal notes.
 
 ## L2-061: Find locations for a shoot idea

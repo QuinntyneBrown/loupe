@@ -14,7 +14,7 @@ public sealed record LocationResult(Guid Id, string Name, string? AddressLine1, 
         location.Setting, location.ScoutingBrief, location.Notes,
         location.Tags.OrderBy(tag => tag.Name, StringComparer.OrdinalIgnoreCase).Select(tag => new LocationTagResult(tag.Name, tag.Category)).ToArray(),
         location.Images.OrderBy(image => image.Position).Select(image => LocationImageResult.From(location.Id, image)).ToArray(),
-        location.CoverImageId, null, "None", location.CreatedAt, location.UpdatedAt, location.Revision);
+        location.CoverImageId, null, LocationReportStatus.Derive(location), location.CreatedAt, location.UpdatedAt, location.Revision);
 
     private static string Format(decimal value) => value.ToString("0.000000", CultureInfo.InvariantCulture);
 }

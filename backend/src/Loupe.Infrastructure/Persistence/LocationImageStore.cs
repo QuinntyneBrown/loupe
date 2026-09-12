@@ -42,7 +42,7 @@ public sealed class LocationImageStore(LibraryDbContext database, TimeProvider c
     public async Task<Location> RemoveAsync(Guid locationId, string ownerId, Guid imageId, long revision, CancellationToken cancellationToken)
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
-        var location = await Lock(locationId, ownerId).Include(item => item.Images).Include(item => item.Tags).SingleOrDefaultAsync(cancellationToken)
+        var location = await Lock(locationId, ownerId).Include(item => item.Images).Include(item => item.Tags).Include(item => item.CurrentScoutingOperation).SingleOrDefaultAsync(cancellationToken)
             ?? throw new ResourceNotFoundException();
         var image = location.Images.SingleOrDefault(item => item.Id == imageId) ?? throw new ResourceNotFoundException();
         if (location.Revision != revision) throw new RevisionConflictException();
@@ -69,7 +69,7 @@ public sealed class LocationImageStore(LibraryDbContext database, TimeProvider c
 
     public async Task<Location> SetCoverAsync(Guid locationId, string ownerId, Guid imageId, long revision, CancellationToken cancellationToken)
     {
-        var location = await database.Locations.Include(item => item.Images).Include(item => item.Tags)
+        var location = await database.Locations.Include(item => item.Images).Include(item => item.Tags).Include(item => item.CurrentScoutingOperation)
             .SingleOrDefaultAsync(item => item.Id == locationId && item.OwnerId == ownerId, cancellationToken) ?? throw new ResourceNotFoundException();
         if (location.Images.All(item => item.Id != imageId)) throw new ResourceNotFoundException();
         if (location.Revision != revision) throw new RevisionConflictException();

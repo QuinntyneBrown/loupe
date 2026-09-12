@@ -1,6 +1,7 @@
 using Loupe.Application.Common;
 using Loupe.Application.Locations;
 using Loupe.Domain.Locations;
+using Loupe.Domain.Operations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Loupe.Infrastructure.Persistence;
@@ -14,7 +15,7 @@ public sealed class LocationStore(LibraryDbContext context, TimeProvider clock) 
     }
 
     public Task<Location?> FindOwnedAsync(Guid id, string ownerId, CancellationToken cancellationToken) =>
-        context.Locations.AsNoTracking().Include(location => location.Tags).Include(location => location.Images)
+        context.Locations.AsNoTracking().Include(location => location.Tags).Include(location => location.Images).Include(location => location.CurrentScoutingOperation)
             .SingleOrDefaultAsync(location => location.Id == id && location.OwnerId == ownerId, cancellationToken);
 
     public Task<int> CountAsync(string ownerId, CancellationToken cancellationToken) =>
@@ -28,7 +29,11 @@ public sealed class LocationStore(LibraryDbContext context, TimeProvider clock) 
         return await query.OrderByDescending(location => location.CreatedAt).ThenBy(location => location.Id).Take(count)
             .Select(location => new LocationSummary(location.Id, location.Name, location.Locality,
                 location.CoverImageId == null ? null : LocationImageUrls.Preview(location.Id, location.CoverImageId.Value),
-                location.Images.Count, "None", location.CreatedAt))
+                location.Images.Count,
+                location.CurrentScoutingOperation != null && location.CurrentScoutingOperation.Status == OperationStatus.Queued ? "Queued"
+                : location.CurrentScoutingOperation != null && location.CurrentScoutingOperation.Status == OperationStatus.Running ? "Running"
+                : location.CurrentScoutingOperation != null && location.CurrentScoutingOperation.Status == OperationStatus.Failed ? "Failed"
+                : location.ScoutingReportJson == null ? "None" : "Ready", location.CreatedAt))
             .ToListAsync(cancellationToken);
     }
 
@@ -74,8 +79,8 @@ public sealed class LocationStore(LibraryDbContext context, TimeProvider clock) 
 
     private async Task<Location> EditAsync(Guid id, string ownerId, long revision, Action<Location> apply, CancellationToken cancellationToken)
     {
-        var location = await context.Locations.Include(item => item.Tags).SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken)
-            ?? throw new ResourceNotFoundException();
+        var location = await context.Locations.Include(item => item.Tags).Include(item => item.Images).Include(item => item.CurrentScoutingOperation)
+            .SingleOrDefaultAsync(item => item.Id == id && item.OwnerId == ownerId, cancellationToken) ?? throw new ResourceNotFoundException();
         if (location.Revision != revision) throw new RevisionConflictException();
         apply(location);
         location.UpdatedAt = clock.GetUtcNow();

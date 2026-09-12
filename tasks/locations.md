@@ -22,7 +22,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] A6b Add a location from the grid (L2-055.1, .3, .8; L2-043.7; L2-044.6; L2-045.2)
 - [x] A7 Inspect a location and edit its details (L2-055.2, .4, .5, .6, .8; L2-057.2, .3, .4, .6; L2-044.2)
 - [x] A8 Manage location images in the gallery (L2-056.1–.6, .9; L2-057.2, .5)
-- [ ] B1 Admit a scouting report request (L2-060.1, .2, .5, .7; L2-033.1, .5; L2-035)
+- [x] B1 Admit a scouting report request (L2-060.1, .2, .7; L2-033.1; L2-035)
 - [ ] B2 Generate, validate, and publish a scouting report (L2-058.1–.7; L2-059.3, .4; L2-060.4; L2-034.1–.3; L2-036.6)
 - [ ] B3 Outdate, cancel, and retry scouting work (L2-060.3, .6; L2-056.5; L2-031.7; L2-033.4; L2-034.4)
 - [ ] B4 Request and read the scouting report in the detail (L2-060.1–.8; L2-058.1; L2-057.3; L2-041.2)
@@ -427,4 +427,42 @@ recorded only when actually executed.
 - Non-claims: the report-outdating half of L2-056.5 lands with B3/B4 (the remove
   dialog states it); drag-and-drop is not offered (the file picker is the non-drag
   path); HEIC previews come from the server preview URL, not the browser.
+
+### B1 — Admit a scouting report request (L2-060.1, .2, .7; L2-033.1; L2-035)
+
+- Tests: `backend/tests/Loupe.Api.Tests/Scouting/ScoutingAdmissionTests.cs`
+  (4 cases) with `ApiFactory` in Live mode and a `ControlledAiTransport` that
+  counts provider calls: `POST /api/locations/{id}/scouting-report` on an imaged
+  location → 202 with `Location: /api/operations/{id}`, type `LocationScouting`,
+  `Queued`, `Live`; the same `Idempotency-Key` replays the identical body; a
+  repeat without the key and a `regenerate` request while the job is active both
+  return the active job; the detail and grid card report `Queued` with `report`
+  null, `…/scouting-report/operation` returns the job and `…/scouting-report` →
+  204; notes remain editable; zero provider calls; after an API restart the job
+  is still `Queued`. No images → 400 naming `images` with nothing queued and
+  `None` unchanged. Without `Ai:ApiKey` → 503 `integration_not_configured` with
+  `Retry-After`, nothing queued, and the brief still saves. Five admitted jobs →
+  the sixth 429 with `Retry-After` and no operation; a stranger → 404; a stale
+  revision → 409; revision 0 → 400.
+- RED: `-Filter 'FullyQualifiedName~ScoutingAdmissionTests'` → `Failed: 4,
+  Passed: 0` — the route returned 404 (`Expected: Accepted / Actual: NotFound`).
+- Built: `Loupe.Domain/Scouting/{ScoutingInput,ScoutingImageInput}`,
+  `OperationType.LocationScouting`, `Location.CurrentScoutingOperationId`
+  (navigation to `BackgroundOperation`, `SetNull`) and `ScoutingReportJson`
+  (migration `LocationScouting`); `IScoutingConfiguration`/`ScoutingConfiguration`
+  (`location-scouting-v1`), `IScoutingStore`/`ScoutingStore.AdmitAsync`
+  (admission lock, row lock, revision, `images` field error, active job returned,
+  five-active `AnalysisLimitException`, input built from the ordered images'
+  preview keys and allowlisted EXIF, the image-set revision and the brief);
+  `RequestScoutingReportCommand[Handler]` (identity resolved before any work,
+  receipt type `scouting`), `GetScoutingOperationQuery[Handler]`,
+  `GetScoutingReportQuery[Handler]` (204 until a report shape exists),
+  `ScoutingReportsController`, `RequestScoutingReportRequest`;
+  `LocationReportStatus.Derive` feeds `reportStatus` on the detail and the grid.
+- GREEN: same filter → `Passed: 4`. Band `Locations|Scouting|Search|Admission|
+  CritiqueLease|Operations` → `Passed: 136`. `dotnet build` clean; `dotnet format`
+  clean for the new files.
+- Non-claims: reuse of a Succeeded report without a provider call and explicit
+  Regenerate after success (L2-060.5) need a completed job, so they are proven in
+  B2 with the worker; the `GET …/scouting-report` body is typed in B2.
 
