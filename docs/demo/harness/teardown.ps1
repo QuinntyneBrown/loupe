@@ -12,7 +12,7 @@ param(
 )
 
 Write-Host "Stopping $Prefix containers..." -ForegroundColor Cyan
-docker rm -f "$Prefix-api" "$Prefix-worker" "$Prefix-postgres" 2>$null | Out-Null
+docker rm -f "$Prefix-api" "$Prefix-worker" "$Prefix-postgres" "$Prefix-ollama" 2>$null | Out-Null
 docker network rm "$Prefix-net" 2>$null | Out-Null
 
 Write-Host "Stopping the Angular dev server (port $AppPort)..." -ForegroundColor Cyan
