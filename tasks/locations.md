@@ -24,7 +24,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] A8 Manage location images in the gallery (L2-056.1–.6, .9; L2-057.2, .5)
 - [x] B1 Admit a scouting report request (L2-060.1, .2, .7; L2-033.1; L2-035)
 - [x] B2 Generate, validate, and publish a scouting report (L2-058.1–.7; L2-059.3, .4; L2-060.4, .5, .6, .8; L2-034)
-- [ ] B3 Outdate, cancel, and retry scouting work (L2-060.3, .6; L2-056.5; L2-031.7; L2-033.4; L2-034.4)
+- [x] B3 Outdate, cancel, and retry scouting work (L2-060.3, .6; L2-056.5; L2-055.5; L2-031.7; L2-034.4)
 - [ ] B4 Request and read the scouting report in the detail (L2-060.1–.8; L2-058.1; L2-057.3; L2-041.2)
 - [ ] B5 Release evaluation manifest and procedure (L2-059.5, .6; L2-050.2, .5)
 - [ ] C1 Find locations by keyword with shoot filters (L2-062.1, .2, .3, .7, .8; L2-061.2–.6)
@@ -525,4 +525,41 @@ recorded only when actually executed.
   recorded as procedure in B5, never as a passed check here; the 60-second lease
   recovery and timeout classes are covered by the shared lease tests, not
   re-proven per job type; UI rendering of the report is B4.
+
+### B3 — Outdate, cancel, and retry scouting work (L2-060.3, .6; L2-056.5; L2-055.5; L2-031.7; L2-034.4)
+
+- Tests: `backend/tests/Loupe.Api.Tests/Scouting/ScoutingLifecycleTests.cs`
+  (7 cases): after a report succeeds, adding an image returns `reportStatus`
+  `Outdated` with the report still carrying `imageCount` 2 and its original
+  `generatedAt`, the grid card shows `Outdated`, removing an image keeps it
+  `Outdated` and readable, and Regenerate restores `Ready` with a newer report;
+  editing the brief leaves `Ready` with `briefSnapshot` still the first brief;
+  while a job is running, deleting the location, adding an image, or removing an
+  image marks the job `Canceled` and the released run commits nothing (the
+  location is gone, or the report stays absent with status `None`); three 503s
+  fail the job with `provider_unavailable` and `Failed` on the detail, a retry
+  with a stale revision → 409, `POST /api/operations/{id}/retry` → 202 with a new
+  `LocationScouting` job that succeeds (`Ready`), retrying a succeeded or a
+  refused (`unsupported_input`) job → 409 `retry_unavailable`; a retryable failure
+  whose image set changed since → 409 `analysis_inputs_changed` with no provider
+  call.
+- RED: `-Filter 'FullyQualifiedName~ScoutingLifecycleTests'` → `Failed: 6,
+  Passed: 1` — `Expected: "Outdated" / Actual: "Ready"`, `Expected: "Canceled" /
+  Actual: "Running"`, and the retry route answered 404 for a scouting job; the
+  brief-edit case already passed on B2 and confirms rather than drives.
+- Built: `LocationReportStatus.Derive` compares the saved report's image-set
+  revision with the location's (`Outdated`), shared by the detail and the list
+  projection; `ScoutingCancellation` cancels the location's active
+  `LocationScouting` job under the admission lock from `LocationImageStore`
+  add/remove and `DeletionStore.DeleteLocationAsync`; `ScoutingInputBuilder`
+  moved to Application for admission and retry; `RetryScoutingReportCommand
+  [Handler]` (same retryable codes, `RetryAvailableAt`, revision, identity and
+  input comparison → `AnalysisInputsChangedException`, then `AdmitAsync` with
+  regenerate); `RetryCritiqueCommandHandler` dispatches `LocationScouting` to it
+  before its unchanged critique branch.
+- GREEN: same filter → `Passed: 7`. Band `Scouting|Locations|CritiqueManualRetry|
+  CritiqueRetry|Deletion|Cleanup|Search` → `Passed: 166`. `dotnet build` clean;
+  `dotnet format` clean.
+- Non-claims: the Outdated label's count/timestamp display, Regenerate and Retry
+  controls are B4; "current for search until a replacement commits" is C1.
 

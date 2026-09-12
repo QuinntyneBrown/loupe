@@ -16,6 +16,7 @@ public sealed class LocationImageStore(LibraryDbContext database, TimeProvider c
     {
         // The receipt owns the transaction; lock the location so concurrent uploads cannot exceed the cap or collide on a position.
         if (database.Database.CurrentTransaction is null) throw new InvalidOperationException("Adding a location image requires a transaction.");
+        await ScoutingCancellation.CancelAsync(database, locationId, ownerId, "The image set changed.", clock.GetUtcNow(), cancellationToken);
         var location = await Lock(locationId, ownerId).Include(item => item.Images).SingleOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException();
         if (location.Images.Count >= LocationImageLimit.Maximum) throw new RequestValidationException("images", LocationImageLimit.Message);
         var added = new LocationImage
@@ -42,6 +43,7 @@ public sealed class LocationImageStore(LibraryDbContext database, TimeProvider c
     public async Task<Location> RemoveAsync(Guid locationId, string ownerId, Guid imageId, long revision, CancellationToken cancellationToken)
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
+        await ScoutingCancellation.CancelAsync(database, locationId, ownerId, "The image set changed.", clock.GetUtcNow(), cancellationToken);
         var location = await Lock(locationId, ownerId).Include(item => item.Images).Include(item => item.Tags).Include(item => item.CurrentScoutingOperation).SingleOrDefaultAsync(cancellationToken)
             ?? throw new ResourceNotFoundException();
         var image = location.Images.SingleOrDefault(item => item.Id == imageId) ?? throw new ResourceNotFoundException();

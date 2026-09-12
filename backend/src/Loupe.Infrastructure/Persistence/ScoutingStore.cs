@@ -2,7 +2,6 @@ using System.Text.Json;
 using Loupe.Application.Common;
 using Loupe.Application.Operations;
 using Loupe.Application.Scouting;
-using Loupe.Domain.Locations;
 using Loupe.Domain.Operations;
 using Loupe.Domain.Scouting;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +18,7 @@ public sealed class ScoutingStore(LibraryDbContext database, TimeProvider clock)
             .Include(item => item.Images).SingleOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException();
         if (location.Revision != revision) throw new RevisionConflictException();
         if (location.Images.Count == 0) throw new RequestValidationException("images", "Add an image before requesting a scouting report.");
-        var inputJson = JsonSerializer.Serialize(Input(location));
+        var inputJson = JsonSerializer.Serialize(ScoutingInputBuilder.From(location));
         var active = database.BackgroundOperations.Where(operation => operation.OwnerId == ownerId
             && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running));
         var existing = await active.SingleOrDefaultAsync(operation => operation.Type == OperationType.LocationScouting && operation.ResourceId == locationId, cancellationToken);
@@ -68,7 +67,4 @@ public sealed class ScoutingStore(LibraryDbContext database, TimeProvider clock)
         await database.SaveChangesAsync(cancellationToken);
         return operation.Id;
     }
-
-    public static ScoutingInput Input(Location location) => new(location.ImageSetRevision, location.ScoutingBrief,
-        location.Images.OrderBy(image => image.Position).Select(image => new ScoutingImageInput(image.Id, image.Position, image.PreviewKey, image.Exif)).ToArray());
 }

@@ -1,7 +1,9 @@
+using System.Text.Json;
 using Loupe.Application.Common;
 using Loupe.Application.Locations;
 using Loupe.Domain.Locations;
 using Loupe.Domain.Operations;
+using Loupe.Domain.Scouting;
 using Microsoft.EntityFrameworkCore;
 
 namespace Loupe.Infrastructure.Persistence;
@@ -26,15 +28,24 @@ public sealed class LocationStore(LibraryDbContext context, TimeProvider clock) 
         var query = context.Locations.AsNoTracking().Where(location => location.OwnerId == ownerId);
         if (cursor is not null) query = query.Where(location => location.CreatedAt < cursor.CreatedAt
             || location.CreatedAt == cursor.CreatedAt && location.Id.CompareTo(cursor.Id) > 0);
-        return await query.OrderByDescending(location => location.CreatedAt).ThenBy(location => location.Id).Take(count)
-            .Select(location => new LocationSummary(location.Id, location.Name, location.Locality,
-                location.CoverImageId == null ? null : LocationImageUrls.Preview(location.Id, location.CoverImageId.Value),
-                location.Images.Count,
-                location.CurrentScoutingOperation != null && location.CurrentScoutingOperation.Status == OperationStatus.Queued ? "Queued"
-                : location.CurrentScoutingOperation != null && location.CurrentScoutingOperation.Status == OperationStatus.Running ? "Running"
-                : location.CurrentScoutingOperation != null && location.CurrentScoutingOperation.Status == OperationStatus.Failed ? "Failed"
-                : location.ScoutingReportJson == null ? "None" : "Ready", location.CreatedAt))
+        var rows = await query.OrderByDescending(location => location.CreatedAt).ThenBy(location => location.Id).Take(count)
+            .Select(location => new
+            {
+                location.Id,
+                location.Name,
+                location.Locality,
+                location.CoverImageId,
+                ImageCount = location.Images.Count,
+                Operation = location.CurrentScoutingOperation == null ? (OperationStatus?)null : location.CurrentScoutingOperation.Status,
+                location.ScoutingReportJson,
+                location.ImageSetRevision,
+                location.CreatedAt
+            })
             .ToListAsync(cancellationToken);
+        return rows.Select(row => new LocationSummary(row.Id, row.Name, row.Locality,
+            row.CoverImageId == null ? null : LocationImageUrls.Preview(row.Id, row.CoverImageId.Value), row.ImageCount,
+            LocationReportStatus.Derive(row.Operation, row.ScoutingReportJson == null ? null : JsonSerializer.Deserialize<SavedScoutingReport>(row.ScoutingReportJson), row.ImageSetRevision),
+            row.CreatedAt)).ToArray();
     }
 
     public Task<Location> UpdateAsync(Guid id, string ownerId, long revision, LocationDetails details, CancellationToken cancellationToken) =>
