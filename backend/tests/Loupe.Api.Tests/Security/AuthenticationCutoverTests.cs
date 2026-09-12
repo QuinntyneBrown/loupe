@@ -23,7 +23,8 @@ public sealed class AuthenticationCutoverTests(PostgreSqlFixture database) : ICl
         await using (var scope = factory.Services.CreateAsyncScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<LibraryDbContext>();
-            var previous = db.Database.GetMigrations().Last(m => !m.EndsWith("_LocalUsers", StringComparison.Ordinal));
+            var previous = db.Database.GetMigrations()
+                .TakeWhile(m => !m.EndsWith("_LocalUsers", StringComparison.Ordinal)).Last();
             await db.GetService<IMigrator>().MigrateAsync(previous);
             db.Photographs.Add(new Photograph { Id = photoId, OwnerId = "legacy-owner", Title = "Retained photograph", CreatedAt = factory.Clock.GetUtcNow(), ImageKey = "legacy-original", PreviewKey = "legacy-preview", Width = 20, Height = 20 });
             await db.SaveChangesAsync();

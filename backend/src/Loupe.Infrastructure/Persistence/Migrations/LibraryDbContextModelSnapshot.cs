@@ -49,7 +49,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
                     b.HasIndex("OwnerId", "NormalizedName")
                         .IsUnique();
 
-                    b.ToTable("boards", (string?)null);
+                    b.ToTable("boards", (string)null);
                 });
 
             modelBuilder.Entity("Loupe.Domain.Boards.BoardReference", b =>
@@ -70,7 +70,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ReferenceId", "OwnerId");
 
-                    b.ToTable("board_references", (string?)null);
+                    b.ToTable("board_references", (string)null);
                 });
 
             modelBuilder.Entity("Loupe.Domain.Deletions.DeletionOperation", b =>
@@ -331,7 +331,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OwnerId", "CreatedAt", "Id");
 
-                    b.ToTable("photographers", (string?)null);
+                    b.ToTable("photographers", (string)null);
                 });
 
             modelBuilder.Entity("Loupe.Domain.Photographers.PhotographerDraft", b =>
@@ -379,7 +379,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OwnerId", "ExpiresAt");
 
-                    b.ToTable("photographer_drafts", (string?)null);
+                    b.ToTable("photographer_drafts", (string)null);
                 });
 
             modelBuilder.Entity("Loupe.Domain.Photographers.PhotographerTag", b =>
@@ -411,7 +411,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("PhotographerId", "OwnerId");
 
-                    b.ToTable("photographer_tags", (string?)null);
+                    b.ToTable("photographer_tags", (string)null);
                 });
 
             modelBuilder.Entity("Loupe.Domain.Photographs.Photograph", b =>
@@ -657,7 +657,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OwnerId", "ExpiresAt");
 
-                    b.ToTable("reference_drafts", (string?)null);
+                    b.ToTable("reference_drafts", (string)null);
                 });
 
             modelBuilder.Entity("Loupe.Domain.References.ReferenceTag", b =>
@@ -689,7 +689,7 @@ namespace Loupe.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ReferenceId", "OwnerId");
 
-                    b.ToTable("reference_tags", (string?)null);
+                    b.ToTable("reference_tags", (string)null);
                 });
 
             modelBuilder.Entity("Loupe.Domain.Sessions.ApplicationSession", b =>

@@ -631,3 +631,23 @@ be established without printing credentials. Live quality checks are mandatory.
   budget); global load-budget certification is outside this keyword delivery.
 - Keyword delivery is complete and uncommitted. Meaning/indexing and the
   broader branch checklist remain explicitly deferred.
+
+### PR preparation and rebase onto main
+- After keyword completion, publication was explicitly requested. Rebased the
+  feature branch onto `d57eba9`, retaining main's local-account/JWT cutover and
+  the earlier Inspiration/Photographer commits alongside the keyword delivery.
+- Resolved persistence/snapshot and dependency conflicts by retaining both
+  account and library models. The Admin lock now includes the source importer's
+  existing transitive AngleSharp dependency.
+- The first combined build exposed mixed nullable conventions in the generated
+  snapshot. Aligned the table casts with main's disabled nullable context.
+  The ensuing API run passed 142 of 143 cases; its only failure was the cutover
+  fixture selecting the latest non-account migration, now newer than LocalUsers.
+  Targeting the migration immediately before LocalUsers restores the intended
+  legacy-session scenario without weakening its content-retention assertions.
+  All 37 authentication cases then passed; the 106 other search/persistence/
+  source-import cases had already passed in the combined run.
+- All 178 selected Chromium search, authentication/layout and shared-library
+  regressions passed after rebasing. Production Angular build passed with the
+  existing warning threshold (764.15 kB initial bundle versus 500 kB).
+  Independent design-system files were unchanged by the rebase.
