@@ -23,7 +23,7 @@ RED, implementation, GREEN, regressions, commit.
 - [x] A7 Inspect a location and edit its details (L2-055.2, .4, .5, .6, .8; L2-057.2, .3, .4, .6; L2-044.2)
 - [x] A8 Manage location images in the gallery (L2-056.1–.6, .9; L2-057.2, .5)
 - [x] B1 Admit a scouting report request (L2-060.1, .2, .7; L2-033.1; L2-035)
-- [ ] B2 Generate, validate, and publish a scouting report (L2-058.1–.7; L2-059.3, .4; L2-060.4; L2-034.1–.3; L2-036.6)
+- [x] B2 Generate, validate, and publish a scouting report (L2-058.1–.7; L2-059.3, .4; L2-060.4, .5, .6, .8; L2-034)
 - [ ] B3 Outdate, cancel, and retry scouting work (L2-060.3, .6; L2-056.5; L2-031.7; L2-033.4; L2-034.4)
 - [ ] B4 Request and read the scouting report in the detail (L2-060.1–.8; L2-058.1; L2-057.3; L2-041.2)
 - [ ] B5 Release evaluation manifest and procedure (L2-059.5, .6; L2-050.2, .5)
@@ -465,4 +465,64 @@ recorded only when actually executed.
 - Non-claims: reuse of a Succeeded report without a provider call and explicit
   Regenerate after success (L2-060.5) need a completed job, so they are proven in
   B2 with the worker; the `GET …/scouting-report` body is typed in B2.
+
+### B2 — Generate, validate, and publish a scouting report (L2-058.1–.7; L2-059.3, .4; L2-060.4, .5, .6, .8; L2-034)
+
+- Tests: `backend/tests/Loupe.Api.Tests/Scouting/ScoutingWorkerTests.cs` (23
+  cases) hosting the real `AnalysisWorker` against a `ControlledSourceTransport`
+  and the `ScoutingReportFixture` builder (a complete valid provider result citing
+  image numbers): a three-image location whose address, coordinates, notes and
+  tags carry SECRET markers reaches `Succeeded`; the single recorded request
+  contains the brief, `"store":false`, a strict `json_schema`, three
+  `input_image` parts and no `"tools":` property, and none of the secrets or
+  coordinates; `GET …/scouting-report` returns `mode` Live, `location-scouting-v1`,
+  the model, the brief snapshot, `imageCount` 3, the image-set revision and a
+  timestamp; the report's sections are `overview, suitability, timesOfDay,
+  techniques, groupSize, cautions` in that order, with the five shoot types, the
+  seven periods, ratings and bases as sent, and every entry's `citedImageIds`
+  resolved to the real ids of images 1 and 3; no `score` appears; the detail is
+  `Ready` with the same report and untouched notes, the card is `Ready`, a stranger
+  → 404. Twenty invalid shapes (missing section, foreign rating/period/technique/
+  basis, blank and 1,001-rune text, duplicate or missing shoot type, four
+  strengths, thirteen or duplicate techniques, no Recommended while Avoid is
+  present, Recommended on an Inferred basis, an image number outside the set, no
+  cited image, a numeric `score`, group 0/501/min-above-max) each retry once
+  (`Queued` + `invalid_output`, one call), then after 5 s fail `invalid_output`
+  with a safe message, two calls, `…/scouting-report` → 204 and the detail
+  `Failed` with `report` null. An unchanged request after success returns the same
+  operation with no provider call; `regenerate` creates a new job, the previous
+  report stays visible while it runs (`Running`), a second regenerate returns the
+  active job, and on commit the second report replaces the first with notes
+  unchanged (two calls in all). After a success, a regenerate that meets 503 →
+  `Queued provider_unavailable`, then 429 → `Queued provider_rate_limited`, then a
+  refusal → `Failed unsupported_input` with the earlier report still readable.
+- RED: `-Filter 'ScoutingWorkerTests.L2_058_1|ScoutingWorkerTests.L2_060_5'` →
+  `Expected: "Succeeded" / Actual: "Queued"` (nothing processed
+  `LocationScouting`) and an empty `…/scouting-report` body. One later failure
+  was the spec's own: the prompt legitimately says "call tools", so the request
+  check now asserts the absence of a `"tools":` property.
+- Built: `Loupe.Domain/Scouting` report types (`ScoutingReport`, `ReportStrength`,
+  `SuitabilityEntry`, `TimeOfDayEntry`, `TechniqueEntry`, `GroupSizeEntry`,
+  `CautionEntry`, `SavedScoutingReport`) and the shared vocabularies as enums with
+  `JsonStringEnumMemberName` labels; `ScoutingReportValidator` (every L2-058 rule,
+  Recommended/Avoid must be Visible, a supportable set needs a Recommended period,
+  cited ids ⊆ analysed set); `IScoutingProvider`, `IScoutingWorkStore`,
+  `RunScoutingReportCommand[Handler]` (the reference-analysis handler shape: 120 s
+  timeout, 20 s lease renewal, `IAnalysisFailureStore` routing); `ScoutingWorkStore`
+  (claim/renew, conditional publish under row locks: current operation and
+  image-set revision must still match); `AzureOpenAiScoutingProvider` (numbered
+  previews with allowlisted EXIF captions and the brief only, `store=false`,
+  `ScoutingPrompt`, `ScoutingResponseFormat` strict schema, `ScoutingOutput`
+  mapping image numbers to ids with unknown numbers failing validation);
+  `ScoutingStore` reuse of a Succeeded report for unchanged input; `AnalysisWorker`
+  round-robin of four kinds and the worker `Program.cs` whitelist;
+  `AnalysisFailureStore` scouting wording; `GetScoutingReportQuery` typed as
+  `SavedScoutingReport?` and `LocationResult.report`.
+- GREEN: `-Filter 'FullyQualifiedName~ScoutingWorkerTests'` → `Passed: 23`. Band
+  `Scouting|Locations|ReferenceAnalysisWorker|Critique|PhotographerSummary|
+  Operations` → `Passed: 221`. `dotnet build` clean; `dotnet format` clean.
+- Non-claims: L2-059.1/.2/.5/.6 are prompt properties and release evaluations —
+  recorded as procedure in B5, never as a passed check here; the 60-second lease
+  recovery and timeout classes are covered by the shared lease tests, not
+  re-proven per job type; UI rendering of the report is B4.
 

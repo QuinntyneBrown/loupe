@@ -30,6 +30,25 @@ public sealed class ScoutingStore(LibraryDbContext database, TimeProvider clock)
             await database.SaveChangesAsync(cancellationToken);
             return existing.Id;
         }
+        if (!regenerate)
+        {
+            // An unchanged image set, brief, mode, model, and prompt version reuses the completed report without a provider call.
+            var current = location.ScoutingReportJson is null ? null : JsonSerializer.Deserialize<SavedScoutingReport>(location.ScoutingReportJson);
+            var currentId = current?.OperationId ?? Guid.Empty;
+            var completed = await database.BackgroundOperations.FromSqlInterpolated($"SELECT * FROM background_operations WHERE \"OwnerId\" = {ownerId} AND \"ResourceId\" = {locationId} AND \"Type\" = 'LocationScouting' AND \"Status\" = 'Succeeded' AND \"Mode\" = {identity.Mode.ToString()} AND \"Model\" = {identity.Model} AND \"PromptVersion\" = {identity.PromptVersion} AND \"InputJson\" = CAST({inputJson} AS jsonb) AND \"OutputJson\" IS NOT NULL ORDER BY (\"Id\" = {currentId}) DESC, \"CompletedAt\" DESC, \"Id\" LIMIT 1")
+                .AsNoTracking().SingleOrDefaultAsync(cancellationToken);
+            if (completed is not null)
+            {
+                if (current?.OperationId != completed.Id)
+                {
+                    location.ScoutingReportJson = completed.OutputJson;
+                    location.Revision++;
+                }
+                location.CurrentScoutingOperationId = completed.Id;
+                await database.SaveChangesAsync(cancellationToken);
+                return completed.Id;
+            }
+        }
         if (await active.CountAsync(cancellationToken) >= 5) throw new AnalysisLimitException();
         var now = clock.GetUtcNow();
         var operation = new BackgroundOperation

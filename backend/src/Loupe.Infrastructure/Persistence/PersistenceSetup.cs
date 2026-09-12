@@ -57,6 +57,8 @@ public static class PersistenceSetup
         services.AddScoped<ILocationStore, LocationStore>();
         services.AddScoped<ILocationImageStore, LocationImageStore>();
         services.AddScoped<IScoutingStore, ScoutingStore>();
+        services.AddScoped<IScoutingWorkStore, ScoutingWorkStore>();
+        services.AddScoped<IScoutingProvider, AzureOpenAiScoutingProvider>();
         services.AddSingleton<IScoutingConfiguration, ScoutingConfiguration>();
         services.AddScoped<IBoardStore, BoardStore>();
         services.AddScoped<IReferenceImportStore, ReferenceImportStore>();
