@@ -852,3 +852,13 @@ use `npm --prefix e2e test`; backend options/provisioning are in `backend/README
   injects `VIDEO_SERVICE` in `domain`; the page, dialogs, and unsaved-changes guard
   live in the application project. The `--lp-video-ratio` token was added to the
   design system first and mirrored.
+
+## VID-09: in-app player on the video detail page (L2-056.4)
+
+- Red: `npx playwright test video-player.spec.js` failed because cards had no Play
+  link and `/videos/:id` did not route.
+- Green: the player spec passes with the `videos` and `video-editing` specs after
+  the card's thumbnail became a router link to the detail page.
+- `VideoPlayer` (components) renders the privacy-enhanced embed; `VideoDetail`
+  (domain) loads the video through `VIDEO_SERVICE`; the page composes the shared
+  edit and delete dialogs and returns to Videos with a notice after deletion.

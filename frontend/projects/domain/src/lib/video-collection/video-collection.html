@@ -123,6 +123,7 @@
     }
     @for (item of items(); track item.id) {
       <lp-video-card
+        [destination]="'/videos/' + item.id"
         [title]="item.title"
         [url]="item.url"
         [thumbnailUrl]="item.thumbnailUrl"

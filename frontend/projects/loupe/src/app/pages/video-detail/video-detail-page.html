@@ -1,0 +1,36 @@
+<main id="main" class="lp-main" tabindex="-1">
+  <a class="back" routerLink="/videos"
+    ><svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-chevron-left" /></svg
+    >Videos</a
+  >
+  <lp-video-detail
+    [id]="id()"
+    (editRequested)="editing.set($event)"
+    (deleteRequested)="deleting.set($event)"
+  />
+</main>
+<lp-unsaved-changes [dirty]="dirty" />
+@if (editing(); as item) {
+  <lp-video-form
+    [video]="item"
+    (saved)="saved($event)"
+    (closed)="closeEdit()"
+    (deleteRequested)="deleting.set($event)"
+  />
+}
+@if (deleting(); as item) {
+  <lp-delete-video [video]="item" (deleted)="deletionComplete($event)" (closed)="closeDelete()" />
+}
+@if (notice()) {
+  <div class="notice" role="status">
+    <span>{{ notice() }}</span
+    ><button
+      class="lp-icon-button"
+      type="button"
+      aria-label="Dismiss notification"
+      (click)="notice.set('')"
+    >
+      <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+    </button>
+  </div>
+}

@@ -1,4 +1,5 @@
 import { Component, inject, signal, viewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { VideoCollection } from 'domain';
 import { SESSION_SERVICE, VideoResult } from 'api';
 import { VideoForm } from '../../dialogs/video-form/video-form';
@@ -12,7 +13,11 @@ import { UnsavedChanges } from '../../dialogs/unsaved-changes/unsaved-changes';
   styleUrl: './videos-page.css',
 })
 export class VideosPage {
-  readonly notice = signal('');
+  readonly notice = signal(
+    typeof inject(Router).currentNavigation()?.extras.state?.['videoDeleted'] === 'string'
+      ? `“${inject(Router).currentNavigation()?.extras.state?.['videoDeleted']}” deleted.`
+      : '',
+  );
   readonly adding = signal(false);
   readonly editing = signal<VideoResult | null>(null);
   readonly deleting = signal<VideoResult | null>(null);

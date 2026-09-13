@@ -383,6 +383,7 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 - [x] L2-056.1: Given saved videos, when the list is opened, then videos appear newest first with stable cursor paging and an accurate total, owner-scoped.
 - [x] L2-056.2: Given a keyword query, when the list is filtered, then a video matches on title, channel, summary, notes, or tag names.
 - [x] L2-056.3: Given a topic or selected tags, when the list is filtered, then only matching videos are returned before paging, and the tag facet lists each tag with its count.
+- [x] L2-056.4: Given a saved video, when opened from its card or by URL, then it plays inside Loupe in an embedded privacy-enhanced YouTube player with its details, tags, notes, a YouTube link, and edit and delete actions; an unavailable video says so and offers the way back.
 
 ## L2-057: Index videos for meaning search
 - [x] L2-057.1: Given embeddings are configured and a saved or edited video, when the index worker runs, then the vector is stored, the bookmark reads as indexed, and notes are excluded from the submitted text.

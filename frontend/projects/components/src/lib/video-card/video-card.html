@@ -1,13 +1,5 @@
 <article>
-  <a
-    #link
-    class="thumb"
-    [href]="url()"
-    target="_blank"
-    rel="noopener noreferrer"
-    referrerpolicy="no-referrer"
-    [attr.aria-label]="'Watch ' + title() + ' on YouTube'"
-  >
+  <a #link class="thumb" [routerLink]="destination()" [attr.aria-label]="'Play ' + title()">
     @if (!imageFailed()) {
       <img
         [src]="thumbnailUrl()"

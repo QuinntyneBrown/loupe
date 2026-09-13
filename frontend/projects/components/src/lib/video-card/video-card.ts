@@ -1,7 +1,9 @@
 import { Component, computed, ElementRef, input, output, signal, viewChild } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'lp-video-card',
+  imports: [RouterLink],
   templateUrl: './video-card.html',
   styleUrl: './video-card.css',
 })
@@ -10,6 +12,7 @@ export class VideoCard {
   focus(): void {
     this.link().nativeElement.focus();
   }
+  readonly destination = input.required<string>();
   readonly title = input.required<string>();
   readonly url = input.required<string>();
   readonly thumbnailUrl = input.required<string>();

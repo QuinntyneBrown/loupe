@@ -23,8 +23,11 @@ product scope remains in `../tasks/todo.md`; this is an incremental implementati
 
 The Videos page (`/videos`) saves YouTube videos through `IVideoService` and
 `VIDEO_SERVICE`, tags them, and searches them by keyword or, when the API has an
-embedding deployment, by meaning. Playwright replaces the adapter with the
-`window.loupeVideos` fixture in `../e2e/fixtures/video-library.js`.
+embedding deployment, by meaning. Each card opens `/videos/:id`, which plays the
+video in an embedded `youtube-nocookie.com` player beside its details, tags, and
+private notes. Playwright replaces the adapter with the `window.loupeVideos`
+fixture in `../e2e/fixtures/video-library.js`; the player frame is asserted by
+its source, not loaded.
 
 Sign-in uses local email/password credentials through `ISessionService` and
 `SESSION_SERVICE`. The production adapter obtains anonymous antiforgery proof,

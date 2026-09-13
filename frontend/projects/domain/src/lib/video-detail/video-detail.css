@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+h1,
+h2,
+p {
+  margin: var(--lp-zero);
+}
+.player {
+  aspect-ratio: var(--lp-video-ratio);
+  border-radius: var(--lp-radius-lg);
+}
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lp-space-2);
+}
+.lp-title {
+  overflow-wrap: anywhere;
+}
+.channel {
+  font-family: var(--lp-font-mono);
+}
+.delete {
+  color: var(--lp-color-danger);
+}
+section {
+  display: grid;
+  gap: var(--lp-space-3);
+}
+.text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: var(--lp-leading-relaxed);
+}

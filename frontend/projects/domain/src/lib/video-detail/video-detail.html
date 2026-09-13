@@ -1,0 +1,101 @@
+@if (loading() && !item()) {
+  <div class="lp-detail" aria-label="Loading video" aria-busy="true">
+    <div class="lp-detail__media"><div class="lp-skeleton player" aria-hidden="true"></div></div>
+    <div class="lp-detail__head">
+      <div class="lp-skeleton lp-skeleton--title" aria-hidden="true"></div>
+    </div>
+  </div>
+} @else if (unavailable()) {
+  <div class="lp-empty" role="alert">
+    <h1 class="lp-empty__title">This video is no longer available.</h1>
+    <p class="lp-empty__text">It was deleted from your library, or the link is not yours.</p>
+    <div class="lp-empty__action">
+      <a class="lp-button lp-button--secondary" routerLink="/videos">Back to Videos</a>
+    </div>
+  </div>
+} @else if (failed()) {
+  <div class="lp-empty" role="alert">
+    <h1 class="lp-empty__title">Couldn't load this video.</h1>
+    <p class="lp-empty__text">Check your connection and try again. Nothing you saved is lost.</p>
+    <div class="lp-empty__action">
+      <button class="lp-button lp-button--secondary" type="button" (click)="retry()">
+        Try again</button
+      ><a class="lp-button lp-button--ghost" routerLink="/videos">Back to Videos</a>
+    </div>
+  </div>
+} @else if (item(); as video) {
+  <article class="lp-detail" [attr.aria-busy]="loading()">
+    <div class="lp-detail__media">
+      <lp-video-player [videoId]="video.videoId" [title]="video.title" />
+    </div>
+    <header class="lp-detail__head">
+      <div class="pills">
+        <span class="lp-pill">{{ topicLabel(video) }}</span>
+        @if (!video.indexed) {
+          <span class="lp-pill lp-pill--outline">Indexing</span>
+        }
+      </div>
+      <h1 class="lp-title">{{ video.title }}</h1>
+      <div class="lp-detail__meta">
+        @if (video.channel) {
+          <span class="channel">{{ video.channel }}</span>
+        }
+        <span>Saved {{ video.createdAt | date: 'd MMM yyyy' }}</span>
+        <a
+          class="lp-link"
+          [href]="video.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          referrerpolicy="no-referrer"
+          >Open on YouTube<svg class="lp-icon lp-icon--sm" aria-hidden="true">
+            <use href="#i-external" /></svg
+        ></a>
+      </div>
+      <div class="lp-detail__actions">
+        <button
+          #editButton
+          class="lp-button lp-button--secondary"
+          type="button"
+          (click)="editRequested.emit(video)"
+        >
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-edit" /></svg>Edit
+        </button>
+        <button
+          class="lp-button lp-button--ghost delete"
+          type="button"
+          (click)="deleteRequested.emit(video)"
+        >
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-trash" /></svg>Delete
+        </button>
+      </div>
+    </header>
+    <div class="lp-detail__body">
+      @if (video.summary) {
+        <section aria-labelledby="video-summary-title">
+          <h2 id="video-summary-title" class="lp-kicker">What it covers</h2>
+          <p class="text">{{ video.summary }}</p>
+        </section>
+      }
+      <section aria-labelledby="video-tags-title">
+        <h2 id="video-tags-title" class="lp-kicker">Tags</h2>
+        @if (video.tags.length) {
+          <div class="lp-tags">
+            @for (tag of video.tags; track tag.name) {
+              <span class="lp-tag lp-tag--plain">{{ tag.name }}</span>
+            }
+          </div>
+        } @else {
+          <p class="lp-muted">No tags yet.</p>
+        }
+      </section>
+      <section aria-labelledby="video-notes-title">
+        <h2 id="video-notes-title" class="lp-kicker">Your notes</h2>
+        @if (video.notes) {
+          <p class="text">{{ video.notes }}</p>
+        } @else {
+          <p class="lp-muted">No notes yet.</p>
+        }
+      </section>
+    </div>
+  </article>
+}

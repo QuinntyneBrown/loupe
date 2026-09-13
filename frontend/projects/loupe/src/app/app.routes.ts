@@ -10,6 +10,7 @@ import { InspirationPage } from './pages/inspiration/inspiration-page';
 import { ReferenceDetailPage } from './pages/reference-detail/reference-detail-page';
 import { Routes } from '@angular/router';
 import { videoUnsavedGuard } from './video-unsaved.guard';
+import { videoDetailUnsavedGuard } from './video-detail-unsaved.guard';
 import { sessionGuard } from './session.guard';
 import { SignIn } from './pages/sign-in/sign-in';
 import { MyWork } from './pages/my-work/my-work';
@@ -20,6 +21,14 @@ import { DeletionPage } from './pages/deletion/deletion-page';
 import { ComparePage } from './pages/compare/compare-page';
 
 export const routes: Routes = [
+  {
+    path: 'videos/:id',
+    loadComponent: () =>
+      import('./pages/video-detail/video-detail-page').then((module) => module.VideoDetailPage),
+    canActivate: [sessionGuard],
+    canDeactivate: [videoDetailUnsavedGuard],
+    title: 'Video · Loupe',
+  },
   {
     path: 'videos',
     loadComponent: () => import('./pages/videos/videos-page').then((module) => module.VideosPage),

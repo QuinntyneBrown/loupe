@@ -1,0 +1,16 @@
+:host {
+  display: block;
+  min-width: var(--lp-zero);
+}
+.frame {
+  aspect-ratio: var(--lp-video-ratio);
+  border-radius: var(--lp-radius-lg);
+  overflow: hidden;
+  background: var(--lp-color-image-fallback);
+}
+iframe {
+  display: block;
+  width: var(--lp-full);
+  height: var(--lp-full);
+  border: var(--lp-zero);
+}

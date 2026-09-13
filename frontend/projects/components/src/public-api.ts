@@ -4,3 +4,4 @@ export * from './lib/photographer-card/photographer-card';
 export * from './lib/critique-content/critique-content';
 export * from './lib/critique-content/critique-presentation';
 export * from './lib/video-card/video-card';
+export * from './lib/video-player/video-player';

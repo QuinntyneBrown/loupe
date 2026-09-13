@@ -34,7 +34,8 @@ export class VideosPage {
   }
   async expectCard(title, topic, tags = []) {
     const card = this.card(title);
-    const watch = card.getByRole('link', { name: `Watch ${title} on YouTube`, exact: true });
+    await expect(card.getByRole('link', { name: `Play ${title}`, exact: true })).toHaveAttribute('href', /\/videos\/video-\d+$/);
+    const watch = card.getByRole('link', { name: `Open ${title} on youtube.com`, exact: true });
     await expect(watch).toHaveAttribute('href', /^https:\/\/www\.youtube\.com\/watch\?v=/);
     await expect(watch).toHaveAttribute('target', '_blank');
     await expect(watch).toHaveAttribute('rel', 'noopener noreferrer');
@@ -64,7 +65,11 @@ export class VideosPage {
     await expect(this.page.getByRole('heading', { name: 'Save the videos you learn from.', exact: true })).toBeFocused();
   }
   async expectCardFocused(title) {
-    await expect(this.page.getByRole('link', { name: `Watch ${title} on YouTube`, exact: true })).toBeFocused();
+    await expect(this.page.getByRole('link', { name: `Play ${title}`, exact: true })).toBeFocused();
+  }
+  async play(title) {
+    await this.card(title).getByRole('link', { name: `Play ${title}`, exact: true }).click();
+    await expect(this.page).toHaveURL(/\/videos\/video-\d+$/);
   }
   async search(query) {
     const input = this.page.getByRole('searchbox', { name: 'Search your videos', exact: true });
@@ -186,5 +191,59 @@ export class VideoDialog {
   }
   async expectNotice(text) {
     await expect(this.page.getByRole('status')).toContainText(text);
+  }
+}
+
+export class VideoPlayerPage {
+  constructor(page) {
+    this.page = page;
+  }
+  async open(id) {
+    await this.page.goto(`/videos/${id}`);
+    await new SignInPage(this.page).continue();
+  }
+  async expectPlayer(title, videoId) {
+    const frame = this.page.getByTitle(title, { exact: true });
+    await expect(frame).toHaveAttribute('src', `https://www.youtube-nocookie.com/embed/${videoId}?rel=0`);
+    await expect(this.page.getByRole('heading', { name: title, exact: true, level: 1 })).toBeVisible();
+  }
+  async expectDetails({ topic, channel, summary, tags = [], notes }) {
+    if (topic) await expect(this.page.getByText(topic, { exact: true })).toBeVisible();
+    if (channel) await expect(this.page.getByText(channel, { exact: true })).toBeVisible();
+    if (summary) await expect(this.page.getByText(summary, { exact: true })).toBeVisible();
+    for (const tag of tags) await expect(this.page.getByText(tag, { exact: true })).toBeVisible();
+    if (notes) await expect(this.page.getByText(notes, { exact: true })).toBeVisible();
+    else if (notes === null) await expect(this.page.getByText('No notes yet.', { exact: true })).toBeVisible();
+  }
+  async expectYouTubeLink(url) {
+    const link = this.page.getByRole('link', { name: 'Open on YouTube', exact: true });
+    await expect(link).toHaveAttribute('href', url);
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    await expect(link).toHaveAttribute('referrerpolicy', 'no-referrer');
+  }
+  async back() {
+    await this.page.getByRole('link', { name: 'Videos', exact: true }).first().click();
+    await expect(this.page).toHaveURL(/\/videos$/);
+  }
+  async edit() {
+    await this.page.getByRole('button', { name: 'Edit', exact: true }).click();
+  }
+  async expectUnavailable() {
+    await expect(this.page.getByRole('heading', { name: 'This video is no longer available.', exact: true })).toBeVisible();
+    await expect(this.page.getByRole('link', { name: 'Back to Videos', exact: true })).toBeVisible();
+  }
+  async expectLoadFailure() {
+    await expect(this.page.getByRole('heading', { name: "Couldn't load this video.", exact: true })).toBeVisible();
+  }
+  async retry() {
+    await this.page.getByRole('button', { name: 'Try again', exact: true }).click();
+  }
+  async expectNotice(text) {
+    await expect(this.page.getByRole('status')).toContainText(text);
+  }
+  async expectAccessible() {
+    expect((await new AxeBuilder({ page: this.page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]);
+    expect(await this.page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   }
 }

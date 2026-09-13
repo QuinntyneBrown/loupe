@@ -15,3 +15,4 @@ export * from './lib/board-navigation/board-navigation';
 export * from './lib/reference-filters/reference-filters';
 export * from './lib/search-results/search-results';
 export * from './lib/video-collection/video-collection';
+export * from './lib/video-detail/video-detail';
