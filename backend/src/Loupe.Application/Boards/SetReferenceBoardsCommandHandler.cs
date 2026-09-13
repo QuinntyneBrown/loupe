@@ -3,6 +3,7 @@ using Loupe.Application.References;
 using Loupe.Application.Security;
 using MediatR;
 namespace Loupe.Application.Boards;
+
 public sealed class SetReferenceBoardsCommandHandler(ICurrentOwner owner, IBoardStore boards) : IRequestHandler<SetReferenceBoardsCommand, ReferenceResult>
 {
     public async Task<ReferenceResult> Handle(SetReferenceBoardsCommand request, CancellationToken cancellationToken)

@@ -21,7 +21,10 @@ public sealed class ReplaceReferenceImageCommandHandler(ICurrentOwner owner, IRe
         var image = await request.Image.ReadAsync(cancellationToken);
         var fingerprint = Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new
         {
-            request.Id, request.Revision, image.Sha256, ContentType = request.Image.ContentType.ToLowerInvariant()
+            request.Id,
+            request.Revision,
+            image.Sha256,
+            ContentType = request.Image.ContentType.ToLowerInvariant()
         })));
         await receipts.ExecuteAsync(owner.Id, "reference-image", key, fingerprint, async token =>
         {

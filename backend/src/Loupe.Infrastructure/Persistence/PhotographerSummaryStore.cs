@@ -35,8 +35,14 @@ public sealed class PhotographerSummaryStore(LibraryDbContext database, TimeProv
             ? JsonSerializer.Deserialize<CapturedPortfolioPage>(photographer.SourceJson) : null;
         var operation = new BackgroundOperation
         {
-            OwnerId = ownerId, ResourceId = id, Type = OperationType.PhotographerSummary, Mode = identity.Mode,
-            Model = identity.Model, PromptVersion = identity.PromptVersion, CreatedAt = now, UpdatedAt = now,
+            OwnerId = ownerId,
+            ResourceId = id,
+            Type = OperationType.PhotographerSummary,
+            Mode = identity.Mode,
+            Model = identity.Model,
+            PromptVersion = identity.PromptVersion,
+            CreatedAt = now,
+            UpdatedAt = now,
             InputJson = JsonSerializer.Serialize(new PhotographerSummaryInput(photographer.PortfolioUrl, photographer.SourceRevision, source))
         };
         database.BackgroundOperations.Add(operation); photographer.CurrentSummaryOperationId = operation.Id;

@@ -19,16 +19,21 @@ public sealed class SearchEligibilityTests(PostgreSqlFixture database) : IClassF
         using var owner = await factory.CreateAuthenticatedClientAsync(Guid.NewGuid().ToString());
         var reference = await Save(owner, "references/links", new
         {
-            title = "reference-title", sourceUrl = "https://reference-host.example/excluded-path?excluded-query#excluded-fragment",
-            notes = "reference-notes", attribution = "reference-credit"
+            title = "reference-title",
+            sourceUrl = "https://reference-host.example/excluded-path?excluded-query#excluded-fragment",
+            notes = "reference-notes",
+            attribution = "reference-credit"
         }, "reference");
         using var description = await owner.PutAsJsonAsync($"/api/references/{reference}/description", new { revision = 1, text = "reference-description" });
         description.EnsureSuccessStatusCode();
         await SetTags(owner, reference, 2, "reference-tag");
         var photographer = await Save(owner, "photographers", new
         {
-            name = "photographer-name", portfolioUrl = "https://photographer-host.example/excluded-path?excluded-query#excluded-fragment",
-            summary = "photographer-summary", notes = "photographer-notes", tags = new[] { new { name = "photographer-tag" } }
+            name = "photographer-name",
+            portfolioUrl = "https://photographer-host.example/excluded-path?excluded-query#excluded-fragment",
+            summary = "photographer-summary",
+            notes = "photographer-notes",
+            tags = new[] { new { name = "photographer-tag" } }
         }, "photographer");
         await PendingReferenceSuggestions(factory, reference, "pending-description", "pending-reference-tag");
         await PendingPhotographerSuggestions(factory, photographer, "pending-summary", "pending-photographer-tag");

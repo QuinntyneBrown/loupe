@@ -30,6 +30,10 @@ public static class PersistenceSetup
         services.AddScoped<IReferenceStore, ReferenceStore>();
         services.AddScoped<IPhotographerStore, PhotographerStore>();
         services.AddScoped<Loupe.Application.Search.ISearchStore, SearchStore>();
+        services.AddScoped<Loupe.Application.Videos.IVideoStore, VideoStore>();
+        services.AddScoped<Loupe.Application.Videos.IVideoIndexStore, VideoIndexStore>();
+        services.AddSingleton<Loupe.Application.Videos.IVideoEmbeddingConfiguration, VideoEmbeddingConfiguration>();
+        services.AddScoped<Loupe.Application.Videos.IVideoEmbeddingProvider, AzureOpenAiVideoEmbeddingProvider>();
         services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSummaryStore, PhotographerSummaryStore>();
         services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSummaryQueue, PhotographerSummaryQueue>();
         services.AddScoped<Loupe.Application.PhotographerSummaries.IPhotographerSuggestionStore, PhotographerSuggestionStore>();

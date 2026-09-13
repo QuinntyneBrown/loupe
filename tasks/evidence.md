@@ -823,3 +823,32 @@ local .NET SDK, so checks used the repository's .NET 10.0.400 Linux acceptance
 image. Browser commands used Node 22.22.3 via npm exec because the installed
 22.21.0 is below Angular's declared supported patch version. Frontend regressions
 use `npm --prefix e2e test`; backend options/provisioning are in `backend/README.md`.
+
+## VID-01 to VID-05: video bookmarks, browsing, indexing, and meaning search (L2-055 to L2-058)
+
+- Environment: no Docker socket here, so the suite ran against a local PostgreSQL 16
+  with pgvector through the new `LOUPE_TEST_POSTGRES` fixture option; the .NET 10.0.303
+  SDK was installed from dot.net.
+- Red: `dotnet test backend/Loupe.slnx --filter FullyQualifiedName~SaveVideoTests`
+  failed with 404 for `POST /api/videos`; `ListVideoTests`, `EditVideoTests`,
+  `VideoIndexWorkerTests`, and `VideoMeaningSearchTests` each failed first for the
+  missing route, method, command, or mode.
+- Green: the five video test classes pass (`FullyQualifiedName~Videos`), then the
+  full backend suite and `dotnet format --verify-no-changes`.
+- Videos store a canonical `https://www.youtube.com/watch?v=<id>` URL with a unique
+  owner/video identifier, manual tags, a topic, and a pgvector column written by the
+  worker's `IndexVideosCommand`; meaning search embeds the query through the same
+  Azure OpenAI deployment and ranks by cosine similarity with the 0.20 threshold.
+
+## VID-06 to VID-08: Videos page, dialogs, and search (L2-055 to L2-058, L2-043 to L2-045)
+
+- Red: `npx playwright test videos.spec.js` failed because the Library navigation
+  had no Videos link and `/videos` did not route; `video-editing.spec.js` failed on
+  the missing dialog; `video-search.spec.js` failed on the missing search controls.
+- Green: the three video specs pass in Chromium with the injected `loupeVideos`
+  fixture, including axe audits at 1440, 768, and 375 pixels, then the full e2e
+  suite.
+- Placement: `VideoCard` is presentational in `components`; `VideoCollection`
+  injects `VIDEO_SERVICE` in `domain`; the page, dialogs, and unsaved-changes guard
+  live in the application project. The `--lp-video-ratio` token was added to the
+  design system first and mirrored.

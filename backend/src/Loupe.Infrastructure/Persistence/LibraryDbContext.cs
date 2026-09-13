@@ -6,6 +6,7 @@ using Loupe.Domain.References;
 using Microsoft.EntityFrameworkCore;
 using Loupe.Domain.Boards;
 using Loupe.Domain.Photographers;
+using Loupe.Domain.Videos;
 
 namespace Loupe.Infrastructure.Persistence;
 
@@ -14,6 +15,7 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
     public DbSet<Loupe.Domain.Users.User> Users => Set<Loupe.Domain.Users.User>();
     public DbSet<Photographer> Photographers => Set<Photographer>();
     public DbSet<PhotographerDraft> PhotographerDrafts => Set<PhotographerDraft>();
+    public DbSet<Video> Videos => Set<Video>();
     public DbSet<Board> Boards => Set<Board>();
     public DbSet<BoardReference> BoardReferences => Set<BoardReference>();
     public DbSet<ApplicationSession> Sessions => Set<ApplicationSession>();
@@ -49,6 +51,18 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         modelBuilder.Entity<PhotographerTag>().HasIndex(tag => new { tag.OwnerId, tag.NormalizedName });
         modelBuilder.Entity<PhotographerTag>().HasOne<Photographer>().WithMany(item => item.Tags)
             .HasForeignKey(tag => new { tag.PhotographerId, tag.OwnerId }).HasPrincipalKey(item => new { item.Id, item.OwnerId }).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Video>().ToTable("videos").HasKey(item => item.Id);
+        modelBuilder.Entity<Video>().HasAlternateKey(item => new { item.Id, item.OwnerId });
+        modelBuilder.Entity<Video>().Property(item => item.VideoId).HasMaxLength(11);
+        modelBuilder.Entity<Video>().Property(item => item.Topic).HasMaxLength(32);
+        modelBuilder.Entity<Video>().Property(item => item.EmbeddingModel).HasMaxLength(200);
+        modelBuilder.Entity<Video>().Property(item => item.Revision).HasDefaultValue(1L).IsConcurrencyToken();
+        modelBuilder.Entity<Video>().HasIndex(item => new { item.OwnerId, item.VideoId }).IsUnique();
+        modelBuilder.Entity<Video>().HasIndex(item => new { item.OwnerId, item.CreatedAt, item.Id });
+        modelBuilder.Entity<VideoTag>().ToTable("video_tags").HasKey(tag => new { tag.VideoId, tag.NormalizedName });
+        modelBuilder.Entity<VideoTag>().HasIndex(tag => new { tag.OwnerId, tag.NormalizedName });
+        modelBuilder.Entity<VideoTag>().HasOne<Video>().WithMany(item => item.Tags)
+            .HasForeignKey(tag => new { tag.VideoId, tag.OwnerId }).HasPrincipalKey(item => new { item.Id, item.OwnerId }).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ReferenceDraft>().ToTable("reference_drafts").HasKey(draft => draft.Id);
         modelBuilder.Entity<ReferenceDraft>().HasIndex(draft => new { draft.OwnerId, draft.ExpiresAt });
         modelBuilder.Entity<ReferenceDraft>().Property(draft => draft.Revision).IsConcurrencyToken();

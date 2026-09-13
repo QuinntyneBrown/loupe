@@ -20,8 +20,14 @@ public sealed class ReferenceAnalysisQueue(LibraryDbContext database, IReference
             && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running), cancellationToken) >= 5;
         var operation = new BackgroundOperation
         {
-            OwnerId = reference.OwnerId, ResourceId = reference.Id, Type = OperationType.ReferenceAnalysis, Mode = identity.Mode,
-            Model = identity.Model, PromptVersion = identity.PromptVersion, CreatedAt = now, UpdatedAt = now,
+            OwnerId = reference.OwnerId,
+            ResourceId = reference.Id,
+            Type = OperationType.ReferenceAnalysis,
+            Mode = identity.Mode,
+            Model = identity.Model,
+            PromptVersion = identity.PromptVersion,
+            CreatedAt = now,
+            UpdatedAt = now,
             InputJson = JsonSerializer.Serialize(new ReferenceAnalysisInput(reference.ImageKey, reference.PreviewKey, reference.ImageRevision)),
             Status = full ? OperationStatus.Failed : OperationStatus.Queued,
             CompletedAt = full ? now : null,

@@ -34,8 +34,12 @@ public sealed class SearchMutationTests(PostgreSqlFixture database) : IClassFixt
         await Matches(owner, "tags=reviewed-tag", photographer);
         using var editedPhotographer = await owner.PutAsJsonAsync($"/api/photographers/{photographer}", new
         {
-            revision = 2, name = "Bookmark", portfolioUrl = "https://bookmark.example/",
-            summary = "revised-summary", notes = "revised-bookmark-notes", tags = Array.Empty<object>()
+            revision = 2,
+            name = "Bookmark",
+            portfolioUrl = "https://bookmark.example/",
+            summary = "revised-summary",
+            notes = "revised-bookmark-notes",
+            tags = Array.Empty<object>()
         });
         editedPhotographer.EnsureSuccessStatusCode();
         await Matches(owner, "query=reviewed-tag");
@@ -46,8 +50,11 @@ public sealed class SearchMutationTests(PostgreSqlFixture database) : IClassFixt
 
         using var editedReference = await owner.PutAsJsonAsync($"/api/references/{reference}", new
         {
-            revision = 3, title = "Revised-title", sourceUrl = "https://revised-host.example/",
-            attribution = "Revised-credit", notes = "Revised-notes"
+            revision = 3,
+            title = "Revised-title",
+            sourceUrl = "https://revised-host.example/",
+            attribution = "Revised-credit",
+            notes = "Revised-notes"
         });
         editedReference.EnsureSuccessStatusCode();
         using var editedDescription = await owner.PutAsJsonAsync($"/api/references/{reference}/description", new { revision = 4, text = "Revised-description" });

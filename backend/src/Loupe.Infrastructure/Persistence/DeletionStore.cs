@@ -73,7 +73,10 @@ public sealed class DeletionStore(LibraryDbContext database, TimeProvider clock,
         if (reference.Revision != revision) throw new RevisionConflictException();
         var operation = new DeletionOperation
         {
-            OwnerId = ownerId, ResourceType = "reference", ResourceId = id, DeletedAt = now,
+            OwnerId = ownerId,
+            ResourceType = "reference",
+            ResourceId = id,
+            DeletedAt = now,
             MediaKeys = new[] { reference.ImageKey, reference.PreviewKey }.OfType<string>().ToArray()
         };
         database.Deletions.Add(operation);

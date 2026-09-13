@@ -1,0 +1,107 @@
+:host {
+  display: block;
+}
+.lp-page-header__actions {
+  align-self: flex-start;
+}
+h1,
+p {
+  margin: var(--lp-zero);
+}
+.search {
+  display: grid;
+  gap: var(--lp-space-3);
+  margin-bottom: var(--lp-space-6);
+}
+.search__form {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-2);
+  max-width: var(--lp-search-max);
+}
+.search__form .lp-icon {
+  flex: none;
+  color: var(--lp-color-text-2);
+}
+.search__form input {
+  flex: var(--lp-fraction);
+  min-width: var(--lp-zero);
+}
+.search__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lp-space-2);
+  align-items: flex-start;
+}
+.segmented {
+  display: inline-flex;
+  background: var(--lp-color-surface-2);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-md);
+  padding: var(--lp-space-1);
+}
+.segmented--wrap {
+  flex-wrap: wrap;
+}
+.segmented label {
+  position: relative;
+  cursor: pointer;
+}
+.segmented input {
+  position: absolute;
+  opacity: var(--lp-zero);
+}
+.segmented span {
+  display: block;
+  padding: var(--lp-space-2) var(--lp-space-3);
+  border-radius: var(--lp-radius-sm);
+  font-size: var(--lp-text-sm);
+  color: var(--lp-color-text-2);
+}
+.segmented input:checked + span {
+  background: var(--lp-color-surface);
+  color: var(--lp-color-text);
+}
+.segmented input:focus-visible + span {
+  outline: var(--lp-ring-width) solid var(--lp-color-focus);
+}
+.search__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lp-space-2);
+}
+.search__tags .count {
+  font-family: var(--lp-font-mono);
+  font-size: var(--lp-text-xs);
+}
+[role='alert'] {
+  color: var(--lp-color-danger);
+}
+.unavailable {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lp-space-3);
+}
+.unavailable p {
+  color: var(--lp-color-text);
+}
+.search > .lp-button--ghost {
+  justify-self: start;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(var(--lp-full), var(--lp-card-min)), var(--lp-fraction))
+  );
+  gap: var(--lp-space-4);
+}
+.lp-skeleton--card {
+  aspect-ratio: var(--lp-video-ratio);
+}
+.more {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--lp-space-6);
+}

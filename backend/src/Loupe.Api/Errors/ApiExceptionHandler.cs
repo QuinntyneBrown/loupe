@@ -3,6 +3,7 @@ using Loupe.Application.Photographers;
 using Loupe.Application.Boards;
 using Loupe.Application.Images;
 using Loupe.Application.Operations;
+using Loupe.Application.Videos;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Globalization;
 
@@ -19,6 +20,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             RequestValidationException => 400,
             BoardNameConflictException => 409,
             PortfolioConflictException => 409,
+            VideoConflictException => 409,
             ResourceNotFoundException => 404,
             RevisionConflictException => 409,
             OperationConflictException => 409,
@@ -40,6 +42,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             RequestValidationException => "invalid_request",
             BoardNameConflictException => "board_name_conflict",
             PortfolioConflictException => "portfolio_conflict",
+            VideoConflictException => "video_conflict",
             ResourceNotFoundException => "item_unavailable",
             RevisionConflictException => "revision_conflict",
             OperationConflictException => "operation_conflict",

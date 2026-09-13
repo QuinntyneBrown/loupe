@@ -20,10 +20,26 @@ public sealed class SavePhotographerCommandHandler(ICurrentOwner owner, IPhotogr
         var alreadySaved = true;
         var id = await receipts.ExecuteAsync(owner.Id, "photographer-save", key, fingerprint, async token =>
         {
-            var candidate = new Photographer { Id = Guid.NewGuid(), OwnerId = owner.Id, Name = metadata.Name, PortfolioUrl = metadata.PortfolioUrl,
-                Summary = metadata.Summary, SummaryProvenance = metadata.Summary is null ? null : "manual", Notes = metadata.Notes, CreatedAt = clock.GetUtcNow() };
-            foreach (var tag in metadata.Tags) candidate.Tags.Add(new PhotographerTag { PhotographerId = candidate.Id, OwnerId = owner.Id,
-                Name = tag.Name!, NormalizedName = tag.Name!.ToUpperInvariant(), Category = tag.Category, Provenance = "manual" });
+            var candidate = new Photographer
+            {
+                Id = Guid.NewGuid(),
+                OwnerId = owner.Id,
+                Name = metadata.Name,
+                PortfolioUrl = metadata.PortfolioUrl,
+                Summary = metadata.Summary,
+                SummaryProvenance = metadata.Summary is null ? null : "manual",
+                Notes = metadata.Notes,
+                CreatedAt = clock.GetUtcNow()
+            };
+            foreach (var tag in metadata.Tags) candidate.Tags.Add(new PhotographerTag
+            {
+                PhotographerId = candidate.Id,
+                OwnerId = owner.Id,
+                Name = tag.Name!,
+                NormalizedName = tag.Name!.ToUpperInvariant(),
+                Category = tag.Category,
+                Provenance = "manual"
+            });
             var saved = await photographers.SaveAsync(candidate, token); alreadySaved = saved.Id != candidate.Id; return saved.Id;
         }, cancellationToken);
         return new(PhotographerResult.From(await photographers.FindOwnedAsync(owner.Id, id, cancellationToken) ?? throw new ResourceNotFoundException()), alreadySaved);

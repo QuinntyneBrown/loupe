@@ -16,14 +16,31 @@ public sealed class PhotographerDraftStore(LibraryDbContext database, IPhotograp
         await AnalysisAdmissionLock.AcquireAsync(database, ownerId, cancellationToken);
         var existing = await photographers.FindSourceOwnedAsync(ownerId, portfolioUrl, cancellationToken);
         var now = clock.GetUtcNow();
-        var draft = new PhotographerDraft { Id = Guid.NewGuid(), OwnerId = ownerId, PortfolioUrl = portfolioUrl, Name = existing?.Name ?? name,
-            ExpiresAt = now.AddHours(24), CommittedPhotographerId = existing?.Id };
+        var draft = new PhotographerDraft
+        {
+            Id = Guid.NewGuid(),
+            OwnerId = ownerId,
+            PortfolioUrl = portfolioUrl,
+            Name = existing?.Name ?? name,
+            ExpiresAt = now.AddHours(24),
+            CommittedPhotographerId = existing?.Id
+        };
         if (existing is null && configured)
         {
             if (await database.BackgroundOperations.CountAsync(item => item.OwnerId == ownerId && (item.Status == OperationStatus.Queued || item.Status == OperationStatus.Running), cancellationToken) >= 5)
                 throw new AnalysisLimitException();
-            draft.ImportOperation = new BackgroundOperation { OwnerId = ownerId, ResourceId = draft.Id, Type = OperationType.PhotographerDraftImport,
-                Mode = ExecutionMode.Live, Model = "loupe-portfolio-import-v1", PromptVersion = "portfolio-import-v1", InputJson = JsonSerializer.Serialize(portfolioUrl), CreatedAt = now, UpdatedAt = now };
+            draft.ImportOperation = new BackgroundOperation
+            {
+                OwnerId = ownerId,
+                ResourceId = draft.Id,
+                Type = OperationType.PhotographerDraftImport,
+                Mode = ExecutionMode.Live,
+                Model = "loupe-portfolio-import-v1",
+                PromptVersion = "portfolio-import-v1",
+                InputJson = JsonSerializer.Serialize(portfolioUrl),
+                CreatedAt = now,
+                UpdatedAt = now
+            };
             draft.ImportOperationId = draft.ImportOperation.Id;
         }
         else if (existing is null) draft.FailureCode = "integration_not_configured";
@@ -48,12 +65,29 @@ public sealed class PhotographerDraftStore(LibraryDbContext database, IPhotograp
         if (draft.CommittedPhotographerId is { } savedId)
             return new(PhotographerResult.From(await photographers.FindOwnedAsync(ownerId, savedId, cancellationToken) ?? throw new ResourceNotFoundException()), true);
         var sameSource = await database.Database.SqlQuery<bool>($"SELECT loupe_normalize_source({draft.PortfolioUrl}) = loupe_normalize_source({metadata.PortfolioUrl}) AS \"Value\"").SingleAsync(cancellationToken);
-        var candidate = new Photographer { Id = Guid.NewGuid(), OwnerId = ownerId, Name = metadata.Name, PortfolioUrl = metadata.PortfolioUrl, CreatedAt = clock.GetUtcNow(),
-            Summary = metadata.Summary, SummaryProvenance = metadata.Summary is null ? null : "manual", Notes = metadata.Notes,
-            SourceJson = sameSource ? draft.SourceJson : null, CapturedSourceRevision = sameSource && draft.SourceJson is not null ? 1 : null,
-            SourceFailureCode = sameSource ? draft.FailureCode ?? import?.FailureCode : null };
-        foreach (var tag in metadata.Tags) candidate.Tags.Add(new PhotographerTag { PhotographerId = candidate.Id, OwnerId = ownerId,
-            Name = tag.Name!, NormalizedName = tag.Name!.ToUpperInvariant(), Category = tag.Category, Provenance = "manual" });
+        var candidate = new Photographer
+        {
+            Id = Guid.NewGuid(),
+            OwnerId = ownerId,
+            Name = metadata.Name,
+            PortfolioUrl = metadata.PortfolioUrl,
+            CreatedAt = clock.GetUtcNow(),
+            Summary = metadata.Summary,
+            SummaryProvenance = metadata.Summary is null ? null : "manual",
+            Notes = metadata.Notes,
+            SourceJson = sameSource ? draft.SourceJson : null,
+            CapturedSourceRevision = sameSource && draft.SourceJson is not null ? 1 : null,
+            SourceFailureCode = sameSource ? draft.FailureCode ?? import?.FailureCode : null
+        };
+        foreach (var tag in metadata.Tags) candidate.Tags.Add(new PhotographerTag
+        {
+            PhotographerId = candidate.Id,
+            OwnerId = ownerId,
+            Name = tag.Name!,
+            NormalizedName = tag.Name!.ToUpperInvariant(),
+            Category = tag.Category,
+            Provenance = "manual"
+        });
         var saved = await photographers.SaveAsync(candidate, cancellationToken);
         draft.CommittedPhotographerId = saved.Id; await database.SaveChangesAsync(cancellationToken);
         return new(PhotographerResult.From(saved), saved.Id != candidate.Id);
@@ -72,7 +106,7 @@ public sealed class PhotographerDraftStore(LibraryDbContext database, IPhotograp
                 .SetProperty(item => item.Message, "Page reading canceled."), cancellationToken);
         var draft = await database.PhotographerDrafts.FromSqlInterpolated($"SELECT * FROM photographer_drafts WHERE \"Id\" = {id} AND \"OwnerId\" = {ownerId} FOR UPDATE")
             .SingleOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException();
-        if (!draft.Canceled) {draft.Canceled = true; draft.Name = null; draft.SourceJson = null; draft.Revision++; await database.SaveChangesAsync(cancellationToken);}
+        if (!draft.Canceled) { draft.Canceled = true; draft.Name = null; draft.SourceJson = null; draft.Revision++; await database.SaveChangesAsync(cancellationToken); }
         await transaction.CommitAsync(cancellationToken);
     }
 }

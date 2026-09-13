@@ -21,6 +21,11 @@ These are separate Angular projects with independent library build targets.
 See `../tasks/evidence.md` for delivered behavior and test evidence. The complete
 product scope remains in `../tasks/todo.md`; this is an incremental implementation.
 
+The Videos page (`/videos`) saves YouTube videos through `IVideoService` and
+`VIDEO_SERVICE`, tags them, and searches them by keyword or, when the API has an
+embedding deployment, by meaning. Playwright replaces the adapter with the
+`window.loupeVideos` fixture in `../e2e/fixtures/video-library.js`.
+
 Sign-in uses local email/password credentials through `ISessionService` and
 `SESSION_SERVICE`. The production adapter obtains anonymous antiforgery proof,
 posts credentials, then refreshes authenticated session/antiforgery state. The

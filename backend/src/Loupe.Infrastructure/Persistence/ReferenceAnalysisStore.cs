@@ -29,8 +29,14 @@ public sealed class ReferenceAnalysisStore(LibraryDbContext database, TimeProvid
         var now = clock.GetUtcNow();
         var operation = new BackgroundOperation
         {
-            OwnerId = ownerId, ResourceId = id, Type = OperationType.ReferenceAnalysis, Mode = identity.Mode,
-            Model = identity.Model, PromptVersion = identity.PromptVersion, CreatedAt = now, UpdatedAt = now,
+            OwnerId = ownerId,
+            ResourceId = id,
+            Type = OperationType.ReferenceAnalysis,
+            Mode = identity.Mode,
+            Model = identity.Model,
+            PromptVersion = identity.PromptVersion,
+            CreatedAt = now,
+            UpdatedAt = now,
             InputJson = JsonSerializer.Serialize(new ReferenceAnalysisInput(reference.ImageKey, reference.PreviewKey, reference.ImageRevision))
         };
         database.BackgroundOperations.Add(operation); reference.CurrentAnalysisOperationId = operation.Id;

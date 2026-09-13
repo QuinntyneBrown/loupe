@@ -1,0 +1,191 @@
+<dialog #modal class="lp-dialog" aria-labelledby="video-form-title" (cancel)="cancel($event)">
+  <form class="lp-dialog__panel" (ngSubmit)="save()">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="video-form-title">
+          {{ editing() ? 'Edit video' : 'Add video' }}
+        </h2>
+        <p class="lp-dialog__text">
+          Paste a YouTube link and say what it teaches. Tags and the summary make it searchable by
+          meaning.
+        </p>
+      </div>
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Close"
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body">
+      <div class="lp-form">
+        <div class="lp-field">
+          <label class="lp-field__label" for="video-url">YouTube URL</label
+          ><input
+            id="video-url"
+            name="url"
+            class="lp-input lp-input--mono"
+            type="url"
+            autofocus
+            placeholder="https://www.youtube.com/watch?v=…"
+            [ngModel]="url()"
+            (ngModelChange)="url.set($event)"
+            [disabled]="busy()"
+          />
+        </div>
+        <div class="fields">
+          <div class="lp-field">
+            <label class="lp-field__label" for="video-title">Title</label
+            ><input
+              id="video-title"
+              name="title"
+              class="lp-input"
+              [ngModel]="title()"
+              (ngModelChange)="title.set($event)"
+              [disabled]="busy()"
+            />
+          </div>
+          <div class="lp-field">
+            <label class="lp-field__label" for="video-topic">Topic</label>
+            <div class="lp-select-wrap">
+              <select
+                id="video-topic"
+                name="topic"
+                class="lp-select"
+                [ngModel]="topic()"
+                (ngModelChange)="topic.set($event)"
+                [disabled]="busy()"
+              >
+                @for (option of topics; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="video-channel"
+            >Channel <span class="lp-field__optional">optional</span></label
+          ><input
+            id="video-channel"
+            name="channel"
+            class="lp-input"
+            placeholder="Who made it"
+            [ngModel]="channel()"
+            (ngModelChange)="channel.set($event)"
+            [disabled]="busy()"
+          />
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="video-summary"
+            >What it covers <span class="lp-field__optional">optional</span></label
+          ><textarea
+            id="video-summary"
+            name="summary"
+            class="lp-textarea"
+            rows="2"
+            placeholder="The techniques, the setups, the ideas"
+            [ngModel]="summary()"
+            (ngModelChange)="summary.set($event)"
+            [disabled]="busy()"
+          ></textarea>
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="video-tags"
+            >Tags <span class="lp-field__optional">optional</span></label
+          >
+          <div class="lp-chip-input">
+            @for (tag of tags(); track tag) {
+              <span class="lp-tag"
+                >{{ tag
+                }}<button
+                  class="lp-tag__action"
+                  type="button"
+                  [attr.aria-label]="'Remove tag ' + tag"
+                  [disabled]="busy()"
+                  (click)="removeTag(tag)"
+                >
+                  <svg class="lp-icon lp-icon--sm" aria-hidden="true">
+                    <use href="#i-x" />
+                  </svg></button
+              ></span>
+            }
+            <input
+              id="video-tags"
+              name="tag"
+              [ngModel]="tag()"
+              (ngModelChange)="tag.set($event)"
+              [disabled]="busy()"
+              (keydown.enter)="addTag($event)"
+              placeholder="Add a tag"
+            />
+          </div>
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="video-notes"
+            >Your notes <span class="lp-field__optional">optional</span></label
+          ><textarea
+            id="video-notes"
+            name="notes"
+            class="lp-textarea"
+            rows="2"
+            placeholder="What to try after watching"
+            [ngModel]="notes()"
+            (ngModelChange)="notes.set($event)"
+            [disabled]="busy()"
+          ></textarea>
+          <p class="lp-field__hint">
+            Notes stay private. They are searched by keyword, never sent for indexing.
+          </p>
+        </div>
+      </div>
+      @if (error()) {
+        <p role="alert">{{ error() }}</p>
+        @if (stale()) {
+          <button
+            class="lp-button lp-button--secondary"
+            type="button"
+            [disabled]="busy()"
+            (click)="review()"
+          >
+            Review latest
+          </button>
+        } @else if (retryable()) {
+          <button
+            class="lp-button lp-button--secondary"
+            type="button"
+            [disabled]="busy()"
+            (click)="save()"
+          >
+            Try again
+          </button>
+        }
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      @if (editing()) {
+        <button
+          class="lp-button lp-button--danger delete"
+          type="button"
+          [disabled]="busy()"
+          (click)="requestDelete()"
+        >
+          Delete
+        </button>
+      }
+      <button
+        class="lp-button lp-button--secondary"
+        type="button"
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        Cancel</button
+      ><button class="lp-button lp-button--primary" type="submit" [disabled]="busy() || stale()">
+        {{ busy() ? 'Saving…' : 'Save' }}
+      </button>
+    </footer>
+  </form>
+</dialog>

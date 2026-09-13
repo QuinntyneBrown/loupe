@@ -1,0 +1,74 @@
+<article>
+  <a
+    #link
+    class="thumb"
+    [href]="url()"
+    target="_blank"
+    rel="noopener noreferrer"
+    referrerpolicy="no-referrer"
+    [attr.aria-label]="'Watch ' + title() + ' on YouTube'"
+  >
+    @if (!imageFailed()) {
+      <img
+        [src]="thumbnailUrl()"
+        alt=""
+        loading="lazy"
+        decoding="async"
+        referrerpolicy="no-referrer"
+        (error)="imageFailed.set(true)"
+      />
+    } @else {
+      <span class="placeholder"
+        ><svg class="lp-icon" aria-hidden="true"><use href="#i-play" /></svg
+      ></span>
+    }
+    <span class="play" aria-hidden="true"
+      ><svg class="lp-icon" aria-hidden="true"><use href="#i-play" /></svg
+    ></span>
+  </a>
+  <div class="body">
+    <div class="meta">
+      <span class="lp-pill">{{ topicLabel() }}</span>
+      @if (match(); as match) {
+        <span class="lp-pill lp-pill--success lp-pill--mono">{{ match }}</span>
+      }
+      @if (!indexed()) {
+        <span class="lp-pill lp-pill--outline">Indexing</span>
+      }
+    </div>
+    <h2>{{ title() }}</h2>
+    @if (channel()) {
+      <p class="channel">{{ channel() }}</p>
+    }
+    @if (summary()) {
+      <p class="description">{{ summary() }}</p>
+    }
+    @if (tags().length) {
+      <div class="lp-tags">
+        @for (tag of tags(); track tag) {
+          <span class="lp-tag lp-tag--plain">{{ tag }}</span>
+        }
+      </div>
+    }
+    <div class="foot">
+      <a
+        class="domain"
+        [href]="url()"
+        target="_blank"
+        rel="noopener noreferrer"
+        referrerpolicy="no-referrer"
+        [attr.aria-label]="'Open ' + title() + ' on youtube.com'"
+        >youtube.com<svg class="lp-icon lp-icon--sm" aria-hidden="true">
+          <use href="#i-external" /></svg
+      ></a>
+      <button
+        class="lp-button lp-button--ghost lp-button--sm"
+        type="button"
+        [attr.aria-label]="'Edit ' + title()"
+        (click)="editRequested.emit()"
+      >
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-edit" /></svg>Edit
+      </button>
+    </div>
+  </div>
+</article>

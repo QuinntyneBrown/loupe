@@ -16,8 +16,10 @@ import { BOARD_SERVICE, BoardService } from 'api';
 import { PHOTOGRAPHER_SERVICE, PhotographerService } from 'api';
 import { PHOTOGRAPHER_DRAFT_SERVICE, PhotographerDraftService } from 'api';
 import { REFERENCE_DRAFT_SERVICE, ReferenceDraftService } from 'api';
+import { VIDEO_SERVICE, VideoService } from 'api';
 
 export const appProviders = [
+  { provide: VIDEO_SERVICE, useClass: VideoService },
   { provide: SEARCH_SERVICE, useClass: SearchService },
   { provide: PHOTOGRAPHER_SUMMARY_SERVICE, useClass: PhotographerSummaryService },
   { provide: PHOTOGRAPHER_DRAFT_SERVICE, useClass: PhotographerDraftService },

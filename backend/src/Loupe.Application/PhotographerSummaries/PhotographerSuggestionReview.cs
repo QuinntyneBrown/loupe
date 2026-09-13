@@ -42,8 +42,15 @@ public static class PhotographerSuggestionReview
                 if (photographer.Tags.All(tag => tag.NormalizedName != key))
                 {
                     if (photographer.Tags.Count >= 50) throw new RequestValidationException("tags", "A photographer can have at most 50 active tags. Remove a tag before accepting another.");
-                    photographer.Tags.Add(new PhotographerTag { PhotographerId = photographer.Id, OwnerId = photographer.OwnerId, NormalizedName = key, Name = name, Category = category,
-                        Provenance = name == suggestion.Name && category == suggestion.Category ? "ai-accepted" : "edited-ai" });
+                    photographer.Tags.Add(new PhotographerTag
+                    {
+                        PhotographerId = photographer.Id,
+                        OwnerId = photographer.OwnerId,
+                        NormalizedName = key,
+                        Name = name,
+                        Category = category,
+                        Provenance = name == suggestion.Name && category == suggestion.Category ? "ai-accepted" : "edited-ai"
+                    });
                 }
             }
             saved.Tags[index] = suggestion with { State = state };

@@ -4,6 +4,7 @@ using Loupe.Application.ReferenceAnalysis;
 using Loupe.Application.ReferenceImports;
 using Loupe.Application.PhotographerImports;
 using Loupe.Application.PhotographerSummaries;
+using Loupe.Application.Videos;
 using Loupe.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,13 +29,17 @@ public static class Program
             options.TypeEvaluator = type => type.Namespace == typeof(CleanDeletedContentCommand).Namespace
                 || type == typeof(RunCritiqueCommandHandler) || type == typeof(RunReferenceImportCommandHandler)
                 || type == typeof(RunReferenceAnalysisCommandHandler) || type == typeof(RunPhotographerImportCommandHandler)
-                || type == typeof(RunPhotographerSummaryCommandHandler);
+                || type == typeof(RunPhotographerSummaryCommandHandler) || type == typeof(IndexVideosCommandHandler);
             options.RegisterServicesFromAssemblyContaining<CleanDeletedContentCommand>();
         });
         builder.Services.AddOptions<CleanupOptions>().BindConfiguration("Cleanup")
             .Validate(options => options.PollInterval > TimeSpan.Zero && options.PollInterval <= TimeSpan.FromMinutes(5),
                 "Cleanup:PollInterval must be positive and at most five minutes.").ValidateOnStart();
+        builder.Services.AddOptions<IndexingOptions>().BindConfiguration("Indexing")
+            .Validate(options => options.PollInterval > TimeSpan.Zero && options.PollInterval <= TimeSpan.FromMinutes(5),
+                "Indexing:PollInterval must be positive and at most five minutes.").ValidateOnStart();
         builder.Services.AddHostedService<CleanupWorker>();
+        builder.Services.AddHostedService<VideoIndexWorker>();
         builder.Services.AddHostedService<AnalysisWorker>();
         builder.Services.AddHostedService<ReferenceImportWorker>();
         using var host = builder.Build();

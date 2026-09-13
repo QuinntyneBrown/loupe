@@ -23,13 +23,17 @@ public sealed class SearchTagFacetTests(PostgreSqlFixture database) : IClassFixt
         await SetTags(owner, leftOnly, 1, left);
         var rightOnly = await Save(owner, "photographers", new
         {
-            name = "Right", portfolioUrl = "https://right.example/", tags = new[] { new { name = right } }
+            name = "Right",
+            portfolioUrl = "https://right.example/",
+            tags = new[] { new { name = right } }
         }, "photographer");
         var bothReference = await Save(owner, "references/links", new { sourceUrl = "https://both.example/" }, "reference");
         await SetTags(owner, bothReference, 1, left, right);
         var bothPhotographer = await Save(owner, "photographers", new
         {
-            name = "Both", portfolioUrl = "https://both-photographer.example/", tags = new[] { new { name = left }, new { name = right } }
+            name = "Both",
+            portfolioUrl = "https://both-photographer.example/",
+            tags = new[] { new { name = left }, new { name = right } }
         }, "photographer");
         await PendingReferenceSuggestions(factory, leftOnly, "Pending", "pending-reference");
         await PendingPhotographerSuggestions(factory, rightOnly, "Pending", "pending-photographer");
@@ -37,7 +41,8 @@ public sealed class SearchTagFacetTests(PostgreSqlFixture database) : IClassFixt
         await SetTags(stranger, privateReference, 1, left, right, "private-reference");
         await Save(stranger, "photographers", new
         {
-            name = "Private", portfolioUrl = "https://private-photographer.example/",
+            name = "Private",
+            portfolioUrl = "https://private-photographer.example/",
             tags = new[] { new { name = left }, new { name = right }, new { name = "private-photographer" } }
         }, "photographer");
 
@@ -72,13 +77,15 @@ public sealed class SearchTagFacetTests(PostgreSqlFixture database) : IClassFixt
         await PendingReferenceSuggestions(factory, reference, "Pending description", "pending-only");
         var photographer = await Save(owner, "photographers", new
         {
-            name = "Bookmark", portfolioUrl = "https://photographer.example/",
+            name = "Bookmark",
+            portfolioUrl = "https://photographer.example/",
             tags = new[] { new { name = "CAFÉ" }, new { name = "photographer-only" } }
         }, "photographer");
         await PendingPhotographerSuggestions(factory, photographer, "Pending summary", "pending-photographer-only");
         await Save(stranger, "photographers", new
         {
-            name = "Private", portfolioUrl = "https://private.example/",
+            name = "Private",
+            portfolioUrl = "https://private.example/",
             tags = new[] { new { name = "CAFÉ" }, new { name = "private-only" } }
         }, "photographer");
         var privateReference = await Save(stranger, "references/links", new { sourceUrl = "https://private-reference.example/" }, "reference");
@@ -97,7 +104,10 @@ public sealed class SearchTagFacetTests(PostgreSqlFixture database) : IClassFixt
         Assert.Equal(new[] { "CAFÉ", "photographer-only", "renamed" }, (await Facets(owner)).Select(facet => facet.GetProperty("name").GetString()));
         using var edited = await owner.PutAsJsonAsync($"/api/photographers/{photographer}", new
         {
-            revision = 1, name = "Bookmark", portfolioUrl = "https://photographer.example/", tags = Array.Empty<object>()
+            revision = 1,
+            name = "Bookmark",
+            portfolioUrl = "https://photographer.example/",
+            tags = Array.Empty<object>()
         });
         edited.EnsureSuccessStatusCode();
         Assert.Equal("renamed", Assert.Single(await Facets(owner)).GetProperty("name").GetString());

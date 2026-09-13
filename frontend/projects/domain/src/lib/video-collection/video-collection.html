@@ -1,0 +1,189 @@
+<div class="lp-page-header">
+  <div class="lp-page-header__text">
+    <h1 class="lp-title">Videos</h1>
+    <p class="lp-page-header__sub">
+      {{
+        total() === null
+          ? 'Posing, lighting, and conversations with photographers'
+          : searching()
+            ? total() + ' matching'
+            : total()
+              ? total() + ' saved'
+              : 'Posing, lighting, and conversations with photographers'
+      }}
+    </p>
+  </div>
+  <div class="lp-page-header__actions">
+    <button class="lp-button lp-button--primary" type="button" (click)="addRequested.emit()">
+      <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-plus" /></svg>Add video
+    </button>
+  </div>
+</div>
+<div class="search">
+  <form class="search__form" role="search" (ngSubmit)="submit()">
+    <svg class="lp-icon" aria-hidden="true"><use href="#i-search" /></svg>
+    <input
+      class="lp-input"
+      type="search"
+      name="query"
+      aria-label="Search your videos"
+      [placeholder]="
+        mode() === 'meaning' ? 'soft window light for couples' : 'title, channel, tag or note'
+      "
+      [ngModel]="query()"
+      (ngModelChange)="query.set($event)"
+      [attr.aria-invalid]="!!queryError()"
+      [attr.aria-describedby]="queryError() ? 'video-query-error' : null"
+    />
+    <button class="lp-button lp-button--secondary" type="submit">Search</button>
+  </form>
+  <div class="search__filters">
+    <div class="segmented" role="radiogroup" aria-label="Search mode">
+      <label
+        ><input
+          type="radio"
+          name="mode"
+          value="keyword"
+          [checked]="mode() === 'keyword'"
+          (change)="chooseMode('keyword')"
+        /><span>Keyword</span></label
+      >
+      <label
+        ><input
+          type="radio"
+          name="mode"
+          value="meaning"
+          [checked]="mode() === 'meaning'"
+          (change)="chooseMode('meaning')"
+        /><span>Meaning</span></label
+      >
+    </div>
+    <div class="segmented segmented--wrap" role="radiogroup" aria-label="Topic">
+      <label
+        ><input
+          type="radio"
+          name="topic"
+          value=""
+          [checked]="topic() === null"
+          (change)="chooseTopic(null)"
+        /><span>All</span></label
+      >
+      @for (option of topics; track option.value) {
+        <label
+          ><input
+            type="radio"
+            name="topic"
+            [value]="option.value"
+            [checked]="topic() === option.value"
+            (change)="chooseTopic(option.value)"
+          /><span>{{ option.label }}</span></label
+        >
+      }
+    </div>
+  </div>
+  @if (facets().length) {
+    <div class="search__tags" role="group" aria-label="Tags">
+      @for (facet of facets(); track facet.name) {
+        <button
+          class="lp-chip"
+          type="button"
+          [attr.aria-pressed]="tagSelected(facet.name)"
+          (click)="toggleTag(facet.name)"
+        >
+          {{ facet.name }} <span class="count">{{ facet.count }}</span>
+        </button>
+      }
+    </div>
+  }
+  @if (queryError()) {
+    <p id="video-query-error" role="alert">{{ queryError() }}</p>
+  }
+  @if (meaningUnavailable()) {
+    <div class="unavailable" role="alert">
+      <p>
+        Meaning search isn't available right now. Keyword search still finds the words you saved.
+      </p>
+      <button class="lp-button lp-button--secondary" type="button" (click)="useKeyword()">
+        Use Keyword
+      </button>
+    </div>
+  }
+  @if (filtered()) {
+    <button class="lp-button lp-button--ghost" type="button" (click)="clearFilters()">
+      Clear filters
+    </button>
+  }
+</div>
+<section aria-label="Your videos" [attr.aria-busy]="loading()">
+  <div class="grid">
+    @if (loading() && total() === null) {
+      @for (tile of skeletons; track tile) {
+        <div class="lp-skeleton lp-skeleton--card" aria-hidden="true"></div>
+      }
+    }
+    @for (item of items(); track item.id) {
+      <lp-video-card
+        [title]="item.title"
+        [url]="item.url"
+        [thumbnailUrl]="item.thumbnailUrl"
+        [topicLabel]="topicLabel(item)"
+        [channel]="item.channel"
+        [summary]="item.summary"
+        [tags]="tagNames(item)"
+        [indexed]="item.indexed"
+        [score]="item.score"
+        (editRequested)="editRequested.emit(item)"
+      />
+    }
+  </div>
+  @if (total() === 0 && !failed() && !meaningUnavailable()) {
+    @if (searching()) {
+      <div class="lp-empty">
+        <h2 #emptyHeading tabindex="-1" class="lp-empty__title">No videos match.</h2>
+        <p class="lp-empty__text">
+          Try other words, another topic, or fewer tags. Meaning search only covers indexed videos.
+        </p>
+        <div class="lp-empty__action">
+          <button class="lp-button lp-button--secondary" type="button" (click)="clearFilters()">
+            Clear filters
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="lp-empty">
+        <h2 #emptyHeading tabindex="-1" class="lp-empty__title">Save the videos you learn from.</h2>
+        <p class="lp-empty__text">
+          Keep the posing walkthroughs, lighting breakdowns, and interviews with photographers you
+          want to return to. Tag them, and find them again by keyword or by meaning.
+        </p>
+        <div class="lp-empty__action">
+          <button class="lp-button lp-button--primary" type="button" (click)="addRequested.emit()">
+            Add video
+          </button>
+        </div>
+      </div>
+    }
+  }
+  @if (failed()) {
+    <div class="lp-empty" role="alert">
+      <h2 class="lp-empty__title">Couldn't load your videos.</h2>
+      <p class="lp-empty__text">Check your connection and try again. Nothing you saved is lost.</p>
+      <div class="lp-empty__action">
+        <button class="lp-button lp-button--secondary" type="button" (click)="retry()">
+          Try again
+        </button>
+      </div>
+    </div>
+  } @else if (cursor()) {
+    <div class="more">
+      <button
+        class="lp-button lp-button--secondary"
+        type="button"
+        [disabled]="loading()"
+        (click)="load(true)"
+      >
+        {{ loading() ? 'Loading…' : 'Load more' }}
+      </button>
+    </div>
+  }
+</section>

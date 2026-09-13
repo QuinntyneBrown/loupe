@@ -22,10 +22,17 @@ public sealed class PhotographerSummaryQueue(LibraryDbContext database, IPhotogr
             ? JsonSerializer.Deserialize<CapturedPortfolioPage>(photographer.SourceJson) : null;
         var operation = new BackgroundOperation
         {
-            OwnerId = photographer.OwnerId, ResourceId = photographer.Id, Type = OperationType.PhotographerSummary, Mode = identity.Mode,
-            Model = identity.Model, PromptVersion = identity.PromptVersion, CreatedAt = now, UpdatedAt = now,
+            OwnerId = photographer.OwnerId,
+            ResourceId = photographer.Id,
+            Type = OperationType.PhotographerSummary,
+            Mode = identity.Mode,
+            Model = identity.Model,
+            PromptVersion = identity.PromptVersion,
+            CreatedAt = now,
+            UpdatedAt = now,
             InputJson = JsonSerializer.Serialize(new PhotographerSummaryInput(photographer.PortfolioUrl, photographer.SourceRevision, source)),
-            Status = full ? OperationStatus.Failed : OperationStatus.Queued, CompletedAt = full ? now : null,
+            Status = full ? OperationStatus.Failed : OperationStatus.Queued,
+            CompletedAt = full ? now : null,
             FailureCode = full ? "analysis_limit" : null,
             Message = full ? "Your photographer is saved. Too many operations are active; request a summary when one finishes." : "Waiting to start."
         };

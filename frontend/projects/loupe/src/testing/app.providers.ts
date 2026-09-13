@@ -23,8 +23,11 @@ import { MockPhotographerService } from './mock-photographer.service';
 import { MockBoardService } from './mock-board.service';
 import { REFERENCE_DRAFT_SERVICE } from 'api';
 import { MockReferenceDraftService } from './mock-reference-draft.service';
+import { VIDEO_SERVICE } from 'api';
+import { MockVideoService } from './mock-video.service';
 
 export const appProviders = [
+  { provide: VIDEO_SERVICE, useClass: MockVideoService },
   { provide: SEARCH_SERVICE, useClass: MockSearchService },
   { provide: PHOTOGRAPHER_SUMMARY_SERVICE, useClass: MockPhotographerSummaryService },
   { provide: PHOTOGRAPHER_DRAFT_SERVICE, useClass: MockPhotographerDraftService },

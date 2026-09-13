@@ -22,8 +22,14 @@ public sealed class CreateLinkedPhotographerCommandHandler(ICurrentOwner owner, 
         var fingerprint = Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { request.ReferenceId, request.Revision, metadata.Name, metadata.PortfolioUrl })));
         var id = await receipts.ExecuteAsync(owner.Id, "reference-create-photographer", key, fingerprint, async token =>
         {
-            var candidate = new Photographer { Id = Guid.NewGuid(), OwnerId = owner.Id, Name = metadata.Name,
-                PortfolioUrl = metadata.PortfolioUrl, CreatedAt = clock.GetUtcNow() };
+            var candidate = new Photographer
+            {
+                Id = Guid.NewGuid(),
+                OwnerId = owner.Id,
+                Name = metadata.Name,
+                PortfolioUrl = metadata.PortfolioUrl,
+                CreatedAt = clock.GetUtcNow()
+            };
             var photographer = await photographers.SaveAsync(candidate, token);
             // The receipt transaction owns both writes: a stale or missing reference rolls back creation.
             await links.SetAsync(owner.Id, request.ReferenceId, request.Revision, photographer.Id, token);

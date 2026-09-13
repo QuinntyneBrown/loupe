@@ -48,8 +48,15 @@ public static class ReferenceSuggestionReview
                 if (reference.Tags.All(tag => tag.NormalizedName != key))
                 {
                     if (reference.Tags.Count >= 50) throw new RequestValidationException("tags", "A reference can have at most 50 active tags. Remove a tag before accepting another.");
-                    reference.Tags.Add(new ReferenceTag { ReferenceId = reference.Id, OwnerId = reference.OwnerId, NormalizedName = key,
-                        Name = name, Category = category, Provenance = name == suggestion.Name && category == suggestion.Category ? "ai-accepted" : "edited-ai" });
+                    reference.Tags.Add(new ReferenceTag
+                    {
+                        ReferenceId = reference.Id,
+                        OwnerId = reference.OwnerId,
+                        NormalizedName = key,
+                        Name = name,
+                        Category = category,
+                        Provenance = name == suggestion.Name && category == suggestion.Category ? "ai-accepted" : "edited-ai"
+                    });
                 }
             }
             saved.Tags[index] = suggestion with { State = state };

@@ -23,6 +23,10 @@
         <svg class="lp-icon" aria-hidden="true"><use href="#i-user" /></svg>
         <span>Photographers</span>
       </a>
+      <a routerLink="/videos" [attr.aria-current]="currentArea() === 'videos' ? 'page' : null">
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-play" /></svg>
+        <span>Videos</span>
+      </a>
       <a routerLink="/search" [attr.aria-current]="currentArea() === 'search' ? 'page' : null">
         <svg class="lp-icon" aria-hidden="true"><use href="#i-search" /></svg>
         <span>Search</span>

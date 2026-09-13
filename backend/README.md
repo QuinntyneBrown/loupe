@@ -5,6 +5,9 @@ Docker Desktop must be running with Linux containers. The test image starts
 isolated PostgreSQL containers through Testcontainers; the Docker socket is
 mounted only in this acceptance environment. No production account or AI
 credentials are used. Filter a slice with `-Filter FullyQualifiedName~Photographs`.
+Without Docker, point `LOUPE_TEST_POSTGRES` at a superuser connection string for a
+PostgreSQL server with the `vector` extension available; each test class then
+creates and drops its own database on that server instead of starting a container.
 
 The acceptance image pins .NET SDK 10.0.400 on Ubuntu 24.04 by image digest and
 uses the distribution's libvips and libheif HEVC plugins. The x265 encoder creates
@@ -197,6 +200,37 @@ account configuration, `provider_disabled` can indicate a missing deployment,
 rate limits require capacity or retry, and `invalid_output` requires checking model
 support and output quality. Do not describe controlled transport acceptance tests as
 a live Azure check or as proof of photographic critique quality.
+
+### Azure OpenAI embeddings for videos
+
+Saved YouTube videos (`/api/videos`) are searchable by meaning once an embedding
+deployment is configured alongside the critique settings:
+
+```text
+Ai__EmbeddingDeployment=YOUR-EMBEDDING-DEPLOYMENT
+Ai__EmbeddingModel=text-embedding-3-small
+```
+
+`Ai:EmbeddingDeployment` is the Azure deployment name of a 1536-dimension text
+embedding model; `Ai:EmbeddingModel` is the model identity recorded with each
+stored vector (default shown above). The worker posts to
+`{endpoint}/openai/v1/embeddings` with the `api-key` header, requesting 1536
+dimensions, and stores vectors in the `videos` table's pgvector column (the
+`Videos` migration creates the `vector` extension, so the database role applying
+migrations needs that privilege). A video's title, topic, channel, summary, and
+tag names are embedded; private notes never leave the database and are searched
+by keyword only. Videos read as indexed only when their stored vector matches
+their current revision and the configured model, so changing `Ai:EmbeddingModel`
+re-embeds every video on the next worker iterations. `Indexing:PollInterval`
+(default 15 seconds, at most five minutes) controls how often the worker looks
+for videos to embed; multiple workers coordinate through row locks.
+
+`GET /api/videos?mode=meaning&query=...` embeds the query with the same
+deployment and returns the best matches in one page (cosine similarity at least
+0.20, ranked by similarity then identifier, honoring `topic` and `tags`). It
+returns `integration_not_configured` (503) without an embedding deployment and
+`service_unavailable` (503) when the embedding call fails; keyword mode keeps
+working in both cases.
 
 ### Retiring historical samples
 

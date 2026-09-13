@@ -371,3 +371,25 @@ Every criterion remains required. Execute in tasks/plan.md order; check only wit
 - [x] L2-036.6–7: Configure Azure and verify the Responses request using failing-first API acceptance tests.
 - [x] L2-036.8–9: Verify saved-result compatibility and Azure failure handling.
 - [x] L2-041.2 / L2-050: Name Azure in request disclosures; update setup and run regression checks.
+
+## L2-055: Save and edit video bookmarks
+- [x] L2-055.1: Given a valid title, YouTube URL, and topic, when saved, then the bookmark and all entered fields survive reload, the canonical URL and thumbnail URL are derived from the video identifier, and the bookmark is private to its owner.
+- [x] L2-055.2: Given a URL that is not an HTTP(S) YouTube video URL, an empty title, an unsupported topic, a tag category outside the shared set, or an overlength value, when saved, then the relevant field error is returned with no partial bookmark.
+- [x] L2-055.3: Given a video identifier already saved by its owner, when saved again or when another bookmark is edited to that URL, then a conflict is returned and both records are preserved.
+- [x] L2-055.4: Given a bookmark, when its fields are edited with the opened revision, then the values are replaced and the revision increments; a stale revision produces a conflict without changes.
+- [x] L2-055.5: Given a bookmark, when deleted with its current revision, then it and its tags are removed; a stale revision produces a conflict.
+
+## L2-056: Browse and filter the video library
+- [x] L2-056.1: Given saved videos, when the list is opened, then videos appear newest first with stable cursor paging and an accurate total, owner-scoped.
+- [x] L2-056.2: Given a keyword query, when the list is filtered, then a video matches on title, channel, summary, notes, or tag names.
+- [x] L2-056.3: Given a topic or selected tags, when the list is filtered, then only matching videos are returned before paging, and the tag facet lists each tag with its count.
+
+## L2-057: Index videos for meaning search
+- [x] L2-057.1: Given embeddings are configured and a saved or edited video, when the index worker runs, then the vector is stored, the bookmark reads as indexed, and notes are excluded from the submitted text.
+- [x] L2-057.2: Given embeddings are not configured or the provider fails, when the worker runs, then the bookmark remains readable and not indexed, and the next run retries it.
+- [x] L2-057.3: Given the configured embedding model changes, when the worker runs, then previously indexed videos are re-embedded before they count as indexed.
+
+## L2-058: Find videos by meaning
+- [x] L2-058.1: Given indexed videos and a nonblank query, when Meaning search is submitted, then eligible videos are ranked by cosine similarity with the 0.20 threshold, honoring filters, each with its score.
+- [x] L2-058.2: Given a blank query, when Meaning search is submitted, then a query field error is returned and no embedding is requested.
+- [x] L2-058.3: Given embeddings are not configured or the query embedding fails, when Meaning search is submitted, then the API reports unavailability and the UI offers switching to Keyword.

@@ -16,6 +16,10 @@ and AGENTS.md. Existing mockups are visual seeds, not behavioral specifications.
   .NET 10 SDK. Test commands and exact native packages are in backend/.
 - OpenAI GPT-5.4 mini for critique, metadata, summaries; Ollama bge-m3 for local
   embeddings. Explicit deterministic Demo and configured Live modes.
+- Video bookmarks embed through `IVideoEmbeddingProvider`, implemented today with
+  the configured Azure OpenAI resource (`Ai:EmbeddingDeployment`) so one credential
+  set serves every AI call; private notes are excluded from embedded text. A local
+  provider (Ollama bge-m3) can replace the adapter behind the same port.
 - Independent static design-system site; authoritative --lp- visual tokens.
 - HTTPS, externally supplied secrets, encrypted storage/backups, independently
   retained deletion ledger. Hourly backups, deletion replay before readiness.

@@ -8,6 +8,10 @@ public sealed class AiOptions
     public string? Deployment { get; set; }
     public string? ApiKey { get; set; }
     public int MaxConcurrentCalls { get; set; } = 4;
+    public string? EmbeddingDeployment { get; set; }
+    public string EmbeddingModel { get; set; } = "text-embedding-3-small";
+    public bool IsEmbeddingConfigured => Mode == "Live" && !string.IsNullOrWhiteSpace(ApiKey) && !string.IsNullOrWhiteSpace(Endpoint)
+        && !string.IsNullOrWhiteSpace(EmbeddingDeployment) && !string.IsNullOrWhiteSpace(EmbeddingModel);
     public bool IsConfigured => Mode == "Live" && !string.IsNullOrWhiteSpace(ApiKey)
         && !string.IsNullOrWhiteSpace(Endpoint) && !string.IsNullOrWhiteSpace(Deployment);
 

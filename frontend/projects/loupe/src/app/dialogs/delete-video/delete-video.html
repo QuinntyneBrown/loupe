@@ -1,0 +1,61 @@
+<dialog
+  #modal
+  class="lp-dialog"
+  aria-labelledby="delete-video-title"
+  aria-describedby="delete-video-effects"
+  (cancel)="cancel($event)"
+>
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="delete-video-title">Delete {{ video().title }}?</h2>
+        <p class="lp-dialog__text" id="delete-video-effects">
+          The bookmark, its tags, your notes, and its search index entry are removed. The video
+          itself stays on YouTube.
+        </p>
+      </div>
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Close"
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    @if (error()) {
+      <div class="lp-dialog__body">
+        <p role="alert">{{ error() }}</p>
+        @if (stale() && !unavailable()) {
+          <button
+            class="lp-button lp-button--secondary"
+            type="button"
+            [disabled]="busy()"
+            (click)="review()"
+          >
+            Review latest video
+          </button>
+        }
+      </div>
+    }
+    <footer class="lp-dialog__footer">
+      <button
+        class="lp-button lp-button--secondary"
+        type="button"
+        autofocus
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        Cancel</button
+      ><button
+        class="lp-button lp-button--danger"
+        type="button"
+        [disabled]="busy() || stale() || unavailable()"
+        (click)="confirm()"
+      >
+        {{ busy() ? 'Deleting…' : 'Delete' }}
+      </button>
+    </footer>
+  </div>
+</dialog>
