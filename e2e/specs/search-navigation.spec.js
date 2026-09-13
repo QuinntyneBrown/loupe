@@ -60,7 +60,7 @@ test("Given unsaved notes, when slash navigation is canceled or confirmed, then 
 });
 
 for (const width of [1440, 768, 640, 639, 320]) {
-  test(`Given the shared shell at ${width}px, when each area is opened, then four destinations remain reachable with correct active state`, async ({
+  test(`Given the shared shell at ${width}px, when each area is opened, then five destinations remain reachable with correct active state`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 900 });
@@ -68,7 +68,7 @@ for (const width of [1440, 768, 640, 639, 320]) {
     await screen.open("?q=window");
     await screen.expectResults(4, 4);
     await screen.expectNavigation("Search");
-    for (const area of ["Photographers", "Inspiration", "My Work", "Search"]) {
+    for (const area of ["Photographers", "Videos", "Inspiration", "My Work", "Search"]) {
       await screen.navigate(area);
       await screen.expectNavigation(area);
       await screen.expectMainFocus();
