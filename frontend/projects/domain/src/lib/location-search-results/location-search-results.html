@@ -1,0 +1,146 @@
+@if (request(); as search) {
+  <section aria-label="Matching locations" [attr.aria-busy]="loading()">
+    <div class="results-head">
+      <p role="status">{{ status() }}</p>
+      @if (search.mode === 'meaning' && items().length && !failed()) {
+        <span class="lp-pill lp-pill--ai">Matched by meaning</span>
+      }
+    </div>
+    @if (items().length) {
+      <div class="grid">
+        @for (item of cards(); track item.id) {
+          <lp-location-result-card
+            [destination]="'/locations/' + item.id"
+            [name]="item.name"
+            [locality]="item.locality"
+            [coverPreviewUrl]="item.coverPreviewUrl"
+            [imageCount]="item.imageCount"
+            [recommendedPeriods]="item.recommendedPeriods"
+            [groupSize]="item.groupSize"
+            [ratings]="item.ratings"
+          />
+        }
+      </div>
+    }
+    @if (loading()) {
+      @if (!items().length) {
+        <div class="grid" aria-hidden="true">
+          @for (tile of [1, 2, 3, 4, 5, 6]; track tile) {
+            <div class="lp-skeleton skeleton-card"></div>
+          }
+        </div>
+      }
+    } @else if (failed() && refreshRequired()) {
+      <div class="lp-notice lp-notice--info" role="status">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg>
+        <div class="lp-notice__body">
+          <span class="lp-notice__title">Your locations changed while you were browsing.</span>
+          <span
+            >The next page can't be fetched from the old ordering. Refresh to continue from the top
+            with the current results.</span
+          >
+          <div class="lp-notice__actions">
+            <button
+              class="lp-button lp-button--secondary lp-button--sm"
+              type="button"
+              (click)="load(true, true)"
+            >
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg
+              >Refresh results
+            </button>
+          </div>
+        </div>
+      </div>
+    } @else if (failed()) {
+      <div class="lp-empty" role="alert">
+        @if (unavailable()) {
+          <h2 class="lp-empty__title">Meaning search isn't available right now.</h2>
+          <p class="lp-empty__text">
+            Nothing is shown rather than passing keyword matches off as meaning results. Keyword
+            search still works with the same filters.
+          </p>
+          <div class="lp-empty__action">
+            <button
+              class="lp-button lp-button--secondary"
+              type="button"
+              (click)="keywordRequested.emit()"
+            >
+              Switch to Keyword
+            </button>
+            <button class="lp-button lp-button--ghost" type="button" (click)="load(true, true)">
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg>Try
+              again
+            </button>
+          </div>
+        } @else if (failure()?.code === 'invalid_request') {
+          <h2 class="lp-empty__title">Check your search.</h2>
+          <p class="lp-empty__text">
+            Correct the query or the selected filters, then search again.
+          </p>
+          <div class="lp-empty__action">
+            <button
+              class="lp-button lp-button--secondary"
+              type="button"
+              (click)="filtersRequested.emit()"
+            >
+              Review filters
+            </button>
+          </div>
+        } @else {
+          <h2 class="lp-empty__title">Find a location isn't available right now.</h2>
+          <p class="lp-empty__text">
+            Try again in a moment. Your locations are fine; only search is affected.
+          </p>
+          <div class="lp-empty__action">
+            <button
+              class="lp-button lp-button--secondary"
+              type="button"
+              (click)="load(!items().length, true)"
+            >
+              <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-retry" /></svg>Try
+              again
+            </button>
+          </div>
+        }
+      </div>
+    } @else if (!items().length) {
+      <div class="lp-empty">
+        <h2 #emptyHeading tabindex="-1" class="lp-empty__title">
+          {{
+            search.query
+              ? 'No locations match “' + search.query + '”.'
+              : 'No locations match these filters.'
+          }}
+        </h2>
+        <p class="lp-empty__text">
+          Edit the query, or clear a filter. Shoot type, people, and time of day only match
+          locations with a scouting report.
+        </p>
+        <div class="lp-empty__action">
+          <button
+            class="lp-button lp-button--secondary"
+            type="button"
+            (click)="queryEditRequested.emit()"
+          >
+            Edit query
+          </button>
+          @if (hasFilters()) {
+            <button
+              class="lp-button lp-button--secondary"
+              type="button"
+              (click)="filtersClearRequested.emit()"
+            >
+              Clear filters
+            </button>
+          }
+        </div>
+      </div>
+    } @else if (cursor()) {
+      <div class="more">
+        <button class="lp-button lp-button--secondary" type="button" (click)="load(false, true)">
+          Load more
+        </button>
+      </div>
+    }
+  </section>
+}

@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kew Bridge foreshore · Loupe</title>
+<meta name="description" content="One location: a full-frame image gallery, the address and coordinates you typed, your brief, notes, and tags, and the AI scouting report grounded in the images.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<link rel="stylesheet" href="assets/mock.css">
+</head>
+<body class="lp-shell">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.1"/><circle cx="12" cy="12" r="1.1"/><circle cx="19" cy="12" r="1.1"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3zM12 10v4M12 17.5v.5"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L18 10l-4-4L4 16zM13 7l4 4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+</svg>
+
+<a class="lp-skip" href="#main">Skip to content</a>
+<header class="lp-topbar">
+  <a class="lp-wordmark" href="my-work.html" aria-label="Loupe">L<span class="lp-wordmark__o"></span>upe</a>
+  <nav class="lp-nav" aria-label="Primary">
+    <a href="my-work.html"><svg class="lp-icon"><use href="#i-image"/></svg><span>My Work</span></a>
+    <a href="inspiration.html"><svg class="lp-icon"><use href="#i-grid"/></svg><span>Inspiration</span></a>
+    <a href="photographers.html"><svg class="lp-icon"><use href="#i-user"/></svg><span>Photographers</span></a>
+    <a href="search.html"><svg class="lp-icon"><use href="#i-search"/></svg><span>Search</span></a>
+    <a href="locations.html" aria-current="page"><svg class="lp-icon"><use href="#i-pin"/></svg><span>Locations</span></a>
+  </nav>
+  <div class="lp-topbar__end">
+    <span class="lp-topbar__hint"><span class="lp-kbd">/</span> to search</span>
+    <a class="lp-avatar" href="settings.html" aria-label="Settings">QB</a>
+  </div>
+</header>
+<div class="lp-banner lp-banner--demo" data-demo-only role="status">
+  <span class="lp-kicker">Demo mode</span>
+  <span>No provider is configured, so scouting reports can't be requested. Everything else works.</span>
+  <a href="settings.html?demo=1">Connect a provider</a>
+</div>
+
+<main id="main" class="lp-main">
+  <a class="lp-back" href="locations.html"><svg class="lp-icon lp-icon--sm"><use href="#i-chevron-left"/></svg>Locations</a>
+
+  <!-- Loading -->
+  <div class="lp-detail" data-state="loading" aria-busy="true">
+    <div class="lp-detail__media"><div class="lp-skeleton lp-skeleton--image"></div><div class="lp-row"><span class="lp-skeleton" style="width:67px;aspect-ratio:4/5"></span><span class="lp-skeleton" style="width:67px;aspect-ratio:4/5"></span><span class="lp-skeleton" style="width:67px;aspect-ratio:4/5"></span></div><div class="lp-skeleton lp-skeleton--text" style="width:40%"></div></div>
+    <div class="lp-detail__body">
+      <div class="lp-stack lp-stack--sm"><div class="lp-skeleton lp-skeleton--title" style="width:60%"></div><div class="lp-skeleton lp-skeleton--text" style="width:35%"></div></div>
+      <div class="lp-skeleton lp-skeleton--card"></div>
+      <div class="lp-stack lp-stack--sm"><div class="lp-skeleton lp-skeleton--text" style="width:90%"></div><div class="lp-skeleton lp-skeleton--text" style="width:75%"></div><div class="lp-skeleton lp-skeleton--text" style="width:60%"></div></div>
+    </div>
+  </div>
+
+  <!-- Error: unavailable or foreign detail (L2-057.4, L2-043.3) -->
+  <div class="lp-empty" data-state="error" role="alert">
+    <h1 class="lp-empty__title">Couldn't load this location.</h1>
+    <p class="lp-empty__text">It may have been deleted, or the connection dropped. Try again, or go back to your locations.</p>
+    <div class="lp-empty__action"><button class="lp-button lp-button--secondary" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Try again</button><a class="lp-button lp-button--ghost" href="locations.html">Back to Locations</a></div>
+  </div>
+
+  <div class="lp-detail" data-state="default no-images no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed">
+
+    <!-- ===== Head ===== -->
+    <div class="lp-detail__head">
+      <div class="lp-detail__title-row">
+        <h1 class="lp-title" data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed">Kew Bridge foreshore</h1>
+        <h1 class="lp-title" data-state="no-images">Nunhead cemetery gate</h1>
+        <details class="lp-menu">
+          <summary class="lp-icon-button" aria-label="More actions"><svg class="lp-icon"><use href="#i-more"/></svg></summary>
+          <div class="lp-menu__list">
+            <button class="lp-menu__item" type="button" data-open="edit-location:form"><svg class="lp-icon lp-icon--sm"><use href="#i-edit"/></svg>Edit location</button>
+            <div class="lp-menu__sep"></div>
+            <button class="lp-menu__item lp-menu__item--danger" type="button" data-open="delete-location"><svg class="lp-icon lp-icon--sm"><use href="#i-trash"/></svg>Delete location</button>
+          </div>
+        </details>
+      </div>
+      <div class="lp-detail__meta" data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed">
+        <span>Richmond, London</span>
+        <span class="lp-pill lp-pill--outline"><span class="lp-visually-hidden">Setting: </span>Outdoor</span>
+      </div>
+      <div class="lp-detail__meta" data-state="no-images">
+        <span class="lp-faint">Address not recorded</span>
+      </div>
+      <!-- Report status, then search status (L2-033, L2-060, L2-062.4-6) -->
+      <div class="lp-detail__meta" data-state="default queued scouting regenerating failed outdated brief-changed full indexing-failed">
+        <span class="lp-status lp-status--ready" data-state="default brief-changed full indexing-failed">Report ready</span>
+        <span class="lp-status lp-status--queued" data-state="queued">Queued</span>
+        <span class="lp-status lp-status--analyzing" data-state="scouting regenerating">Scouting</span>
+        <span class="lp-status lp-status--failed" data-state="failed">Failed</span>
+        <span class="lp-status lp-status--outdated" data-state="outdated">Outdated</span>
+        <span class="lp-status lp-status--queued" data-state="queued scouting">Processing report</span>
+        <span class="lp-status lp-status--analyzing" data-state="outdated">Updating search</span>
+        <span class="lp-status lp-status--failed" data-state="indexing-failed">Search indexing failed · <button class="lp-link" type="button">Retry</button></span>
+      </div>
+    </div>
+
+    <!-- ===== Media column: gallery, address, coordinates, timestamps ===== -->
+    <div class="lp-detail__media">
+
+      <!-- Gallery: one stage, radio thumbs; images 5-10 appear only in the full state (L2-056, L2-057.2, L2-057.5) -->
+      <div class="lp-gallery" data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed">
+        <figure class="lp-photo-stage lp-photo-stage--contain lp-gallery__stage">
+          <img data-image="1" src="https://picsum.photos/seed/lp-l1/1200/800" width="1200" height="800" alt="Kew Bridge foreshore, image 1">
+          <img data-image="2" src="https://picsum.photos/seed/lp-l1b/1200/800" width="1200" height="800" alt="Kew Bridge foreshore, image 2">
+          <img data-image="3" src="https://picsum.photos/seed/lp-l1c/800/1200" width="800" height="1200" alt="Kew Bridge foreshore, image 3">
+          <img data-image="4" src="https://picsum.photos/seed/lp-l1d/1200/800" width="1200" height="800" alt="Kew Bridge foreshore, image 4">
+          <img data-image="5" data-state="full" src="https://picsum.photos/seed/lp-l1e/1200/800" width="1200" height="800" alt="Kew Bridge foreshore, image 5">
+          <img data-image="6" data-state="full" src="https://picsum.photos/seed/lp-l1f/1200/800" width="1200" height="800" alt="Kew Bridge foreshore, image 6">
+          <img data-image="7" data-state="full" src="https://picsum.photos/seed/lp-l1g/1200/800" width="1200" height="800" alt="Kew Bridge foreshore, image 7">
+          <img data-image="8" data-state="full" src="https://picsum.photos/seed/lp-l1h/1200/800" width="1200" height="800" alt="Kew Bridge foreshore, image 8">
+          <img data-image="9" data-state="full" src="https://picsum.photos/seed/lp-l1i/1200/800" width="1200" height="800" alt="Kew Bridge foreshore, image 9">
+          <img data-image="10" data-state="full" src="https://picsum.photos/seed/lp-l1j/1200/800" width="1200" height="800" alt="Kew Bridge foreshore, image 10">
+        </figure>
+        <div class="lp-gallery__thumbs" role="radiogroup" aria-label="Images">
+          <label class="lp-gallery__thumb"><input type="radio" name="gallery" id="img-1" aria-label="Image 1, cover"><img src="https://picsum.photos/seed/lp-l1/240/300" width="120" height="150" alt=""><span class="lp-pill">Cover</span></label>
+          <label class="lp-gallery__thumb"><input type="radio" name="gallery" id="img-2" aria-label="Image 2" checked><img src="https://picsum.photos/seed/lp-l1b/240/300" width="120" height="150" alt=""></label>
+          <label class="lp-gallery__thumb"><input type="radio" name="gallery" id="img-3" aria-label="Image 3"><img src="https://picsum.photos/seed/lp-l1c/240/300" width="120" height="150" alt=""></label>
+          <label class="lp-gallery__thumb"><input type="radio" name="gallery" id="img-4" aria-label="Image 4"><img src="https://picsum.photos/seed/lp-l1d/240/300" width="120" height="150" alt=""></label>
+          <label class="lp-gallery__thumb" data-state="full"><input type="radio" name="gallery" id="img-5" aria-label="Image 5"><img src="https://picsum.photos/seed/lp-l1e/240/300" width="120" height="150" alt=""></label>
+          <label class="lp-gallery__thumb" data-state="full"><input type="radio" name="gallery" id="img-6" aria-label="Image 6"><img src="https://picsum.photos/seed/lp-l1f/240/300" width="120" height="150" alt=""></label>
+          <label class="lp-gallery__thumb" data-state="full"><input type="radio" name="gallery" id="img-7" aria-label="Image 7"><img src="https://picsum.photos/seed/lp-l1g/240/300" width="120" height="150" alt=""></label>
+          <label class="lp-gallery__thumb" data-state="full"><input type="radio" name="gallery" id="img-8" aria-label="Image 8"><img src="https://picsum.photos/seed/lp-l1h/240/300" width="120" height="150" alt=""></label>
+          <label class="lp-gallery__thumb" data-state="full"><input type="radio" name="gallery" id="img-9" aria-label="Image 9"><img src="https://picsum.photos/seed/lp-l1i/240/300" width="120" height="150" alt=""></label>
+          <label class="lp-gallery__thumb" data-state="full"><input type="radio" name="gallery" id="img-10" aria-label="Image 10"><img src="https://picsum.photos/seed/lp-l1j/240/300" width="120" height="150" alt=""></label>
+        </div>
+        <div class="lp-gallery__caption">
+          <span>
+            <span data-image="1">Image 1 · Cover</span><span data-image="2">Image 2</span><span data-image="3">Image 3</span><span data-image="4">Image 4</span><span data-image="5">Image 5</span><span data-image="6">Image 6</span><span data-image="7">Image 7</span><span data-image="8">Image 8</span><span data-image="9">Image 9</span><span data-image="10">Image 10</span>
+          </span>
+          <span class="lp-row">
+            <button class="lp-button lp-button--ghost lp-button--sm" type="button" data-toast-open="cover-changed">Set as cover</button>
+            <button class="lp-button lp-button--ghost lp-button--sm" type="button" data-open="remove-image">Remove</button>
+          </span>
+        </div>
+        <div class="lp-gallery__capacity">
+          <span data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured indexing-failed">4 of 10 images</span>
+          <span data-state="full">10 of 10 images. Remove one to add another.</span>
+          <button class="lp-button lp-button--secondary lp-button--sm" type="button" data-open="add-images:form" data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured indexing-failed"><svg class="lp-icon lp-icon--sm"><use href="#i-upload"/></svg>Add images</button>
+          <button class="lp-button lp-button--secondary lp-button--sm" type="button" disabled data-state="full"><svg class="lp-icon lp-icon--sm"><use href="#i-upload"/></svg>Add images</button>
+        </div>
+      </div>
+
+      <!-- No images yet (L2-057.3) -->
+      <div class="lp-photo-stage lp-photo-stage--empty" data-state="no-images">
+        <svg class="lp-icon"><use href="#i-pin"/></svg>
+        <span>No images yet. Add up to ten; the scouting report works from them.</span>
+        <button class="lp-button lp-button--secondary lp-button--sm" type="button" data-open="add-images:form"><svg class="lp-icon lp-icon--sm"><use href="#i-upload"/></svg>Add images</button>
+      </div>
+
+      <!-- Address, in the order entered, empty lines left out (L2-055.2) -->
+      <address class="lp-address" data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed">
+        Thames Path, north bank<br>
+        Richmond<br>
+        London<br>
+        <span class="lp-mono">TW8 0EE</span><br>
+        United Kingdom
+      </address>
+      <p class="lp-address lp-faint" data-state="no-images">Address not recorded</p>
+      <dl class="lp-meta">
+        <dt>Coordinates</dt>
+        <dd data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed"><span class="lp-mono">51.487213, -0.287604</span> <span class="lp-faint">· typed by you, never read from a photo</span></dd>
+        <dd data-state="no-images"><span class="lp-faint">Not recorded</span></dd>
+        <dt>Created</dt>
+        <dd data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed">3 Sep 2026</dd>
+        <dd data-state="no-images">11 Sep 2026</dd>
+        <dt>Updated</dt>
+        <dd data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed">10 Sep 2026</dd>
+        <dd data-state="no-images">11 Sep 2026</dd>
+      </dl>
+    </div>
+
+    <!-- ===== Body column ===== -->
+    <div class="lp-detail__body">
+
+      <!-- Report: needs an image (L2-057.3, L2-060.2) -->
+      <section class="lp-ai-block lp-ai-block--quiet" data-state="no-images" aria-labelledby="report-no-images-title">
+        <div class="lp-ai-block__head"><h2 class="lp-kicker lp-kicker--ai" id="report-no-images-title">Scouting report</h2></div>
+        <p class="lp-ai-block__text lp-muted">Add an image to get a scouting report. It only describes what the images show, so there's nothing to report on yet.</p>
+      </section>
+
+      <!-- Report: not requested yet; the request control carries its own disclosure (L2-060.1, L2-041.2) -->
+      <section class="lp-ai-block lp-ai-block--quiet" data-state="no-report" aria-labelledby="report-request-title">
+        <div class="lp-ai-block__head"><h2 class="lp-kicker lp-kicker--ai" id="report-request-title">Scouting report</h2></div>
+        <div data-live-only>
+          <p class="lp-ai-block__text">Ready when you are. The report says what shoots this place suits, when the light works, which compositions apply, how many people fit, and what to watch for, each tied to what's visible in your images.</p>
+          <div class="lp-ai-block__actions" style="margin-top:var(--lp-space-3)"><a class="lp-button lp-button--primary" href="location.html?state=queued">Request scouting report</a></div>
+          <p class="lp-ai-block__note" style="margin-top:var(--lp-space-3)">Sends these 4 images, your scouting brief, and camera settings (focal length, aperture, shutter, ISO, capture time) to Azure OpenAI. Your address, coordinates, notes, and tags stay on the server.</p>
+        </div>
+        <div data-demo-only>
+          <p class="lp-ai-block__text lp-muted">Integration not configured. Set the provider credentials on the server to request scouting reports. You can keep editing this location.</p>
+          <div class="lp-ai-block__actions" style="margin-top:var(--lp-space-3)"><a class="lp-button lp-button--ghost lp-button--sm" href="settings.html?demo=1">Check AI status</a></div>
+        </div>
+      </section>
+
+      <!-- Report: Integration not configured (L2-060.7) -->
+      <section class="lp-ai-block lp-ai-block--quiet" data-state="not-configured" aria-labelledby="report-unconfigured-title">
+        <div class="lp-ai-block__head"><h2 class="lp-kicker lp-kicker--ai" id="report-unconfigured-title">Scouting report</h2></div>
+        <p class="lp-ai-block__text lp-muted">Integration not configured. Set the provider credentials on the server to request scouting reports. You can keep editing this location.</p>
+        <div class="lp-ai-block__actions"><a class="lp-button lp-button--ghost lp-button--sm" href="settings.html">Check AI status</a></div>
+      </section>
+
+      <!-- Report: queued (L2-060.1, L2-033) -->
+      <div class="lp-processing" data-state="queued" aria-live="polite">
+        <div class="lp-processing__title"><span class="lp-spinner"></span>Queued for scouting</div>
+        <p class="lp-processing__text">One location is ahead of this one. Usually under a minute each. You can leave this page; the report will be here when you come back.</p>
+      </div>
+
+      <!-- Report: running -->
+      <div class="lp-processing" data-state="scouting" aria-live="polite">
+        <div class="lp-processing__title"><span class="lp-spinner"></span>Looking at the images</div>
+        <p class="lp-processing__text">Reading all 4 images, their camera settings, and your brief. Usually under a minute. You can leave this page; the report will be here when you come back.</p>
+      </div>
+      <section class="lp-ai-block" data-state="scouting" aria-hidden="true">
+        <div class="lp-report">
+          <div class="lp-report__section"><div class="lp-skeleton lp-skeleton--title" style="width:30%"></div><div class="lp-skeleton lp-skeleton--text" style="width:95%"></div><div class="lp-skeleton lp-skeleton--text" style="width:70%"></div></div>
+          <div class="lp-report__section"><div class="lp-skeleton lp-skeleton--title" style="width:25%"></div><div class="lp-skeleton lp-skeleton--text" style="width:85%"></div><div class="lp-skeleton lp-skeleton--text" style="width:60%"></div><div class="lp-skeleton lp-skeleton--text" style="width:75%"></div></div>
+        </div>
+      </section>
+
+      <!-- Report: regenerating, previous report stays visible below (L2-060.4) -->
+      <div class="lp-processing" data-state="regenerating" aria-live="polite">
+        <div class="lp-processing__title"><span class="lp-spinner"></span>Regenerating with the current 4 images</div>
+        <p class="lp-processing__text">The report below stays until the new one is ready. If this fails, it stays anyway.</p>
+      </div>
+
+      <!-- Report: failed; earlier report stays readable below (L2-060.6, L2-034) -->
+      <div class="lp-notice lp-notice--error" data-state="failed" role="alert">
+        <svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>
+        <div class="lp-notice__body">
+          <span class="lp-notice__title">The scouting report didn't complete.</span>
+          <span>The AI provider stopped responding after two attempts. Your images and brief are saved; the report from 3 Sep is still below.</span>
+          <div class="lp-notice__actions">
+            <a class="lp-button lp-button--secondary lp-button--sm" href="location.html?state=regenerating"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Retry</a>
+            <a class="lp-button lp-button--ghost lp-button--sm" href="settings.html">Check AI status</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== The report (L2-058, L2-059, L2-060.8) ===== -->
+      <section class="lp-ai-block" data-state="default regenerating failed outdated brief-changed full indexing-failed" aria-labelledby="report-title">
+        <div class="lp-ai-block__head">
+          <div class="lp-row">
+            <h2 class="lp-kicker lp-kicker--ai" id="report-title">Scouting report</h2>
+            <span class="lp-pill lp-pill--ai">AI generated</span>
+            <span class="lp-pill lp-pill--warning" data-state="outdated">Outdated</span>
+            <span class="lp-pill" data-state="regenerating failed">Previous report</span>
+          </div>
+          <span class="lp-ai-block__note" data-state="default full indexing-failed">Generated 10 Sep 2026 · Azure OpenAI · gpt-4.1 · 4 images · brief as saved 10 Sep 2026</span>
+          <span class="lp-ai-block__note" data-state="regenerating failed outdated brief-changed">Generated 3 Sep 2026 · Azure OpenAI · gpt-4.1 · 3 images · brief as saved 3 Sep 2026</span>
+        </div>
+
+        <div class="lp-notice lp-notice--warning" data-state="outdated">
+          <svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>
+          <div class="lp-notice__body">
+            <span class="lp-notice__title">Based on 3 images as of 3 Sep 2026. The image set has changed since.</span>
+            <span>Still readable, and still what Find a location uses, until a new report replaces it.</span>
+            <div class="lp-notice__actions"><a class="lp-button lp-button--primary lp-button--sm" href="location.html?state=regenerating">Regenerate</a></div>
+          </div>
+        </div>
+
+        <div class="lp-notice lp-notice--info" data-state="brief-changed">
+          <div class="lp-notice__body">
+            <span class="lp-notice__title">Your brief changed on 10 Sep. This report used the brief as saved 3 Sep.</span>
+            <span>Regenerate to have the report answer the new brief. Until then it stays as it is.</span>
+            <div class="lp-notice__actions"><a class="lp-button lp-button--primary lp-button--sm" href="location.html?state=regenerating">Regenerate</a></div>
+          </div>
+        </div>
+
+        <div class="lp-report">
+
+          <section class="lp-report__section" aria-labelledby="report-overview">
+            <h3 class="lp-kicker lp-kicker--ai" id="report-overview">Overview</h3>
+            <div class="lp-report__rows">
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Repeating arches give depth</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-1"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1/72/90" width="32" height="40" alt="Image 1"></label><label for="img-3"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1c/72/90" width="32" height="40" alt="Image 3"></label></span></div>
+                <p class="lp-report__reason">The bridge arches recede in a line across images 1 and 3, so a couple placed under the near arch reads against three more behind them.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Open shade under the bridge</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-3"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1c/72/90" width="32" height="40" alt="Image 3"></label></span></div>
+                <p class="lp-report__reason">Image 3 shows even, directionless light under the arch while the bank outside is in full sun: a soft-light pocket for faces without fill.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Uncluttered foreground</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-2"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1b/72/90" width="32" height="40" alt="Image 2"></label></span></div>
+                <p class="lp-report__reason">Wet gravel and a row of mooring posts (image 2) are the only foreground elements, so there is little to crop out.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="lp-report__section" aria-labelledby="report-suitability">
+            <h3 class="lp-kicker lp-kicker--ai" id="report-suitability">Suitability</h3>
+            <div class="lp-report__rows">
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Portraits</span><span class="lp-pill lp-pill--success">Well suited</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-3"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1c/72/90" width="32" height="40" alt="Image 3"></label><label for="img-2"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1b/72/90" width="32" height="40" alt="Image 2"></label></span></div>
+                <p class="lp-report__reason">Open shade under the arch for faces, and a long, empty gravel bank for full-length work.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Family portraits</span><span class="lp-pill lp-pill--warning">Not recommended</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-1"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1/72/90" width="32" height="40" alt="Image 1"></label><label for="img-2"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1b/72/90" width="32" height="40" alt="Image 2"></label></span></div>
+                <p class="lp-report__reason">The gravel is uneven and the water's edge is close in images 1 and 2, with nowhere for small children to stand safely while a group is arranged.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Headshots</span><span class="lp-pill lp-pill--success">Well suited</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-3"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1c/72/90" width="32" height="40" alt="Image 3"></label></span></div>
+                <p class="lp-report__reason">The arch interior gives a flat, dark background with soft frontal light.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Engagement</span><span class="lp-pill lp-pill--success">Well suited</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-1"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1/72/90" width="32" height="40" alt="Image 1"></label><label for="img-4"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1d/72/90" width="32" height="40" alt="Image 4"></label></span></div>
+                <p class="lp-report__reason">The receding arches and the path along the wall give walking-couple compositions with depth.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Events</span><span class="lp-pill">Workable</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-1"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1/72/90" width="32" height="40" alt="Image 1"></label><label for="img-2"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1b/72/90" width="32" height="40" alt="Image 2"></label></span></div>
+                <p class="lp-report__reason">Small gatherings only: no level ground, no cover from rain, and the images show nowhere for a larger group to stand together.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="lp-report__section" aria-labelledby="report-time">
+            <h3 class="lp-kicker lp-kicker--ai" id="report-time">Time of day</h3>
+            <div class="lp-report__rows">
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Dawn</span><span class="lp-pill lp-pill--outline">Unknown</span><span class="lp-basis lp-basis--inferred">Inferred</span><span class="lp-report__cites"><label for="img-1"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1/72/90" width="32" height="40" alt="Image 1"></label></span></div>
+                <p class="lp-report__reason">Every image is daytime; nothing shows how the light reaches the bank at first light.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Morning</span><span class="lp-pill lp-pill--success">Recommended</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-1"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1/72/90" width="32" height="40" alt="Image 1"></label></span></div>
+                <p class="lp-report__reason">Image 1 shows the bank lit from the side with the arches in shadow: modelling on faces without the overhead sun of image 2.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Midday</span><span class="lp-pill lp-pill--warning">Avoid</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-2"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1b/72/90" width="32" height="40" alt="Image 2"></label></span></div>
+                <p class="lp-report__reason">Image 2 shows hard overhead light on the gravel, short shadows, and blown highlights on the water.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Afternoon</span><span class="lp-pill lp-pill--outline">Unknown</span><span class="lp-basis lp-basis--inferred">Inferred</span><span class="lp-report__cites"><label for="img-2"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1b/72/90" width="32" height="40" alt="Image 2"></label></span></div>
+                <p class="lp-report__reason">No image shows the light between the overhead sun of image 2 and the low sun of image 4.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Golden hour</span><span class="lp-pill lp-pill--success">Recommended</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-4"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1d/72/90" width="32" height="40" alt="Image 4"></label><label for="img-1"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1/72/90" width="32" height="40" alt="Image 1"></label></span></div>
+                <p class="lp-report__reason">Image 4 shows low, warm light raking the railings with long shadows across the steps, and image 1 shows open sky over the water with nothing to block a low sun.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Blue hour</span><span class="lp-pill lp-pill--outline">Unknown</span><span class="lp-basis lp-basis--inferred">Inferred</span><span class="lp-report__cites"><label for="img-3"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1c/72/90" width="32" height="40" alt="Image 3"></label></span></div>
+                <p class="lp-report__reason">No image shows the bridge after sunset; whether the arches are lit is not visible.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Night</span><span class="lp-pill lp-pill--outline">Unknown</span><span class="lp-basis lp-basis--inferred">Inferred</span><span class="lp-report__cites"><label for="img-4"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1d/72/90" width="32" height="40" alt="Image 4"></label></span></div>
+                <p class="lp-report__reason">Nothing in the images shows artificial light on the foreshore.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="lp-report__section" aria-labelledby="report-techniques">
+            <h3 class="lp-kicker lp-kicker--ai" id="report-techniques">Techniques</h3>
+            <div class="lp-report__rows">
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Leading lines</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-1"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1/72/90" width="32" height="40" alt="Image 1"></label><label for="img-2"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1b/72/90" width="32" height="40" alt="Image 2"></label></span></div>
+                <p class="lp-report__reason">The wall and the row of mooring posts both run into the frame toward the arches; place the couple where the two lines meet.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Layering</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-1"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1/72/90" width="32" height="40" alt="Image 1"></label></span></div>
+                <p class="lp-report__reason">Foreground gravel, the subjects on the bank, the near arch, and the far arches stack four planes in image 1; a wide aperture separates them.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Negative space</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-1"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1/72/90" width="32" height="40" alt="Image 1"></label></span></div>
+                <p class="lp-report__reason">Empty water and sky take up two thirds of image 1; a small figure at the bank edge reads as a portrait of the place as much as the person.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="lp-report__section" aria-labelledby="report-group">
+            <h3 class="lp-kicker lp-kicker--ai" id="report-group">Group size</h3>
+            <div class="lp-report__rows">
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">2–8 people</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-1"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1/72/90" width="32" height="40" alt="Image 1"></label><label for="img-3"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1c/72/90" width="32" height="40" alt="Image 3"></label></span></div>
+                <p class="lp-report__reason">The bank in images 1 and 2 is wide enough for a small family in one or two rows, but the usable gravel narrows under the arch (image 3) and there is no level ground for a larger group.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="lp-report__section" aria-labelledby="report-cautions">
+            <h3 class="lp-kicker lp-kicker--ai" id="report-cautions">Cautions</h3>
+            <div class="lp-report__rows">
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Tideline</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-2"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1b/72/90" width="32" height="40" alt="Image 2"></label></span></div>
+                <p class="lp-report__reason">Wet gravel and a dark water line on the wall in image 2 show the bank is regularly under water. When, the images can't say; check that yourself.</p>
+              </div>
+              <div class="lp-report__row">
+                <div class="lp-report__row-head"><span class="lp-report__label">Signage at the steps</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-4"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1d/72/90" width="32" height="40" alt="Image 4"></label></span></div>
+                <p class="lp-report__reason">A warning sign and bins at the top of the steps in image 4 will need cropping, or the subjects moving down a few steps.</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <div class="lp-ai-block__actions" data-state="default full indexing-failed"><a class="lp-button lp-button--ghost lp-button--sm" href="location.html?state=regenerating">Regenerate</a></div>
+        <div class="lp-ai-block__actions" data-state="regenerating"><button class="lp-button lp-button--ghost lp-button--sm is-busy" type="button" disabled><span class="lp-spinner"></span>Regenerating</button></div>
+        <p class="lp-ai-block__note">Regenerating sends the current images, your brief, and camera settings to Azure OpenAI again. Notes, address, coordinates, and tags are never sent. A section the images can't support says so rather than guessing.</p>
+      </section>
+
+      <!-- Scouting brief: explicit Save (L2-055.5, L2-004) -->
+      <div class="lp-block" data-save-editor>
+        <div class="lp-block__head">
+          <label class="lp-subheading" for="brief">Scouting brief</label>
+          <span class="lp-save-status lp-save-status--saved" data-save-status>Saved</span>
+        </div>
+        <textarea class="lp-textarea" id="brief" rows="2" placeholder="What you'd shoot here. Sent with the images when you request a report." data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed" data-save-input>Couple sessions at low tide, two people, nothing staged. Wide and quiet, not the bridge as a landmark.</textarea>
+        <textarea class="lp-textarea" id="brief-empty" rows="2" placeholder="What you'd shoot here. Sent with the images when you request a report." data-state="no-images" aria-label="Scouting brief"></textarea>
+        <p class="lp-field__hint">Sent with the images when you request a report. Your address, coordinates, and notes never are.</p>
+        <div class="lp-block__foot"><button class="lp-button lp-button--secondary lp-button--sm" type="button" data-save-button disabled>Save</button></div>
+      </div>
+
+      <!-- Your notes: yours alone, never sent, never overwritten by a report (L2-060.8) -->
+      <div class="lp-block" data-save-editor>
+        <div class="lp-block__head">
+          <label class="lp-subheading" for="notes">Your notes</label>
+          <span class="lp-save-status lp-save-status--saved" data-save-status>Saved</span>
+        </div>
+        <textarea class="lp-textarea" id="notes" rows="4" placeholder="Access, parking, who to ask. Notes stay with you." data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed" data-save-input>Check the tide tables; the gravel is under water from about two hours before high tide. Parking on Kew Green, five minutes' walk. Ask at the boatyard if the gate is shut.</textarea>
+        <textarea class="lp-textarea" id="notes-empty" rows="4" placeholder="Access, parking, who to ask. Notes stay with you." data-state="no-images" aria-label="Your notes"></textarea>
+        <div class="lp-block__foot"><button class="lp-button lp-button--secondary lp-button--sm" type="button" data-save-button disabled>Save</button></div>
+      </div>
+
+      <!-- Your tags -->
+      <div class="lp-block">
+        <div class="lp-block__head">
+          <label class="lp-subheading" for="tag-input">Your tags</label>
+          <span class="lp-save-status lp-save-status--saved">Saved</span>
+        </div>
+        <div class="lp-chip-input" data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed">
+          <span class="lp-tag">river<button class="lp-tag__action" type="button" aria-label="Remove tag river"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span>
+          <span class="lp-tag">low tide<button class="lp-tag__action" type="button" aria-label="Remove tag low tide"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span>
+          <span class="lp-tag">arches<button class="lp-tag__action" type="button" aria-label="Remove tag arches"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span>
+          <span class="lp-tag">open shade<button class="lp-tag__action" type="button" aria-label="Remove tag open shade"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></span>
+          <input id="tag-input" type="text" placeholder="Add a tag" aria-label="Add a tag">
+        </div>
+        <div class="lp-chip-input" data-state="no-images">
+          <input type="text" placeholder="Add a tag" aria-label="Add a tag">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ============ Dialogs ============ -->
+
+<!-- Edit location: the structured fields; brief, notes, and tags edit inline (L2-055) -->
+<dialog class="lp-dialog" data-dialog="edit-location" aria-labelledby="edit-location-title">
+  <form method="dialog" class="lp-dialog__panel">
+
+    <section data-step="form">
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title" id="edit-location-title">Edit location</h2><p class="lp-dialog__text">Images, the report, and your tags aren't touched by this.</p></div>
+        <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-field">
+          <label class="lp-field__label" for="edit-location-name">Name</label>
+          <input class="lp-input" id="edit-location-name" type="text" value="Kew Bridge foreshore" autofocus>
+        </div>
+        <fieldset class="lp-form">
+          <legend class="lp-form__legend">Address <span class="lp-field__optional">optional · typed by you, never read from a photo</span></legend>
+          <div class="lp-field">
+            <label class="lp-field__label" for="edit-location-address-1">Address line 1</label>
+            <input class="lp-input" id="edit-location-address-1" type="text" value="Thames Path, north bank">
+          </div>
+          <div class="lp-field">
+            <label class="lp-field__label" for="edit-location-address-2">Address line 2</label>
+            <input class="lp-input" id="edit-location-address-2" type="text" value="">
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="edit-location-locality">Locality</label>
+              <input class="lp-input" id="edit-location-locality" type="text" value="Richmond">
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="edit-location-region">Region</label>
+              <input class="lp-input" id="edit-location-region" type="text" value="London">
+            </div>
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="edit-location-postal">Postal code</label>
+              <input class="lp-input lp-input--mono" id="edit-location-postal" type="text" value="TW8 0EE">
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="edit-location-country">Country</label>
+              <input class="lp-input" id="edit-location-country" type="text" value="United Kingdom">
+            </div>
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="edit-location-lat">Latitude</label>
+              <input class="lp-input lp-input--mono" id="edit-location-lat" type="text" inputmode="decimal" value="51.487213">
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="edit-location-lng">Longitude</label>
+              <input class="lp-input lp-input--mono" id="edit-location-lng" type="text" inputmode="decimal" value="-0.287604">
+              <p class="lp-field__hint">Decimal degrees, both or neither. Shown to six places.</p>
+            </div>
+          </div>
+        </fieldset>
+        <div class="lp-field">
+          <label class="lp-field__label" for="edit-location-setting">Setting</label>
+          <div class="lp-select-wrap">
+            <select class="lp-select" id="edit-location-setting">
+              <option>Not set</option><option>Indoor</option><option selected>Outdoor</option><option>Mixed</option>
+            </select>
+            <svg class="lp-icon lp-icon--sm"><use href="#i-chevron-down"/></svg>
+          </div>
+        </div>
+      </div>
+      <footer class="lp-dialog__footer">
+        <span class="lp-dialog__privacy"><svg class="lp-icon lp-icon--sm"><use href="#i-lock"/></svg>Private. Address and coordinates stay on the server.</span>
+        <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+        <button class="lp-button lp-button--primary" type="button" data-toast-open="saved">Save changes</button>
+      </footer>
+    </section>
+
+    <!-- Conflict: someone saved a newer revision; attempted values are kept (L2-055.6, L2-030) -->
+    <section data-step="conflict" hidden>
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title">Edit location</h2></div>
+        <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-notice lp-notice--warning" role="alert">
+          <svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>
+          <div class="lp-notice__body">
+            <span class="lp-notice__title">This location was changed elsewhere since you opened it.</span>
+            <span>Your edits are kept below and nothing has been saved. Reload the latest version, then apply them again.</span>
+            <div class="lp-notice__actions"><button class="lp-button lp-button--secondary lp-button--sm" type="button" data-open="edit-location:form"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Reload latest</button></div>
+          </div>
+        </div>
+        <div class="lp-field">
+          <label class="lp-field__label" for="edit-location-conflict-name">Name</label>
+          <input class="lp-input" id="edit-location-conflict-name" type="text" value="Kew Bridge foreshore, north bank">
+        </div>
+        <fieldset class="lp-form">
+          <legend class="lp-form__legend">Address <span class="lp-field__optional">optional · typed by you, never read from a photo</span></legend>
+          <div class="lp-field">
+            <label class="lp-field__label" for="edit-location-conflict-address-1">Address line 1</label>
+            <input class="lp-input" id="edit-location-conflict-address-1" type="text" value="Thames Path, north bank">
+          </div>
+          <div class="lp-field">
+            <label class="lp-field__label" for="edit-location-conflict-address-2">Address line 2</label>
+            <input class="lp-input" id="edit-location-conflict-address-2" type="text" value="Below Kew Bridge">
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="edit-location-conflict-locality">Locality</label>
+              <input class="lp-input" id="edit-location-conflict-locality" type="text" value="Richmond">
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="edit-location-conflict-region">Region</label>
+              <input class="lp-input" id="edit-location-conflict-region" type="text" value="London">
+            </div>
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="edit-location-conflict-postal">Postal code</label>
+              <input class="lp-input lp-input--mono" id="edit-location-conflict-postal" type="text" value="TW8 0EE">
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="edit-location-conflict-country">Country</label>
+              <input class="lp-input" id="edit-location-conflict-country" type="text" value="United Kingdom">
+            </div>
+          </div>
+          <div class="lp-form__row">
+            <div class="lp-field">
+              <label class="lp-field__label" for="edit-location-conflict-lat">Latitude</label>
+              <input class="lp-input lp-input--mono" id="edit-location-conflict-lat" type="text" inputmode="decimal" value="51.487213">
+            </div>
+            <div class="lp-field">
+              <label class="lp-field__label" for="edit-location-conflict-lng">Longitude</label>
+              <input class="lp-input lp-input--mono" id="edit-location-conflict-lng" type="text" inputmode="decimal" value="-0.287604">
+            </div>
+          </div>
+        </fieldset>
+        <div class="lp-field">
+          <label class="lp-field__label" for="edit-location-conflict-setting">Setting</label>
+          <div class="lp-select-wrap">
+            <select class="lp-select" id="edit-location-conflict-setting">
+              <option>Not set</option><option>Indoor</option><option selected>Outdoor</option><option>Mixed</option>
+            </select>
+            <svg class="lp-icon lp-icon--sm"><use href="#i-chevron-down"/></svg>
+          </div>
+        </div>
+      </div>
+      <footer class="lp-dialog__footer">
+        <span class="lp-dialog__privacy"><svg class="lp-icon lp-icon--sm"><use href="#i-lock"/></svg>Private. Address and coordinates stay on the server.</span>
+        <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+        <button class="lp-button lp-button--primary" type="button" disabled>Save changes</button>
+      </footer>
+    </section>
+
+  </form>
+</dialog>
+
+<!-- Add images: one upload per file, capacity enforced before transfer (L2-056) -->
+<dialog class="lp-dialog" data-dialog="add-images" aria-labelledby="add-images-title">
+  <form method="dialog" class="lp-dialog__panel">
+
+    <section data-step="form">
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title" id="add-images-title">Add images</h2></div>
+        <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="lp-dialog__body">
+        <label class="lp-dropzone">
+          <svg class="lp-icon"><use href="#i-upload"/></svg>
+          <span class="lp-dropzone__title" data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed">Drop up to 6 images here, or browse</span>
+          <span class="lp-dropzone__title" data-state="no-images">Drop up to 10 images here, or browse</span>
+          <span>JPEG, PNG, HEIC or WebP, up to 25 MB each. <span data-state="default no-report queued scouting regenerating failed outdated brief-changed not-configured full indexing-failed">4 of 10 used.</span><span data-state="no-images">0 of 10 used.</span> Each file is its own upload.</span>
+          <input class="lp-visually-hidden" type="file" accept="image/*" multiple autofocus>
+        </label>
+        <p class="lp-field__hint">Location data inside a file is stripped on upload. Your coordinates are never read from a photo. The first image becomes the cover.</p>
+      </div>
+      <footer class="lp-dialog__footer">
+        <span class="lp-dialog__privacy"><svg class="lp-icon lp-icon--sm"><use href="#i-lock"/></svg>Private. Only you can see these.</span>
+        <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+        <button class="lp-button lp-button--primary" type="button" data-open="add-images:progress">Upload</button>
+      </footer>
+    </section>
+
+    <section data-step="progress" hidden>
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title">Uploading 4 images…</h2><p class="lp-dialog__text">Each image is its own upload. One failing doesn't stop the others, and what's already in stays in.</p></div>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-stack" aria-live="polite">
+          <div class="lp-progress-row lp-progress-row--done">
+            <div class="lp-progress"><div class="lp-progress__bar" style="width:100%"></div></div>
+            <div class="lp-progress-row__meta"><span>foreshore-1.jpg</span><span class="lp-pill lp-pill--success">Saved</span></div>
+          </div>
+          <div class="lp-progress-row">
+            <div class="lp-progress"><div class="lp-progress__bar" style="width:64%"></div></div>
+            <div class="lp-progress-row__meta"><span>foreshore-2.jpg</span><span>4.2 of 6.6 MB</span></div>
+          </div>
+          <div class="lp-progress-row">
+            <div class="lp-notice lp-notice--error" role="alert">
+              <svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>
+              <div class="lp-notice__body">
+                <span class="lp-notice__title">foreshore-3.heic didn't upload.</span>
+                <span>The connection dropped part way through. Nothing from this file was kept.</span>
+                <div class="lp-notice__actions"><button class="lp-button lp-button--secondary lp-button--sm" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Retry</button><button class="lp-button lp-button--ghost lp-button--sm" type="button">Remove</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="lp-progress-row">
+            <div class="lp-notice lp-notice--error" role="alert">
+              <svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>
+              <div class="lp-notice__body">
+                <span class="lp-notice__title">foreshore-4.tif is a format Loupe can't read.</span>
+                <span>Use JPEG, PNG, HEIC or WebP up to 25 MB. Export a JPEG at full size and add it afterwards.</span>
+                <div class="lp-notice__actions"><button class="lp-button lp-button--ghost lp-button--sm" type="button">Remove</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="lp-dialog__footer">
+        <button class="lp-button lp-button--secondary" type="button" data-toast-open="upload-cancelled">Cancel remaining</button>
+        <button class="lp-button lp-button--primary" type="button" data-toast-open="images-added">Done</button>
+      </footer>
+    </section>
+
+    <section data-step="too-many" hidden>
+      <header class="lp-dialog__header">
+        <div><h2 class="lp-dialog__title">Add images</h2></div>
+        <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="lp-dialog__body">
+        <div class="lp-notice lp-notice--error" role="alert">
+          <svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>
+          <div class="lp-notice__body">
+            <span class="lp-notice__title">You chose 8 images, but only 6 more fit.</span>
+            <span>A location holds up to 10 images and this one has 4. Nothing was uploaded; choose up to 6.</span>
+          </div>
+        </div>
+        <label class="lp-dropzone lp-dropzone--compact">
+          <svg class="lp-icon"><use href="#i-upload"/></svg>
+          <span>Choose again, up to 6</span>
+          <input class="lp-visually-hidden" type="file" accept="image/*" multiple autofocus>
+        </label>
+      </div>
+      <footer class="lp-dialog__footer">
+        <button class="lp-button lp-button--secondary" type="button" data-close>Cancel</button>
+      </footer>
+    </section>
+
+  </form>
+</dialog>
+
+<!-- Remove one image (L2-056.5) -->
+<dialog class="lp-dialog" data-dialog="remove-image" aria-labelledby="remove-image-title">
+  <form method="dialog" class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="remove-image-title">Remove image 2?</h2>
+        <p class="lp-dialog__text">It leaves the gallery now and is deleted from storage within a day. If it's the cover, the next image becomes the cover. The scouting report is marked Outdated until you regenerate it.</p>
+      </div>
+      <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+    </header>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" data-close autofocus>Cancel</button>
+      <a class="lp-button lp-button--danger" href="location.html?state=outdated&toast=image-removed">Remove</a>
+    </footer>
+  </form>
+</dialog>
+
+<!-- Delete location (L2-057.6, L2-031) -->
+<dialog class="lp-dialog" data-dialog="delete-location" aria-labelledby="delete-location-title">
+  <form method="dialog" class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="delete-location-title">Delete “Kew Bridge foreshore”?</h2>
+        <p class="lp-dialog__text">Its 4 images, scouting report, notes, tags, and search record are all removed. This can't be undone.</p>
+      </div>
+      <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+    </header>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--secondary" type="button" data-close autofocus>Cancel</button>
+      <a class="lp-button lp-button--danger" href="locations.html?toast=deleted">Delete</a>
+    </footer>
+  </form>
+</dialog>
+
+<!-- ============ Toasts ============ -->
+<div class="lp-toast" data-toast="saved" role="status"><span class="lp-toast__text">Changes saved.</span><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+<div class="lp-toast" data-toast="cover-changed" role="status"><span class="lp-toast__text">Cover updated.</span><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+<div class="lp-toast" data-toast="image-removed" data-open-in="outdated" role="status"><span class="lp-toast__text">Image removed.</span><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+<div class="lp-toast" data-toast="images-added" role="status"><span class="lp-toast__text">2 images added. 2 didn't upload.</span><a class="lp-toast__action" href="location.html?state=queued">Request scouting report</a><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+<div class="lp-toast" data-toast="upload-cancelled" role="alert"><span class="lp-toast__text">Upload cancelled. If the server finished a file first, refresh to see it.</span><a class="lp-toast__action" href="location.html">Refresh</a><button class="lp-icon-button" type="button" data-toast-close aria-label="Dismiss"><svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button></div>
+
+<script src="assets/mock.js"></script>
+</body>
+</html>

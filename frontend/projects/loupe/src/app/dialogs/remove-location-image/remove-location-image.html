@@ -1,0 +1,65 @@
+<dialog
+  #modal
+  class="lp-dialog"
+  aria-labelledby="remove-image-title"
+  aria-describedby="remove-image-effects"
+  (cancel)="cancel($event)"
+>
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="remove-image-title">
+          Remove image {{ image().position }}?
+        </h2>
+        <p class="lp-dialog__text" id="remove-image-effects">
+          It leaves the gallery now and is deleted from storage within a day. If it's the cover, the
+          next image becomes the cover. A scouting report is marked Outdated until you regenerate
+          it.
+        </p>
+      </div>
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Close"
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    @if (busy() || error()) {
+      <div class="lp-dialog__body">
+        @if (busy()) {
+          <p role="status">Working…</p>
+        }
+        @if (error()) {
+          <p role="alert">{{ error() }}</p>
+        }
+        @if (stale() && !busy()) {
+          <button class="lp-button lp-button--secondary" type="button" (click)="reload()">
+            Reload latest details
+          </button>
+        }
+      </div>
+    }
+    <footer class="lp-dialog__footer">
+      <button
+        class="lp-button lp-button--secondary"
+        type="button"
+        autofocus
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+      <button
+        class="lp-button lp-button--danger"
+        type="button"
+        [disabled]="busy() || stale() || unavailable()"
+        (click)="confirm()"
+      >
+        Remove
+      </button>
+    </footer>
+  </div>
+</dialog>

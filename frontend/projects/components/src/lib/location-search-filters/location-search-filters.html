@@ -1,0 +1,95 @@
+<div class="row row--desktop">
+  <div class="lp-chips" role="group" aria-label="Shoot type">
+    @for (shootType of shootTypeOptions(); track shootType) {
+      <button
+        class="lp-chip"
+        type="button"
+        [attr.aria-pressed]="value().shootTypes.includes(shootType)"
+        (click)="toggleShootType(shootType)"
+      >
+        {{ shootType }}
+        @if (value().shootTypes.includes(shootType)) {
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
+        }
+      </button>
+    }
+  </div>
+  <label class="label" [for]="id + '-people'">People</label>
+  <input
+    #people
+    class="lp-input lp-input--count"
+    [id]="id + '-people'"
+    type="number"
+    min="1"
+    max="500"
+    step="1"
+    placeholder="any"
+    [value]="value().people ?? ''"
+    (change)="setPeople(people.value)"
+    (keydown.enter)="$event.preventDefault(); setPeople(people.value)"
+  />
+</div>
+<div class="row row--desktop">
+  <div class="lp-chips" role="group" aria-label="Time of day">
+    @for (period of periodOptions(); track period) {
+      <button
+        class="lp-chip"
+        type="button"
+        [attr.aria-pressed]="value().timesOfDay.includes(period)"
+        (click)="togglePeriod(period)"
+      >
+        {{ period }}
+        @if (value().timesOfDay.includes(period)) {
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
+        }
+      </button>
+    }
+  </div>
+  <div class="lp-segmented" role="radiogroup" aria-label="Setting">
+    <label class="lp-segmented__option"
+      ><input
+        type="radio"
+        [name]="id + '-setting'"
+        value=""
+        [checked]="!value().setting"
+        (change)="chooseSetting(null)"
+      /><span class="lp-segmented__label">Any</span></label
+    >
+    @for (setting of settingOptions; track setting) {
+      <label class="lp-segmented__option"
+        ><input
+          type="radio"
+          [name]="id + '-setting'"
+          [value]="setting"
+          [checked]="value().setting === setting"
+          (change)="chooseSetting(setting)"
+        /><span class="lp-segmented__label">{{ setting }}</span></label
+      >
+    }
+  </div>
+  <button
+    class="lp-chip"
+    type="button"
+    [attr.aria-pressed]="value().tags.length > 0"
+    (click)="dialogRequested.emit()"
+  >
+    <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-filter" /></svg>Tags
+  </button>
+  @if (count()) {
+    <button class="lp-link lp-small clear" type="button" (click)="clear()">Clear all</button>
+  }
+</div>
+<div class="row row--mobile">
+  <button
+    class="lp-chip"
+    type="button"
+    [attr.aria-pressed]="count() > 0"
+    (click)="dialogRequested.emit()"
+  >
+    <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-filter" /></svg
+    >{{ summary() }}
+  </button>
+  @if (count()) {
+    <button class="lp-link lp-small clear" type="button" (click)="clear()">Clear all</button>
+  }
+</div>

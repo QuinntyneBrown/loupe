@@ -1,0 +1,15 @@
+:host {
+  display: contents;
+}
+.retry {
+  background: none;
+  border: none;
+  padding: var(--lp-zero);
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  min-height: var(--lp-space-6);
+}
+.retry:disabled {
+  color: var(--lp-color-text-3);
+}

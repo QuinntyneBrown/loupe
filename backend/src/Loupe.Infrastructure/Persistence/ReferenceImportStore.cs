@@ -18,7 +18,7 @@ public sealed class ReferenceImportStore(LibraryDbContext database, TimeProvider
         var source = reference.SourceUrl ?? throw new RequestValidationException("sourceUrl", "Add a source URL before requesting an import.");
         var normalizedSource = await database.Database.SqlQuery<string>($"SELECT loupe_normalize_source({source}) AS \"Value\"").SingleAsync(cancellationToken);
         var active = database.BackgroundOperations.Where(operation => operation.OwnerId == ownerId
-            && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running));
+            && operation.Type != OperationType.LocationIndex && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running));
         var existing = await active.SingleOrDefaultAsync(operation => operation.Type == OperationType.ReferenceImport && operation.ResourceId == referenceId, cancellationToken);
         if (existing is not null)
         {

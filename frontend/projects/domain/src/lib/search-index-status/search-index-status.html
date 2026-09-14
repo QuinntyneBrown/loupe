@@ -1,0 +1,20 @@
+@if (label(); as status) {
+  <span
+    class="lp-status"
+    [class]="'lp-status ' + status.modifier"
+    role="status"
+    aria-label="Search index"
+    [attr.aria-busy]="busy()"
+  >
+    {{ status.text }}
+    @if (location().indexStatus === 'failed') {
+      <span aria-hidden="true">·</span>
+      <button class="lp-link retry" type="button" [disabled]="busy()" (click)="retry()">
+        Retry
+      </button>
+    }
+  </span>
+  @if (error()) {
+    <span class="lp-field__error" role="alert">{{ error() }}</span>
+  }
+}

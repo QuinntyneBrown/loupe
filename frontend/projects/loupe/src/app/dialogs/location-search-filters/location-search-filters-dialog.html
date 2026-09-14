@@ -1,0 +1,150 @@
+<dialog
+  #modal
+  class="lp-dialog"
+  aria-labelledby="location-filters-title"
+  (cancel)="cancel($event)"
+  (keydown)="trapFocus($event)"
+>
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 id="location-filters-title" class="lp-dialog__title">Filters</h2>
+        <p class="lp-dialog__text">
+          Filters combine with whatever you typed. Shoot type, people, and time of day only match
+          locations with a scouting report.
+        </p>
+      </div>
+      <button type="button" class="lp-icon-button" aria-label="Close" (click)="cancel()">
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body">
+      <section class="filter-group">
+        <h3 id="location-filters-shoot-type">
+          Shoot type <span class="hint">all selected types must be Well suited or Workable</span>
+        </h3>
+        <div class="choices" role="group" aria-label="Shoot type">
+          @for (shootType of shootTypeOptions(); track shootType) {
+            <button
+              class="lp-chip"
+              type="button"
+              [attr.aria-pressed]="draftShootTypes().includes(shootType)"
+              (click)="toggleShootType(shootType)"
+            >
+              {{ shootType }}
+            </button>
+          }
+        </div>
+      </section>
+      <section class="filter-group">
+        <label class="lp-field__label" for="location-filters-people"
+          >People <span class="hint">within the report's group size</span></label
+        >
+        <input
+          class="lp-input lp-input--count"
+          id="location-filters-people"
+          type="number"
+          min="1"
+          max="500"
+          step="1"
+          placeholder="any"
+          [value]="draftPeople()"
+          (input)="draftPeople.set(people.value); peopleError.set('')"
+          [attr.aria-invalid]="peopleError() ? true : null"
+          [attr.aria-describedby]="peopleError() ? 'location-filters-people-error' : null"
+          #people
+        />
+        @if (peopleError()) {
+          <p id="location-filters-people-error" class="lp-field__error" role="alert">
+            {{ peopleError() }}
+          </p>
+        }
+      </section>
+      <section class="filter-group">
+        <h3>Time of day <span class="hint">any selected period Recommended</span></h3>
+        <div class="choices" role="group" aria-label="Time of day">
+          @for (period of periodOptions(); track period) {
+            <button
+              class="lp-chip"
+              type="button"
+              [attr.aria-pressed]="draftPeriods().includes(period)"
+              (click)="togglePeriod(period)"
+            >
+              {{ period }}
+            </button>
+          }
+        </div>
+      </section>
+      <section class="filter-group">
+        <h3>Setting</h3>
+        <div class="lp-segmented lp-segmented--block" role="radiogroup" aria-label="Setting">
+          <label class="lp-segmented__option"
+            ><input
+              type="radio"
+              name="location-filters-setting"
+              value=""
+              [checked]="!draftSetting()"
+              (change)="draftSetting.set(null)"
+            /><span class="lp-segmented__label">Any</span></label
+          >
+          @for (setting of settingOptions; track setting) {
+            <label class="lp-segmented__option"
+              ><input
+                type="radio"
+                name="location-filters-setting"
+                [value]="setting"
+                [checked]="draftSetting() === setting"
+                (change)="draftSetting.set(setting)"
+              /><span class="lp-segmented__label">{{ setting }}</span></label
+            >
+          }
+        </div>
+      </section>
+      <section class="filter-group">
+        <h3>Tags <span class="hint">up to 10; all must match</span></h3>
+        @if (tagsFailed()) {
+          <p role="alert">Tags could not be loaded. Your selections are unchanged.</p>
+          <button class="lp-button lp-button--secondary" type="button" (click)="retryTags.emit()">
+            Retry tags
+          </button>
+        } @else if (tags() === null) {
+          <p role="status">Loading tags…</p>
+        } @else if (!tags()?.length) {
+          <p>No location tags yet.</p>
+        }
+        <div
+          class="choices"
+          role="group"
+          aria-label="Tags"
+          [attr.aria-describedby]="tagError() ? 'location-filters-tags-error' : null"
+        >
+          @for (tag of tagChoices(); track tag.name) {
+            <button
+              class="lp-chip"
+              type="button"
+              [attr.aria-pressed]="hasTag(tag.name)"
+              (click)="toggleTag(tag.name)"
+            >
+              {{ tag.name }}
+              @if (tag.count !== null) {
+                <span class="count"
+                  >{{ tag.count
+                  }}<span class="visually-hidden">
+                    {{ tag.count === 1 ? 'location' : 'locations' }}</span
+                  ></span
+                >
+              }
+            </button>
+          }
+        </div>
+        @if (tagError()) {
+          <p id="location-filters-tags-error" role="alert">{{ tagError() }}</p>
+        }
+      </section>
+    </div>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--ghost" type="button" (click)="clear()">Clear</button>
+      <button class="lp-button lp-button--primary" type="button" (click)="apply()">Apply</button>
+    </footer>
+  </div>
+</dialog>

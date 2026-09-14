@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find a location · Loupe</title>
+<meta name="description" content="Describe a shoot in plain language, add shoot type, people, time of day, setting, and tag filters, and get your own locations ranked with what their reports say.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<link rel="stylesheet" href="assets/mock.css">
+</head>
+<body class="lp-shell">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3zM12 10v4M12 17.5v.5"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+</svg>
+
+<a class="lp-skip" href="#main">Skip to content</a>
+<header class="lp-topbar">
+  <a class="lp-wordmark" href="my-work.html" aria-label="Loupe">L<span class="lp-wordmark__o"></span>upe</a>
+  <nav class="lp-nav" aria-label="Primary">
+    <a href="my-work.html"><svg class="lp-icon"><use href="#i-image"/></svg><span>My Work</span></a>
+    <a href="inspiration.html"><svg class="lp-icon"><use href="#i-grid"/></svg><span>Inspiration</span></a>
+    <a href="photographers.html"><svg class="lp-icon"><use href="#i-user"/></svg><span>Photographers</span></a>
+    <a href="search.html"><svg class="lp-icon"><use href="#i-search"/></svg><span>Search</span></a>
+    <a href="locations.html" aria-current="page"><svg class="lp-icon"><use href="#i-pin"/></svg><span>Locations</span></a>
+  </nav>
+  <div class="lp-topbar__end">
+    <a class="lp-avatar" href="settings.html" aria-label="Settings">QB</a>
+  </div>
+</header>
+<div class="lp-banner lp-banner--demo" data-demo-only role="status">
+  <span class="lp-kicker">Demo mode</span>
+  <span>No provider is configured, so Meaning search falls back to keyword matching and says so.</span>
+  <a href="settings.html?demo=1">Connect a provider</a>
+</div>
+
+<main id="main" class="lp-main">
+  <a class="lp-back" href="locations.html"><svg class="lp-icon lp-icon--sm"><use href="#i-chevron-left"/></svg>Locations</a>
+
+  <!-- Initial: explains the query and filters without implying anything failed (L2-043.2) -->
+  <div class="lp-search-hero" data-state="default">
+    <div class="lp-search-hero__intro">
+      <h1 class="lp-title">Describe the shoot.</h1>
+      <p class="lp-muted">Who it's for, how many people, the light you want, a technique. Loupe ranks your own locations by what their scouting reports say.</p>
+    </div>
+    <form class="lp-input-wrap lp-input-wrap--lg" role="search" action="find-location.html">
+      <svg class="lp-icon"><use href="#i-search"/></svg>
+      <input class="lp-input lp-input--lg" type="search" name="q" placeholder="golden hour engagement session with leading lines for two people" aria-label="Describe the shoot" autofocus>
+    </form>
+    <div class="lp-segmented" role="radiogroup" aria-label="Search mode" style="justify-self:center">
+      <label class="lp-segmented__option"><input type="radio" name="mode" id="find-mode-keyword" checked><span class="lp-segmented__label">Keyword</span></label>
+      <label class="lp-segmented__option"><input type="radio" name="mode" id="find-mode-meaning"><span class="lp-segmented__label">Meaning</span></label>
+    </div>
+    <p class="lp-faint lp-small" style="text-align:center">Keyword matches the words you type against a location's details and report. Meaning ranks by what they describe, even without the exact words.</p>
+    <div class="lp-search-hero__examples" aria-label="Example searches">
+      <a class="lp-chip" href="find-location.html?state=results">“Golden hour engagement session with leading lines for two people”</a>
+      <a class="lp-chip" href="find-location.html?state=results">“Indoor headshots with soft window light”</a>
+      <a class="lp-chip" href="find-location.html?state=results">“Somewhere a family of six can spread out at midday”</a>
+    </div>
+    <div class="lp-stack lp-stack--sm">
+      <div class="lp-filters lp-filters__desktop" style="justify-content:center">
+        <div class="lp-chips" role="group" aria-label="Shoot type">
+          <button class="lp-chip" type="button" aria-pressed="false">Portraits</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Family portraits</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Headshots</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Engagement</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Events</button>
+        </div>
+        <label class="lp-filters__label" for="find-people">People</label>
+        <input class="lp-input lp-input--count" id="find-people" type="number" min="1" max="500" placeholder="any">
+      </div>
+      <div class="lp-filters lp-filters__desktop" style="justify-content:center">
+        <div class="lp-chips" role="group" aria-label="Time of day">
+          <button class="lp-chip" type="button" aria-pressed="false">Dawn</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Morning</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Midday</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Afternoon</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Golden hour</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Blue hour</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Night</button>
+        </div>
+        <div class="lp-segmented" role="radiogroup" aria-label="Setting">
+          <label class="lp-segmented__option"><input type="radio" name="setting" value="any" checked><span class="lp-segmented__label">Any</span></label>
+          <label class="lp-segmented__option"><input type="radio" name="setting" value="indoor"><span class="lp-segmented__label">Indoor</span></label>
+          <label class="lp-segmented__option"><input type="radio" name="setting" value="outdoor"><span class="lp-segmented__label">Outdoor</span></label>
+          <label class="lp-segmented__option"><input type="radio" name="setting" value="mixed"><span class="lp-segmented__label">Mixed</span></label>
+        </div>
+        <button class="lp-chip" type="button" data-open="filters"><svg class="lp-icon lp-icon--sm"><use href="#i-filter"/></svg>Tags</button>
+      </div>
+      <div class="lp-filters lp-filters__mobile" style="justify-content:center">
+        <button class="lp-chip" type="button" data-open="filters"><svg class="lp-icon lp-icon--sm"><use href="#i-filter"/></svg>Filters</button>
+      </div>
+      <p class="lp-field__hint" style="text-align:center">Shoot type, people, and time of day come from the scouting report, so locations without a report drop out while any of those is set.</p>
+    </div>
+  </div>
+
+  <!-- Search at the top once there is a query -->
+  <div class="lp-search-hero lp-search-hero--top" data-state="results loading no-results error meaning-unavailable query-required refresh-required" id="find-hero-top">
+    <form class="lp-input-wrap lp-input-wrap--lg" role="search" action="find-location.html">
+      <svg class="lp-icon"><use href="#i-search"/></svg>
+      <input class="lp-input lp-input--lg" type="search" name="q" value="golden hour engagement session with leading lines for two people" aria-label="Describe the shoot" data-state="results loading meaning-unavailable">
+      <input class="lp-input lp-input--lg" type="search" name="q" value="rooftop with a skyline" aria-label="Describe the shoot" data-state="no-results error">
+      <input class="lp-input lp-input--lg" type="search" name="q" value="foreshore" aria-label="Describe the shoot" data-state="refresh-required">
+      <input class="lp-input lp-input--lg lp-input--invalid" type="search" name="q" value="" aria-label="Describe the shoot" aria-invalid="true" aria-describedby="find-query-error" data-state="query-required">
+    </form>
+    <p class="lp-field__error" id="find-query-error" data-state="query-required"><svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>Describe the shoot to search by meaning. Keyword can browse by filters alone.</p>
+    <div class="lp-filters">
+      <!-- Two mode groups so each state shows the mode it was searched in; the checked Meaning radio drives the results badge -->
+      <div class="lp-segmented" role="radiogroup" aria-label="Search mode" data-state="results loading meaning-unavailable query-required">
+        <label class="lp-segmented__option"><input type="radio" name="mode-top" id="find-mode-keyword-top"><span class="lp-segmented__label">Keyword</span></label>
+        <label class="lp-segmented__option"><input type="radio" name="mode-top" id="find-mode-meaning-top" checked><span class="lp-segmented__label">Meaning</span></label>
+      </div>
+      <div class="lp-segmented" role="radiogroup" aria-label="Search mode" data-state="no-results error refresh-required">
+        <label class="lp-segmented__option"><input type="radio" name="mode-top-keyword" id="find-mode-keyword-top-k" checked><span class="lp-segmented__label">Keyword</span></label>
+        <label class="lp-segmented__option"><input type="radio" name="mode-top-keyword" id="find-mode-meaning-top-k"><span class="lp-segmented__label">Meaning</span></label>
+      </div>
+      <div class="lp-chips lp-filters__desktop" role="group" aria-label="Shoot type">
+        <button class="lp-chip" type="button" aria-pressed="false">Portraits</button>
+        <button class="lp-chip" type="button" aria-pressed="false">Family portraits</button>
+        <button class="lp-chip" type="button" aria-pressed="false">Headshots</button>
+        <button class="lp-chip" type="button" aria-pressed="true" data-state="results loading meaning-unavailable query-required">Engagement<svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button>
+        <button class="lp-chip" type="button" aria-pressed="false" data-state="no-results error refresh-required">Engagement</button>
+        <button class="lp-chip" type="button" aria-pressed="true" data-state="results loading meaning-unavailable query-required">Events<svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button>
+        <button class="lp-chip" type="button" aria-pressed="false" data-state="no-results error refresh-required">Events</button>
+      </div>
+      <label class="lp-filters__label lp-filters__desktop" for="find-people-top">People</label>
+      <input class="lp-input lp-input--count lp-filters__desktop" id="find-people-top" type="number" min="1" max="500" value="2" data-state="results loading meaning-unavailable query-required">
+      <input class="lp-input lp-input--count lp-filters__desktop" type="number" min="1" max="500" placeholder="any" aria-label="People" data-state="no-results error refresh-required">
+      <div class="lp-filters__mobile">
+        <button class="lp-chip" type="button" aria-pressed="true" data-open="filters" data-state="results loading meaning-unavailable query-required"><svg class="lp-icon lp-icon--sm"><use href="#i-filter"/></svg>4 filters</button>
+        <button class="lp-chip" type="button" aria-pressed="true" data-open="filters" data-state="refresh-required"><svg class="lp-icon lp-icon--sm"><use href="#i-filter"/></svg>1 filter</button>
+        <button class="lp-chip" type="button" data-open="filters" data-state="no-results error"><svg class="lp-icon lp-icon--sm"><use href="#i-filter"/></svg>Filters</button>
+      </div>
+    </div>
+    <div class="lp-filters lp-filters__desktop">
+      <div class="lp-chips" role="group" aria-label="Time of day">
+        <button class="lp-chip" type="button" aria-pressed="false">Dawn</button>
+        <button class="lp-chip" type="button" aria-pressed="false">Morning</button>
+        <button class="lp-chip" type="button" aria-pressed="false">Midday</button>
+        <button class="lp-chip" type="button" aria-pressed="false">Afternoon</button>
+        <button class="lp-chip" type="button" aria-pressed="true" data-state="results loading meaning-unavailable query-required">Golden hour<svg class="lp-icon lp-icon--sm"><use href="#i-x"/></svg></button>
+        <button class="lp-chip" type="button" aria-pressed="false" data-state="no-results error refresh-required">Golden hour</button>
+        <button class="lp-chip" type="button" aria-pressed="false">Blue hour</button>
+        <button class="lp-chip" type="button" aria-pressed="false">Night</button>
+      </div>
+      <div class="lp-segmented" role="radiogroup" aria-label="Setting" data-state="results loading meaning-unavailable query-required no-results error">
+        <label class="lp-segmented__option"><input type="radio" name="setting-top" value="any" checked><span class="lp-segmented__label">Any</span></label>
+        <label class="lp-segmented__option"><input type="radio" name="setting-top" value="indoor"><span class="lp-segmented__label">Indoor</span></label>
+        <label class="lp-segmented__option"><input type="radio" name="setting-top" value="outdoor"><span class="lp-segmented__label">Outdoor</span></label>
+        <label class="lp-segmented__option"><input type="radio" name="setting-top" value="mixed"><span class="lp-segmented__label">Mixed</span></label>
+      </div>
+      <div class="lp-segmented" role="radiogroup" aria-label="Setting" data-state="refresh-required">
+        <label class="lp-segmented__option"><input type="radio" name="setting-top-r" value="any"><span class="lp-segmented__label">Any</span></label>
+        <label class="lp-segmented__option"><input type="radio" name="setting-top-r" value="indoor"><span class="lp-segmented__label">Indoor</span></label>
+        <label class="lp-segmented__option"><input type="radio" name="setting-top-r" value="outdoor" checked><span class="lp-segmented__label">Outdoor</span></label>
+        <label class="lp-segmented__option"><input type="radio" name="setting-top-r" value="mixed"><span class="lp-segmented__label">Mixed</span></label>
+      </div>
+      <button class="lp-chip" type="button" data-open="filters"><svg class="lp-icon lp-icon--sm"><use href="#i-filter"/></svg>Tags</button>
+      <span class="lp-filters__spacer"></span>
+      <div class="lp-filters--active" data-state="results loading meaning-unavailable query-required refresh-required">
+        <button class="lp-link lp-small" type="button">Clear all</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results, Meaning mode (L2-061.1, L2-061.2): every card shows the rating for each selected shoot type -->
+  <div class="lp-stack" data-state="results" style="gap:var(--lp-space-6)" id="find-results">
+    <div class="lp-results-head" aria-live="polite">
+      <span>6 locations for <em>“golden hour engagement session with leading lines for two people”</em></span>
+      <span class="lp-pill lp-pill--ai" data-mode-pill="meaning" data-live-only>Matched by meaning</span>
+      <span class="lp-pill" data-mode-pill="meaning" data-demo-only>Meaning search needs a provider · showing keyword matches</span>
+    </div>
+    <div class="lp-location-grid">
+      <article class="lp-location-card">
+        <a class="lp-location-card__link" href="location.html" aria-label="Open Kew Bridge foreshore"></a>
+        <div class="lp-location-card__cover"><img src="https://picsum.photos/seed/lp-l1/240/300" width="96" height="120" alt="" loading="lazy"></div>
+        <div class="lp-location-card__body">
+          <h2 class="lp-location-card__name">Kew Bridge foreshore</h2>
+          <span class="lp-location-card__place">Richmond · 4 images</span>
+          <span class="lp-location-card__line">Recommended · Morning, Golden hour</span>
+          <span class="lp-location-card__line">2–8 people</span>
+          <div class="lp-location-card__ratings"><span class="lp-pill lp-pill--success">Engagement · Well suited</span><span class="lp-pill">Events · Workable</span></div>
+        </div>
+      </article>
+      <article class="lp-location-card">
+        <a class="lp-location-card__link" href="location.html" aria-label="Open Walthamstow wetlands"></a>
+        <div class="lp-location-card__cover"><img src="https://picsum.photos/seed/lp-l7/240/300" width="96" height="120" alt="" loading="lazy"></div>
+        <div class="lp-location-card__body">
+          <h2 class="lp-location-card__name">Walthamstow wetlands</h2>
+          <span class="lp-location-card__place">Waltham Forest · 4 images</span>
+          <span class="lp-location-card__line">Recommended · Dawn, Golden hour</span>
+          <span class="lp-location-card__line">2–20 people</span>
+          <div class="lp-location-card__ratings"><span class="lp-pill lp-pill--success">Engagement · Well suited</span><span class="lp-pill lp-pill--success">Events · Well suited</span></div>
+        </div>
+      </article>
+      <article class="lp-location-card">
+        <a class="lp-location-card__link" href="location.html" aria-label="Open Hampstead ponds path"></a>
+        <div class="lp-location-card__cover"><img src="https://picsum.photos/seed/lp-l10/240/300" width="96" height="120" alt="" loading="lazy"></div>
+        <div class="lp-location-card__body">
+          <h2 class="lp-location-card__name">Hampstead ponds path</h2>
+          <span class="lp-location-card__place">Camden · 3 images</span>
+          <span class="lp-location-card__line">Recommended · Morning, Golden hour</span>
+          <span class="lp-location-card__line">1–6 people</span>
+          <div class="lp-location-card__ratings"><span class="lp-pill lp-pill--success">Engagement · Well suited</span><span class="lp-pill">Events · Workable</span></div>
+        </div>
+      </article>
+      <article class="lp-location-card">
+        <a class="lp-location-card__link" href="location.html" aria-label="Open Peckham multi-storey roof"></a>
+        <div class="lp-location-card__cover"><img src="https://picsum.photos/seed/lp-l8/240/300" width="96" height="120" alt="" loading="lazy"></div>
+        <div class="lp-location-card__body">
+          <h2 class="lp-location-card__name">Peckham multi-storey roof</h2>
+          <span class="lp-location-card__place">Southwark · 5 images</span>
+          <span class="lp-location-card__line">Recommended · Golden hour, Blue hour</span>
+          <span class="lp-location-card__line">2–40 people</span>
+          <div class="lp-location-card__ratings"><span class="lp-pill">Engagement · Workable</span><span class="lp-pill lp-pill--success">Events · Well suited</span></div>
+        </div>
+      </article>
+      <article class="lp-location-card">
+        <a class="lp-location-card__link" href="location.html" aria-label="Open St Dunstan in the East"></a>
+        <div class="lp-location-card__cover"><img src="https://picsum.photos/seed/lp-l5/240/300" width="96" height="120" alt="" loading="lazy"></div>
+        <div class="lp-location-card__body">
+          <h2 class="lp-location-card__name">St Dunstan in the East</h2>
+          <span class="lp-location-card__place">City of London · 6 images</span>
+          <span class="lp-location-card__line">Recommended · Midday, Golden hour</span>
+          <span class="lp-location-card__line">2–12 people</span>
+          <div class="lp-location-card__ratings"><span class="lp-pill lp-pill--success">Engagement · Well suited</span><span class="lp-pill">Events · Workable</span></div>
+        </div>
+      </article>
+      <article class="lp-location-card">
+        <a class="lp-location-card__link" href="location.html?state=outdated" aria-label="Open Bermondsey wall"></a>
+        <div class="lp-location-card__cover"><img src="https://picsum.photos/seed/lp-l3/240/300" width="96" height="120" alt="" loading="lazy"></div>
+        <div class="lp-location-card__body">
+          <h2 class="lp-location-card__name">Bermondsey wall</h2>
+          <span class="lp-location-card__place">Southwark · 5 images</span>
+          <span class="lp-location-card__line">Recommended · Golden hour</span>
+          <span class="lp-location-card__line">2–10 people</span>
+          <div class="lp-location-card__ratings"><span class="lp-pill">Engagement · Workable</span><span class="lp-pill">Events · Workable</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="lp-stack" data-state="loading" aria-busy="true" style="gap:var(--lp-space-6)">
+    <div class="lp-results-head"><span class="lp-skeleton lp-skeleton--text" style="width:260px"></span></div>
+    <div class="lp-location-grid">
+      <div class="lp-skeleton lp-skeleton--card"></div><div class="lp-skeleton lp-skeleton--card"></div><div class="lp-skeleton lp-skeleton--card"></div>
+      <div class="lp-skeleton lp-skeleton--card"></div><div class="lp-skeleton lp-skeleton--card"></div><div class="lp-skeleton lp-skeleton--card"></div>
+    </div>
+  </div>
+
+  <!-- No results: edit the query or clear filters (L2-062.8) -->
+  <div class="lp-empty" data-state="no-results" aria-live="polite">
+    <h2 class="lp-empty__title">No locations match “rooftop with a skyline”.</h2>
+    <p class="lp-empty__text">Edit the query, or clear a filter. Shoot type, people, and time of day only match locations with a scouting report.</p>
+    <div class="lp-empty__action">
+      <button class="lp-button lp-button--secondary" type="button">Clear filters</button>
+      <a class="lp-chip" href="find-location.html?state=results">“Somewhere high up with an open sky”</a>
+    </div>
+  </div>
+
+  <!-- Service error: retryable, distinct from no results (L2-062.8) -->
+  <div class="lp-empty" data-state="error" role="alert">
+    <h2 class="lp-empty__title">Find a location isn't available right now.</h2>
+    <p class="lp-empty__text">Try again in a moment. Your locations are fine; only search is affected.</p>
+    <div class="lp-empty__action"><button class="lp-button lp-button--secondary" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Try again</button></div>
+  </div>
+
+  <!-- Meaning unavailable: says so, offers Keyword, never passes keyword matches off as meaning (L2-061.7) -->
+  <div class="lp-empty" data-state="meaning-unavailable" role="alert">
+    <h2 class="lp-empty__title">Meaning search isn't available right now.</h2>
+    <p class="lp-empty__text">Nothing is shown rather than passing keyword matches off as meaning results. Keyword search still works with the same filters.</p>
+    <div class="lp-empty__action">
+      <a class="lp-button lp-button--secondary" href="find-location.html?state=refresh-required">Switch to Keyword</a>
+      <button class="lp-button lp-button--ghost" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Try again</button>
+    </div>
+  </div>
+
+  <!-- Blank query in Meaning mode: asks for a query instead of embedding nothing (L2-061.6) -->
+  <div class="lp-empty lp-empty--compact" data-state="query-required">
+    <h2 class="lp-empty__title">Describe the shoot to search by meaning.</h2>
+    <p class="lp-empty__text">Meaning needs a few words to rank against. Keyword mode can browse your locations by filters alone.</p>
+    <div class="lp-empty__action"><a class="lp-button lp-button--secondary" href="find-location.html?state=refresh-required">Switch to Keyword</a></div>
+  </div>
+
+  <!-- Keyword results with no report-based filter: a location without a report is findable and says so (L2-061.5, L2-062.1);
+       the index generation changed while paging (L2-061.8) -->
+  <div class="lp-stack" data-state="refresh-required" style="gap:var(--lp-space-6)">
+    <div class="lp-results-head" aria-live="polite">
+      <span>3 locations for <em>“foreshore”</em></span>
+    </div>
+    <div class="lp-location-grid">
+      <article class="lp-location-card">
+        <a class="lp-location-card__link" href="location.html" aria-label="Open Kew Bridge foreshore"></a>
+        <div class="lp-location-card__cover"><img src="https://picsum.photos/seed/lp-l1/240/300" width="96" height="120" alt="" loading="lazy"></div>
+        <div class="lp-location-card__body">
+          <h2 class="lp-location-card__name">Kew Bridge foreshore</h2>
+          <span class="lp-location-card__place">Richmond · 4 images</span>
+          <span class="lp-location-card__line">Recommended · Morning, Golden hour</span>
+          <span class="lp-location-card__line">2–8 people</span>
+        </div>
+      </article>
+      <article class="lp-location-card">
+        <a class="lp-location-card__link" href="location.html?state=no-report" aria-label="Open Deptford creek stairs"></a>
+        <div class="lp-location-card__cover"><img src="https://picsum.photos/seed/lp-l11/240/300" width="96" height="120" alt="" loading="lazy"></div>
+        <div class="lp-location-card__body">
+          <h2 class="lp-location-card__name">Deptford creek stairs</h2>
+          <span class="lp-location-card__place">Lewisham · 1 image</span>
+          <span class="lp-location-card__line">Outdoor · river, stairs, low tide</span>
+          <div class="lp-location-card__ratings"><span class="lp-pill lp-pill--outline">No scouting report</span></div>
+        </div>
+      </article>
+      <article class="lp-location-card">
+        <a class="lp-location-card__link" href="location.html" aria-label="Open Cornmill Gardens bandstand"></a>
+        <div class="lp-location-card__cover"><img src="https://picsum.photos/seed/lp-l2/240/300" width="96" height="120" alt="" loading="lazy"></div>
+        <div class="lp-location-card__body">
+          <h2 class="lp-location-card__name">Cornmill Gardens bandstand</h2>
+          <span class="lp-location-card__place">Lewisham · 3 images</span>
+          <span class="lp-location-card__line">Recommended · Afternoon, Golden hour</span>
+          <span class="lp-location-card__line">Group size · Cannot assess</span>
+        </div>
+      </article>
+    </div>
+    <div class="lp-notice lp-notice--info" role="status">
+      <svg class="lp-icon lp-icon--sm"><use href="#i-alert"/></svg>
+      <div class="lp-notice__body">
+        <span class="lp-notice__title">Your locations changed while you were browsing.</span>
+        <span>The next page can't be fetched from the old ordering. Refresh to continue from the top with the current results.</span>
+        <div class="lp-notice__actions"><button class="lp-button lp-button--secondary lp-button--sm" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-retry"/></svg>Refresh results</button></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ============ Dialogs ============ -->
+
+<!-- Filters: every group, for narrow screens and for tags (L2-061) -->
+<dialog class="lp-dialog" data-dialog="filters" aria-labelledby="filters-title">
+  <form method="dialog" class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div><h2 class="lp-dialog__title" id="filters-title">Filters</h2><p class="lp-dialog__text">Filters combine with whatever you typed. Shoot type, people, and time of day only match locations with a scouting report.</p></div>
+      <button class="lp-icon-button" type="button" data-close aria-label="Close"><svg class="lp-icon"><use href="#i-x"/></svg></button>
+    </header>
+    <div class="lp-dialog__body">
+      <fieldset class="lp-stack lp-stack--sm">
+        <legend class="lp-form__legend">Shoot type <span class="lp-field__optional">all selected types must be Well suited or Workable</span></legend>
+        <div class="lp-chips" role="group">
+          <button class="lp-chip" type="button" aria-pressed="false" autofocus>Portraits</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Family portraits</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Headshots</button>
+          <button class="lp-chip" type="button" aria-pressed="true">Engagement</button>
+          <button class="lp-chip" type="button" aria-pressed="true">Events</button>
+        </div>
+      </fieldset>
+      <div class="lp-field">
+        <label class="lp-field__label" for="filters-people">People <span class="lp-field__optional">within the report's group size</span></label>
+        <input class="lp-input lp-input--count" id="filters-people" type="number" min="1" max="500" value="2">
+      </div>
+      <fieldset class="lp-stack lp-stack--sm">
+        <legend class="lp-form__legend">Time of day <span class="lp-field__optional">any selected period Recommended</span></legend>
+        <div class="lp-chips" role="group">
+          <button class="lp-chip" type="button" aria-pressed="false">Dawn</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Morning</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Midday</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Afternoon</button>
+          <button class="lp-chip" type="button" aria-pressed="true">Golden hour</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Blue hour</button>
+          <button class="lp-chip" type="button" aria-pressed="false">Night</button>
+        </div>
+      </fieldset>
+      <fieldset class="lp-stack lp-stack--sm">
+        <legend class="lp-form__legend">Setting</legend>
+        <div class="lp-segmented lp-segmented--block" role="radiogroup" aria-label="Setting">
+          <label class="lp-segmented__option"><input type="radio" name="setting-dialog" value="any" checked><span class="lp-segmented__label">Any</span></label>
+          <label class="lp-segmented__option"><input type="radio" name="setting-dialog" value="indoor"><span class="lp-segmented__label">Indoor</span></label>
+          <label class="lp-segmented__option"><input type="radio" name="setting-dialog" value="outdoor"><span class="lp-segmented__label">Outdoor</span></label>
+          <label class="lp-segmented__option"><input type="radio" name="setting-dialog" value="mixed"><span class="lp-segmented__label">Mixed</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="lp-stack lp-stack--sm">
+        <legend class="lp-form__legend">Tags <span class="lp-field__optional">up to 10; all must match</span></legend>
+        <div class="lp-chips" role="group">
+          <button class="lp-chip" type="button" aria-pressed="false">river</button>
+          <button class="lp-chip" type="button" aria-pressed="false">arches</button>
+          <button class="lp-chip" type="button" aria-pressed="false">open shade</button>
+          <button class="lp-chip" type="button" aria-pressed="false">rooftop</button>
+          <button class="lp-chip" type="button" aria-pressed="false">window light</button>
+          <button class="lp-chip" type="button" aria-pressed="false">ruin</button>
+          <button class="lp-chip" type="button" aria-pressed="false">stairs</button>
+          <button class="lp-chip" type="button" aria-pressed="false">low tide</button>
+          <button class="lp-chip lp-chip--ghost" type="button">More tags</button>
+        </div>
+      </fieldset>
+    </div>
+    <footer class="lp-dialog__footer">
+      <button class="lp-button lp-button--ghost" type="button">Clear</button>
+      <button class="lp-button lp-button--primary" type="button" data-close>Apply</button>
+    </footer>
+  </form>
+</dialog>
+
+<script src="assets/mock.js"></script>
+</body>
+</html>

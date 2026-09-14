@@ -1,0 +1,152 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Browse, inspect, and delete locations
+enum LocationReportStatus {
+  None
+  Queued
+  Running
+  Ready
+  Outdated
+  Failed
+}
+class LocationSummary {
+  +Id: Guid
+  +Name: string
+  +Locality: string?
+  +CoverPreviewUrl: string?
+  +ImageCount: int
+  +ReportStatus: LocationReportStatus
+  +CreatedAt: DateTimeOffset
+}
+class LocationPage {
+  +Items: IReadOnlyList<LocationSummary>
+  +NextCursor: string?
+  +TotalCount: int
+}
+class LocationResult {
+  +Id: Guid
+  +Name: string
+  +AddressLines: IReadOnlyList<string>
+  +Coordinates: Coordinates?
+  +Setting: LocationSetting?
+  +ScoutingBrief: string?
+  +Notes: string?
+  +Tags: IReadOnlyList<LocationTagResult>
+  +Images: IReadOnlyList<LocationImageResult>
+  +CoverImageId: Guid?
+  +Report: SavedScoutingReport?
+  +ReportStatus: LocationReportStatus
+  +CreatedAt: DateTimeOffset
+  +UpdatedAt: DateTimeOffset
+  +Revision: long
+}
+LocationPage "1" *-- "*" LocationSummary
+LocationSummary --> LocationReportStatus
+LocationResult --> LocationReportStatus
+class DeletionOperation {
+  +Id: Guid
+  +OwnerId: string
+  +ResourceType: string
+  +ResourceId: Guid
+  +DeletedAt: DateTimeOffset
+  +CompletedAt: DateTimeOffset?
+  +MediaKeys: string[]
+}
+class LocationListCursor {
+  +{static} Scope(ownerId: string, pageSize: int): string
+  +{static} Encode(cursor: CreatedCursor, scope: string): string
+  +{static} Parse(value: string?, scope: string): CreatedCursor?
+}
+interface ILocationStore {
+  +ListAsync(ownerId: string, count: int, cursor: CreatedCursor?, ct: CancellationToken): Task<IReadOnlyList<LocationSummary>>
+  +CountAsync(ownerId: string, ct: CancellationToken): Task<int>
+  +FindOwnedAsync(id: Guid, ownerId: string, ct: CancellationToken): Task<Location?>
+}
+interface IDeletionStore {
+  +DeleteLocationAsync(id: Guid, ownerId: string, revision: long, ct: CancellationToken): Task<DeletionOperation>
+  +FindOwnedAsync(id: Guid, ownerId: string, ct: CancellationToken): Task<DeletionOperation?>
+}
+class ListLocationsQuery {
+  +PageSize: int
+  +Cursor: string?
+}
+class ListLocationsQueryHandler {
+  +Handle(request: ListLocationsQuery, cancellation: CancellationToken): Task<LocationPage>
+}
+class GetLocationQuery {
+  +Id: Guid
+}
+class GetLocationQueryHandler {
+  +Handle(request: GetLocationQuery, cancellation: CancellationToken): Task<LocationResult>
+}
+class DeleteLocationCommand {
+  +Id: Guid
+  +Revision: long
+}
+class DeleteLocationCommandHandler {
+  +Handle(request: DeleteLocationCommand, cancellation: CancellationToken): Task<DeletionResult>
+}
+ListLocationsQueryHandler ..> ListLocationsQuery : handles
+ListLocationsQueryHandler ..> LocationListCursor : scopes
+ListLocationsQueryHandler ..> ILocationStore : lists / counts
+GetLocationQueryHandler ..> GetLocationQuery : handles
+GetLocationQueryHandler ..> ILocationStore : reads owned
+DeleteLocationCommandHandler ..> DeleteLocationCommand : handles
+DeleteLocationCommandHandler ..> IDeletionStore : deletes
+IDeletionStore ..> DeletionOperation : records
+interface ILocationService {
+  +list(cursor?: string): Promise<LocationPage>
+  +get(id: string): Promise<LocationResult>
+}
+interface IDeletionService {
+  +deleteLocation(id: string, revision: number): Promise<DeletionResult>
+}
+class LocationCollection {
+  -service: ILocationService
+  +items: Signal<LocationSummary[]>
+  +loading: Signal<boolean>
+  +failed: Signal<boolean>
+  +nextCursor: Signal<string | null>
+}
+class LocationDetailPanel {
+  -service: ILocationService
+  +location: Signal<LocationResult | null>
+  +error: Signal<string>
+}
+class LocationCard {
+  +name: InputSignal<string>
+  +locality: InputSignal<string | null>
+  +previewUrl: InputSignal<string | null>
+  +imageCount: InputSignal<number>
+  +status: InputSignal<LocationReportStatus>
+}
+LocationCollection ..> ILocationService : inject token
+LocationCollection *-- LocationCard : renders
+LocationDetailPanel ..> ILocationService : inject token
+LocationDetailPanel ..> IDeletionService : inject token
+' layout: stack clusters vertically to stay within the render width
+LocationResult -[hidden]down-> ListLocationsQueryHandler
+LocationPage -[hidden]down-> GetLocationQueryHandler
+DeletionOperation -[hidden]down-> DeleteLocationCommandHandler
+ILocationStore -[hidden]down-> LocationCollection
+IDeletionStore -[hidden]down-> LocationDetailPanel
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Save a location and edit its details
+Person(owner, "Library owner", "Uses this capability")
+System_Boundary(loupe, "Loupe") {
+Container(spa, "Loupe web", "Angular", "LocationsPage, LocationDetailPage, AddLocation, EditLocation")
+Container(api, "Loupe API", "ASP.NET Core", "LocationsController")
+ContainerDb(db, "Library store", "PostgreSQL via LibraryDbContext", "Owned locations, tags, revisions, and receipts")
+}
+Rel(owner, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls via interface-bound HTTP adapter", "JSON / HTTPS")
+Rel(api, db, "Reads or commits owned state", "Infrastructure adapter")
+@enduml

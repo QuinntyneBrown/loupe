@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Save a location and edit its details
+Person(owner, "Library owner", "Scouts places and keeps them in a private location library")
+System(loupe, "Loupe", "Save a location and edit its details")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

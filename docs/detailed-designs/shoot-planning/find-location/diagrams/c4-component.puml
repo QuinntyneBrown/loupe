@@ -1,0 +1,28 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Find a location for a shoot
+Container(spa, "LocationSearchResults / LocationSearchFilters", "Angular domain", "Inject LOCATION_SEARCH_SERVICE")
+Container_Boundary(api, "Loupe API and Application") {
+Component(ctrl, "LocationSearchController", "API controller", "Binds, dispatches, returns")
+Component(handler, "FindLocationsQueryHandler", "Application / MediatR 12.5.0", "Validates query, mode, and filters; pages")
+Component(filter, "LocationSearchFilter / LocationSearchCursor", "Application", "Tokens, filter groups, scoped continuation")
+Component(store, "ILocationSearchStore", "Application port", "Keyword rows and counts with report-based filters")
+Component(ports, "IEmbeddingProvider / IVectorSearchReader", "Application ports (proposed)", "Query vector and filtered similarity ranking")
+Component(builder, "LocationSearchInputBuilder", "Application", "Semantic document without address lines")
+Component(refresh, "RefreshLocationSearchDocumentCommandHandler", "Application", "Conditional publish through IVectorWriter")
+}
+ContainerDb(db, "Library store", "Infrastructure adapter", "Authoritative data and document intents")
+ContainerDb(vectors, "Vector store", "Infrastructure adapter (TO SUPPLY)", "Location vectors")
+Container(worker, "Loupe worker", ".NET", "SearchIndexWorker (proposed)")
+Rel(spa, ctrl, "Calls through ILocationSearchService", "HTTPS")
+Rel(ctrl, handler, "Dispatches request", "MediatR")
+Rel(handler, filter, "Validates and scopes")
+Rel(handler, store, "Keyword mode")
+Rel(handler, ports, "Meaning mode")
+Rel(store, db, "Implemented by Infrastructure")
+Rel(ports, vectors, "Implemented by Infrastructure")
+Rel(worker, refresh, "Dispatches document refresh", "MediatR")
+Rel(refresh, builder, "Builds the document")
+Rel(refresh, vectors, "Publishes only when revisions still match", "IVectorWriter")
+@enduml

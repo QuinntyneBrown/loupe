@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Find a location for a shoot
+Person(owner, "Library owner", "Describes a shoot and picks a saved location that suits it")
+System(loupe, "Loupe", "Find a location for a shoot")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+@enduml

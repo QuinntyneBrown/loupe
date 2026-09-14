@@ -1,0 +1,193 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure - Produce and ground a scouting report
+enum ShootType {
+  Portraits
+  FamilyPortraits
+  Headshots
+  Engagement
+  Events
+}
+enum SuitabilityRating {
+  WellSuited
+  Workable
+  NotRecommended
+  CannotAssess
+}
+enum TimeOfDay {
+  Dawn
+  Morning
+  Midday
+  Afternoon
+  GoldenHour
+  BlueHour
+  Night
+}
+enum TimeOfDayRating {
+  Recommended
+  Avoid
+  Unknown
+}
+enum EvidenceBasis {
+  Visible
+  Inferred
+}
+enum CompositionTechnique {
+  RuleOfThirds
+  LeadingLines
+  FillTheFrame
+  ColourTheory
+  NearFar
+  SimplifyTheScene
+  NaturalFraming
+  Symmetry
+  NegativeSpace
+  Layering
+  PatternsAndRepetition
+  VantagePoint
+}
+class ScoutingImageInput {
+  +ImageId: Guid
+  +PreviewKey: string
+  +Exif: CaptureMetadata
+}
+class ScoutingInput {
+  +ImageSetRevision: long
+  +Images: IReadOnlyList<ScoutingImageInput>
+  +Brief: string?
+}
+ScoutingInput "1" *-- "1..10" ScoutingImageInput
+class ReportEntry {
+  +Basis: EvidenceBasis
+  +Reason: string
+  +CitedImageIds: IReadOnlyList<Guid>
+}
+class ReportStrength {
+  +Title: string
+}
+class SuitabilityEntry {
+  +ShootType: ShootType
+  +Rating: SuitabilityRating
+}
+class TimeOfDayEntry {
+  +Period: TimeOfDay
+  +Rating: TimeOfDayRating
+}
+class TechniqueEntry {
+  +Technique: CompositionTechnique
+}
+class GroupSizeEntry {
+  +Minimum: int?
+  +Maximum: int?
+  +CannotAssess: bool
+}
+class CautionEntry {
+  +Title: string
+}
+ReportEntry <|-- ReportStrength
+ReportEntry <|-- SuitabilityEntry
+ReportEntry <|-- TimeOfDayEntry
+ReportEntry <|-- TechniqueEntry
+ReportEntry <|-- GroupSizeEntry
+ReportEntry <|-- CautionEntry
+ReportEntry --> EvidenceBasis
+SuitabilityEntry --> ShootType
+SuitabilityEntry --> SuitabilityRating
+TimeOfDayEntry --> TimeOfDay
+TimeOfDayEntry --> TimeOfDayRating
+TechniqueEntry --> CompositionTechnique
+class ScoutingReport {
+  +Overview: IReadOnlyList<ReportStrength>
+  +Suitability: IReadOnlyList<SuitabilityEntry>
+  +TimesOfDay: IReadOnlyList<TimeOfDayEntry>
+  +Techniques: IReadOnlyList<TechniqueEntry>
+  +GroupSize: GroupSizeEntry
+  +Cautions: IReadOnlyList<CautionEntry>
+}
+ScoutingReport "1" *-- "1..3" ReportStrength
+ScoutingReport "1" *-- "5" SuitabilityEntry
+ScoutingReport "1" *-- "7" TimeOfDayEntry
+ScoutingReport "1" *-- "1..12" TechniqueEntry
+ScoutingReport "1" *-- "1" GroupSizeEntry
+ScoutingReport "1" *-- "*" CautionEntry
+class SavedScoutingReport {
+  +OperationId: Guid
+  +GeneratedAt: DateTimeOffset
+  +Mode: ExecutionMode
+  +Model: string
+  +PromptVersion: string
+  +BriefSnapshot: string?
+  +ImageSetRevision: long
+  +ImageCount: int
+  +Report: ScoutingReport
+}
+SavedScoutingReport *-- ScoutingReport
+class ScoutingReportValidator {
+  +{static} IsValid(report: ScoutingReport?, input: ScoutingInput): bool
+}
+interface IScoutingProvider {
+  +GenerateAsync(input: ScoutingInput, identity: AnalysisIdentity, ct: CancellationToken): Task<ScoutingReport>
+}
+interface IScoutingConfiguration {
+  +GetIdentity(): AnalysisIdentity
+}
+interface IScoutingWorkStore {
+  +ClaimAsync(mode: ExecutionMode, ct: CancellationToken): Task<BackgroundOperation?>
+  +RenewAsync(operation: BackgroundOperation, ct: CancellationToken): Task<bool>
+  +PublishAsync(operation: BackgroundOperation, input: ScoutingInput, report: ScoutingReport, ct: CancellationToken): Task
+}
+class RunScoutingReportCommand {
+}
+class RunScoutingReportCommandHandler {
+  +Handle(request: RunScoutingReportCommand, cancellation: CancellationToken): Task<bool>
+}
+RunScoutingReportCommandHandler ..> RunScoutingReportCommand : handles
+RunScoutingReportCommandHandler ..> IScoutingWorkStore : claims / publishes
+RunScoutingReportCommandHandler ..> IScoutingProvider : generates
+RunScoutingReportCommandHandler ..> IScoutingConfiguration : identity
+RunScoutingReportCommandHandler ..> ScoutingReportValidator : validates
+RunScoutingReportCommandHandler --> ScoutingInput : deserializes InputJson
+class AzureOpenAiScoutingProvider {
+  -clients: IHttpClientFactory
+  -images: IImageStore
+  +GenerateAsync(input: ScoutingInput, identity: AnalysisIdentity, ct: CancellationToken): Task<ScoutingReport>
+}
+AzureOpenAiScoutingProvider ..|> IScoutingProvider
+interface IScoutingReportService {
+  +get(locationId: string): Promise<SavedScoutingReport | null>
+}
+class ScoutingReportContent {
+  +report: InputSignal<SavedScoutingReport>
+  +imageSelected: OutputEmitterRef<string>
+}
+class ScoutingReportPanel {
+  -service: IScoutingReportService
+}
+ScoutingReportPanel ..> IScoutingReportService : inject token
+ScoutingReportPanel *-- ScoutingReportContent : renders
+' layout: stack clusters vertically to stay within the render width
+ScoutingReport -[hidden]down-> RunScoutingReportCommandHandler
+SavedScoutingReport -[hidden]down-> ScoutingReportValidator
+IScoutingWorkStore -[hidden]down-> AzureOpenAiScoutingProvider
+IScoutingProvider -[hidden]down-> ScoutingReportPanel
+IScoutingConfiguration -[hidden]down-> IScoutingReportService
+@enduml

@@ -17,7 +17,7 @@ public sealed class ReferenceAnalysisStore(LibraryDbContext database, TimeProvid
             .SingleOrDefaultAsync(cancellationToken) ?? throw new ResourceNotFoundException();
         if (reference.Revision != revision) throw new RevisionConflictException();
         if (reference.ImageKey is null || reference.PreviewKey is null) throw new RequestValidationException("image", "Add an image before requesting visual suggestions.");
-        var active = database.BackgroundOperations.Where(operation => operation.OwnerId == ownerId && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running));
+        var active = database.BackgroundOperations.Where(operation => operation.OwnerId == ownerId && operation.Type != OperationType.LocationIndex && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running));
         var existing = await active.SingleOrDefaultAsync(operation => operation.Type == OperationType.ReferenceAnalysis && operation.ResourceId == id, cancellationToken);
         if (existing is not null)
         {

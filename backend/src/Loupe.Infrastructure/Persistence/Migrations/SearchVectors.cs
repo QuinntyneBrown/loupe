@@ -1,0 +1,1101 @@
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+
+#nullable enable
+
+namespace Loupe.Infrastructure.Persistence.Migrations
+{
+    /// <inheritdoc />
+    [DbContext(typeof(LibraryDbContext))]
+    [Migration("20260912193818_SearchVectors")]
+    public sealed class SearchVectors : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            // pgvector is trusted in current releases, so the extension installs without superuser rights; the table is
+            // written and read through raw SQL and stays outside the EF model.
+            migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS vector;");
+            migrationBuilder.Sql("""
+                CREATE TABLE search_vectors (
+                    "OwnerId" text NOT NULL,
+                    "ItemType" text NOT NULL,
+                    "ItemId" uuid NOT NULL,
+                    "ModelIdentity" text NOT NULL,
+                    "SourceRevision" bigint NOT NULL,
+                    "Vector" vector(1024) NOT NULL,
+                    "IndexedAt" timestamp with time zone NOT NULL,
+                    CONSTRAINT "PK_search_vectors" PRIMARY KEY ("OwnerId", "ItemType", "ItemId")
+                );
+                """);
+            migrationBuilder.Sql("CREATE INDEX \"IX_search_vectors_Vector\" ON search_vectors USING hnsw (\"Vector\" vector_cosine_ops);");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.Sql("DROP TABLE IF EXISTS search_vectors;");
+        }
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        {
+            modelBuilder
+                .HasAnnotation("ProductVersion", "10.0.11")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Loupe.Domain.Boards.Board", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId", "NormalizedName")
+                        .IsUnique();
+
+                    b.ToTable("boards", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Boards.BoardReference", b =>
+                {
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ReferenceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("BoardId", "ReferenceId");
+
+                    b.HasIndex("BoardId", "OwnerId");
+
+                    b.HasIndex("ReferenceId", "OwnerId");
+
+                    b.ToTable("board_references", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Deletions.DeletionOperation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("LastAttemptAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.PrimitiveCollection<string[]>("MediaKeys")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ResourceType")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompletedAt", "LastAttemptAt", "DeletedAt");
+
+                    b.HasIndex("OwnerId", "ResourceType", "ResourceId")
+                        .IsUnique();
+
+                    b.ToTable("deletions", "journal");
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Locations.Location", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AddressLine1")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AddressLine2")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("CoverImageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CurrentIndexOperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CurrentScoutingOperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("ImageSetRevision")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L);
+
+                    b.Property<decimal?>("Latitude")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)");
+
+                    b.Property<string>("Locality")
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("Longitude")
+                        .HasPrecision(10, 6)
+                        .HasColumnType("numeric(10,6)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PostalCode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Region")
+                        .HasColumnType("text");
+
+                    b.Property<long>("Revision")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L);
+
+                    b.Property<string>("ScoutingBrief")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ScoutingReportJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Setting")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CurrentIndexOperationId");
+
+                    b.HasIndex("CurrentScoutingOperationId");
+
+                    b.HasIndex("OwnerId", "CreatedAt", "Id");
+
+                    b.ToTable("locations", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Locations.LocationImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Height")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ImageKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PreviewKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Width")
+                        .HasColumnType("integer");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Exif", "Loupe.Domain.Locations.LocationImage.Exif#CaptureMetadata", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Aperture");
+
+                            b1.Property<string>("Camera");
+
+                            b1.Property<string>("CapturedAt");
+
+                            b1.Property<string>("FocalLength");
+
+                            b1.Property<string>("Iso");
+
+                            b1.Property<string>("Lens");
+
+                            b1.Property<string>("ShutterSpeed");
+
+                            b1
+                                .ToJson("Exif")
+                                .HasColumnType("jsonb");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationId", "OwnerId");
+
+                    b.HasIndex("LocationId", "Position");
+
+                    b.ToTable("location_images", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Locations.LocationTag", b =>
+                {
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("LocationId", "NormalizedName");
+
+                    b.HasIndex("LocationId", "OwnerId");
+
+                    b.HasIndex("OwnerId", "NormalizedName");
+
+                    b.ToTable("location_tags", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Operations.AnalysisDispatchCursor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("analysis_dispatch_cursor", (string?)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            OwnerId = ""
+                        });
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Operations.BackgroundOperation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FailureCode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("InputJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("InvalidOutputCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("LeaseExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LeaseToken")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("OutputJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("PromptVersion")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("RecoveryCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("RetryAvailableAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status", "CreatedAt");
+
+                    b.HasIndex("OwnerId", "Type", "ResourceId");
+
+                    b.ToTable("background_operations", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Operations.OperationReceipt", b =>
+                {
+                    b.Property<string>("OwnerId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("OperationType")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Key")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PayloadHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("OwnerId", "OperationType", "Key");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.ToTable("operation_receipts", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Photographers.Photographer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<long?>("CapturedSourceRevision")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CurrentSummaryOperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PortfolioHash")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasComputedColumnSql("md5(loupe_normalize_source(\"PortfolioUrl\"))", true);
+
+                    b.Property<string>("PortfolioUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("Revision")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L);
+
+                    b.Property<string>("SourceFailureCode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SourceJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<long>("SourceRevision")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L);
+
+                    b.Property<string>("SuggestionUndoJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("SuggestionsJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SummaryProvenance")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId", "PortfolioHash");
+
+                    b.HasIndex("OwnerId", "CreatedAt", "Id");
+
+                    b.ToTable("photographers", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Photographers.PhotographerDraft", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Canceled")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("CommittedPhotographerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FailureCode")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ImportOperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PortfolioUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("SourceJson")
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportOperationId");
+
+                    b.HasIndex("OwnerId", "ExpiresAt");
+
+                    b.ToTable("photographer_drafts", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Photographers.PhotographerTag", b =>
+                {
+                    b.Property<Guid>("PhotographerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Provenance")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("PhotographerId", "NormalizedName");
+
+                    b.HasIndex("OwnerId", "NormalizedName");
+
+                    b.HasIndex("PhotographerId", "OwnerId");
+
+                    b.ToTable("photographer_tags", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Photographs.Photograph", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ArchivedDemoCritiqueJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CritiqueJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid?>("CurrentCritiqueOperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Height")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ImageKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PreviewKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("Revision")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L);
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Width")
+                        .HasColumnType("integer");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Brief", "Loupe.Domain.Photographs.Photograph.Brief#CritiqueBrief", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<int?>("Experience");
+
+                            b1.Property<string>("Genre");
+
+                            b1.Property<string>("Intent");
+
+                            b1.Property<string>("RequestedFeedback");
+
+                            b1
+                                .ToJson("Brief")
+                                .HasColumnType("jsonb");
+                        });
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Exif", "Loupe.Domain.Photographs.Photograph.Exif#CaptureMetadata", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Aperture");
+
+                            b1.Property<string>("Camera");
+
+                            b1.Property<string>("CapturedAt");
+
+                            b1.Property<string>("FocalLength");
+
+                            b1.Property<string>("Iso");
+
+                            b1.Property<string>("Lens");
+
+                            b1.Property<string>("ShutterSpeed");
+
+                            b1
+                                .ToJson("Exif")
+                                .HasColumnType("jsonb");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId", "CreatedAt", "Id");
+
+                    b.ToTable("photographs", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.References.Reference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Attribution")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CurrentAnalysisOperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CurrentImportOperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("DescriptionProvenance")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Height")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ImageKey")
+                        .HasColumnType("text");
+
+                    b.Property<long>("ImageRevision")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L);
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("PhotographerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PreviewKey")
+                        .HasColumnType("text");
+
+                    b.Property<long>("Revision")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L);
+
+                    b.Property<string>("SourceHash")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasComputedColumnSql("md5(loupe_normalize_source(\"SourceUrl\"))", true);
+
+                    b.Property<string>("SourceImportJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("SourceUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SuggestionUndoJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("SuggestionsJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Width")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId", "SourceHash");
+
+                    b.HasIndex("PhotographerId", "OwnerId");
+
+                    b.HasIndex("OwnerId", "CreatedAt", "Id");
+
+                    b.ToTable("references", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.References.ReferenceDraft", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Attribution")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("CommittedReferenceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FailureCode")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Height")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ImageKey")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ImportOperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PreviewKey")
+                        .HasColumnType("text");
+
+                    b.Property<long>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("SourceImportJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("SourceUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Width")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportOperationId");
+
+                    b.HasIndex("OwnerId", "ExpiresAt");
+
+                    b.ToTable("reference_drafts", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.References.ReferenceTag", b =>
+                {
+                    b.Property<Guid>("ReferenceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Provenance")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("ReferenceId", "NormalizedName");
+
+                    b.HasIndex("OwnerId", "NormalizedName");
+
+                    b.HasIndex("ReferenceId", "OwnerId");
+
+                    b.ToTable("reference_tags", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Sessions.ApplicationSession", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Issuer")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("LastSeenAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserVersion")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("sessions", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Users.User", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedEmail")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PasswordVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .IsUnique();
+
+                    b.ToTable("users", (string?)null);
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Boards.BoardReference", b =>
+                {
+                    b.HasOne("Loupe.Domain.Boards.Board", null)
+                        .WithMany("References")
+                        .HasForeignKey("BoardId", "OwnerId")
+                        .HasPrincipalKey("Id", "OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Loupe.Domain.References.Reference", null)
+                        .WithMany("Boards")
+                        .HasForeignKey("ReferenceId", "OwnerId")
+                        .HasPrincipalKey("Id", "OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Locations.Location", b =>
+                {
+                    b.HasOne("Loupe.Domain.Operations.BackgroundOperation", "CurrentIndexOperation")
+                        .WithMany()
+                        .HasForeignKey("CurrentIndexOperationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Loupe.Domain.Operations.BackgroundOperation", "CurrentScoutingOperation")
+                        .WithMany()
+                        .HasForeignKey("CurrentScoutingOperationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CurrentIndexOperation");
+
+                    b.Navigation("CurrentScoutingOperation");
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Locations.LocationImage", b =>
+                {
+                    b.HasOne("Loupe.Domain.Locations.Location", null)
+                        .WithMany("Images")
+                        .HasForeignKey("LocationId", "OwnerId")
+                        .HasPrincipalKey("Id", "OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Locations.LocationTag", b =>
+                {
+                    b.HasOne("Loupe.Domain.Locations.Location", null)
+                        .WithMany("Tags")
+                        .HasForeignKey("LocationId", "OwnerId")
+                        .HasPrincipalKey("Id", "OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Photographers.PhotographerDraft", b =>
+                {
+                    b.HasOne("Loupe.Domain.Operations.BackgroundOperation", "ImportOperation")
+                        .WithMany()
+                        .HasForeignKey("ImportOperationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("ImportOperation");
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Photographers.PhotographerTag", b =>
+                {
+                    b.HasOne("Loupe.Domain.Photographers.Photographer", null)
+                        .WithMany("Tags")
+                        .HasForeignKey("PhotographerId", "OwnerId")
+                        .HasPrincipalKey("Id", "OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Loupe.Domain.References.Reference", b =>
+                {
+                    b.HasOne("Loupe.Domain.Photographers.Photographer", "Photographer")
+                        .WithMany()
+                        .HasForeignKey("PhotographerId", "OwnerId")
+                        .HasPrincipalKey("Id", "OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Photographer");
+                });
+
+            modelBuilder.Entity("Loupe.Domain.References.ReferenceDraft", b =>
+                {
+                    b.HasOne("Loupe.Domain.Operations.BackgroundOperation", "ImportOperation")
+                        .WithMany()
+                        .HasForeignKey("ImportOperationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("ImportOperation");
+                });
+
+            modelBuilder.Entity("Loupe.Domain.References.ReferenceTag", b =>
+                {
+                    b.HasOne("Loupe.Domain.References.Reference", null)
+                        .WithMany("Tags")
+                        .HasForeignKey("ReferenceId", "OwnerId")
+                        .HasPrincipalKey("Id", "OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Boards.Board", b =>
+                {
+                    b.Navigation("References");
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Locations.Location", b =>
+                {
+                    b.Navigation("Images");
+
+                    b.Navigation("Tags");
+                });
+
+            modelBuilder.Entity("Loupe.Domain.Photographers.Photographer", b =>
+                {
+                    b.Navigation("Tags");
+                });
+
+            modelBuilder.Entity("Loupe.Domain.References.Reference", b =>
+                {
+                    b.Navigation("Boards");
+
+                    b.Navigation("Tags");
+                });
+        }
+    }
+}

@@ -1,0 +1,63 @@
+<dialog
+  #modal
+  class="lp-dialog"
+  aria-labelledby="delete-location-title"
+  aria-describedby="delete-location-effects"
+  (cancel)="cancel($event)"
+>
+  <div class="lp-dialog__panel">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="delete-location-title">
+          Delete “{{ latest()?.name ?? name() }}”?
+        </h2>
+        <p class="lp-dialog__text" id="delete-location-effects">{{ effects() }}</p>
+      </div>
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Close"
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    @if (busy() || loading() || error()) {
+      <div class="lp-dialog__body">
+        @if (busy()) {
+          <p role="status">Deleting location…</p>
+        } @else if (loading()) {
+          <p role="status">Loading latest details…</p>
+        }
+        @if (error()) {
+          <p role="alert">{{ error() }}</p>
+        }
+        @if ((stale() || (error() && !unavailable())) && !loading() && !busy()) {
+          <button class="lp-button lp-button--secondary" type="button" (click)="load()">
+            Reload latest details
+          </button>
+        }
+      </div>
+    }
+    <footer class="lp-dialog__footer">
+      <button
+        class="lp-button lp-button--secondary"
+        type="button"
+        autofocus
+        [disabled]="busy()"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+      <button
+        class="lp-button lp-button--danger"
+        type="button"
+        [disabled]="busy() || loading() || stale() || unavailable() || !latest()"
+        (click)="confirm()"
+      >
+        Delete
+      </button>
+    </footer>
+  </div>
+</dialog>

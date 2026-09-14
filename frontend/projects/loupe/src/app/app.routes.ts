@@ -10,6 +10,8 @@ import { InspirationPage } from './pages/inspiration/inspiration-page';
 import { ReferenceDetailPage } from './pages/reference-detail/reference-detail-page';
 import { Routes } from '@angular/router';
 import { sessionGuard } from './session.guard';
+import { locationsUnsavedGuard } from './locations-unsaved.guard';
+import { locationUnsavedGuard } from './location-unsaved.guard';
 import { SignIn } from './pages/sign-in/sign-in';
 import { MyWork } from './pages/my-work/my-work';
 import { PhotographDetailPage } from './pages/photograph-detail/photograph-detail-page';
@@ -19,6 +21,31 @@ import { DeletionPage } from './pages/deletion/deletion-page';
 import { ComparePage } from './pages/compare/compare-page';
 
 export const routes: Routes = [
+  {
+    path: 'locations/find',
+    loadComponent: () =>
+      import('./pages/find-location/find-location-page').then((module) => module.FindLocationPage),
+    canActivate: [sessionGuard],
+    title: 'Find a location \u00b7 Loupe',
+  },
+  {
+    path: 'locations/:id',
+    loadComponent: () =>
+      import('./pages/location-detail/location-detail-page').then(
+        (module) => module.LocationDetailPage,
+      ),
+    canActivate: [sessionGuard],
+    canDeactivate: [locationUnsavedGuard],
+    title: 'Location · Loupe',
+  },
+  {
+    path: 'locations',
+    loadComponent: () =>
+      import('./pages/locations/locations-page').then((module) => module.LocationsPage),
+    canActivate: [sessionGuard],
+    canDeactivate: [locationsUnsavedGuard],
+    title: 'Locations \u00b7 Loupe',
+  },
   {
     path: 'search',
     loadComponent: () => import('./pages/search/search-page').then((module) => module.SearchPage),

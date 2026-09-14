@@ -1,0 +1,26 @@
+:host {
+  display: block;
+}
+.notice {
+  position: fixed;
+  bottom: var(--lp-space-6);
+  left: var(--lp-gutter);
+  z-index: var(--lp-z-toast);
+  display: flex;
+  align-items: center;
+  gap: var(--lp-space-4);
+  max-width: min(var(--lp-toast-max), calc(var(--lp-full) - var(--lp-gutter) * 2));
+  background: var(--lp-color-ink);
+  color: var(--lp-color-on-ink);
+  padding: var(--lp-space-3) var(--lp-space-4);
+  border-radius: var(--lp-radius-md);
+  box-shadow: var(--lp-shadow-lg);
+}
+.notice button {
+  color: inherit;
+}
+@media (width < 640px) {
+  .notice {
+    bottom: calc(var(--lp-tabbar-height) + var(--lp-space-4));
+  }
+}

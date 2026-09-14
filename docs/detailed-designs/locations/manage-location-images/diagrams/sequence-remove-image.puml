@@ -1,0 +1,56 @@
+@startuml
+title Remove a location image or change the cover
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "LocationGallery / RemoveLocationImage" as page
+participant "LocationService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "LocationsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "RemoveLocationImageCommandHandler" as handler
+participant "Location" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "Durable work runner" as worker
+end box
+actor -> page : Confirm Remove for the selected image
+page -> client : revision, imageId
+client -> controller : DELETE /api/locations/{id}/images/{imageId}?revision
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch RemoveLocationImageCommand
+handler -> db : FOR UPDATE owned location [L2-056]
+db --> handler : Owned state or 404 item_unavailable
+alt revision matches
+handler -> entity : Remove image; close position gap; cover moves to next image if it was the cover
+handler -> db : Record image and preview keys as cleanup candidates; ImageSetRevision + 1; Revision + 1
+db --> handler : Committed state
+note over entity : Report untouched; Outdated derives from ImageSetRevision != report ImageSetRevision
+handler --> controller : 200 LocationResult without the image
+else revision stale
+handler --> controller : 409 revision_conflict
+end
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals; gallery drops the image immediately
+page --> actor : Saved / loaded state or retained-input error
+worker -> db : CleanupWorker: candidates not referenced by any live row
+worker -> worker : Delete bytes within 24 hours; remaining images stay readable
+note over page, controller : Set as cover: PUT /api/locations/{id}/cover with revision and imageId changes only CoverImageId
+@enduml

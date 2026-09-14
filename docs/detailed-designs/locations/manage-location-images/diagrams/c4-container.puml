@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Upload and manage a location's images
+Person(owner, "Library owner", "Uses this capability")
+System_Boundary(loupe, "Loupe") {
+Container(spa, "Loupe web", "Angular", "LocationDetailPage, LocationGallery, AddLocationImages")
+Container(api, "Loupe API", "ASP.NET Core", "LocationsController")
+ContainerDb(db, "Library store", "PostgreSQL via LibraryDbContext", "Locations, location images, cover, image-set revision")
+ContainerDb(media, "Image store", "FileImageStore under Media:Root", "Immutable stripped originals and previews")
+Container(worker, "Loupe worker", ".NET hosted service", "CleanupWorker removes abandoned and deleted image bytes")
+}
+Rel(owner, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls via interface-bound HTTP adapter", "multipart or JSON / HTTPS")
+Rel(api, db, "Reads or commits owned state", "Infrastructure adapter")
+Rel(api, media, "Stages and reads image objects", "IImageStore")
+Rel(worker, db, "Reads live keys and cleanup candidates", "Infrastructure adapter")
+Rel(worker, media, "Deletes unreferenced bytes", "IImageStore")
+@enduml

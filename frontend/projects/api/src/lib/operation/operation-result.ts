@@ -7,7 +7,8 @@ export interface OperationResult {
     | 'ReferenceDraftImport'
     | 'ReferenceAnalysis'
     | 'PhotographerDraftImport'
-    | 'PhotographerSummary';
+    | 'PhotographerSummary'
+    | 'LocationScouting';
   status: 'Queued' | 'Running' | 'Succeeded' | 'Failed' | 'Canceled';
   mode: 'Demo' | 'Live';
   createdAt: string;

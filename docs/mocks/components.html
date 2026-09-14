@@ -18,6 +18,7 @@
   <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
   <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.1"/><circle cx="12" cy="12" r="1.1"/><circle cx="19" cy="12" r="1.1"/></symbol>
@@ -47,6 +48,7 @@
     <a href="inspiration.html"><svg class="lp-icon"><use href="#i-grid"/></svg><span>Inspiration</span></a>
     <a href="photographers.html"><svg class="lp-icon"><use href="#i-user"/></svg><span>Photographers</span></a>
     <a href="search.html"><svg class="lp-icon"><use href="#i-search"/></svg><span>Search</span></a>
+    <a href="locations.html"><svg class="lp-icon"><use href="#i-pin"/></svg><span>Locations</span></a>
   </nav>
   <div class="lp-topbar__end">
     <span class="lp-topbar__hint"><span class="lp-kbd">/</span> to search</span>
@@ -229,12 +231,13 @@
       </div>
 
       <div class="gallery__item">
-        <span class="gallery__label">lp-status · queued, analyzing, ready, failed, on image</span>
+        <span class="gallery__label">lp-status · queued, analyzing, ready, failed, outdated, on image</span>
         <div class="gallery__stage">
           <span class="lp-status lp-status--queued">Queued</span>
           <span class="lp-status lp-status--analyzing">Analyzing</span>
           <span class="lp-status lp-status--ready">Ready</span>
           <span class="lp-status lp-status--failed">Failed</span>
+          <span class="lp-status lp-status--outdated">Outdated</span>
           <span class="gallery__stage gallery__stage--dark" style="padding:var(--lp-space-2);border:0"><span class="lp-status lp-status--ready lp-status--on-image">Ready</span></span>
         </div>
       </div>
@@ -361,6 +364,15 @@
           <dl class="lp-meta" style="width:100%"><dt>Genre</dt><dd>Landscape</dd><dt>Experience</dt><dd>Intermediate</dd></dl>
         </div>
       </div>
+
+      <div class="gallery__item">
+        <span class="gallery__label">lp-address and lp-basis · an address in the order it was typed, empty lines left out; the evidence basis of a report entry (L2-055, L2-058)</span>
+        <div class="gallery__stage gallery__stage--block">
+          <address class="lp-address">Thames Path, north bank<br>Richmond<br>London<br><span class="lp-mono">TW8 0EE</span><br>United Kingdom</address>
+          <dl class="lp-meta" style="width:100%"><dt>Coordinates</dt><dd><span class="lp-mono">51.487213, -0.287604</span> <span class="lp-faint">· typed by you, never read from a photo</span></dd></dl>
+          <div class="lp-row"><span class="lp-basis">Visible</span><span class="lp-basis lp-basis--inferred">Inferred</span></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -387,6 +399,61 @@
           <div class="lp-photographer-grid">
             <article class="lp-photographer-card"><a class="lp-photographer-card__link" href="photographer.html" aria-label="Open"></a><div class="lp-photographer-card__head"><h3 class="lp-photographer-card__name">Mara Lindqvist</h3><span class="lp-photographer-card__domain">maralindqvist.com</span></div><p class="lp-photographer-card__desc">Portraits in available light, mostly north-facing windows and long sittings. A restrained warm palette and almost no fill.</p><div class="lp-tags"><span class="lp-tag lp-tag--plain">window light</span><span class="lp-tag lp-tag--plain">portrait</span></div><div class="lp-photographer-card__foot"><div class="lp-photographer-card__thumbs"><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s10/72/72" width="36" height="36" alt=""><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s33/72/72" width="36" height="36" alt=""></div><span class="lp-photographer-card__count">6 references</span></div></article>
             <article class="lp-photographer-card lp-photographer-card--result"><a class="lp-photographer-card__link" href="photographer.html" aria-label="Open"></a><span class="lp-result-type">Photographer</span><div class="lp-photographer-card__head"><h3 class="lp-photographer-card__name">Saoirse Quinn</h3><span class="lp-photographer-card__domain">saoirsequinn.ie</span></div><p class="lp-photographer-card__desc">Studio and home sittings lit by one window. Black and white, slow, and unhurried.</p><div class="lp-photographer-card__foot"><div class="lp-photographer-card__thumbs"><img class="lp-thumb lp-thumb--sm" src="https://picsum.photos/seed/lp-s9/72/72" width="36" height="36" alt=""></div><span class="lp-photographer-card__count">9 references</span></div></article>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-gallery · one full-frame stage, radio thumbnails switched by CSS (keyboard-operable, selection announced), cover, capacity line (L2-056, L2-057)</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-gallery" style="max-width:520px">
+            <figure class="lp-photo-stage lp-photo-stage--contain lp-gallery__stage">
+              <img data-image="1" src="https://picsum.photos/seed/lp-l1/1200/800" width="1200" height="800" alt="Image 1">
+              <img data-image="2" src="https://picsum.photos/seed/lp-l1b/1200/800" width="1200" height="800" alt="Image 2">
+              <img data-image="3" src="https://picsum.photos/seed/lp-l1c/800/1200" width="800" height="1200" alt="Image 3">
+            </figure>
+            <div class="lp-gallery__thumbs" role="radiogroup" aria-label="Images">
+              <label class="lp-gallery__thumb"><input type="radio" name="g-gallery" id="img-1" aria-label="Image 1, cover" checked><img src="https://picsum.photos/seed/lp-l1/240/300" width="120" height="150" alt=""><span class="lp-pill">Cover</span></label>
+              <label class="lp-gallery__thumb"><input type="radio" name="g-gallery" id="img-2" aria-label="Image 2"><img src="https://picsum.photos/seed/lp-l1b/240/300" width="120" height="150" alt=""></label>
+              <label class="lp-gallery__thumb"><input type="radio" name="g-gallery" id="img-3" aria-label="Image 3"><img src="https://picsum.photos/seed/lp-l1c/240/300" width="120" height="150" alt=""></label>
+            </div>
+            <div class="lp-gallery__caption"><span><span data-image="1">Image 1 · Cover</span><span data-image="2">Image 2</span><span data-image="3">Image 3</span></span><span class="lp-row"><button class="lp-button lp-button--ghost lp-button--sm" type="button">Set as cover</button><button class="lp-button lp-button--ghost lp-button--sm" type="button">Remove</button></span></div>
+            <div class="lp-gallery__capacity"><span>3 of 10 images</span><button class="lp-button lp-button--secondary lp-button--sm" type="button"><svg class="lp-icon lp-icon--sm"><use href="#i-upload"/></svg>Add images</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-report · scouting report vocabulary inside lp-ai-block: suitability and time-of-day ratings, a Visible or Inferred basis on every entry, group size or Cannot assess, cited images that select the gallery image. No scores, stars, or percentages (L2-058).</span>
+        <div class="gallery__stage gallery__stage--block">
+          <section class="lp-ai-block">
+            <div class="lp-ai-block__head"><div class="lp-row"><h3 class="lp-kicker lp-kicker--ai">Scouting report</h3><span class="lp-pill lp-pill--ai">AI generated</span><span class="lp-pill lp-pill--warning">Outdated</span></div><span class="lp-ai-block__note">Generated 10 Sep 2026 · Azure OpenAI · gpt-4.1 · 4 images · brief as saved 10 Sep 2026</span></div>
+            <div class="lp-report">
+              <section class="lp-report__section"><h4 class="lp-kicker lp-kicker--ai">Suitability</h4><div class="lp-report__rows">
+                <div class="lp-report__row"><div class="lp-report__row-head"><span class="lp-report__label">Portraits</span><span class="lp-pill lp-pill--success">Well suited</span><span class="lp-basis">Visible</span><span class="lp-report__cites"><label for="img-3"><img class="lp-thumb" src="https://picsum.photos/seed/lp-l1c/72/90" width="32" height="40" alt="Image 3"></label></span></div><p class="lp-report__reason">Open shade under the arch for faces.</p></div>
+                <div class="lp-report__row"><div class="lp-report__row-head"><span class="lp-report__label">Events</span><span class="lp-pill">Workable</span><span class="lp-basis">Visible</span></div><p class="lp-report__reason">Small gatherings only.</p></div>
+                <div class="lp-report__row"><div class="lp-report__row-head"><span class="lp-report__label">Family portraits</span><span class="lp-pill lp-pill--warning">Not recommended</span><span class="lp-basis">Visible</span></div><p class="lp-report__reason">Uneven gravel and a close water's edge.</p></div>
+                <div class="lp-report__row"><div class="lp-report__row-head"><span class="lp-report__label">Headshots</span><span class="lp-pill lp-pill--outline">Cannot assess</span><span class="lp-basis">Visible</span></div><p class="lp-report__reason">No image shows a background at head height.</p></div>
+              </div></section>
+              <section class="lp-report__section"><h4 class="lp-kicker lp-kicker--ai">Time of day</h4><div class="lp-report__rows">
+                <div class="lp-report__row"><div class="lp-report__row-head"><span class="lp-report__label">Morning</span><span class="lp-pill lp-pill--success">Recommended</span><span class="lp-basis">Visible</span></div><p class="lp-report__reason">Side light on the bank with the arches in shadow.</p></div>
+                <div class="lp-report__row"><div class="lp-report__row-head"><span class="lp-report__label">Midday</span><span class="lp-pill lp-pill--warning">Avoid</span><span class="lp-basis">Visible</span></div><p class="lp-report__reason">Hard overhead light and blown highlights on the water.</p></div>
+                <div class="lp-report__row"><div class="lp-report__row-head"><span class="lp-report__label">Night</span><span class="lp-pill lp-pill--outline">Unknown</span><span class="lp-basis lp-basis--inferred">Inferred</span></div><p class="lp-report__reason">Nothing in the images shows artificial light.</p></div>
+              </div></section>
+              <section class="lp-report__section"><h4 class="lp-kicker lp-kicker--ai">Group size</h4><div class="lp-report__rows">
+                <div class="lp-report__row"><div class="lp-report__row-head"><span class="lp-report__label">Cannot assess</span><span class="lp-basis lp-basis--inferred">Inferred</span></div><p class="lp-report__reason">The images show no continuous ground to judge how many people fit.</p></div>
+              </div></section>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="gallery__item gallery__item--wide">
+        <span class="gallery__label">lp-location-card · Find a location result: cover or placeholder, name, locality, Recommended periods, group range, one rating per selected shoot type; without a report, manual fields only (L2-061)</span>
+        <div class="gallery__stage gallery__stage--block">
+          <div class="lp-location-grid">
+            <article class="lp-location-card"><a class="lp-location-card__link" href="location.html" aria-label="Open"></a><div class="lp-location-card__cover"><img src="https://picsum.photos/seed/lp-l1/240/300" width="96" height="120" alt=""></div><div class="lp-location-card__body"><h3 class="lp-location-card__name">Kew Bridge foreshore</h3><span class="lp-location-card__place">Richmond · 4 images</span><span class="lp-location-card__line">Recommended · Morning, Golden hour</span><span class="lp-location-card__line">2–8 people</span><div class="lp-location-card__ratings"><span class="lp-pill lp-pill--success">Engagement · Well suited</span><span class="lp-pill">Events · Workable</span></div></div></article>
+            <article class="lp-location-card"><a class="lp-location-card__link" href="location.html?state=no-images" aria-label="Open"></a><div class="lp-location-card__cover"><svg class="lp-icon"><use href="#i-pin"/></svg></div><div class="lp-location-card__body"><h3 class="lp-location-card__name">Nunhead cemetery gate</h3><span class="lp-location-card__place">No images</span><span class="lp-location-card__line">Outdoor · gate, ivy</span><div class="lp-location-card__ratings"><span class="lp-pill lp-pill--outline">No scouting report</span></div></div></article>
           </div>
         </div>
       </div>

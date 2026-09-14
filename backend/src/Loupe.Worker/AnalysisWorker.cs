@@ -1,6 +1,7 @@
 using Loupe.Application.Critiques;
 using Loupe.Application.ReferenceAnalysis;
 using Loupe.Application.PhotographerSummaries;
+using Loupe.Application.Scouting;
 using Loupe.Infrastructure.Ai;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,15 +34,16 @@ public sealed class AnalysisWorker(IServiceScopeFactory scopes, IOptions<AiOptio
                 await using var scope = scopes.CreateAsyncScope();
                 var sender = scope.ServiceProvider.GetRequiredService<ISender>();
                 var processed = false;
-                for (var offset = 0; offset < 3 && !processed; offset++)
+                for (var offset = 0; offset < 4 && !processed; offset++)
                 {
                     var kind = next;
-                    next = (next + 1) % 3;
+                    next = (next + 1) % 4;
                     processed = kind switch
                     {
                         0 => await sender.Send(new RunReferenceAnalysisCommand(), stoppingToken),
                         1 => await sender.Send(new RunCritiqueCommand(), stoppingToken),
-                        _ => await sender.Send(new RunPhotographerSummaryCommand(), stoppingToken)
+                        2 => await sender.Send(new RunPhotographerSummaryCommand(), stoppingToken),
+                        _ => await sender.Send(new RunScoutingReportCommand(), stoppingToken)
                     };
                 }
                 if (processed) continue;

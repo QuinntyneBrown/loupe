@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Shoot-planning relevance evaluation manifest",
+  "type": "object",
+  "required": [
+    "version",
+    "gate",
+    "reviewer",
+    "model",
+    "corpus",
+    "queries"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "gate": {
+      "type": "object"
+    },
+    "reviewer": {
+      "type": "object",
+      "required": [
+        "name",
+        "recordedReasonsPath"
+      ]
+    },
+    "model": {
+      "type": "object",
+      "required": [
+        "name",
+        "dimensions",
+        "threshold",
+        "documentVersion"
+      ]
+    },
+    "corpus": {
+      "type": "object",
+      "required": [
+        "size",
+        "locations"
+      ],
+      "properties": {
+        "size": {
+          "const": 30
+        },
+        "locations": {
+          "type": "array",
+          "minItems": 30,
+          "maxItems": 30,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "setting",
+              "tags",
+              "brief"
+            ]
+          }
+        }
+      }
+    },
+    "queries": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "text",
+          "productBriefExample",
+          "relevant"
+        ],
+        "properties": {
+          "relevant": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

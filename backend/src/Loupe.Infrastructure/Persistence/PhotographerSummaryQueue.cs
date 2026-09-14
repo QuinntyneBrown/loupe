@@ -17,7 +17,7 @@ public sealed class PhotographerSummaryQueue(LibraryDbContext database, IPhotogr
         await AnalysisAdmissionLock.AcquireAsync(database, photographer.OwnerId, cancellationToken);
         var identity = configuration.GetIdentity(); var now = clock.GetUtcNow();
         var full = await database.BackgroundOperations.CountAsync(operation => operation.OwnerId == photographer.OwnerId
-            && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running), cancellationToken) >= 5;
+            && operation.Type != OperationType.LocationIndex && (operation.Status == OperationStatus.Queued || operation.Status == OperationStatus.Running), cancellationToken) >= 5;
         var source = photographer.CapturedSourceRevision == photographer.SourceRevision && photographer.SourceJson is not null
             ? JsonSerializer.Deserialize<CapturedPortfolioPage>(photographer.SourceJson) : null;
         var operation = new BackgroundOperation

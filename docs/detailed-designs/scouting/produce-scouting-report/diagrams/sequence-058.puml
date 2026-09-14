@@ -1,0 +1,65 @@
+@startuml
+title L2-058 - Deliver a structured scouting report
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "ScoutingReportPanel" as page
+participant "ScoutingReportService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "ScoutingReportsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "RunScoutingReportCommandHandler" as handler
+participant "ScoutingReportValidator" as validator
+participant "SavedScoutingReport" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "Durable work runner" as worker
+participant "AzureOpenAiScoutingProvider" as ext
+end box
+note over page, controller : Admission persists work before processing; status reads are owner-scoped
+worker -> handler : AnalysisWorker dispatches RunScoutingReportCommand
+handler -> db : ClaimAsync LocationScouting; lease 60 s
+db --> handler : Operation with ScoutingInput or nothing to do
+handler -> ext : GenerateAsync(input, Live identity) within 120 s; renew lease every 20 s
+ext --> handler : ScoutingReport or ProviderFailureException
+alt provider failure or timeout
+handler -> db : IAnalysisFailureStore: retry within budget or Failed with safe code
+else result returned
+handler -> validator : IsValid(report, input) [L2-058]
+alt missing section, foreign rating or period, blank reason, duplicate or missing shoot type, over three strengths, overlength text, or uncited image
+validator --> handler : false
+handler -> db : RejectInvalidAsync: one automatic retry, then Failed invalid_output; current report unchanged
+else complete and valid
+validator --> handler : true
+handler -> entity : SavedScoutingReport(operation, now, mode, model, prompt, brief snapshot, ImageSetRevision, image count, report)
+handler -> db : PublishAsync: FOR UPDATE location; same CurrentScoutingOperationId and ImageSetRevision; lease still held
+db --> handler : Committed Succeeded + report JSON, or no-op when the location changed or is gone
+end
+end
+handler --> worker : true when work was processed
+actor -> page : Open the location while the job runs
+page -> client : poll every second while Queued or Running
+client -> controller : GET /api/locations/{id}/scouting-report
+controller -> db : Owner-scoped read of report JSON and operation
+db --> controller : SavedScoutingReport or 204 with status
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Six sections in order, each entry with basis and cited images; no numeric score
+@enduml

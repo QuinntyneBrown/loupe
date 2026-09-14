@@ -44,6 +44,7 @@ to play (GitHub opens the MP4 in its video player).
 | --- | --- |
 | ▶ **Video** | [`docs/demo/inspiration/inspiration-tour.mp4`](docs/demo/inspiration/inspiration-tour.mp4) (142 s, 1440 × 1040, 12.9 MB, narrated and captioned) |
 | 📖 **Chapters, transcript and how it was recorded** | [`docs/demo/inspiration/README.md`](docs/demo/inspiration/README.md) |
+| ▶ **Locations video** | [`docs/demo/locations/locations-tour.mp4`](docs/demo/locations/locations-tour.mp4) (199 s, 1440 × 1040, 14.0 MB, narrated and captioned; real local embeddings, no Azure OpenAI) · [chapters and transcript](docs/demo/locations/README.md) |
 | 🎞 **All demo recordings** (critique, API + worker, design system) | [`docs/demo/README.md`](docs/demo/README.md) |
 
 Everything in the recording is real, persisted state: no mocked product
@@ -60,6 +61,7 @@ header says so).
 | **Boards and tags** | Organise a reference into any number of boards; add, edit and categorise tags; filter the collection by tag; review AI-suggested descriptions and tags before they apply. |
 | **Photographers** | Bookmark photographer portfolios, link references to them, and keep editable, grounded summaries. |
 | **Search** | Keyword search across titles, notes, tags, attribution and photographers, combined with board and tag filters, paging and navigable URL state. Meaning (semantic) search is planned on the same surface. |
+| **Locations** | Keep a private library of shoot locations with up to ten images, an address and coordinates you type yourself, a brief, notes and tags; request an AI scouting report grounded in the images (overview, suitability by shoot type, times of day, techniques, group size, cautions — each with its evidence basis and cited images); and find a location for a shoot by keyword or by meaning, with shoot-type, people, time-of-day, setting and tag filters. Meaning search embeds locally through Ollama and pgvector, so notes never leave the deployment. |
 | **Privacy and durability** | Every library is private to its owner: local accounts, Loupe-issued JWTs in secure HttpOnly cookies with server-side revocation, private media storage, revision-protected edits, idempotent uploads and an audited deletion ledger. |
 
 ## Architecture

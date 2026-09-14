@@ -18,7 +18,7 @@ public sealed class AnalysisFailureStore(LibraryDbContext database, TimeProvider
                 .SetProperty(item => item.CompletedAt, retry ? (DateTimeOffset?)null : now).SetProperty(item => item.UpdatedAt, now)
                 .SetProperty(item => item.LeaseToken, (Guid?)null).SetProperty(item => item.LeaseExpiresAt, (DateTimeOffset?)null)
                 .SetProperty(item => item.FailureCode, "invalid_output")
-                .SetProperty(item => item.Message, retry ? (operation.Type == OperationType.Critique ? "The critique was incomplete. Waiting to try once more." : "The suggestions were incomplete. Waiting to try once more.") : (operation.Type == OperationType.Critique ? "The critique could not be validated. Your saved content is unchanged." : "The suggestions could not be validated. Your saved content is unchanged.")), cancellationToken);
+                .SetProperty(item => item.Message, retry ? (operation.Type == OperationType.Critique ? "The critique was incomplete. Waiting to try once more." : operation.Type == OperationType.LocationScouting ? "The scouting report was incomplete. Waiting to try once more." : "The suggestions were incomplete. Waiting to try once more.") : (operation.Type == OperationType.Critique ? "The critique could not be validated. Your saved content is unchanged." : operation.Type == OperationType.LocationScouting ? "The scouting report could not be validated. Your saved content is unchanged." : "The suggestions could not be validated. Your saved content is unchanged.")), cancellationToken);
     }
 
     public Task RejectTimeoutAsync(BackgroundOperation operation, CancellationToken cancellationToken)

@@ -1,0 +1,58 @@
+@startuml
+title L2-062 - Search locations by keyword and keep results current
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "FindLocationPage / LocationSearchResults" as page
+participant "LocationSearchService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "LocationSearchController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "FindLocationsQueryHandler" as handler
+participant "RefreshLocationSearchDocumentCommandHandler" as refresh
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "Durable work runner" as worker
+participant "LocalEmbeddingProvider / IVectorWriter adapters" as ext
+end box
+actor -> page : Keyword query with filters, or filters alone
+page -> client : query?, mode=keyword, filters, cursor?, pageSize?
+client -> controller : GET /api/locations/search
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch FindLocationsQuery
+handler -> handler : NFC normalize; split tokens; validate filters; scope cursor to owner, mode, filters, page size [L2-062]
+handler -> db : LocationSearchStore: every token as case-insensitive substring of name, address lines, locality, region, postal code, country, setting, notes, brief, tags, report text; filters on report JSON; owner and deletion checks
+db --> handler : Rows in creation-date desc then id order, count; report-less rows only through manual fields
+handler --> controller : 200 LocationSearchPage; No scouting report labeled; a blank query returns every filtered location
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals; No results offers edit query or Clear filters; service error is a separate retryable state
+page --> actor : Saved / loaded state or retained-input error
+note over db : A save, edit, tag change, image change, or report publish records the SearchDocument intent in the same transaction; the stale vector is excluded immediately
+worker -> refresh : SearchIndexWorker dispatches RefreshLocationSearchDocumentCommand
+refresh -> db : Load location, report, and SearchDocument; Processing report while a requested report is pending
+refresh -> ext : Build document without address lines; embed with the generation model
+ext --> refresh : Vector
+refresh -> ext : Publish only if Revision, ImageSetRevision, and report operation still match
+alt still current
+ext --> refresh : Indexed within 60 s of the save or of the report's success; detail shows current
+else changed, deleted, or failed
+ext --> refresh : Discarded; Updating search remains, or Search indexing failed with Retry after a failed job
+end
+@enduml

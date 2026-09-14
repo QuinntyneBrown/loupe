@@ -1,0 +1,25 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Browse, inspect, and delete locations
+Container(spa, "LocationCollection / LocationDetailPanel", "Angular domain", "Inject LOCATION_SERVICE and DELETION_SERVICE")
+Container_Boundary(api, "Loupe API and Application") {
+Component(ctrl, "LocationsController", "API controller", "Binds, dispatches, returns")
+Component(handler, "ListLocationsQueryHandler\nGetLocationQueryHandler\nDeleteLocationCommandHandler", "Application / MediatR 12.5.0", "Validates, authorizes, coordinates slice")
+Component(cursor, "LocationListCursor", "Application", "Owner and page-size scoped CreatedCursor")
+Component(entity, "Location / DeletionOperation", "Domain", "State, report status derivation, tombstone")
+Component(store, "ILocationStore", "Application port", "Owner-scoped list, count, and detail reads")
+Component(deletions, "IDeletionStore", "Application port", "DeleteLocationAsync: cancel jobs, tombstone, remove")
+}
+ContainerDb(db, "Library store", "Infrastructure adapter", "Authoritative data and deletion journal")
+Container(worker, "Loupe worker", ".NET", "DeletedContentCleaner and DeletionRetention")
+Rel(spa, ctrl, "Calls through ILocationService / IDeletionService", "HTTPS")
+Rel(ctrl, handler, "Dispatches request", "MediatR")
+Rel(handler, cursor, "Parses and encodes continuation")
+Rel(handler, entity, "Reads or applies behavior")
+Rel(handler, store, "Uses inward-defined port")
+Rel(handler, deletions, "Uses inward-defined port")
+Rel(store, db, "Implemented by Infrastructure")
+Rel(deletions, db, "Implemented by Infrastructure")
+Rel(worker, db, "Completes cleanup and prunes records")
+@enduml

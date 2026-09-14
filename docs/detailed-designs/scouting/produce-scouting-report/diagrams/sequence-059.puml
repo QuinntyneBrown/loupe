@@ -1,0 +1,48 @@
+@startuml
+title L2-059 - Ground the scouting report in visible evidence
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "RunScoutingReportCommandHandler" as handler
+participant "ScoutingInput" as input
+participant "ScoutingReportValidator" as validator
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+participant "Durable work runner" as worker
+participant "AzureOpenAiScoutingProvider" as ext
+database "Image store" as media
+participant "Azure OpenAI responses endpoint" as azure
+end box
+worker -> handler : RunScoutingReportCommand for a claimed LocationScouting operation
+handler -> input : Deserialize InputJson: image ids, preview keys, allowlisted EXIF, brief snapshot
+note over input : Address, coordinates, notes, tags, and other locations are not in the snapshot [L2-059]
+handler -> ext : GenerateAsync(input, identity)
+ext -> media : OpenRead each current preview (32-hex key, at most 8 MB)
+media --> ext : JPEG bytes
+ext -> ext : Build request: ScoutingPrompt instructions, one input_image per preview, brief and EXIF as input_text, strict json_schema, store=false
+ext -> azure : POST openai/v1/responses with api-key header and deployment
+azure --> ext : Completed output_text, refusal, or HTTP failure
+alt refusal or non-completed status
+ext --> handler : ProviderFailureException UnsupportedInput / Transient
+else output text
+ext -> ext : Strict deserialization: unmapped members and duplicates rejected
+ext --> handler : ScoutingReport
+handler -> validator : Basis on every entry; Recommended and Avoid periods carry Visible; unsupported periods are Unknown with a reason
+validator --> handler : Valid, or invalid_output rejection
+end
+note over ext, azure : Instructions embedded in an image or the brief are content: no tool, no URL fetch, no record access, no field outside the validated report
+note over handler : The prompt forbids permits, fees, hours, ownership, parking, crowds, orientation, sun position, distances, and place names as fact; the brief's own words may be echoed as stated
+@enduml

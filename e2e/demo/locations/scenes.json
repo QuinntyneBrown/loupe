@@ -1,0 +1,52 @@
+[
+  {
+    "id": "signin",
+    "title": "Places, seen before the shoot",
+    "text": "Loupe now keeps the places you shoot as well as the photographs. This recording drives the real Angular application against the real API, worker, and database, with a local embedding model running beside them. It starts by signing in with a locally provisioned account."
+  },
+  {
+    "id": "browse",
+    "title": "Browse the Locations library",
+    "text": "Locations opens on the whole library: seven places, each a card with its cover, name, locality, and image count. Hovering a card reveals those details, and every card carries its report status; none of these has a scouting report yet. Find a location sits in the header."
+  },
+  {
+    "id": "add",
+    "title": "Add a location",
+    "text": "Adding a location is one dialog: a name, an address you type yourself, never read from a photo, a setting, a scouting brief, private notes, and tags. Save, and the new card appears at the front of the library with a placeholder until it has images."
+  },
+  {
+    "id": "images",
+    "title": "Upload images and choose a cover",
+    "text": "A location holds up to ten images. Choose several at once and each one uploads on its own with its own progress. The gallery shows the full frame, the thumbnails are a radio group, so the arrow keys move the selection, and any image can become the cover."
+  },
+  {
+    "id": "detail",
+    "title": "Notes, tags, and a search index that keeps up",
+    "text": "The brief, notes, and tags save inline, each with its own status. Every save records an index intent: the status reads Updating search while the worker embeds the location through the local model, and clears the moment the vector is current."
+  },
+  {
+    "id": "report",
+    "title": "Ask for a scouting report",
+    "text": "A scouting report is requested explicitly, and the disclosure says exactly what leaves the server: the images, the brief, and camera settings; never the address, coordinates, notes, or tags. This stack has no Azure OpenAI credentials, so the request is refused with a clear message, and editing continues."
+  },
+  {
+    "id": "report-example",
+    "title": "What a scouting report looks like",
+    "text": "What a finished report looks like is on the design-system site, with synthetic content. Six sections in a fixed order: overview, suitability by shoot type, times of day, techniques, group size, and cautions. Ratings are words, never scores, every entry names its evidence basis, and citing an image selects it in the gallery."
+  },
+  {
+    "id": "find-keyword",
+    "title": "Find a location by keyword",
+    "text": "Find a location searches your own library. Keyword mode matches every word you type against a location's details and, once it has one, its report. Setting and tag filters work on any location, including the one added a moment ago, while shoot type, people, and time of day read the report."
+  },
+  {
+    "id": "find-meaning",
+    "title": "Find a location by meaning",
+    "text": "Meaning mode ranks by what the locations describe, not by matching words. The query is embedded by the local model and compared with each location's current vector, and the results carry the Matched by meaning label. A calm waterside shoot at first light surfaces the water locations first, without those words in their tags."
+  },
+  {
+    "id": "close",
+    "title": "Saved for real",
+    "text": "Everything shown was saved for real: the location, its images and cover, the notes, the tags, and every search index update are in the database, and both searches found them a moment later. That is the Locations area today: keep the places, ask for the report, and find the right one for the shoot."
+  }
+]

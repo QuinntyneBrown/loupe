@@ -1,0 +1,57 @@
+@startuml
+title Delete a location
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "DeleteLocation dialog" as page
+participant "DeletionService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "LocationsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "DeleteLocationCommandHandler" as handler
+participant "DeletionOperation" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+participant "Durable work runner" as worker
+end box
+actor -> page : Confirm Delete after reading the named effects
+page -> client : revision
+client -> controller : DELETE /api/locations/{id}?revision
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch DeleteLocationCommand
+handler -> db : IDeletionStore.DeleteLocationAsync in one transaction [L2-031]
+db --> handler : Prior DeletionOperation on an owner repeat; 404 for foreign or unknown id
+alt first deletion with matching revision
+handler -> db : Cancel Queued / Running LocationScouting operations: "The location was deleted."
+handler -> entity : Tombstone: ResourceType location, every image and preview key
+handler -> db : Remove location, images, tags; commit
+db --> handler : Acknowledged; read access, media, counts, search, operations revoked now
+handler --> controller : 200 DeletionResult Pending
+else stale revision
+handler --> controller : 409 revision_conflict
+end
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Navigate to Locations with a deleted notice
+page --> actor : Saved / loaded state or retained-input error
+worker -> db : ScoutingWorkStore.PublishAsync re-reads location FOR UPDATE
+db --> worker : No row: return without committing; staged output discarded
+worker -> db : DeletedContentCleaner: keys not referenced by any live row
+worker -> worker : Delete bytes within 24 hours; DeletionRetention prunes after 35 days
+@enduml

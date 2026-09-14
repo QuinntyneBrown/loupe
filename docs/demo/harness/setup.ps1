@@ -34,6 +34,14 @@
   Defaults to a temp directory named after the prefix; nothing under the repo
   is touched besides the files this script explicitly documents.
 
+.PARAMETER Ollama
+  Also start a local Ollama container (<Prefix>-ollama) on the stack network,
+  pull the bge-m3 embedding model into it (about 1.2 GB on first use, kept in
+  the shared loupe-ollama-models volume), and point the Api and Worker at it through
+  Embeddings__Endpoint so Find a location's Meaning mode and the search index
+  worker run. Without this switch Meaning mode reports search unavailable and
+  each location shows no search-index status; keyword search is unaffected.
+
 .EXAMPLE
   pwsh docs/demo/harness/setup.ps1
 
@@ -46,13 +54,15 @@ param(
   [int]$DbPort = 5433,
   [int]$ApiPort = 5001,
   [int]$AppPort = 4200,
-  [string]$ScratchDir = (Join-Path $env:TEMP "$Prefix-harness")
+  [string]$ScratchDir = (Join-Path $env:TEMP "$Prefix-harness"),
+  [switch]$Ollama
 )
 
 $ErrorActionPreference = 'Stop'
 Set-Location $RepoRoot
 
 $postgres = "$Prefix-postgres"; $api = "$Prefix-api"; $worker = "$Prefix-worker"; $network = "$Prefix-net"; $image = "$Prefix-runtime"
+$ollamaContainer = "$Prefix-ollama"
 $appOrigin = "https://localhost:$AppPort"
 $hostConnection = "Host=localhost;Port=$DbPort;Database=loupe_demo;Username=loupe;Password=loupe-demo-only"
 $containerConnection = "Host=$postgres;Port=5432;Database=loupe_demo;Username=loupe;Password=loupe-demo-only"
@@ -105,6 +115,26 @@ docker network create $network 2>$null | Out-Null
 docker network connect $network $postgres 2>$null | Out-Null
 
 $env:Jwt__SigningKey = [Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
+if ($Ollama) {
+  Write-Host "== 5b. Start Ollama ($ollamaContainer) and pull bge-m3 for local embeddings ==" -ForegroundColor Cyan
+  docker rm -f $ollamaContainer 2>$null | Out-Null
+  # Pulled models are immutable downloads, so every stack shares one volume instead of pulling 1.2 GB per prefix.
+  # OLLAMA_KEEP_ALIVE keeps bge-m3 resident; the default unloads it after five idle minutes, and the reload adds seconds to the next query.
+  docker run -d --name $ollamaContainer --network $network -e OLLAMA_KEEP_ALIVE=24h -v "loupe-ollama-models:/root/.ollama" ollama/ollama | Out-Null
+  # The server inside the container takes a moment to listen; pull only once it answers.
+  $ready = $false
+  foreach ($attempt in 1..30) {
+    docker exec $ollamaContainer ollama list *>$null
+    if ($LASTEXITCODE -eq 0) { $ready = $true; break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $ready) { throw 'Ollama did not start.' }
+  docker exec $ollamaContainer ollama pull bge-m3
+  if ($LASTEXITCODE -ne 0) { throw 'Pulling bge-m3 failed.' }
+  $env:Embeddings__Endpoint = "http://${ollamaContainer}:11434"
+  $env:Embeddings__Model = 'bge-m3'
+}
+
 Write-Host "== 6. Run Loupe.Api ($api, host port $ApiPort) and Loupe.Worker ($worker) ==" -ForegroundColor Cyan
 docker rm -f $api $worker 2>$null | Out-Null
 docker run -d --name $api --network $network -p "${ApiPort}:5001" `
@@ -117,11 +147,13 @@ docker run -d --name $api --network $network -p "${ApiPort}:5001" `
   -e Jwt__Issuer='Loupe' -e Jwt__Audience='Loupe' -e Jwt__SigningKey `
   -e Browser__AllowedOrigins__0=$appOrigin `
   -e Ai__Mode='Live' -e Ai__Endpoint -e Ai__Deployment -e Ai__Model -e Ai__ApiKey -e Imports__Mode='Live' `
+  -e Embeddings__Endpoint -e Embeddings__Model `
   --entrypoint dotnet $image /app/api/Loupe.Api.dll | Out-Null
 docker run -d --name $worker --network $network `
   -v "${ScratchDir}/demo-media:/data/media" `
   -e ConnectionStrings__Library=$containerConnection `
   -e Media__Root='/data/media' -e Ai__Mode='Live' -e Ai__Endpoint -e Ai__Deployment -e Ai__Model -e Ai__ApiKey -e Imports__Mode='Live' -e Cleanup__PollInterval='00:00:15' `
+  -e Embeddings__Endpoint -e Embeddings__Model `
   --entrypoint dotnet $image /app/worker/Loupe.Worker.dll | Out-Null
 
 Remove-Item Env:\Jwt__SigningKey

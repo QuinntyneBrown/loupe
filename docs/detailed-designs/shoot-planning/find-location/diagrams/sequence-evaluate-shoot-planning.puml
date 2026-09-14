@@ -1,0 +1,44 @@
+@startuml
+title Evaluate shoot-planning relevance
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Named release reviewer" as reviewer
+box "Backend - Loupe Evaluation application" #D1FADF
+participant "ShootPlanningEvaluationRunner" as runner
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "EvaluateShootPlanningCommand handler" as handler
+participant "FindLocationsQueryHandler" as search
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+participant "LocalEmbeddingProvider / IVectorSearchReader adapters" as ext
+database "Evaluation record" as record
+end box
+reviewer -> runner : Run release evaluation with the documented model and configuration
+runner -> handler : EvaluateShootPlanningCommand(frozen corpus, labeled queries, identity, reviewer)
+handler -> record : Load 30 locations with reports and 8 queries, each with at least three pre-labeled relevant locations
+loop each query
+handler -> search : Meaning search over the frozen corpus
+search -> ext : Embed and rank with the 0.20 threshold
+ext --> search : Ranked first five
+search --> handler : Results
+handler -> handler : Count relevant results in the first five against the labels
+handler -> record : Store results, configuration, and reviewer reasons
+end
+handler -> handler : Gate: at least six queries with three or more relevant; every query with two or more
+handler --> runner : Pass or fail with reasons
+runner --> reviewer : Recorded verdict; corpus, labels, and reviewer identity TO SUPPLY
+@enduml

@@ -20,7 +20,8 @@ if ($environment -notmatch 'POSTGRES_PASSWORD=loupe-demo-only' -or $environment 
 # analysis_dispatch_cursor is a singleton row the worker polls; it is reset, never truncated.
 $sql = @'
 TRUNCATE photographs, "references", reference_drafts, reference_tags, board_references, boards, photographers,
-  photographer_drafts, photographer_tags, background_operations, operation_receipts, journal.deletions CASCADE;
+  photographer_drafts, photographer_tags, locations, location_tags, location_images, search_vectors,
+  background_operations, operation_receipts, journal.deletions CASCADE;
 UPDATE analysis_dispatch_cursor SET "OwnerId" = '' WHERE "Id" = 1;
 '@
 $sql | docker exec -i $postgres psql -U loupe -d loupe_demo -v ON_ERROR_STOP=1

@@ -28,6 +28,8 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             RetryUnavailableException => 409,
             RetryNotReadyException => 429,
             ServiceUnavailableException => 503,
+            SearchUnavailableException => 503,
+            SearchRefreshRequiredException => 409,
             IntegrationNotConfiguredException => 503,
             ImageValidationException { Failure: ImageFailure.TooLarge } => 413,
             ImageValidationException { Failure: ImageFailure.Unsupported } => 415,
@@ -49,6 +51,8 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             RetryUnavailableException => "retry_unavailable",
             RetryNotReadyException => "retry_not_ready",
             ServiceUnavailableException => "service_unavailable",
+            SearchUnavailableException => "search_unavailable",
+            SearchRefreshRequiredException => "refresh_required",
             IntegrationNotConfiguredException => "integration_not_configured",
             ImageValidationException { Failure: ImageFailure.TooLarge } => "image_too_large",
             ImageValidationException { Failure: ImageFailure.Unsupported } => "unsupported_media",
@@ -56,7 +60,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             _ => "unexpected_failure"
         };
         logger.LogWarning("Request {CorrelationId} failed with {Code}", context.TraceIdentifier, code);
-        if (exception is ServiceUnavailableException or IntegrationNotConfiguredException) context.Response.Headers.RetryAfter = "5";
+        if (exception is ServiceUnavailableException or IntegrationNotConfiguredException or SearchUnavailableException) context.Response.Headers.RetryAfter = "5";
         if (exception is AnalysisLimitException) context.Response.Headers.RetryAfter = "30";
         if (exception is RetryNotReadyException notReady)
             context.Response.Headers.RetryAfter = Math.Ceiling(notReady.Wait.TotalSeconds).ToString("0", CultureInfo.InvariantCulture);

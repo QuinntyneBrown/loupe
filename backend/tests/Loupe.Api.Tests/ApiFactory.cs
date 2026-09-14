@@ -22,6 +22,7 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
     public DbTransactionInterceptor? TransactionInterceptor { get; init; }
     public ICritiqueProvider? CritiqueProvider { get; init; }
     public HttpMessageHandler? AiTransport { get; init; }
+    public HttpMessageHandler? EmbeddingTransport { get; init; }
     public HttpMessageHandler? SourceTransport { get; init; }
     public Loupe.Application.ReferenceImports.IDnsResolver? SourceDnsResolver { get; init; }
     public Loupe.Application.ReferenceImports.ISourceConnector? SourceConnector { get; init; }
@@ -58,6 +59,8 @@ public sealed class ApiFactory(string? connectionString = null, string? mediaRoo
             builder.ConfigureTestServices(services => services.AddHttpClient("sourceFetch").ConfigurePrimaryHttpMessageHandler(() => SourceTransport));
         if (AiTransport is not null)
             builder.ConfigureTestServices(services => services.AddHttpClient("azure-openai").ConfigurePrimaryHttpMessageHandler(() => AiTransport));
+        if (EmbeddingTransport is not null)
+            builder.ConfigureTestServices(services => services.AddHttpClient("ollama").ConfigurePrimaryHttpMessageHandler(() => EmbeddingTransport));
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["Ai:Endpoint"] = "https://loupe-fixture.openai.azure.com",

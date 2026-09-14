@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Context - Request, regenerate, and outdate a scouting report
+Person(owner, "Library owner", "Asks for a scouting report and regenerates it after the images change")
+System(loupe, "Loupe", "Request, regenerate, and outdate a scouting report")
+System_Ext(external, "Configured external services", "Azure OpenAI responses endpoint reached by admitted work")
+Rel(owner, loupe, "Uses private library", "HTTPS")
+Rel(loupe, external, "Uses through bounded server adapters", "HTTPS")
+@enduml

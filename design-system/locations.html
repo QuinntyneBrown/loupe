@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Locations · Loupe design system</title>
+    <link rel="stylesheet" href="/src/tokens.css">
+    <link rel="stylesheet" href="/src/reference.css">
+    <link rel="stylesheet" href="/src/locations.css">
+    <script type="module" src="/src/locations.js"></script>
+  </head>
+  <body class="locations-example">
+    <a class="skip" href="#main">Skip to content</a>
+    <header><a class="wordmark" href="/">loupe<span> / design system</span></a><a href="/#gallery">All examples</a></header>
+    <main id="main" tabindex="-1">
+      <p class="eyebrow">LOCATIONS / SYNTHETIC LIBRARY</p>
+      <h1>Places, seen before the shoot.</h1>
+      <p class="intro">Location cards, Find a location results, the image gallery, the scouting report, and the search-index status, each in its states.</p>
+      <p class="caption">An independent interaction example. No application, API, or external images are connected.</p>
+
+      <section aria-labelledby="cards-heading">
+        <h2 id="cards-heading">Location cards</h2>
+        <p class="caption">A cover or a placeholder, the name, the locality and image count, and one report status. The status is a pill on the image; the whole card opens the location.</p>
+        <ul class="location-grid" aria-label="Location cards example">
+          <li class="location-tile"><div class="synthetic-image location-tile__cover" role="img" aria-label="Synthetic cover 1: a neutral frame with a blue circle"></div><span class="status status--ready">Report ready</span><a class="location-tile__link" href="#gallery-heading" aria-label="Open Kew Bridge foreshore"></a><div class="location-tile__scrim"><h3>Kew Bridge foreshore</h3><p>Richmond · 4 images</p></div></li>
+          <li class="location-tile"><div class="synthetic-image location-tile__cover" role="img" aria-label="Synthetic cover 2: a neutral frame with a blue circle"></div><span class="status status--outdated">Outdated</span><a class="location-tile__link" href="#gallery-heading" aria-label="Open Peckham multi-storey roof"></a><div class="location-tile__scrim"><h3>Peckham multi-storey roof</h3><p>Southwark · 5 images</p></div></li>
+          <li class="location-tile"><div class="synthetic-image location-tile__cover" role="img" aria-label="Synthetic cover 3: a neutral frame with a blue circle"></div><span class="status status--queued">Queued</span><a class="location-tile__link" href="#gallery-heading" aria-label="Open Walthamstow wetlands"></a><div class="location-tile__scrim"><h3>Walthamstow wetlands</h3><p>Waltham Forest · 4 images</p></div></li>
+          <li class="location-tile"><div class="synthetic-image location-tile__cover" role="img" aria-label="Synthetic cover 4: a neutral frame with a blue circle"></div><span class="status status--analyzing">Scouting</span><a class="location-tile__link" href="#gallery-heading" aria-label="Open St Dunstan in the East"></a><div class="location-tile__scrim"><h3>St Dunstan in the East</h3><p>City of London · 6 images</p></div></li>
+          <li class="location-tile"><div class="synthetic-image location-tile__cover" role="img" aria-label="Synthetic cover 5: a neutral frame with a blue circle"></div><span class="status status--failed">Failed</span><a class="location-tile__link" href="#gallery-heading" aria-label="Open Bermondsey wall"></a><div class="location-tile__scrim"><h3>Bermondsey wall</h3><p>Southwark · 5 images</p></div></li>
+          <li class="location-tile location-tile--placeholder"><div class="location-tile__placeholder" role="img" aria-label="No images yet"><span aria-hidden="true">◎</span></div><a class="location-tile__link" href="#gallery-heading" aria-label="Open Empty lot"></a><div class="location-tile__scrim"><h3>Empty lot</h3><p>No images · <span>No scouting report</span></p></div></li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="results-heading">
+        <h2 id="results-heading">Find a location results</h2>
+        <p class="caption">Keyword and Meaning share one hero. Filters are chips; Meaning results carry the AI pill. Result cards use one, two, three, three, and four columns across the viewport matrix.</p>
+        <div class="specimen search-modes">
+          <div class="segmented" role="radiogroup" aria-label="Search mode">
+            <label class="segmented__option"><input type="radio" name="mode" value="keyword" checked><span class="segmented__label">Keyword</span></label>
+            <label class="segmented__option"><input type="radio" name="mode" value="meaning"><span class="segmented__label">Meaning</span></label>
+          </div>
+          <div class="chips" role="group" aria-label="Shoot type">
+            <button class="tag" type="button" aria-pressed="false">Portraits</button>
+            <button class="tag" type="button" aria-pressed="false">Family portraits</button>
+            <button class="tag" type="button" aria-pressed="false">Headshots</button>
+            <button class="tag" type="button" aria-pressed="false">Engagement</button>
+            <button class="tag" type="button" aria-pressed="true">Events</button>
+          </div>
+          <p class="results-head"><span>3 locations for <em>“low tide”</em></span><span class="pill ai" id="meaning-pill" hidden>Matched by meaning</span></p>
+        </div>
+        <ul class="result-grid" aria-label="Find a location results example">
+          <li class="result-card"><div class="synthetic-image result-card__cover" role="img" aria-label="Synthetic cover: Kew Bridge foreshore"></div><div class="result-card__body"><h3>Kew Bridge foreshore</h3><span class="result-card__place">Richmond · 4 images</span><span class="result-card__line">Recommended · Morning, Golden hour</span><span class="result-card__line">2–8 people</span><ul class="ratings" aria-label="Suitability"><li class="pill success">Engagement · Well suited</li><li class="pill">Events · Workable</li></ul></div></li>
+          <li class="result-card"><div class="synthetic-image result-card__cover" role="img" aria-label="Synthetic cover: Cornmill Gardens bandstand"></div><div class="result-card__body"><h3>Cornmill Gardens bandstand</h3><span class="result-card__place">Lewisham · 3 images</span><span class="result-card__line">Recommended · Afternoon, Golden hour</span><span class="result-card__line">Group size · Cannot assess</span><ul class="ratings" aria-label="Suitability"><li class="pill">Engagement · Workable</li><li class="pill success">Events · Well suited</li></ul></div></li>
+          <li class="result-card"><div class="synthetic-image result-card__cover" role="img" aria-label="Synthetic cover: Deptford creek stairs"></div><div class="result-card__body"><h3>Deptford creek stairs</h3><span class="result-card__place">Lewisham · 1 image</span><ul class="ratings" aria-label="Suitability"><li class="pill outline">No scouting report</li></ul></div></li>
+          <li class="result-card"><div class="synthetic-image result-card__cover" role="img" aria-label="Synthetic cover: Walthamstow wetlands"></div><div class="result-card__body"><h3>Walthamstow wetlands</h3><span class="result-card__place">Waltham Forest · 4 images</span><span class="result-card__line">Recommended · Dawn, Golden hour</span><span class="result-card__line">2–20 people</span><ul class="ratings" aria-label="Suitability"><li class="pill success">Engagement · Well suited</li><li class="pill success">Events · Well suited</li></ul></div></li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="gallery-heading">
+        <h2 id="gallery-heading">Gallery</h2>
+        <p class="caption">Thumbnails are a radio group: click or use the arrow keys to switch the full-frame stage. The selection is announced, and one image is the cover.</p>
+        <div class="specimen gallery">
+          <figure class="gallery__stage"><div class="synthetic-image gallery__frame" id="gallery-frame" role="img" aria-label="Synthetic location frame 1"></div><figcaption><span role="status" aria-label="Selected image" id="gallery-selected">Image 1 of 4</span></figcaption></figure>
+          <div class="gallery__thumbs" role="radiogroup" aria-label="Images" id="gallery-thumbs">
+            <label class="gallery__thumb"><input type="radio" name="image" value="1" checked aria-label="Image 1, cover"><span class="synthetic-image" aria-hidden="true"></span></label>
+            <label class="gallery__thumb"><input type="radio" name="image" value="2" aria-label="Image 2"><span class="synthetic-image" aria-hidden="true"></span></label>
+            <label class="gallery__thumb"><input type="radio" name="image" value="3" aria-label="Image 3"><span class="synthetic-image" aria-hidden="true"></span></label>
+            <label class="gallery__thumb"><input type="radio" name="image" value="4" aria-label="Image 4"><span class="synthetic-image" aria-hidden="true"></span></label>
+          </div>
+          <div class="actions"><button type="button" class="secondary" id="set-cover">Set as cover</button><p role="status" aria-label="Gallery feedback" id="gallery-feedback">Image 1 is the cover.</p></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="report-heading">
+        <h2 id="report-heading">Scouting report</h2>
+        <p class="caption">Six sections in a fixed order. Ratings are words, never scores; every entry names its evidence basis and cites the images it read.</p>
+        <section class="specimen report" aria-label="Scouting report example">
+          <p class="report__note"><span class="pill ai">AI generated</span> Generated 10 Sep 2026 · Azure OpenAI · gpt-4.1 · 4 images · brief as saved</p>
+          <section aria-labelledby="report-overview"><h3 id="report-overview">Overview</h3><ul class="report__list">
+            <li><span class="report__text">Repeating arches give depth</span><span class="report__meta"><span class="pill outline">Visible</span><button type="button" class="cite" data-image="1" aria-label="Show image 1">1</button><button type="button" class="cite" data-image="3" aria-label="Show image 3">3</button></span></li>
+            <li><span class="report__text">Open shade under the bridge</span><span class="report__meta"><span class="pill outline">Visible</span><button type="button" class="cite" data-image="3" aria-label="Show image 3">3</button></span></li>
+          </ul></section>
+          <section aria-labelledby="report-suitability"><h3 id="report-suitability">Suitability</h3><ul class="report__list">
+            <li><span class="report__text">Portraits</span><span class="report__meta"><span class="pill success">Well suited</span><span class="pill outline">Visible</span><button type="button" class="cite" data-image="1" aria-label="Show image 1">1</button></span></li>
+            <li><span class="report__text">Family portraits</span><span class="report__meta"><span class="pill danger">Not recommended</span><span class="pill outline">Visible</span><button type="button" class="cite" data-image="2" aria-label="Show image 2">2</button></span></li>
+            <li><span class="report__text">Events</span><span class="report__meta"><span class="pill">Workable</span><span class="pill outline">Visible</span><button type="button" class="cite" data-image="4" aria-label="Show image 4">4</button></span></li>
+          </ul></section>
+          <section aria-labelledby="report-time"><h3 id="report-time">Time of day</h3><ul class="report__list">
+            <li><span class="report__text">Golden hour</span><span class="report__meta"><span class="pill success">Recommended</span><span class="pill outline">Visible</span><button type="button" class="cite" data-image="1" aria-label="Show image 1">1</button></span></li>
+            <li><span class="report__text">Midday</span><span class="report__meta"><span class="pill danger">Avoid</span><span class="pill outline">Visible</span><button type="button" class="cite" data-image="2" aria-label="Show image 2">2</button></span></li>
+            <li><span class="report__text">Dawn</span><span class="report__meta"><span class="pill">Unknown</span><span class="pill outline">Inferred</span></span></li>
+          </ul></section>
+          <section aria-labelledby="report-techniques"><h3 id="report-techniques">Techniques</h3><ul class="report__list">
+            <li><span class="report__text">Leading lines · Use the arches and the water's edge to lead into the subject.</span><span class="report__meta"><span class="pill outline">Visible</span><button type="button" class="cite" data-image="1" aria-label="Show image 1">1</button></span></li>
+            <li><span class="report__text">Natural framing · Frame a couple inside the nearest arch.</span><span class="report__meta"><span class="pill outline">Visible</span><button type="button" class="cite" data-image="3" aria-label="Show image 3">3</button></span></li>
+          </ul></section>
+          <section aria-labelledby="report-group"><h3 id="report-group">Group size</h3><ul class="report__list">
+            <li><span class="report__text">2–8 people · The dry gravel strip fits a small group.</span><span class="report__meta"><span class="pill outline">Visible</span><button type="button" class="cite" data-image="1" aria-label="Show image 1">1</button></span></li>
+          </ul></section>
+          <section aria-labelledby="report-cautions"><h3 id="report-cautions">Cautions</h3><ul class="report__list">
+            <li><span class="report__text">Wet stones near the waterline are slippery.</span><span class="report__meta"><span class="pill outline">Visible</span><button type="button" class="cite" data-image="2" aria-label="Show image 2">2</button></span></li>
+          </ul></section>
+        </section>
+      </section>
+
+      <section aria-labelledby="status-heading">
+        <h2 id="status-heading">Search index status</h2>
+        <p class="caption">The detail shows where the location's search vector stands. Nothing is shown when it is current or when no embedding endpoint is configured.</p>
+        <div class="specimen">
+          <ul class="actions status-list" aria-label="Location status pills">
+            <li><span class="status status--queued">Processing report</span></li>
+            <li><span class="status status--analyzing">Updating search</span></li>
+            <li><span class="status status--failed" role="status" aria-label="Search index" id="index-status">Search indexing failed · <button type="button" class="link" id="retry-index">Retry</button></span></li>
+          </ul>
+        </div>
+      </section>
+    </main>
+    <footer>Loupe · Made for the practice of photography.<span>Synthetic examples. No library connection.</span></footer>
+  </body>
+</html>

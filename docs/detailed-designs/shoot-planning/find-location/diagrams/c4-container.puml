@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Find a location for a shoot
+Person(owner, "Library owner", "Uses this capability")
+System_Boundary(loupe, "Loupe") {
+Container(spa, "Loupe web", "Angular", "FindLocationPage, LocationSearchResults, LocationSearchFilters")
+Container(api, "Loupe API", "ASP.NET Core", "LocationSearchController")
+ContainerDb(db, "Library store", "PostgreSQL via LibraryDbContext", "Locations, tags, report JSON, search document intents")
+ContainerDb(vectors, "Vector store", "Adapter TO SUPPLY (proposed under L2-026)", "Location vectors per generation")
+Container(worker, "Loupe worker", ".NET hosted service", "SearchIndexWorker (proposed) runs RefreshLocationSearchDocumentCommand with LocalEmbeddingProvider")
+Container(evaluation, "Loupe Evaluation", ".NET CLI (proposed)", "Frozen-corpus relevance evaluation")
+}
+Rel(owner, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls via interface-bound HTTP adapter", "JSON / HTTPS")
+Rel(api, db, "Keyword query and authoritative checks", "Infrastructure adapter")
+Rel(api, vectors, "Ranks current vectors by cosine similarity", "IVectorSearchReader")
+Rel(worker, db, "Leases document intents and validates revisions", "Infrastructure adapter")
+Rel(worker, vectors, "Publishes vectors conditionally", "IVectorWriter")
+Rel(evaluation, vectors, "Runs recorded semantic checks", "Local inference")
+@enduml

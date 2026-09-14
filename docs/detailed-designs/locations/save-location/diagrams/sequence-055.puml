@@ -1,0 +1,56 @@
+@startuml
+title L2-055 - Save and edit a location's details
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "AddLocation dialog / LocationForm" as page
+participant "LocationService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "LocationsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "CreateLocationCommandHandler" as handler
+participant "LocationDetailsValidator" as validator
+participant "Location" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Save a new location
+page -> page : Pair rule: latitude and longitude both or neither
+page -> client : name, address?, coordinates?, setting?, brief?, notes?, tags?; Idempotency-Key
+client -> controller : POST /api/locations
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch CreateLocationCommand
+handler -> validator : Normalize complete input [L2-055]
+alt any field invalid
+validator --> handler : RequestValidationException naming the field
+handler --> controller : 400 invalid_request with field map; nothing written
+else valid
+validator --> handler : LocationDetails, Coordinates?, tags
+handler -> db : Take Idempotency-Key receipt (type location)
+db --> handler : New receipt or prior resource id
+handler -> entity : Create Location with tags; Revision = 1
+handler -> db : Commit location and tags in one transaction
+db --> handler : Saved state
+handler --> controller : 201 LocationResult (address lines in order, six-place coordinates)
+end
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+@enduml

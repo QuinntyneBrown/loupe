@@ -1,0 +1,109 @@
+{
+  "liveAdd": "deptford",
+  "locations": [
+    {
+      "key": "kew",
+      "name": "Kew Bridge foreshore",
+      "locality": "Brentford",
+      "region": "Greater London",
+      "country": "United Kingdom",
+      "setting": "Outdoor",
+      "coordinates": { "latitude": "51.487213", "longitude": "-0.287604" },
+      "scoutingBrief": "Couple sessions at low tide, two people, nothing staged. Wide and quiet, not the bridge as a landmark.",
+      "notes": "Check the tide tables; the gravel is under water from about two hours before high tide. Parking on Kew Green, five minutes' walk.",
+      "tags": [["river", "subject"], ["arches", "composition"], ["low tide", null]],
+      "images": ["lp-s10", "lp-s11", "lp-s12"]
+    },
+    {
+      "key": "walthamstow",
+      "name": "Walthamstow wetlands",
+      "locality": "Walthamstow",
+      "region": "Greater London",
+      "country": "United Kingdom",
+      "setting": "Outdoor",
+      "coordinates": null,
+      "scoutingBrief": "Dawn walks with a couple along the boardwalks; mist over the reservoirs if we are lucky.",
+      "notes": "Gates open at dawn in summer; the east boardwalk faces the sunrise.",
+      "tags": [["reeds", "subject"], ["open sky", "lighting"], ["boardwalk", null]],
+      "images": ["lp-s15", "lp-s18", "lp-s21"]
+    },
+    {
+      "key": "peckham",
+      "name": "Peckham multi-storey roof",
+      "locality": "Peckham",
+      "region": "Greater London",
+      "country": "United Kingdom",
+      "setting": "Outdoor",
+      "coordinates": null,
+      "scoutingBrief": "A small group at dusk with the skyline behind them; strong colour and long shadows.",
+      "notes": "The top deck opens to the public in the evenings. Wind is a problem for hair and dresses.",
+      "tags": [["rooftop", "subject"], ["skyline", "subject"], ["concrete", null]],
+      "images": ["lp-s25", "lp-s30"]
+    },
+    {
+      "key": "dunstan",
+      "name": "St Dunstan in the East",
+      "locality": "City of London",
+      "region": "Greater London",
+      "country": "United Kingdom",
+      "setting": "Mixed",
+      "coordinates": null,
+      "scoutingBrief": "An engagement session framed by the stone arches, with climbing ivy and dappled light.",
+      "notes": "A small garden that fills up at lunchtime; come early on a weekday.",
+      "tags": [["ruin", "subject"], ["arches", "composition"], ["ivy", null]],
+      "images": ["lp-s31", "lp-s33", "lp-s35"]
+    },
+    {
+      "key": "studio",
+      "name": "Window-lit studio, Hackney",
+      "locality": "Hackney",
+      "region": "Greater London",
+      "country": "United Kingdom",
+      "setting": "Indoor",
+      "coordinates": null,
+      "scoutingBrief": "Headshots and small teams in soft north light: a plain wall and one big window.",
+      "notes": "Hire by the hour. The window faces north, so the light stays soft all day.",
+      "tags": [["window light", "lighting"], ["backdrop", null], ["headshots", "genre"]],
+      "images": ["lp-s37", "lp-s41"]
+    },
+    {
+      "key": "hampstead",
+      "name": "Hampstead ponds path",
+      "locality": "Hampstead",
+      "region": "Greater London",
+      "country": "United Kingdom",
+      "setting": "Outdoor",
+      "coordinates": null,
+      "scoutingBrief": "Quiet family walks beside still water, willows for shade, and reflections at first light.",
+      "notes": "The path floods after heavy rain; the far bank is the quieter side.",
+      "tags": [["water", "subject"], ["path", "composition"], ["willows", null]],
+      "images": ["lp-s42", "lp-s54", "lp-s9"]
+    },
+    {
+      "key": "cornmill",
+      "name": "Cornmill Gardens bandstand",
+      "locality": "Lewisham",
+      "region": "Greater London",
+      "country": "United Kingdom",
+      "setting": "Outdoor",
+      "coordinates": null,
+      "scoutingBrief": "Larger families and events on the lawn around the bandstand; open shade under its roof at midday.",
+      "notes": "The bandstand can be booked through the council; the lawn is busy on Sundays.",
+      "tags": [["bandstand", "subject"], ["lawn", null], ["open shade", "lighting"]],
+      "images": ["lp-s10", "lp-s15"]
+    },
+    {
+      "key": "deptford",
+      "name": "Deptford creek stairs",
+      "locality": "Deptford",
+      "region": "Greater London",
+      "country": "United Kingdom",
+      "setting": "Outdoor",
+      "coordinates": null,
+      "scoutingBrief": "Moody portraits on the tidal stairs: mud, rust and the creek at low water.",
+      "notes": "Low tide only; the stairs are under water otherwise.",
+      "tags": [["river", "subject"], ["stairs", "composition"], ["low tide", null]],
+      "images": ["lp-s25", "lp-s31", "lp-s42"]
+    }
+  ]
+}

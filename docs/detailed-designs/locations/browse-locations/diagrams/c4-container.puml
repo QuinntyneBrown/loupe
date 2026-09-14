@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Container - Browse, inspect, and delete locations
+Person(owner, "Library owner", "Uses this capability")
+System_Boundary(loupe, "Loupe") {
+Container(spa, "Loupe web", "Angular", "LocationsPage, LocationDetailPage, LocationCollection, LocationDetailPanel, DeleteLocation")
+Container(api, "Loupe API", "ASP.NET Core", "LocationsController")
+ContainerDb(db, "Library store", "PostgreSQL via LibraryDbContext", "Locations, images, tags, journal.deletions, background_operations")
+ContainerDb(media, "Image store", "FileImageStore", "Stripped originals and previews")
+Container(worker, "Loupe worker", ".NET hosted service", "CleanupWorker completes physical deletion")
+}
+Rel(owner, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls via interface-bound HTTP adapter", "JSON / HTTPS")
+Rel(api, db, "Reads or commits owned state", "Infrastructure adapter")
+Rel(api, media, "Serves owner-authorized image bytes", "IImageStore")
+Rel(worker, db, "Reads deletion records and live keys", "Infrastructure adapter")
+Rel(worker, media, "Deletes unreferenced bytes within 24 hours", "IImageStore")
+@enduml

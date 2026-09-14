@@ -1,0 +1,72 @@
+<dialog
+  #modal
+  class="lp-dialog"
+  aria-labelledby="add-location-title"
+  (cancel)="cancel($event)"
+  (click)="backdrop($event)"
+  (keydown)="trapFocus($event)"
+>
+  <form class="lp-dialog__panel" novalidate (submit)="$event.preventDefault(); save()">
+    <header class="lp-dialog__header">
+      <div>
+        <h2 class="lp-dialog__title" id="add-location-title">Add location</h2>
+        <p class="lp-dialog__text">
+          Only a name is needed. Add images from the location once it's saved.
+        </p>
+      </div>
+      <button
+        class="lp-icon-button"
+        type="button"
+        aria-label="Close"
+        [disabled]="saving()"
+        (click)="cancel()"
+      >
+        <svg class="lp-icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </header>
+    <div class="lp-dialog__body">
+      <lp-location-form idPrefix="add-location" [busy]="saving()" />
+      @if (error()) {
+        <p class="lp-field__error" role="alert">
+          <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-alert" /></svg
+          >{{ error() }}
+        </p>
+      }
+      @if (retryable()) {
+        <button
+          class="lp-button lp-button--secondary"
+          type="button"
+          [disabled]="saving()"
+          (click)="save()"
+        >
+          Try again
+        </button>
+      }
+    </div>
+    <footer class="lp-dialog__footer">
+      <span class="lp-dialog__privacy">
+        <svg class="lp-icon lp-icon--sm" aria-hidden="true"><use href="#i-lock" /></svg>Private.
+        Address and coordinates stay on the server.
+      </span>
+      <button
+        class="lp-button lp-button--secondary"
+        type="button"
+        [disabled]="saving()"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+      <button class="lp-button lp-button--primary" type="submit" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : 'Save location' }}
+      </button>
+    </footer>
+  </form>
+</dialog>
+<lp-unsaved-changes
+  [dirty]="dirty"
+  [warning]="
+    saving()
+      ? 'This save may finish after you leave. Check Locations before adding it again.'
+      : null
+  "
+/>

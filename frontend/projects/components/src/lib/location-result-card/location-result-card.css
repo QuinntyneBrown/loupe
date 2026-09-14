@@ -1,0 +1,86 @@
+:host {
+  display: block;
+  min-width: var(--lp-zero);
+}
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--lp-thumb-size-lg) minmax(var(--lp-zero), 1fr);
+  gap: var(--lp-space-4);
+  padding: var(--lp-space-4);
+  border: var(--lp-hairline) solid var(--lp-color-border);
+  border-radius: var(--lp-radius-lg);
+  background: var(--lp-color-surface);
+  transition: border-color var(--lp-duration-fast) var(--lp-ease);
+}
+.card:hover {
+  border-color: var(--lp-color-border-strong);
+}
+.card__link {
+  position: absolute;
+  inset: var(--lp-zero);
+  border-radius: var(--lp-radius-lg);
+}
+.card__link:focus-visible {
+  outline: var(--lp-stroke) solid var(--lp-color-focus);
+  outline-offset: calc(-1 * var(--lp-stroke));
+}
+.card__cover {
+  display: grid;
+  place-items: center;
+  width: var(--lp-full);
+  aspect-ratio: 4 / 5;
+  border-radius: var(--lp-radius-sm);
+  overflow: hidden;
+  background: var(--lp-color-image-fallback);
+  color: var(--lp-color-text-3);
+}
+.card__cover img {
+  width: var(--lp-full);
+  height: var(--lp-full);
+  object-fit: cover;
+}
+.card__placeholder {
+  display: grid;
+  place-items: center;
+  width: var(--lp-full);
+  height: var(--lp-full);
+}
+.card__body {
+  display: grid;
+  gap: var(--lp-space-2);
+  align-content: start;
+  min-width: var(--lp-zero);
+}
+.card__name {
+  margin: var(--lp-zero);
+  font-size: var(--lp-text-md);
+  font-weight: var(--lp-weight-semibold);
+  letter-spacing: var(--lp-tracking-tight);
+  line-height: var(--lp-leading-tight);
+  overflow-wrap: anywhere;
+}
+.card__place {
+  font-family: var(--lp-font-mono);
+  font-size: var(--lp-text-xs);
+  color: var(--lp-color-text-2);
+}
+.card__line {
+  font-size: var(--lp-text-sm);
+  color: var(--lp-color-text-2);
+}
+.card__ratings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lp-space-1);
+  margin: var(--lp-zero);
+  padding: var(--lp-zero);
+  list-style: none;
+  position: relative;
+}
+.card__ratings .lp-pill {
+  white-space: normal;
+  height: auto;
+  min-height: var(--lp-space-6);
+  padding-block: var(--lp-space-1);
+}

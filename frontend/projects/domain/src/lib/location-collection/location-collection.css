@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+.lp-page-header__actions {
+  align-self: flex-start;
+}
+h1,
+p {
+  margin: var(--lp-zero);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(
+    var(--lp-image-columns),
+    minmax(var(--lp-zero), var(--lp-fraction))
+  );
+  gap: var(--lp-space-5) var(--lp-space-4);
+}
+.lp-empty h2,
+.lp-empty p {
+  margin: var(--lp-zero);
+}
+.more {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--lp-space-6);
+}
+@media (width < 640px) {
+  .grid {
+    gap: var(--lp-space-3);
+  }
+}

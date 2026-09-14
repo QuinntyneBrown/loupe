@@ -1,0 +1,54 @@
+@startuml
+title Edit a location's details
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Library owner" as actor
+box "Frontend - Loupe application / domain / api" #E0F2FE
+participant "EditLocation dialog / LocationForm" as page
+participant "LocationService" as client
+end box
+box "Backend - Loupe API application" #D1FADF
+participant "LocationsController" as controller
+end box
+box "Backend - Loupe Application and Domain" #ECFDF3
+participant "UpdateLocationCommandHandler" as handler
+participant "Location" as entity
+end box
+box "Backend - Loupe Infrastructure" #FFF4E5
+database "Library store" as db
+end box
+actor -> page : Edit name, address, coordinates, or setting
+page -> client : revision, details
+client -> controller : PUT /api/locations/{id}
+note over controller : API middleware authenticates; controller binds only
+controller -> handler : MediatR dispatch UpdateLocationCommand
+handler -> handler : Normalize details [L2-055]
+handler -> db : SELECT owned location FOR UPDATE
+db --> handler : Owned state or 404 item_unavailable
+alt revision matches
+handler -> entity : Apply details only; images, cover, report, tags untouched
+handler -> db : Commit; Revision + 1
+db --> handler : Saved state
+handler --> controller : 200 LocationResult
+else revision stale
+handler --> controller : 409 revision_conflict; attempted values retained client-side
+note over page : Reload latest, then resubmit intentionally
+end
+controller --> client : Typed HTTP response / ProblemDetails
+client --> page : Update state signals
+page --> actor : Saved / loaded state or retained-input error
+note over page, controller : Brief and notes use PUT .../scouting-brief and .../notes; tags use PUT .../tags with the same revision rule
+@enduml

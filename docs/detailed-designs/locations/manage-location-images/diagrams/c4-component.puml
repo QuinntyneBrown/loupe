@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Component - Upload and manage a location's images
+Container(spa, "LocationGallery", "Angular domain", "Injects LOCATION_SERVICE; per-file upload queue")
+Container_Boundary(api, "Loupe API and Application") {
+Component(ctrl, "LocationsController", "API controller", "Binds, dispatches, returns")
+Component(handler, "AddLocationImageCommandHandler\nRemoveLocationImageCommandHandler\nSetLocationCoverCommandHandler\nGetLocationImageQueryHandler", "Application / MediatR 12.5.0", "Validates, authorizes, coordinates slice")
+Component(entity, "Location / LocationImage", "Domain", "Positions, cover, ImageSetRevision")
+Component(store, "ILocationImageStore", "Application port", "Row-locked add, remove, cover")
+Component(ingestor, "IImageIngestor", "Application port", "Validates, orients, strips EXIF, previews")
+Component(images, "IImageStore", "Application port", "Writes, reads, deletes image objects")
+Component(receipts, "IOperationReceiptStore", "Application port", "Idempotency-Key receipts")
+}
+ContainerDb(db, "Library store", "Infrastructure adapter", "Authoritative data")
+ContainerDb(media, "Image store", "FileImageStore", "Immutable image objects")
+Rel(spa, ctrl, "Calls through ILocationService", "HTTPS")
+Rel(ctrl, handler, "Dispatches request", "MediatR")
+Rel(handler, entity, "Reads or applies behavior")
+Rel(handler, ingestor, "Processes one file after ownership and cap checks")
+Rel(handler, images, "Stages or deletes objects")
+Rel(handler, store, "Uses inward-defined port")
+Rel(handler, receipts, "Keys the upload")
+Rel(store, db, "Implemented by Infrastructure")
+Rel(images, media, "Implemented by Infrastructure")
+@enduml
