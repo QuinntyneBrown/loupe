@@ -49,7 +49,7 @@ export class SignInPage {
       this.page.getByText("Enter a valid email address.", { exact: true }),
     ).toBeVisible();
     await expect(
-      this.page.getByText("Use a password with 15 to 128 characters.", {
+      this.page.getByText("Use a password with 8 to 128 characters.", {
         exact: true,
       }),
     ).toBeVisible();

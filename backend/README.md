@@ -47,11 +47,24 @@ dotnet Loupe.Admin.dll reset-password photographer@example.com
 
 Both commands prompt twice with input hidden when interactive, or read one password
 line from stdin when redirected. Never pass passwords as command arguments.
-Passwords contain 15–128 Unicode scalar values and are not trimmed. Email addresses
+Passwords contain 8–128 Unicode scalar values and are not trimmed. Email addresses
 are trimmed and matched case-insensitively. Duplicate creation fails, including
 concurrent requests. Password reset preserves the user ID and library, and revokes
 all sessions. Credentials are salted and hashed using ASP.NET Core PasswordHasher.
 There is no public registration, password-reset endpoint, or account-deletion flow.
+
+The API can also seed one local account at startup. Set `Seed__Email`,
+`Seed__Name` and `Seed__Password` together (all three or none) and `Loupe.Api`
+ensures that account exists before it serves requests: it creates the account
+when the email is absent and never touches an existing one, so its ID, display
+name, password and sessions survive restarts and a later `reset-password` stays
+in force. Two instances starting together create exactly one account. A partial
+or invalid `Seed` section fails startup naming the offending key; an unreachable
+or unmigrated database fails startup with guidance to apply migrations first (the
+API never applies them). Only `Loupe.Api` seeds; the worker and admin CLI ignore
+the section. Supply the values through configuration, never in source; the demo
+harness passes the maintainer's account this way, reading the password from the
+`Seed__Password` environment variable and seeding nothing when it is unset.
 
 The browser first calls `GET /api/session/csrf`, then sends
 `POST /api/session/sign-in` with JSON `{ "email": "...", "password": "..." }`,

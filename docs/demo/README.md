@@ -5,7 +5,10 @@ sign-in flow. They are historical recordings, not evidence of the current login.
 The rerun harness now provisions local users and uses Loupe-issued JWT sessions.
 Demo-only accounts are `photographer@example.com` and `api-demo@example.com`, with
 the synthetic password `local acceptance password`. Never reuse these accounts
-or credentials in a deployed environment.
+or credentials in a deployed environment. When `Seed__Password` is set in the
+environment that runs `setup.ps1`, the Api container additionally seeds the
+maintainer's own local account through the `Seed__*` settings described in the
+root README's Configuration section; the password is never stored in the repository.
 
 Four recordings, all against real, running software — no product responses were
 mocked or invented for these takes. See "Integration substitutions and known

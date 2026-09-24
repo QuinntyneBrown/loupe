@@ -2,7 +2,9 @@
 <#
 .SYNOPSIS
   Stands up the local demo stack used to record docs/demo recordings from a clean
-  environment: PostgreSQL, locally provisioned accounts, the real
+  environment: PostgreSQL, locally provisioned accounts, the maintainer's
+  account seeded by the Api itself through Seed__* settings when the
+  Seed__Password environment variable is set, the real
   Loupe.Api and Loupe.Worker (in Linux containers — see "Why containers" in
   docs/demo/README.md), and the Angular app served same-origin over HTTPS.
 
@@ -47,6 +49,14 @@
 
 .EXAMPLE
   pwsh docs/demo/harness/setup.ps1 -Prefix loupe-insp-demo -DbPort 5434 -ApiPort 5011 -AppPort 4210
+
+.EXAMPLE
+  $env:Seed__Password = '<your local password>'; pwsh docs/demo/harness/setup.ps1
+
+  Also seeds the maintainer's account, quinntynebrown@gmail.com. The password
+  (8 to 128 characters) is read from the environment and handed to the Api
+  container by name, so it never appears in this script or on a command line.
+  Without Seed__Password the stack starts with the demo accounts only.
 #>
 param(
   [string]$RepoRoot = (Resolve-Path "$PSScriptRoot/../../..").Path,
@@ -136,6 +146,10 @@ if ($Ollama) {
 }
 
 Write-Host "== 6. Run Loupe.Api ($api, host port $ApiPort) and Loupe.Worker ($worker) ==" -ForegroundColor Cyan
+# The Seed section is all three keys or none, and its password lives only in the caller's environment,
+# so the maintainer's account is seeded only when Seed__Password is set.
+$seedEmail = 'quinntynebrown@gmail.com'
+$seed = if ($env:Seed__Password) { @('-e', "Seed__Email=$seedEmail", '-e', 'Seed__Name=Quinntyne Brown', '-e', 'Seed__Password') } else { @() }
 docker rm -f $api $worker 2>$null | Out-Null
 docker run -d --name $api --network $network -p "${ApiPort}:5001" `
   -v "${ScratchDir}/certs:/https:ro" -v "${ScratchDir}/demo-media:/data/media" `
@@ -146,6 +160,7 @@ docker run -d --name $api --network $network -p "${ApiPort}:5001" `
   -e Media__Root='/data/media' `
   -e Jwt__Issuer='Loupe' -e Jwt__Audience='Loupe' -e Jwt__SigningKey `
   -e Browser__AllowedOrigins__0=$appOrigin `
+  @seed `
   -e Ai__Mode='Live' -e Ai__Endpoint -e Ai__Deployment -e Ai__Model -e Ai__ApiKey -e Imports__Mode='Live' `
   -e Embeddings__Endpoint -e Embeddings__Model `
   --entrypoint dotnet $image /app/api/Loupe.Api.dll | Out-Null
@@ -183,4 +198,9 @@ Pop-Location
 Write-Host "`nStack starting. Give the Angular dev server ~10s, then verify:" -ForegroundColor Green
 Write-Host "  $appOrigin        (the app)"
 Write-Host "  https://localhost:$ApiPort/api/session   (401 = Api is up)"
+if ($seed.Count) {
+  Write-Host "  Sign in as $seedEmail (seeded by the Api through Seed__*) or photographer@example.com"
+} else {
+  Write-Host "  Sign in as photographer@example.com (set Seed__Password before setup to also seed $seedEmail)"
+}
 Write-Host "`nTear down with docs/demo/harness/teardown.ps1 -Prefix $Prefix -AppPort $AppPort" -ForegroundColor Yellow

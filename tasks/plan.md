@@ -75,3 +75,19 @@ Keep the existing queue and input privacy boundaries. Drain critique work before
 switching all API/worker instances together. Require the configured deployment to
 match the recorded model/version. Live Azure smoke evidence is separate from
 controlled transport tests and requires externally supplied Azure configuration.
+
+## Password minimum 8 and seeded local account (2026-09-15)
+
+The password minimum drops from 15 to 8 Unicode scalar values (the maximum stays
+128) so the maintainer's local password is valid. Loupe.Api gains an optional
+`Seed` configuration section (`Seed__Email`, `Seed__Name`, `Seed__Password`): when
+all three are set the API ensures that one local account exists before serving
+requests, creating it when missing and never touching an existing account. The
+values live in configuration, never in code; the demo harness supplies the
+maintainer's local account. Worker and Admin are unchanged.
+
+Delivery slices (criteria and evidence are appended to the existing task files):
+1. L2-037.6 (updated): password minimum 8 in API, CLI and sign-in page; RED then GREEN.
+2. L2-037.13–14: the seed creates the account at startup; a restart leaves it untouched.
+3. L2-037.15–17: concurrent instances, Seed validation, unmigrated-database guidance.
+4. Harness, README, backend README, security design and demo docs.

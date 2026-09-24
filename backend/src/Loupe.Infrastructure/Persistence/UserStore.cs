@@ -9,12 +9,12 @@ public sealed class UserStore(LibraryDbContext database) : IUserStore
 {
     public Task<User?> FindAsync(string normalizedEmail, CancellationToken cancellationToken) =>
         database.Users.AsNoTracking().SingleOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail, cancellationToken);
-    public async Task CreateAsync(User user, CancellationToken cancellationToken)
+    public async Task<bool> TryCreateAsync(User user, CancellationToken cancellationToken)
     {
         database.Users.Add(user);
-        try { await database.SaveChangesAsync(cancellationToken); }
+        try { await database.SaveChangesAsync(cancellationToken); return true; }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
-        { throw new RequestValidationException("email", "An account with this email already exists."); }
+        { return false; }
     }
     public async Task ResetPasswordAsync(string normalizedEmail, string hash, CancellationToken cancellationToken)
     {

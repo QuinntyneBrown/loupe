@@ -171,7 +171,11 @@ pwsh docs/demo/harness/teardown.ps1
 The harness accepts `-Prefix`, `-DbPort`, `-ApiPort` and `-AppPort` so several
 isolated stacks can coexist. It provisions the demo-only account
 `photographer@example.com` / `local acceptance password`; never reuse those
-credentials anywhere deployed. Production-style configuration, account
+credentials anywhere deployed. When `Seed__Password` is set in the environment
+that runs the harness, the API container also seeds the maintainer's local
+account, `quinntynebrown@gmail.com`, through the `Seed__*` settings described
+under [Configuration](#configuration); the password is never stored in the
+repository. Production-style configuration, account
 provisioning with `Loupe.Admin`, and the worker's operating model are described
 in [`backend/README.md`](backend/README.md).
 
@@ -186,6 +190,7 @@ Runtime settings follow the Microsoft.Extensions configuration model
 | `Media__Root` | Absolute, private directory for uploaded and imported images |
 | `Jwt__SigningKey` (`Jwt__Issuer`, `Jwt__Audience`) | Base64 key of ≥ 32 random bytes; keep it secret and stable across instances |
 | `Browser__AllowedOrigins__0…` | Explicit HTTPS origins allowed to call the API from a browser |
+| `Seed__Email`, `Seed__Name`, `Seed__Password` | Optional. When all three are set, the API ensures that local account exists before serving requests and leaves an existing account untouched; omit all three to seed nothing |
 | `Ai__Mode`, `Ai__Endpoint`, `Ai__Deployment`, `Ai__Model`, `Ai__ApiKey` | Azure OpenAI critique and metadata generation; omit to disable AI features (the app then reports "integration not configured", never sample output) |
 | `Imports__Mode` | `Live` enables real, SSRF-checked retrieval of reference and portfolio URLs |
 | `Cleanup__PollInterval` | Worker maintenance cadence (≤ 5 minutes) |

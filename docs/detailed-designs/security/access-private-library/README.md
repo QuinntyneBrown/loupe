@@ -43,6 +43,16 @@ MediatR. It shares account persistence and password hashing with the API, takes
 passwords through hidden prompts or stdin, and requires only database configuration.
 Emails are normalized for unique lookup; passwords are never trimmed.
 
+At API startup `SeedAccountService`, an `IHostedService` registered by
+`SeedSetup`, reads the optional `Seed` options (email, display name, password;
+all three or none, validated on start with the shared credential predicates)
+and dispatches `EnsureUserCommand` through MediatR before Kestrel serves
+requests. The handler creates the account only when the normalized email is
+absent and never changes an existing account. `IUserStore.TryCreateAsync`
+reports a unique-index collision instead of throwing, so two instances starting
+together create exactly one account. A seed that cannot reach a migrated
+database stops startup with guidance to apply migrations; the API never migrates.
+
 `ICurrentOwner` derives the existing ownership key from Loupe's stable issuer and
 the new user ID. Private queries, mutations and media filter by that owner.
 Foreign and absent records return the same 404; anonymous requests return 401.
@@ -59,6 +69,7 @@ without deleting or reassigning photographs, references, or their media.
 | POST /api/session/sign-out | RevokeSessionCommand | 204 and removed cookie |
 | Admin create-user | CreateUserCommand | Generated local user ID |
 | Admin reset-password | ResetPasswordCommand | Replaced password and revoked sessions |
+| API startup with `Seed` configured | EnsureUserCommand | Existing or newly created local account |
 
 ## Requirements and verification
 
@@ -66,7 +77,8 @@ without deleting or reassigning photographs, references, or their media.
 [L2-038](../../../specs/L2.md#l2-038-enforce-ownership-at-every-data-boundary) refine
 L1-010. Each slice follows failing acceptance tests before implementation, then
 relevant regressions. API tests use real PostgreSQL, CLI provisioning, real
-password verification and signing, controlled clocks, malformed JWTs, and multiple
+password verification and signing, controlled clocks, malformed JWTs, seeded and
+concurrently seeding hosts, an 8-character password minimum, and multiple
 API instances. Migration tests retain legacy content without exposing it to fresh
 accounts. Chromium tests use page objects and injected mocks across the shared
 viewport matrix. No architecture tests are used.

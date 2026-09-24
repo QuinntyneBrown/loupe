@@ -1,6 +1,7 @@
 using Loupe.Application.Security;
 using Loupe.Application.Sessions;
 using Loupe.Infrastructure.Security;
+using Loupe.Api.Accounts;
 using Loupe.Api.Authentication;
 using Loupe.Api.Errors;
 using Loupe.Infrastructure.Persistence;
@@ -22,6 +23,7 @@ public class Program
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<ICurrentOwner, CurrentOwner>();
         builder.Services.AddLoupeAuthentication(builder.Configuration);
+        builder.Services.AddLoupeSeedAccount();
         builder.Services.AddOptions<BrowserOptions>().BindConfiguration("Browser")
             .Validate(options => options.AllowedOrigins.Length > 0 && options.AllowedOrigins.All(origin =>
                 Uri.TryCreate(origin, UriKind.Absolute, out var uri) && uri.Scheme == "https"

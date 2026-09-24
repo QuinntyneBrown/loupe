@@ -63,8 +63,8 @@ public sealed class AdminAccountTests(PostgreSqlFixture database) : IClassFixtur
         Assert.Equal(user.Subject, (await newPassword.Content.ReadFromJsonAsync<SessionResult>())!.Subject);
     }
     [Theory]
-    [InlineData(14, false)]
-    [InlineData(15, true)]
+    [InlineData(7, false)]
+    [InlineData(8, true)]
     [InlineData(128, true)]
     [InlineData(129, false)]
     public async Task L2_037_6_Password_length_boundaries_are_enforced(int length, bool accepted)
@@ -73,7 +73,7 @@ public sealed class AdminAccountTests(PostgreSqlFixture database) : IClassFixtur
         var email = Guid.NewGuid() + "@example.com";
         Assert.Equal(accepted, await AdminAsync("create-user", email, new string('x', length)) == 0);
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost") });
-        using var login = await LocalSignInFlow.LoginAsync(client, email, new string('x', Math.Clamp(length, 15, 128)));
+        using var login = await LocalSignInFlow.LoginAsync(client, email, new string('x', Math.Clamp(length, 8, 128)));
         Assert.Equal(accepted ? HttpStatusCode.OK : HttpStatusCode.Unauthorized, login.StatusCode);
     }
     [Fact]

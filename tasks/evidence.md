@@ -823,3 +823,114 @@ local .NET SDK, so checks used the repository's .NET 10.0.400 Linux acceptance
 image. Browser commands used Node 22.22.3 via npm exec because the installed
 22.21.0 is below Angular's declared supported patch version. Frontend regressions
 use `npm --prefix e2e test`; backend options/provisioning are in `backend/README.md`.
+
+## Password minimum 8 and seeded local account (2026-09-15)
+
+### S1 — Password minimum 8 (L2-037.6 updated)
+
+- Test: `backend/tests/Loupe.Api.Tests/Security/AdminAccountTests.cs`
+  `L2_037_6_Password_length_boundaries_are_enforced`, boundaries moved to
+  7/8/128/129 with sign-in clamped to 8–128; `e2e/page-objects/sign-in-page.js`
+  `expectFieldErrors` expects "Use a password with 8 to 128 characters."
+- RED: `./backend/Test.ps1 -Filter FullyQualifiedName~AdminAccountTests` failed
+  2 of 6: length 8 create-user exited 1 (Expected True, Actual False) and the
+  length 7 case's sign-in with the clamped 8-character password returned 400
+  instead of 401. `npx playwright test specs/sign-in.spec.js --grep "invalid
+  input shows field errors"` failed 1 of 1: the 8-character message was not found.
+- Built: `CredentialValidation.Password` minimum 8 and message; `sign-in.ts`
+  client rule and message; `backend/README.md` password rule; L2-037.6 text.
+- GREEN: `./backend/Test.ps1 -Filter FullyQualifiedName~Security` passed 37/37
+  (20 s) including all four boundary cases; `npx playwright test
+  specs/sign-in.spec.js specs/sign-in-layout.spec.js` passed 25/25 (40.9 s),
+  Chromium only.
+- Non-claims: no seeding exists yet; the full backend suite and the format check
+  run after S3.
+
+### S2 — Seed creates the account at startup; restart leaves it untouched (L2-037.13–14)
+
+- Test: `backend/tests/Loupe.Api.Tests/Security/SeedAccountTests.cs`
+  `L2_037_13_Configured_seed_creates_an_account_that_signs_in_before_the_first_request`
+  and `L2_037_14_Restart_with_the_same_seed_leaves_an_existing_account_untouched`.
+  The tests migrate with a plain `ApiFactory` first because the seed runs at host
+  start, then build a second factory with `Seed:*` settings.
+- RED: `./backend/Test.ps1 -Filter FullyQualifiedName~SeedAccountTests` failed
+  2 of 2: both first sign-ins returned 401 because the Seed settings were ignored.
+- Built: `EnsureUserCommand` and handler (find by normalized email, create only
+  when missing), `CredentialValidation.Name` shared with `CreateUserCommandHandler`,
+  `Loupe.Api/Accounts` (`SeedOptions`, `SeedSetup.AddLoupeSeedAccount`,
+  `SeedAccountService : IHostedService`), one registration line in `Program.cs`.
+- GREEN: `./backend/Test.ps1 -Filter FullyQualifiedName~Security` passed 39/39
+  (16 s): both seed tests plus the 37 existing Security tests.
+- Non-claims: no Seed validation, no concurrent-instance handling, and no
+  migration guidance yet (S3).
+
+### S3 — Concurrent instances, Seed validation, unmigrated database (L2-037.15–17)
+
+- Test: `SeedAccountTests` `L2_037_15_Concurrent_seeds_create_exactly_one_account`
+  (two hosts start together, then two `EnsureUserCommand` sends race directly),
+  `L2_037_16_Partial_or_invalid_seed_configuration_prevents_startup` (theory:
+  each key blank, invalid email, 201-character name, 7- and 129-character
+  password) and `L2_037_17_Unmigrated_database_prevents_startup_with_migration_guidance`
+  (a freshly created, unmigrated database on the fixture container).
+- RED: `./backend/Test.ps1 -Filter FullyQualifiedName~SeedAccountTests` failed
+  9 of 11: the concurrent start threw the store's "already exists"
+  `RequestValidationException` from `SeedAccountService.StartAsync`; every
+  invalid-configuration case surfaced `RequestValidationException` instead of
+  `OptionsValidationException`; the unmigrated database leaked a raw
+  `PostgresException` instead of `InvalidOperationException` with guidance.
+- Built: `IUserStore.TryCreateAsync` (unique violation returns false;
+  `CreateUserCommandHandler` throws the existing message on false);
+  `CredentialValidation.IsEmail/IsPassword/IsName` predicates shared by the
+  throwing methods and `SeedOptions.HasValid*`; three `Seed:*` validators with
+  `ValidateOnStart` in `SeedSetup`; `SeedAccountService` rethrows any failure as
+  `InvalidOperationException` naming `Seed` and telling the operator to apply
+  migrations first.
+- GREEN: `./backend/Test.ps1 -Filter FullyQualifiedName~Security` passed 48/48
+  (20 s). Full regression `./backend/Test.ps1` passed **696/696** (8 m 27 s).
+- Format: `dotnet format backend/Loupe.slnx --verify-no-changes --no-restore`
+  inside the acceptance image passes for every file changed or added by this
+  work (scoped `--include` runs, exit 0). The unscoped run reports pre-existing
+  WHITESPACE findings in 24 untouched files (Boards, Photographers, Search and
+  their tests, last changed 2026-09-11); those were not modified here.
+- Review: the seed reads `IOptions<SeedOptions>` once at start, runs inside its
+  own scope, and never logs or embeds the password; the unmigrated-database test
+  also proves the API creates no tables.
+
+### S4 — Harness and documentation, live-stack verification
+
+- Built: `docs/demo/harness/setup.ps1` passes `Seed__Email`, `Seed__Name` and
+  `Seed__Password` to the Api container (step 6; step 7 demo accounts unchanged)
+  and names the seeded sign-in email at the end; the script parses cleanly.
+  Root `README.md` (Configuration row, full-stack section), `backend/README.md`
+  (seed paragraph), `docs/demo/README.md` and the security design
+  `access-private-library/README.md` (description, interface row, verification)
+  describe the behaviour.
+- Live stack (this workstation, 2026-09-15): the demo runtime image was rebuilt
+  from the working tree and the Api container recreated with the harness's
+  environment plus the three `Seed__*` values. The Api logged a clean start with
+  no exception and no occurrence of the password; `users` gained exactly one row
+  for the seeded email with a salted hash beside the two demo accounts. A
+  headless Chromium sign-in through the Angular app at https://localhost:4200
+  with the seeded credentials landed on My Work with the display name in the
+  header, both before and after `docker restart` of the Api; the row count for
+  that email stayed 1.
+- Frontend regression: `npx playwright test` (Chromium only) completed 703
+  checks with 678 passed and 25 failed while the backend container suite and an
+  image build ran alongside; every failure was a Playwright worker or browser
+  crash (worker exit code 3221225794, "Target crashed"), not an assertion.
+  `npx playwright test --last-failed` on a quiet machine passed all 25 (30.1 s),
+  so every check in the suite has passed on the changed code.
+- Non-claims: Ollama and Azure OpenAI were not configured, so Meaning search and
+  AI features were not exercised; historical demo videos were not rerecorded;
+  the 24 files with pre-existing formatter findings were left as they were.
+
+### S4 follow-up — Seed password out of source (2026-09-23)
+
+- Change: `setup.ps1` hard-coded the maintainer's seed password, which would
+  have been published with the public repository. The harness now passes the
+  three `Seed__*` values only when `Seed__Password` is set in the caller's
+  environment, handing the password to the Api container by name (`-e
+  Seed__Password`, as with `Jwt__SigningKey`) so it appears in neither the
+  script nor a command line; unset, it seeds nothing and the Seed section stays
+  all-or-none. The root README, `backend/README.md` and `docs/demo/README.md`
+  say so.

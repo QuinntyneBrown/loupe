@@ -26,8 +26,8 @@ export class SignIn {
     const fields: Record<string, string> = {};
     if (email.length > 254 || !/^[^\s@]+@[^\s@]+$/.test(email))
       fields['email'] = 'Enter a valid email address.';
-    if (Array.from(password).length < 15 || Array.from(password).length > 128)
-      fields['password'] = 'Use a password with 15 to 128 characters.';
+    if (Array.from(password).length < 8 || Array.from(password).length > 128)
+      fields['password'] = 'Use a password with 8 to 128 characters.';
     this.fields.set(fields);
     if (Object.keys(fields).length) {
       this.password.set('');
